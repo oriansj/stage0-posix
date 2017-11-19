@@ -1,0 +1,3077 @@
+
+
+:newToken
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# struct Token *p; 
+					# p = calloc(1, sizeof(struct Token))
+	mov____$i32,%eax %0xd
+	push___%eax
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %calloc
+	add____$i8,%esp !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+	test___%eax,%eax
+					# if (0 == p) ...
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %newToken_10_break
+					# fprintf(2, "calloc failed.\n"); 
+	push___$i32 &string_open_0
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0x8
+	test___%eax,%eax
+					# exit(1); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %exit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %newToken_10_break
+:newToken_10_break
+	mov____0x8(%ebp),%eax !0x-4
+	leave
+	ret
+
+
+:reverse_list
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# struct Token *root = 0; 
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-4
+					# while (0 != head) ...
+	jmp32  %reverse_list_4_continue
+:reverse_list_4_loop
+					# struct Token *next = head->next; 
+	mov____%ebp,%eax
+	add____$i8,%eax !0x8
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+					# head->next
+	mov____(%eax),%eax
+	mov____%eax,0x8(%ebp) !0x-8
+					# head->next = root
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x8
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+	mov____%eax,%edx
+	pop____%eax
+	mov____%eax,(%edx)
+	test___%eax,%eax
+					# root = head
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+	test___%eax,%eax
+					# head = next
+	mov____0x8(%ebp),%eax !0x-8
+	mov____%eax,0x8(%ebp) !0x8
+	test___%eax,%eax
+:reverse_list_4_continue
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %reverse_list_4_break
+	jmp32  %reverse_list_4_loop
+:reverse_list_4_break
+	mov____0x8(%ebp),%eax !0x-4
+	leave
+	ret
+
+
+:purge_lineComment
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# int c = fgetc(source_file); 
+	mov____0x32,%eax &source_file
+	push___%eax
+	call32 %fgetc
+	add____$i8,%esp !0x4
+	mov____%eax,0x8(%ebp) !0x-4
+					# while (10 != c && 13 != c) ...
+	jmp32  %purge_lineComment_5_continue
+:purge_lineComment_5_loop
+					# c = fgetc(source_file)
+	mov____0x32,%eax &source_file
+	push___%eax
+	call32 %fgetc
+	add____$i8,%esp !0x4
+	mov____%eax,0x8(%ebp) !0x-4
+	test___%eax,%eax
+:purge_lineComment_5_continue
+	mov____$i32,%eax %0xa
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %purge_lineComment_5_break
+	mov____$i32,%eax %0xd
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %purge_lineComment_5_break
+	jmp32  %purge_lineComment_5_loop
+:purge_lineComment_5_break
+	leave
+	ret
+
+
+:store_atom
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# char *store = calloc(4096 + 1, sizeof(char)); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	mov____$i32,%eax %0x1000
+	add____$i8,%eax !0x1
+	push___%eax
+	call32 %calloc
+	add____$i8,%esp !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+					# if (0 == store) ...
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %store_atom_9_break
+					# fprintf(2, "Exhusted available memory\n"); 
+	push___$i32 &string_open_1
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0x8
+	test___%eax,%eax
+					# exit(1); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %exit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %store_atom_9_break
+:store_atom_9_break
+					# int32_t ch; 
+					# uint32_t i = 0; 
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-c
+					# ch = c
+	movzbl_0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-8
+	test___%eax,%eax
+					# do 9 != ch && 10 != ch && 32 != ch && i <= 4096while (...); 
+:store_atom_38_loop
+					# store[i] = (char)ch
+	mov____0x8(%ebp),%eax !0x-8
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-c
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	test___%eax,%eax
+					# ch = fgetc(source_file)
+	mov____0x32,%eax &source_file
+	push___%eax
+	call32 %fgetc
+	add____$i8,%esp !0x4
+	mov____%eax,0x8(%ebp) !0x-8
+	test___%eax,%eax
+					# i = i + 1
+	mov____0x8(%ebp),%eax !0x-c
+	add____$i8,%eax !0x1
+	mov____%eax,0x8(%ebp) !0x-c
+	test___%eax,%eax
+:store_atom_38_continue
+	mov____$i32,%eax %0x9
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %store_atom_38_break
+	mov____$i32,%eax %0xa
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %store_atom_38_break
+	mov____$i32,%eax %0x20
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %store_atom_38_break
+	mov____0x8(%ebp),%eax !0x-c
+	push___%eax
+	mov____$i32,%eax %0x1000
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setle__%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jg32   %store_atom_38_break
+	jmp32  %store_atom_38_loop
+:store_atom_38_break
+	mov____0x8(%ebp),%eax !0x-4
+	leave
+	ret
+
+
+:store_string
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# char *store = calloc(4096 + 1, sizeof(char)); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	mov____$i32,%eax %0x1000
+	add____$i8,%eax !0x1
+	push___%eax
+	call32 %calloc
+	add____$i8,%esp !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+					# if (0 == store) ...
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %store_string_9_break
+					# fprintf(2, "Exhusted available memory\n"); 
+	push___$i32 &string_open_1
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0x8
+	test___%eax,%eax
+					# exit(1); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %exit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %store_string_9_break
+:store_string_9_break
+					# int32_t ch; 
+					# uint32_t i = 0; 
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-c
+					# ch = c
+	movzbl_0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-8
+	test___%eax,%eax
+					# do ch != cwhile (...); 
+:store_string_38_loop
+					# store[i] = (char)ch
+	mov____0x8(%ebp),%eax !0x-8
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-c
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	test___%eax,%eax
+					# i = i + 1
+	mov____0x8(%ebp),%eax !0x-c
+	add____$i8,%eax !0x1
+	mov____%eax,0x8(%ebp) !0x-c
+	test___%eax,%eax
+					# ch = fgetc(source_file)
+	mov____0x32,%eax &source_file
+	push___%eax
+	call32 %fgetc
+	add____$i8,%esp !0x4
+	mov____%eax,0x8(%ebp) !0x-8
+	test___%eax,%eax
+					# if (-1 == ch) ...
+	push___%eax
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	pop____%eax
+	mov____$i32,%eax %0x0
+	sub____%edx,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %store_string_63_break
+					# fprintf(2, "Unmatched \"!\n"); 
+	push___$i32 &string_open_2
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0x8
+	test___%eax,%eax
+					# exit(1); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %exit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %store_string_63_break
+:store_string_63_break
+					# if (4096 == i) ...
+	mov____$i32,%eax %0x1000
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-c
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %store_string_88_break
+					# fprintf(2, "String: %s exceeds max string size\n", store); 
+	push___0x8(%ebp) !0x-4
+	push___$i32 &string_open_3
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+					# exit(1); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %exit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %store_string_88_break
+:store_string_88_break
+:store_string_38_continue
+	mov____0x8(%ebp),%eax !0x-8
+	push___%eax
+	movzbl_0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %store_string_38_break
+	jmp32  %store_string_38_loop
+:store_string_38_break
+	mov____0x8(%ebp),%eax !0x-4
+	leave
+	ret
+
+
+:Tokenize_Line
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# int32_t c; 
+:Tokenize_Line_label_restart
+					# c = fgetc(source_file)
+	mov____0x32,%eax &source_file
+	push___%eax
+	call32 %fgetc
+	add____$i8,%esp !0x4
+	mov____%eax,0x8(%ebp) !0x-4
+	test___%eax,%eax
+					# if (35 == c || 59 == c) ...
+	mov____$i32,%eax %0x23
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %Tokenize_Line_8_break_b_9
+	jmp32  %Tokenize_Line_8_break_skip_b_9
+:Tokenize_Line_8_break_b_9
+	mov____$i32,%eax %0x3b
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %Tokenize_Line_8_break
+:Tokenize_Line_8_break_skip_b_9
+					# purge_lineComment(); 
+	call32 %purge_lineComment
+	add____$i8,%esp !0x0
+	test___%eax,%eax
+	jmp32  %Tokenize_Line_label_restart
+	jmp32  %Tokenize_Line_8_break
+:Tokenize_Line_8_break
+					# if ((9 == c || 10 == c) || 32 == c) ...
+	mov____$i32,%eax %0x9
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %Tokenize_Line_32_break_b_33_b_33
+	jmp32  %Tokenize_Line_32_break_b_33_skip_b_33
+:Tokenize_Line_32_break_b_33_b_33
+	mov____$i32,%eax %0xa
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %Tokenize_Line_32_break_b_33
+:Tokenize_Line_32_break_b_33_skip_b_33
+	jmp32  %Tokenize_Line_32_break_skip_b_33
+:Tokenize_Line_32_break_b_33
+	mov____$i32,%eax %0x20
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %Tokenize_Line_32_break
+:Tokenize_Line_32_break_skip_b_33
+	jmp32  %Tokenize_Line_label_restart
+	jmp32  %Tokenize_Line_32_break
+:Tokenize_Line_32_break
+					# struct Token *p = newToken(); 
+	call32 %newToken
+	add____$i8,%esp !0x0
+	mov____%eax,0x8(%ebp) !0x-8
+					# if (-1 == c) ...else ...
+	push___%eax
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	pop____%eax
+	mov____$i32,%eax %0x0
+	sub____%edx,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %Tokenize_Line_66_else
+					# Reached_EOF = 1
+	mov____$i32,%eax %0x1
+	mov____%eax,0x32 &Reached_EOF
+	test___%eax,%eax
+					# free(p); 
+	push___0x8(%ebp) !0x-8
+	call32 %free
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x8
+	leave
+	ret
+	jmp32  %Tokenize_Line_66_break
+:Tokenize_Line_66_else
+					# if (34 == c || 39 == c) ...else ...
+	mov____$i32,%eax %0x22
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %Tokenize_Line_90_else_b_91
+	jmp32  %Tokenize_Line_90_else_skip_b_91
+:Tokenize_Line_90_else_b_91
+	mov____$i32,%eax %0x27
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %Tokenize_Line_90_else
+:Tokenize_Line_90_else_skip_b_91
+					# p->Text = store_string(c)
+	push___0x8(%ebp) !0x-4
+	call32 %store_string
+	add____$i8,%esp !0x4
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-8
+	mov____(%eax),%eax
+	add____$i8,%eax !0x5
+	mov____%eax,%edx
+	pop____%eax
+	mov____%eax,(%edx)
+	test___%eax,%eax
+					# p->type = str
+	mov____$i32,%eax %0x2
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-8
+	mov____(%eax),%eax
+	add____$i8,%eax !0x4
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	test___%eax,%eax
+	jmp32  %Tokenize_Line_90_break
+:Tokenize_Line_90_else
+					# p->Text = store_atom(c)
+	push___0x8(%ebp) !0x-4
+	call32 %store_atom
+	add____$i8,%esp !0x4
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-8
+	mov____(%eax),%eax
+	add____$i8,%eax !0x5
+	mov____%eax,%edx
+	pop____%eax
+	mov____%eax,(%edx)
+	test___%eax,%eax
+:Tokenize_Line_90_break
+:Tokenize_Line_66_break
+					# p->next = head
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-8
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+	mov____%eax,%edx
+	pop____%eax
+	mov____%eax,(%edx)
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x-8
+	leave
+	ret
+
+
+:setExpression
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# for (struct Token *i = p; 0 != i; i = i->next) ...
+					# struct Token *i = p; 
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+	jmp32  %setExpression_1_initial_skip
+:setExpression_1_loop
+					# if (i->type & macro) ...else ...
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x4
+					# i->type
+	movzbl_(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	pop____%eax
+	and____%edx,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %setExpression_7_else
+	jmp32  %setExpression_1_continue
+	jmp32  %setExpression_7_break
+:setExpression_7_else
+					# if (0 == strncmp(i->Text, match, 4096)) ...
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____$i32,%eax %0x1000
+	push___%eax
+	push___0x8(%ebp) !0xc
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x5
+					# i->Text
+	mov____(%eax),%eax
+	push___%eax
+	call32 %strncmp
+	add____$i8,%esp !0xc
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %setExpression_24_break
+					# i->Expression = Exp
+	mov____0x8(%ebp),%eax !0x10
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x9
+	mov____%eax,%edx
+	pop____%eax
+	mov____%eax,(%edx)
+	test___%eax,%eax
+	jmp32  %setExpression_24_break
+:setExpression_24_break
+:setExpression_7_break
+:setExpression_1_continue
+					# i = i->next
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+					# i->next
+	mov____(%eax),%eax
+	mov____%eax,0x8(%ebp) !0x-4
+:setExpression_1_initial_skip
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %setExpression_1_break
+	jmp32  %setExpression_1_loop
+:setExpression_1_break
+	leave
+	ret
+
+
+:identify_macros
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# for (struct Token *i = p; 0 != i; i = i->next) ...
+					# struct Token *i = p; 
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+	jmp32  %identify_macros_1_initial_skip
+:identify_macros_1_loop
+					# if (0 == strncmp(i->Text, "DEFINE", 4096)) ...
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____$i32,%eax %0x1000
+	push___%eax
+	push___$i32 &string_open_4
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x5
+					# i->Text
+	mov____(%eax),%eax
+	push___%eax
+	call32 %strncmp
+	add____$i8,%esp !0xc
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %identify_macros_7_break
+					# i->type = macro
+	mov____$i32,%eax %0x1
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x4
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	test___%eax,%eax
+					# i->Text = i->next->Text
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+	mov____(%eax),%eax
+	add____$i8,%eax !0x5
+					# i->next->Text
+	mov____(%eax),%eax
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x5
+	mov____%eax,%edx
+	pop____%eax
+	mov____%eax,(%edx)
+	test___%eax,%eax
+					# if (i->next->next->type & str) ...else ...
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+	mov____(%eax),%eax
+	add____$i8,%eax !0x4
+					# i->next->next->type
+	movzbl_(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x2
+	mov____%eax,%edx
+	pop____%eax
+	and____%edx,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %identify_macros_50_else
+					# i->Expression = i->next->next->Text + 1
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+	mov____(%eax),%eax
+	add____$i8,%eax !0x5
+					# i->next->next->Text
+	mov____(%eax),%eax
+	add____$i8,%eax !0x1
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x9
+	mov____%eax,%edx
+	pop____%eax
+	mov____%eax,(%edx)
+	test___%eax,%eax
+	jmp32  %identify_macros_50_break
+:identify_macros_50_else
+					# i->Expression = i->next->next->Text
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+	mov____(%eax),%eax
+	add____$i8,%eax !0x5
+					# i->next->next->Text
+	mov____(%eax),%eax
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x9
+	mov____%eax,%edx
+	pop____%eax
+	mov____%eax,(%edx)
+	test___%eax,%eax
+:identify_macros_50_break
+					# i->next = i->next->next->next
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+					# i->next->next->next
+	mov____(%eax),%eax
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+	mov____%eax,%edx
+	pop____%eax
+	mov____%eax,(%edx)
+	test___%eax,%eax
+	jmp32  %identify_macros_7_break
+:identify_macros_7_break
+:identify_macros_1_continue
+					# i = i->next
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+					# i->next
+	mov____(%eax),%eax
+	mov____%eax,0x8(%ebp) !0x-4
+:identify_macros_1_initial_skip
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %identify_macros_1_break
+	jmp32  %identify_macros_1_loop
+:identify_macros_1_break
+	leave
+	ret
+
+
+:line_macro
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# for (struct Token *i = p; 0 != i; i = i->next) ...
+					# struct Token *i = p; 
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+	jmp32  %line_macro_1_initial_skip
+:line_macro_1_loop
+					# if (i->type & macro) ...
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x4
+					# i->type
+	movzbl_(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	pop____%eax
+	and____%edx,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %line_macro_7_break
+					# setExpression(i->next, i->Text, i->Expression); 
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x9
+					# i->Expression
+	mov____(%eax),%eax
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x5
+					# i->Text
+	mov____(%eax),%eax
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+					# i->next
+	mov____(%eax),%eax
+	push___%eax
+	call32 %setExpression
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+	jmp32  %line_macro_7_break
+:line_macro_7_break
+:line_macro_1_continue
+					# i = i->next
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+					# i->next
+	mov____(%eax),%eax
+	mov____%eax,0x8(%ebp) !0x-4
+:line_macro_1_initial_skip
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %line_macro_1_break
+	jmp32  %line_macro_1_loop
+:line_macro_1_break
+	leave
+	ret
+
+
+:hexify_string
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# char table[16] = {0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39,      0x41, 0x42, 0x43, 0x44, 0x45, 0x46, }; 
+	mov____$i32,%eax %0x30
+	mov____%eax,0x8(%ebp) !0x-40
+	mov____$i32,%eax %0x31
+	mov____%eax,0x8(%ebp) !0x-3c
+	mov____$i32,%eax %0x32
+	mov____%eax,0x8(%ebp) !0x-38
+	mov____$i32,%eax %0x33
+	mov____%eax,0x8(%ebp) !0x-34
+	mov____$i32,%eax %0x34
+	mov____%eax,0x8(%ebp) !0x-30
+	mov____$i32,%eax %0x35
+	mov____%eax,0x8(%ebp) !0x-2c
+	mov____$i32,%eax %0x36
+	mov____%eax,0x8(%ebp) !0x-28
+	mov____$i32,%eax %0x37
+	mov____%eax,0x8(%ebp) !0x-24
+	mov____$i32,%eax %0x38
+	mov____%eax,0x8(%ebp) !0x-20
+	mov____$i32,%eax %0x39
+	mov____%eax,0x8(%ebp) !0x-1c
+	mov____$i32,%eax %0x41
+	mov____%eax,0x8(%ebp) !0x-18
+	mov____$i32,%eax %0x42
+	mov____%eax,0x8(%ebp) !0x-14
+	mov____$i32,%eax %0x43
+	mov____%eax,0x8(%ebp) !0x-10
+	mov____$i32,%eax %0x44
+	mov____%eax,0x8(%ebp) !0x-c
+	mov____$i32,%eax %0x45
+	mov____%eax,0x8(%ebp) !0x-8
+	mov____$i32,%eax %0x46
+	mov____%eax,0x8(%ebp) !0x-4
+					# int i = (strlen(p->Text + 1)/4 + 1)*8; 
+	mov____%ebp,%eax
+	add____$i8,%eax !0x8
+	mov____(%eax),%eax
+	add____$i8,%eax !0x5
+					# p->Text
+	mov____(%eax),%eax
+	add____$i8,%eax !0x1
+	push___%eax
+	call32 %strlen
+	add____$i8,%esp !0x4
+	push___%eax
+	mov____$i32,%eax %0x4
+	mov____%eax,%edx
+	pop____%eax
+	mov____%edx,%ebx
+	xor____%edx,%edx
+	idiv___%ebx
+	add____$i8,%eax !0x1
+	push___%eax
+	mov____$i32,%eax %0x8
+	mov____%eax,%edx
+	pop____%eax
+	mul____%edx
+	mov____%eax,0x8(%ebp) !0x-44
+					# char *d = calloc(4096, sizeof(char)); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	mov____$i32,%eax %0x1000
+	push___%eax
+	call32 %calloc
+	add____$i8,%esp !0x8
+	mov____%eax,0x8(%ebp) !0x-48
+					# p->Expression = d
+	mov____0x8(%ebp),%eax !0x-48
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x8
+	mov____(%eax),%eax
+	add____$i8,%eax !0x9
+	mov____%eax,%edx
+	pop____%eax
+	mov____%eax,(%edx)
+	test___%eax,%eax
+					# while (0 < i) ...
+	jmp32  %hexify_string_70_continue
+:hexify_string_70_loop
+					# i = i - 1
+	mov____0x8(%ebp),%eax !0x-44
+	add____$i8,%eax !0x-1
+	mov____%eax,0x8(%ebp) !0x-44
+	test___%eax,%eax
+					# d[i] = 0x30
+	mov____$i32,%eax %0x30
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-44
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-48
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	test___%eax,%eax
+:hexify_string_70_continue
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-44
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setl___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jge32  %hexify_string_70_break
+	jmp32  %hexify_string_70_loop
+:hexify_string_70_break
+					# while (i < 4096) ...
+	jmp32  %hexify_string_101_continue
+:hexify_string_101_loop
+					# if (0 == p->Text[i + 1]) ...else ...
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-44
+	add____$i8,%eax !0x1
+	mov____%eax,%edx
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x8
+	mov____(%eax),%eax
+	add____$i8,%eax !0x5
+					# p->Text
+	mov____(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %hexify_string_104_else
+					# i = 4096
+	mov____$i32,%eax %0x1000
+	mov____%eax,0x8(%ebp) !0x-44
+	test___%eax,%eax
+	jmp32  %hexify_string_104_break
+:hexify_string_104_else
+					# d[2*i] = table[p->Text[i + 1]/16]
+	mov____0x8(%ebp),%eax !0x-44
+	add____$i8,%eax !0x1
+	mov____%eax,%edx
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x8
+	mov____(%eax),%eax
+	add____$i8,%eax !0x5
+					# p->Text
+	mov____(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x10
+	mov____%eax,%edx
+	pop____%eax
+	mov____%edx,%ebx
+	xor____%edx,%edx
+	idiv___%ebx
+	mov____%eax,%edx
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-40
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-44
+	mov____%eax,%edx
+	pop____%eax
+	mul____%edx
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-48
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	test___%eax,%eax
+					# d[2*i + 1] = table[p->Text[i + 1]%16]
+	mov____0x8(%ebp),%eax !0x-44
+	add____$i8,%eax !0x1
+	mov____%eax,%edx
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x8
+	mov____(%eax),%eax
+	add____$i8,%eax !0x5
+					# p->Text
+	mov____(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x10
+	mov____%eax,%edx
+	pop____%eax
+	mov____%edx,%ebx
+	xor____%edx,%edx
+	idiv___%ebx
+	mov____%edx,%eax
+	mov____%eax,%edx
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-40
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-44
+	mov____%eax,%edx
+	pop____%eax
+	mul____%edx
+	add____$i8,%eax !0x1
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-48
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	test___%eax,%eax
+					# i = i + 1
+	mov____0x8(%ebp),%eax !0x-44
+	add____$i8,%eax !0x1
+	mov____%eax,0x8(%ebp) !0x-44
+	test___%eax,%eax
+:hexify_string_104_break
+:hexify_string_101_continue
+	mov____0x8(%ebp),%eax !0x-44
+	push___%eax
+	mov____$i32,%eax %0x1000
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setl___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jge32  %hexify_string_101_break
+	jmp32  %hexify_string_101_loop
+:hexify_string_101_break
+	leave
+	ret
+
+
+:process_string
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# for (struct Token *i = p; 0 != i; i = i->next) ...
+					# struct Token *i = p; 
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+	jmp32  %process_string_1_initial_skip
+:process_string_1_loop
+					# if (i->type & str) ...
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x4
+					# i->type
+	movzbl_(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x2
+	mov____%eax,%edx
+	pop____%eax
+	and____%edx,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %process_string_7_break
+					# if (''' == i->Text[0]) ...else ...
+	mov____$i32,%eax %0x27
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x5
+					# i->Text
+	mov____(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %process_string_21_else
+					# i->Expression = i->Text + 1
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x5
+					# i->Text
+	mov____(%eax),%eax
+	add____$i8,%eax !0x1
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x9
+	mov____%eax,%edx
+	pop____%eax
+	mov____%eax,(%edx)
+	test___%eax,%eax
+	jmp32  %process_string_21_break
+:process_string_21_else
+					# if ('"' == i->Text[0]) ...
+	mov____$i32,%eax %0x22
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x5
+					# i->Text
+	mov____(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %process_string_56_break
+					# hexify_string(i); 
+	push___0x8(%ebp) !0x-4
+	call32 %hexify_string
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %process_string_56_break
+:process_string_56_break
+:process_string_21_break
+	jmp32  %process_string_7_break
+:process_string_7_break
+:process_string_1_continue
+					# i = i->next
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+					# i->next
+	mov____(%eax),%eax
+	mov____%eax,0x8(%ebp) !0x-4
+:process_string_1_initial_skip
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %process_string_1_break
+	jmp32  %process_string_1_loop
+:process_string_1_break
+	leave
+	ret
+
+
+:preserve_other
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# for (struct Token *i = p; 0 != i; i = i->next) ...
+					# struct Token *i = p; 
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+	jmp32  %preserve_other_1_initial_skip
+:preserve_other_1_loop
+					# if (0 == i->Expression && !(i->type & macro)) ...
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x9
+					# i->Expression
+	mov____(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %preserve_other_7_break
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x4
+					# i->type
+	movzbl_(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	pop____%eax
+	and____%edx,%eax
+	test___%eax,%eax
+	sete___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %preserve_other_7_break
+					# i->Expression = i->Text
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x5
+					# i->Text
+	mov____(%eax),%eax
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x9
+	mov____%eax,%edx
+	pop____%eax
+	mov____%eax,(%edx)
+	test___%eax,%eax
+	jmp32  %preserve_other_7_break
+:preserve_other_7_break
+:preserve_other_1_continue
+					# i = i->next
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+					# i->next
+	mov____(%eax),%eax
+	mov____%eax,0x8(%ebp) !0x-4
+:preserve_other_1_initial_skip
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %preserve_other_1_break
+	jmp32  %preserve_other_1_loop
+:preserve_other_1_break
+	leave
+	ret
+
+
+:range_check
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# switch (number_of_bytes) {   ...} 
+	mov____0x8(%ebp),%eax !0xc
+:range_check_1_clause0
+	cmp____$i8,%eax !0x4
+	je32   %range_check_1_body0
+	jmp32  %range_check_1_clause1
+:range_check_1_body0
+	jmp32  %range_check_1_break
+	jmp32  %range_check_1_body1
+:range_check_1_clause1
+	cmp____$i8,%eax !0x3
+	je32   %range_check_1_body1
+	jmp32  %range_check_1_clause2
+:range_check_1_body1
+					# if (8388607 < displacement || displacement < -8388608) ...
+	mov____$i32,%eax %0x7fffff
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setl___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jge32  %range_check_15_break_b_16
+	jmp32  %range_check_15_break_skip_b_16
+:range_check_15_break_b_16
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	push___%eax
+	mov____$i32,%eax %0x800000
+	mov____%eax,%edx
+	pop____%eax
+	mov____$i32,%eax %0x0
+	sub____%edx,%eax
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setl___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jge32  %range_check_15_break
+:range_check_15_break_skip_b_16
+					# fprintf(2, "A displacement of %d does not fit in 3 bytes", displacement); 
+	push___0x8(%ebp) !0x8
+	push___$i32 &string_open_5
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+					# exit(1); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %exit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %range_check_15_break
+:range_check_15_break
+	jmp32  %range_check_1_break
+	jmp32  %range_check_1_body2
+:range_check_1_clause2
+	cmp____$i8,%eax !0x2
+	je32   %range_check_1_body2
+	jmp32  %range_check_1_clause3
+:range_check_1_body2
+					# if (32767 < displacement || displacement < -32768) ...
+	mov____$i32,%eax %0x7fff
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setl___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jge32  %range_check_58_break_b_59
+	jmp32  %range_check_58_break_skip_b_59
+:range_check_58_break_b_59
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	push___%eax
+	mov____$i32,%eax %0x8000
+	mov____%eax,%edx
+	pop____%eax
+	mov____$i32,%eax %0x0
+	sub____%edx,%eax
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setl___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jge32  %range_check_58_break
+:range_check_58_break_skip_b_59
+					# fprintf(2, "A displacement of %d does not fit in 2 bytes", displacement); 
+	push___0x8(%ebp) !0x8
+	push___$i32 &string_open_6
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+					# exit(1); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %exit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %range_check_58_break
+:range_check_58_break
+	jmp32  %range_check_1_break
+	jmp32  %range_check_1_body3
+:range_check_1_clause3
+	cmp____$i8,%eax !0x1
+	je32   %range_check_1_body3
+	jmp32  %range_check_1_clause4
+:range_check_1_body3
+					# if (127 < displacement || displacement < -128) ...
+	mov____$i32,%eax %0x7f
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setl___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jge32  %range_check_101_break_b_102
+	jmp32  %range_check_101_break_skip_b_102
+:range_check_101_break_b_102
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	push___%eax
+	mov____$i32,%eax %0x80
+	mov____%eax,%edx
+	pop____%eax
+	mov____$i32,%eax %0x0
+	sub____%edx,%eax
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setl___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jge32  %range_check_101_break
+:range_check_101_break_skip_b_102
+					# fprintf(2, "A displacement of %d does not fit in 1 byte", displacement); 
+	push___0x8(%ebp) !0x8
+	push___$i32 &string_open_7
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+					# exit(1); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %exit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %range_check_101_break
+:range_check_101_break
+	jmp32  %range_check_1_break
+	jmp32  %range_check_1_body4
+:range_check_1_clause4
+:range_check_1_body4
+					# exit(1); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %exit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+:range_check_1_break
+	leave
+	ret
+
+
+:numerate_string
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# char *ptr; 
+					# if (a[0] == '0' && a[1] == 'x') ...
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x30
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %numerate_string_2_break
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x78
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %numerate_string_2_break
+	mov____$i32,%eax %0x10
+	push___%eax
+	lea____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	add____$i8,%eax !0x2
+	push___%eax
+	call32 %strtol
+	add____$i8,%esp !0xc
+	leave
+	ret
+	jmp32  %numerate_string_2_break
+:numerate_string_2_break
+	mov____$i32,%eax %0x0
+	push___%eax
+	lea____0x8(%ebp),%eax !0x-4
+	push___%eax
+	push___0x8(%ebp) !0x8
+	call32 %strtol
+	add____$i8,%esp !0xc
+	leave
+	ret
+
+
+:LittleEndian
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# char table[16] = {0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39,      0x41, 0x42, 0x43, 0x44, 0x45, 0x46, }; 
+	mov____$i32,%eax %0x30
+	mov____%eax,0x8(%ebp) !0x-40
+	mov____$i32,%eax %0x31
+	mov____%eax,0x8(%ebp) !0x-3c
+	mov____$i32,%eax %0x32
+	mov____%eax,0x8(%ebp) !0x-38
+	mov____$i32,%eax %0x33
+	mov____%eax,0x8(%ebp) !0x-34
+	mov____$i32,%eax %0x34
+	mov____%eax,0x8(%ebp) !0x-30
+	mov____$i32,%eax %0x35
+	mov____%eax,0x8(%ebp) !0x-2c
+	mov____$i32,%eax %0x36
+	mov____%eax,0x8(%ebp) !0x-28
+	mov____$i32,%eax %0x37
+	mov____%eax,0x8(%ebp) !0x-24
+	mov____$i32,%eax %0x38
+	mov____%eax,0x8(%ebp) !0x-20
+	mov____$i32,%eax %0x39
+	mov____%eax,0x8(%ebp) !0x-1c
+	mov____$i32,%eax %0x41
+	mov____%eax,0x8(%ebp) !0x-18
+	mov____$i32,%eax %0x42
+	mov____%eax,0x8(%ebp) !0x-14
+	mov____$i32,%eax %0x43
+	mov____%eax,0x8(%ebp) !0x-10
+	mov____$i32,%eax %0x44
+	mov____%eax,0x8(%ebp) !0x-c
+	mov____$i32,%eax %0x45
+	mov____%eax,0x8(%ebp) !0x-8
+	mov____$i32,%eax %0x46
+	mov____%eax,0x8(%ebp) !0x-4
+					# switch (Number_of_bytes) {   ...} 
+	mov____0x8(%ebp),%eax !0x10
+:LittleEndian_34_clause0
+	cmp____$i8,%eax !0x4
+	je32   %LittleEndian_34_body0
+	jmp32  %LittleEndian_34_clause1
+:LittleEndian_34_body0
+					# c[6] = table[value<<28]
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x1c
+	mov____%eax,%edx
+	pop____%eax
+	xor____%ecx,%ecx
+	mov____%edx,%ecx
+	shr____%cl,%eax
+	mov____%eax,%edx
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-40
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x6
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	test___%eax,%eax
+					# c[7] = table[(value<<24)%16]
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x18
+	mov____%eax,%edx
+	pop____%eax
+	xor____%ecx,%ecx
+	mov____%edx,%ecx
+	shr____%cl,%eax
+	push___%eax
+	mov____$i32,%eax %0x10
+	mov____%eax,%edx
+	pop____%eax
+	mov____%edx,%ebx
+	xor____%edx,%edx
+	idiv___%ebx
+	mov____%edx,%eax
+	mov____%eax,%edx
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-40
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x7
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	test___%eax,%eax
+	jmp32  %LittleEndian_34_body1
+:LittleEndian_34_clause1
+	cmp____$i8,%eax !0x3
+	je32   %LittleEndian_34_body1
+	jmp32  %LittleEndian_34_clause2
+:LittleEndian_34_body1
+					# c[4] = table[(value<<20)%16]
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x14
+	mov____%eax,%edx
+	pop____%eax
+	xor____%ecx,%ecx
+	mov____%edx,%ecx
+	shr____%cl,%eax
+	push___%eax
+	mov____$i32,%eax %0x10
+	mov____%eax,%edx
+	pop____%eax
+	mov____%edx,%ebx
+	xor____%edx,%edx
+	idiv___%ebx
+	mov____%edx,%eax
+	mov____%eax,%edx
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-40
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x4
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	test___%eax,%eax
+					# c[5] = table[(value<<16)%16]
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x10
+	mov____%eax,%edx
+	pop____%eax
+	xor____%ecx,%ecx
+	mov____%edx,%ecx
+	shr____%cl,%eax
+	push___%eax
+	mov____$i32,%eax %0x10
+	mov____%eax,%edx
+	pop____%eax
+	mov____%edx,%ebx
+	xor____%edx,%edx
+	idiv___%ebx
+	mov____%edx,%eax
+	mov____%eax,%edx
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-40
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x5
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	test___%eax,%eax
+	jmp32  %LittleEndian_34_body2
+:LittleEndian_34_clause2
+	cmp____$i8,%eax !0x2
+	je32   %LittleEndian_34_body2
+	jmp32  %LittleEndian_34_clause3
+:LittleEndian_34_body2
+					# c[2] = table[(value<<12)%16]
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0xc
+	mov____%eax,%edx
+	pop____%eax
+	xor____%ecx,%ecx
+	mov____%edx,%ecx
+	shr____%cl,%eax
+	push___%eax
+	mov____$i32,%eax %0x10
+	mov____%eax,%edx
+	pop____%eax
+	mov____%edx,%ebx
+	xor____%edx,%edx
+	idiv___%ebx
+	mov____%edx,%eax
+	mov____%eax,%edx
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-40
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x2
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	test___%eax,%eax
+					# c[3] = table[(value<<8)%16]
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x8
+	mov____%eax,%edx
+	pop____%eax
+	xor____%ecx,%ecx
+	mov____%edx,%ecx
+	shr____%cl,%eax
+	push___%eax
+	mov____$i32,%eax %0x10
+	mov____%eax,%edx
+	pop____%eax
+	mov____%edx,%ebx
+	xor____%edx,%edx
+	idiv___%ebx
+	mov____%edx,%eax
+	mov____%eax,%edx
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-40
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x3
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	test___%eax,%eax
+	jmp32  %LittleEndian_34_body3
+:LittleEndian_34_clause3
+	cmp____$i8,%eax !0x1
+	je32   %LittleEndian_34_body3
+	jmp32  %LittleEndian_34_clause4
+:LittleEndian_34_body3
+					# c[0] = table[(value<<4)%16]
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x4
+	mov____%eax,%edx
+	pop____%eax
+	xor____%ecx,%ecx
+	mov____%edx,%ecx
+	shr____%cl,%eax
+	push___%eax
+	mov____$i32,%eax %0x10
+	mov____%eax,%edx
+	pop____%eax
+	mov____%edx,%ebx
+	xor____%edx,%edx
+	idiv___%ebx
+	mov____%edx,%eax
+	mov____%eax,%edx
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-40
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	test___%eax,%eax
+					# c[1] = table[value%16]
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x10
+	mov____%eax,%edx
+	pop____%eax
+	mov____%edx,%ebx
+	xor____%edx,%edx
+	idiv___%ebx
+	mov____%edx,%eax
+	mov____%eax,%edx
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-40
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	test___%eax,%eax
+	jmp32  %LittleEndian_34_break
+	jmp32  %LittleEndian_34_body4
+:LittleEndian_34_clause4
+:LittleEndian_34_body4
+					# fprintf(2, "Recieved invalid number of bytes in LittleEndian %d\n",      Number_of_bytes); 
+	push___0x8(%ebp) !0x10
+	push___$i32 &string_open_8
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+					# exit(1); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %exit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+:LittleEndian_34_break
+	mov____0x8(%ebp),%eax !0xc
+	leave
+	ret
+
+
+:express_number
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# char *ch; 
+					# if ('!' == c) ...else ...
+	mov____$i32,%eax %0x21
+	push___%eax
+	movzbl_0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %express_number_2_else
+					# range_check(value, 1); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	push___0x8(%ebp) !0x8
+	call32 %range_check
+	add____$i8,%esp !0x8
+	test___%eax,%eax
+					# ch = calloc(3, sizeof(char))
+	mov____$i32,%eax %0x1
+	push___%eax
+	mov____$i32,%eax %0x3
+	push___%eax
+	call32 %calloc
+	add____$i8,%esp !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+	test___%eax,%eax
+					# if (BigEndian) ...else ...
+	mov____0x32,%eax &BigEndian
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %express_number_24_else
+					# sprintf(ch, "%02x", value); 
+	push___0x8(%ebp) !0x8
+	push___$i32 &string_open_9
+	push___0x8(%ebp) !0x-4
+	call32 %sprintf
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+	jmp32  %express_number_24_break
+:express_number_24_else
+					# ch = LittleEndian(value, ch, 1)
+	mov____$i32,%eax %0x1
+	push___%eax
+	push___0x8(%ebp) !0x-4
+	push___0x8(%ebp) !0x8
+	call32 %LittleEndian
+	add____$i8,%esp !0xc
+	mov____%eax,0x8(%ebp) !0x-4
+	test___%eax,%eax
+:express_number_24_break
+	jmp32  %express_number_2_break
+:express_number_2_else
+					# if ('@' == c) ...else ...
+	mov____$i32,%eax %0x40
+	push___%eax
+	movzbl_0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %express_number_49_else
+					# range_check(value, 2); 
+	mov____$i32,%eax %0x2
+	push___%eax
+	push___0x8(%ebp) !0x8
+	call32 %range_check
+	add____$i8,%esp !0x8
+	test___%eax,%eax
+					# ch = calloc(5, sizeof(char))
+	mov____$i32,%eax %0x1
+	push___%eax
+	mov____$i32,%eax %0x5
+	push___%eax
+	call32 %calloc
+	add____$i8,%esp !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+	test___%eax,%eax
+					# if (BigEndian) ...else ...
+	mov____0x32,%eax &BigEndian
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %express_number_71_else
+					# sprintf(ch, "%04x", value); 
+	push___0x8(%ebp) !0x8
+	push___$i32 &string_open_10
+	push___0x8(%ebp) !0x-4
+	call32 %sprintf
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+	jmp32  %express_number_71_break
+:express_number_71_else
+					# ch = LittleEndian(value, ch, 2)
+	mov____$i32,%eax %0x2
+	push___%eax
+	push___0x8(%ebp) !0x-4
+	push___0x8(%ebp) !0x8
+	call32 %LittleEndian
+	add____$i8,%esp !0xc
+	mov____%eax,0x8(%ebp) !0x-4
+	test___%eax,%eax
+:express_number_71_break
+	jmp32  %express_number_49_break
+:express_number_49_else
+					# if ('%' == c) ...else ...
+	mov____$i32,%eax %0x25
+	push___%eax
+	movzbl_0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %express_number_96_else
+					# range_check(value, 4); 
+	mov____$i32,%eax %0x4
+	push___%eax
+	push___0x8(%ebp) !0x8
+	call32 %range_check
+	add____$i8,%esp !0x8
+	test___%eax,%eax
+					# ch = calloc(9, sizeof(char))
+	mov____$i32,%eax %0x1
+	push___%eax
+	mov____$i32,%eax %0x9
+	push___%eax
+	call32 %calloc
+	add____$i8,%esp !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+	test___%eax,%eax
+					# if (BigEndian) ...else ...
+	mov____0x32,%eax &BigEndian
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %express_number_118_else
+					# sprintf(ch, "%08x", value); 
+	push___0x8(%ebp) !0x8
+	push___$i32 &string_open_11
+	push___0x8(%ebp) !0x-4
+	call32 %sprintf
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+	jmp32  %express_number_118_break
+:express_number_118_else
+					# ch = LittleEndian(value, ch, 4)
+	mov____$i32,%eax %0x4
+	push___%eax
+	push___0x8(%ebp) !0x-4
+	push___0x8(%ebp) !0x8
+	call32 %LittleEndian
+	add____$i8,%esp !0xc
+	mov____%eax,0x8(%ebp) !0x-4
+	test___%eax,%eax
+:express_number_118_break
+	jmp32  %express_number_96_break
+:express_number_96_else
+					# fprintf(2, "Given symbol %c to express immediate value %d\n", c, value); 
+	push___0x8(%ebp) !0x8
+	push___0x8(%ebp) !0xc
+	push___$i32 &string_open_12
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0x10
+	test___%eax,%eax
+					# exit(1); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %exit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+:express_number_96_break
+:express_number_49_break
+:express_number_2_break
+	mov____0x8(%ebp),%eax !0x-4
+	leave
+	ret
+
+
+:eval_immediates
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# for (struct Token *i = p; 0 != i; i = i->next) ...
+					# struct Token *i = p; 
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+	jmp32  %eval_immediates_1_initial_skip
+:eval_immediates_1_loop
+					# if (0 == i->Expression && !(i->type & macro)) ...
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x9
+					# i->Expression
+	mov____(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %eval_immediates_7_break
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x4
+					# i->type
+	movzbl_(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	pop____%eax
+	and____%edx,%eax
+	test___%eax,%eax
+	sete___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %eval_immediates_7_break
+					# int32_t value; 
+					# switch (Architecture) {   ...} 
+	mov____0x32,%eax &Architecture
+:eval_immediates_34_clause0
+	cmp____$i8,%eax !0x2
+	je32   %eval_immediates_34_body0
+	cmp____$i8,%eax !0x1
+	je32   %eval_immediates_34_body0
+	jmp32  %eval_immediates_34_clause1
+:eval_immediates_34_body0
+					# value = numerate_string(i->Text + 1)
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x5
+					# i->Text
+	mov____(%eax),%eax
+	add____$i8,%eax !0x1
+	push___%eax
+	call32 %numerate_string
+	add____$i8,%esp !0x4
+	mov____%eax,0x8(%ebp) !0x-8
+	test___%eax,%eax
+					# if ('0' == i->Text[1] || 0 != value) ...
+	mov____$i32,%eax %0x30
+	push___%eax
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x5
+					# i->Text
+	mov____(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %eval_immediates_54_break_b_55
+	jmp32  %eval_immediates_54_break_skip_b_55
+:eval_immediates_54_break_b_55
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %eval_immediates_54_break
+:eval_immediates_54_break_skip_b_55
+					# i->Expression = express_number(value, i->Text[0])
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x5
+					# i->Text
+	mov____(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	push___%eax
+	push___0x8(%ebp) !0x-8
+	call32 %express_number
+	add____$i8,%esp !0x8
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x9
+	mov____%eax,%edx
+	pop____%eax
+	mov____%eax,(%edx)
+	test___%eax,%eax
+	jmp32  %eval_immediates_54_break
+:eval_immediates_54_break
+	jmp32  %eval_immediates_34_break
+	jmp32  %eval_immediates_34_body1
+:eval_immediates_34_clause1
+	cmp____$i8,%eax !0x0
+	je32   %eval_immediates_34_body1
+	jmp32  %eval_immediates_34_break
+:eval_immediates_34_body1
+					# value = numerate_string(i->Text)
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x5
+					# i->Text
+	mov____(%eax),%eax
+	push___%eax
+	call32 %numerate_string
+	add____$i8,%esp !0x4
+	mov____%eax,0x8(%ebp) !0x-8
+	test___%eax,%eax
+					# if ('0' == i->Text[0] || 0 != value) ...
+	mov____$i32,%eax %0x30
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x5
+					# i->Text
+	mov____(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %eval_immediates_124_break_b_125
+	jmp32  %eval_immediates_124_break_skip_b_125
+:eval_immediates_124_break_b_125
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %eval_immediates_124_break
+:eval_immediates_124_break_skip_b_125
+					# range_check(value, 2); 
+	mov____$i32,%eax %0x2
+	push___%eax
+	push___0x8(%ebp) !0x-8
+	call32 %range_check
+	add____$i8,%esp !0x8
+	test___%eax,%eax
+					# i->Expression = calloc(5, sizeof(char))
+	mov____$i32,%eax %0x1
+	push___%eax
+	mov____$i32,%eax %0x5
+	push___%eax
+	call32 %calloc
+	add____$i8,%esp !0x8
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x9
+	mov____%eax,%edx
+	pop____%eax
+	mov____%eax,(%edx)
+	test___%eax,%eax
+					# sprintf(i->Expression, "%04X", value); 
+	push___0x8(%ebp) !0x-8
+	push___$i32 &string_open_13
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x9
+					# i->Expression
+	mov____(%eax),%eax
+	push___%eax
+	call32 %sprintf
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+	jmp32  %eval_immediates_124_break
+:eval_immediates_124_break
+	jmp32  %eval_immediates_34_break
+:eval_immediates_34_break
+	jmp32  %eval_immediates_7_break
+:eval_immediates_7_break
+:eval_immediates_1_continue
+					# i = i->next
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+					# i->next
+	mov____(%eax),%eax
+	mov____%eax,0x8(%ebp) !0x-4
+:eval_immediates_1_initial_skip
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %eval_immediates_1_break
+	jmp32  %eval_immediates_1_loop
+:eval_immediates_1_break
+	leave
+	ret
+
+
+:print_hex
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# for (struct Token *i = p; 0 != i; i = i->next) ...
+					# struct Token *i = p; 
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+	jmp32  %print_hex_1_initial_skip
+:print_hex_1_loop
+					# if (i->type ^ macro) ...
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x4
+					# i->type
+	movzbl_(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	pop____%eax
+	xor____%edx,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %print_hex_7_break
+					# fprintf(1, "\n%s", i->Expression); 
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x9
+					# i->Expression
+	mov____(%eax),%eax
+	push___%eax
+	push___$i32 &string_open_14
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+	jmp32  %print_hex_7_break
+:print_hex_7_break
+:print_hex_1_continue
+					# i = i->next
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+					# i->next
+	mov____(%eax),%eax
+	mov____%eax,0x8(%ebp) !0x-4
+:print_hex_1_initial_skip
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %print_hex_1_break
+	jmp32  %print_hex_1_loop
+:print_hex_1_break
+					# fprintf(1, "\n"); 
+	push___$i32 &string_open_15
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0x8
+	test___%eax,%eax
+	leave
+	ret
+
+
+:main
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# BigEndian = 0
+	mov____$i32,%eax %0x0
+	mov____%eax,0x32 &BigEndian
+	test___%eax,%eax
+					# struct Token *head = 0; 
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-4
+					# Architecture = 0
+	mov____$i32,%eax %0x0
+	mov____%eax,0x32 &Architecture
+	test___%eax,%eax
+					# int c; 
+					# int option_index = 0; 
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-c
+					# while ((c = getopt_long(argc, argv, "f:h:V", long_options, &option_index)) !=      -1) ...
+	jmp32  %main_16_continue
+:main_16_loop
+					# switch (c) {   ...} 
+	mov____0x8(%ebp),%eax !0x-8
+:main_19_clause0
+	cmp____$i8,%eax !0x0
+	je32   %main_19_body0
+	jmp32  %main_19_clause1
+:main_19_body0
+	jmp32  %main_19_break
+	jmp32  %main_19_body1
+:main_19_clause1
+	cmp____$i8,%eax !0x41
+	je32   %main_19_body1
+	jmp32  %main_19_clause2
+:main_19_body1
+					# Architecture = atoi(optarg)
+	mov____0x32,%eax &optarg
+	push___%eax
+	call32 %atoi
+	add____$i8,%esp !0x4
+	mov____%eax,0x32 &Architecture
+	test___%eax,%eax
+	jmp32  %main_19_break
+	jmp32  %main_19_body2
+:main_19_clause2
+	cmp____$i8,%eax !0x68
+	je32   %main_19_body2
+	jmp32  %main_19_clause3
+:main_19_body2
+					# fprintf(2,      "Usage: %s -f FILENAME1 {-f FILENAME2} (--BigEndian|--LittleEndian) [--BaseAddress 12345] [--Architecture 12345]\n"     , argv[0]); 
+	mov____$i32,%eax %0x0
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	push___%eax
+	push___$i32 &string_open_22
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+					# fprintf(2, "Architecture 0: Knight; 1: x86; 2: AMD64"); 
+	push___$i32 &string_open_23
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0x8
+	test___%eax,%eax
+					# exit(0); 
+	mov____$i32,%eax %0x0
+	push___%eax
+	call32 %exit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %main_19_body3
+:main_19_clause3
+	cmp____$i8,%eax !0x66
+	je32   %main_19_body3
+	jmp32  %main_19_clause4
+:main_19_body3
+					# source_file = open(optarg, 0)
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x32,%eax &optarg
+	push___%eax
+	call32 %open
+	add____$i8,%esp !0x8
+	mov____%eax,0x32 &source_file
+	test___%eax,%eax
+					# Reached_EOF = 0
+	mov____$i32,%eax %0x0
+	mov____%eax,0x32 &Reached_EOF
+	test___%eax,%eax
+					# while (!Reached_EOF) ...
+	jmp32  %main_87_continue
+:main_87_loop
+					# head = Tokenize_Line(head)
+	push___0x8(%ebp) !0x-4
+	call32 %Tokenize_Line
+	add____$i8,%esp !0x4
+	mov____%eax,0x8(%ebp) !0x-4
+	test___%eax,%eax
+:main_87_continue
+	mov____0x32,%eax &Reached_EOF
+	test___%eax,%eax
+	sete___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %main_87_break
+	jmp32  %main_87_loop
+:main_87_break
+	jmp32  %main_19_break
+	jmp32  %main_19_body4
+:main_19_clause4
+	cmp____$i8,%eax !0x56
+	je32   %main_19_body4
+	jmp32  %main_19_clause5
+:main_19_body4
+					# fprintf(1, "M1 0.2\n"); 
+	push___$i32 &string_open_24
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0x8
+	test___%eax,%eax
+					# exit(0); 
+	mov____$i32,%eax %0x0
+	push___%eax
+	call32 %exit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %main_19_body5
+:main_19_clause5
+:main_19_body5
+					# fprintf(2, "Unknown option\n"); 
+	push___$i32 &string_open_25
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0x8
+	test___%eax,%eax
+					# exit(1); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %exit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+:main_19_break
+:main_16_continue
+					# c = getopt_long(argc, argv, "f:h:V", long_options, &option_index)
+	lea____0x8(%ebp),%eax !0x-c
+	push___%eax
+	push___$i32 &long_options
+	push___$i32 &string_open_26
+	push___0x8(%ebp) !0xc
+	push___0x8(%ebp) !0x8
+	call32 %getopt_long
+	add____$i8,%esp !0x14
+	mov____%eax,0x8(%ebp) !0x-8
+	push___%eax
+	push___%eax
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	pop____%eax
+	mov____$i32,%eax %0x0
+	sub____%edx,%eax
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %main_16_break
+	jmp32  %main_16_loop
+:main_16_break
+					# if (0 == head) ...
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %main_158_break
+					# fprintf(2, "Either no input files were given or they were empty\n"); 
+	push___$i32 &string_open_27
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0x8
+	test___%eax,%eax
+					# exit(1); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %exit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %main_158_break
+:main_158_break
+					# head = reverse_list(head)
+	push___0x8(%ebp) !0x-4
+	call32 %reverse_list
+	add____$i8,%esp !0x4
+	mov____%eax,0x8(%ebp) !0x-4
+	test___%eax,%eax
+					# identify_macros(head); 
+	push___0x8(%ebp) !0x-4
+	call32 %identify_macros
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+					# line_macro(head); 
+	push___0x8(%ebp) !0x-4
+	call32 %line_macro
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+					# process_string(head); 
+	push___0x8(%ebp) !0x-4
+	call32 %process_string
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+					# eval_immediates(head); 
+	push___0x8(%ebp) !0x-4
+	call32 %eval_immediates
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+					# preserve_other(head); 
+	push___0x8(%ebp) !0x-4
+	call32 %preserve_other
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+					# print_hex(head); 
+	push___0x8(%ebp) !0x-4
+	call32 %print_hex
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:ELF_data
+
+
+:HEX2_data
+
+:g_environment
+!0x00 !0x00 !0x00 !0x00
+
+:g_stdin
+!0x00 !0x00 !0x00 !0x00
+
+:g_stdout
+!0x00 !0x00 !0x00 !0x00
+
+:optarg
+!0x00 !0x00 !0x00 !0x00
+
+:optind
+!0x00 !0x00 !0x00 !0x00
+
+:opterr
+!0x00 !0x00 !0x00 !0x00
+
+:source_file
+!0x00 !0x00 !0x00 !0x00
+
+:Reached_EOF
+!0x00 !0x00 !0x00 !0x00
+
+:BigEndian
+!0x00 !0x00 !0x00 !0x00
+
+:Architecture
+!0x00 !0x00 !0x00 !0x00
+
+:string_open_0
+"calloc failed.
+"
+
+:string_open_1
+"Exhusted available memory
+"
+
+:string_open_2
+!0x55 !0x6e !0x6d !0x61 !0x74 !0x63 !0x68 !0x65 !0x64 !0x20 !0x22 !0x21 !0x0a !0x00
+
+:string_open_3
+"String: %s exceeds max string size
+"
+
+:string_open_4
+"DEFINE"
+
+:string_open_5
+"A displacement of %d does not fit in 3 bytes"
+
+:string_open_6
+"A displacement of %d does not fit in 2 bytes"
+
+:string_open_7
+"A displacement of %d does not fit in 1 byte"
+
+:string_open_8
+"Recieved invalid number of bytes in LittleEndian %d
+"
+
+:string_open_9
+"%02x"
+
+:string_open_10
+"%04x"
+
+:string_open_11
+"%08x"
+
+:string_open_12
+"Given symbol %c to express immediate value %d
+"
+
+:string_open_13
+"%04X"
+
+:string_open_14
+"
+%s"
+
+:string_open_15
+"
+"
+
+:string_open_16
+"Architecture"
+
+:string_open_17
+"BigEndian"
+
+:string_open_18
+"LittleEndian"
+
+:string_open_19
+"file"
+
+:string_open_20
+"help"
+
+:string_open_21
+"version"
+
+:long_options
+&string_open_16 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x41 !0x00 !0x00 !0x00 &string_open_17 !0x00 !0x00 !0x00 !0x00 &BigEndian !0x01 !0x00 !0x00 !0x00 &string_open_18 !0x00 !0x00 !0x00 !0x00 &BigEndian !0x00 !0x00 !0x00 !0x00 &string_open_19 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x66 !0x00 !0x00 !0x00 &string_open_20 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x68 !0x00 !0x00 !0x00 &string_open_21 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x56 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
+
+:string_open_22
+!0x55 !0x73 !0x61 !0x67 !0x65 !0x3a !0x20 !0x25 !0x73 !0x20 !0x2d !0x66 !0x20 !0x46 !0x49 !0x4c !0x45 !0x4e !0x41 !0x4d !0x45 !0x31 !0x20 !0x7b !0x2d !0x66 !0x20 !0x46 !0x49 !0x4c !0x45 !0x4e !0x41 !0x4d !0x45 !0x32 !0x7d !0x20 !0x28 !0x2d !0x2d !0x42 !0x69 !0x67 !0x45 !0x6e !0x64 !0x69 !0x61 !0x6e !0x7c !0x2d !0x2d !0x4c !0x69 !0x74 !0x74 !0x6c !0x65 !0x45 !0x6e !0x64 !0x69 !0x61 !0x6e !0x29 !0x20 !0x5b !0x2d !0x2d !0x42 !0x61 !0x73 !0x65 !0x41 !0x64 !0x64 !0x72 !0x65 !0x73 !0x73 !0x20 !0x31 !0x32 !0x33 !0x34 !0x35 !0x5d !0x20 !0x5b !0x2d !0x2d !0x41 !0x72 !0x63 !0x68 !0x69 !0x74 !0x65 !0x63 !0x74 !0x75 !0x72 !0x65 !0x20 !0x31 !0x32 !0x33 !0x34 !0x35 !0x5d !0x0a !0x00
+
+:string_open_23
+"Architecture 0: Knight; 1: x86; 2: AMD64"
+
+:string_open_24
+"M1 0.2
+"
+
+:string_open_25
+"Unknown option
+"
+
+:string_open_26
+"f:h:V"
+
+:string_open_27
+"Either no input files were given or they were empty
+"

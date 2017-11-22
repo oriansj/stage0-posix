@@ -2708,7 +2708,7 @@
 					# int option_index = 0; 
 	mov____$i32,%eax %0x0
 	mov____%eax,0x8(%ebp) !0x-c
-					# while ((c = getopt_long(argc, argv, "f:h:V", long_options, &option_index)) !=      -1) ...
+					# while ((c = getopt_long(argc, argv, "f:h:V", long_options, &option_index)) != -     1) ...
 	jmp32  %main_16_continue
 :main_16_loop
 					# switch (c) {   ...} 

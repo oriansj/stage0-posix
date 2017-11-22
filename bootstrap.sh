@@ -17,15 +17,15 @@
 # along with Mes.  If not, see <http://www.gnu.org/licenses/>.
 
 # hex2-0
-../mes/guile/mescc.scm -c -E -I ../mes/mlibc/include -o hex2.E ../mescc-tools/hex2_linker.c
+../mes/guile/mescc.scm -c -E -I ../mes/include -o hex2.E ../mescc-tools/hex2_linker.c
 ../mes/guile/mescc.scm -c -o hex2.M1 hex2.E
-../mescc-tools/bin/M1 --LittleEndian --Architecture=1 -f ../mes/stage0/x86.M1 -f ../mes/mlibc/libc-mes+tcc.M1 -f hex2.M1 > hex2.hex2
-../mescc-tools/bin/hex2 --LittleEndian --Architecture=1 --BaseAddress=0x1000000 -f ../mes/stage0/elf32-header.hex2 -f ../mes/mlibc/crt1.hex2 -f ../mes/mlibc/libc-mes+tcc.hex2 -f hex2.hex2 -f ../mes/stage0/elf32-footer-single-main.hex2 > hex2-0
+../mescc-tools/bin/M1 --LittleEndian --Architecture=1 -f ../mes/stage0/x86.M1 -f ../mes/lib/libc-mes+tcc.M1 -f hex2.M1 > hex2.hex2
+../mescc-tools/bin/hex2 --LittleEndian --Architecture=1 --BaseAddress=0x1000000 -f ../mes/stage0/elf32-header.hex2 -f ../mes/lib/crt1.hex2 -f ../mes/lib/libc-mes+tcc.hex2 -f hex2.hex2 -f ../mes/stage0/elf32-footer-single-main.hex2 > hex2-0
 chmod +x hex2-0
 rm hex2.E
 
 # hex2
-./hex2-0 --LittleEndian --Architecture=1 --BaseAddress=0x1000000 -f ../mes/stage0/elf32-header.hex2 -f ../mes/mlibc/crt1.hex2 -f ../mes/mlibc/libc-mes+tcc.hex2 -f hex2.hex2 -f ../mes/stage0/elf32-footer-single-main.hex2 > hex2-1
+./hex2-0 --LittleEndian --Architecture=1 --BaseAddress=0x1000000 -f ../mes/stage0/elf32-header.hex2 -f ../mes/lib/crt1.hex2 -f ../mes/lib/libc-mes+tcc.hex2 -f hex2.hex2 -f ../mes/stage0/elf32-footer-single-main.hex2 > hex2-1
 chmod +x hex2-1
 mv hex2-1 hex2
 cmp hex2-0 hex2 || diff -y hex2-0 hex2
@@ -33,19 +33,19 @@ rm hex2-0
 rm hex2.hex2
 
 # M1-0
-../mes/guile/mescc.scm -c -E -I ../mes/mlibc/include -o M1.E ../mescc-tools/M1-macro.c
+../mes/guile/mescc.scm -c -E -I ../mes/include -o M1.E ../mescc-tools/M1-macro.c
 ../mes/guile/mescc.scm -c -o M1.M1 M1.E
-../mescc-tools/bin/M1 --LittleEndian --Architecture=1 -f ../mes/stage0/x86.M1 -f ../mes/mlibc/libc-mes+tcc.M1 -f M1.M1 > M1.hex2
-./hex2 --LittleEndian --Architecture=1 --BaseAddress=0x1000000 -f ../mes/stage0/elf32-header.hex2 -f ../mes/mlibc/crt1.hex2 -f ../mes/mlibc/libc-mes+tcc.hex2 -f M1.hex2 -f ../mes/stage0/elf32-footer-single-main.hex2 > M1-0
+../mescc-tools/bin/M1 --LittleEndian --Architecture=1 -f ../mes/stage0/x86.M1 -f M1.M1 > M1.hex2
+./hex2 --LittleEndian --Architecture=1 --BaseAddress=0x1000000 -f ../mes/stage0/elf32-header.hex2 -f ../mes/lib/crt1.hex2 -f ../mes/lib/libc-mes+tcc.hex2 -f M1.hex2 -f ../mes/stage0/elf32-footer-single-main.hex2 > M1-0
 chmod +x M1-0
 rm M1.E
 
 # M1
 echo MORTAL SIN HERE
 mv M1.hex2 M1.hex2-0
-./M1-0 --LittleEndian --Architecture=1 -f ../mes/stage0/x86.M1 -f ../mes/mlibc/libc-mes+tcc.M1 -f M1.M1 > M1.hex2
-cmp M1.hex2-0 M1.hex2 || { diff -y M1.hex2-0 M1.hex2 | head; echo MORTAL SIN HERE; cp M1.hex2-0 M1.hex2; }
-./hex2 --LittleEndian --Architecture=1 --BaseAddress=0x1000000 -f ../mes/stage0/elf32-header.hex2 -f ../mes/mlibc/crt1.hex2 -f ../mes/mlibc/libc-mes+tcc.hex2 -f M1.hex2 -f ../mes/stage0/elf32-footer-single-main.hex2 > M1-1
+./M1-0 --LittleEndian --Architecture=1 -f ../mes/stage0/x86.M1 -f M1.M1 > M1.hex2
+cmp M1.hex2-0 M1.hex2 || { diff -y M1.hex2-0 M1.hex2 | head -1000; echo MORTAL SIN HERE; cp M1.hex2-0 M1.hex2; }
+./hex2 --LittleEndian --Architecture=1 --BaseAddress=0x1000000 -f ../mes/stage0/elf32-header.hex2 -f ../mes/lib/crt1.hex2 -f ../mes/lib/libc-mes+tcc.hex2 -f M1.hex2 -f ../mes/stage0/elf32-footer-single-main.hex2 > M1-1
 chmod +x M1-1
 
 rm M1.hex2

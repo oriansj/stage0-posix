@@ -16,6 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Mes.  If not, see <http://www.gnu.org/licenses/>.
 
+set -ex
+
 # hex2-0
 ../mes/guile/mescc.scm -c -E -I ../mes/include -o hex2.E ../mescc-tools/hex2_linker.c
 ../mes/guile/mescc.scm -c -o hex2.M1 hex2.E
@@ -41,19 +43,14 @@ chmod +x M1-0
 rm M1.E
 
 # M1
-echo MORTAL SIN HERE
 mv M1.hex2 M1.hex2-0
 ./M1-0 --LittleEndian --Architecture=1 -f ../mes/stage0/x86.M1 -f M1.M1 > M1.hex2
-cmp M1.hex2-0 M1.hex2 || { diff -y M1.hex2-0 M1.hex2 | head -1000; echo MORTAL SIN HERE; cp M1.hex2-0 M1.hex2; }
+cmp M1.hex2-0 M1.hex2 || { diff -y M1.hex2-0 M1.hex2 | head -1000; }
 ./hex2 --LittleEndian --Architecture=1 --BaseAddress=0x1000000 -f ../mes/stage0/elf32-header.hex2 -f ../mes/lib/crt1.hex2 -f ../mes/lib/libc-mes+tcc.hex2 -f M1.hex2 -f ../mes/stage0/elf32-footer-single-main.hex2 > M1-1
 chmod +x M1-1
 
 rm M1.hex2
-cmp M1-0 M1-1 || { echo MORTAL SIN HERE; cp M1-0 M1-1; }
+cmp M1-0 M1-1 || { diff -y M1-0 M1-1; }
 mv M1-1 M1
 rm M1-0
-
-echo MORTAL SIN HERE
-cp ../mescc-tools/bin/M1 M1
-# cleanup after MORTAL SIN
-rm -f M1.hex2-0
+rm M1.hex2-0

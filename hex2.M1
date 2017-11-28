@@ -441,7 +441,7 @@
 	push___%ebp
 	mov____%esp,%ebp
 	sub____%esp,$i32 %0x1054
-					# uint32_t value = displacement; 
+					# unsigned value = displacement; 
 	mov____0x8(%ebp),%eax !0x8
 	mov____%eax,0x8(%ebp) !0x-4
 					# range_check(displacement, number_of_bytes); 
@@ -463,7 +463,7 @@
 	je32   %outputPointer_15_body0
 	jmp32  %outputPointer_15_clause1
 :outputPointer_15_body0
-					# printf("%c", value<<24); 
+					# fprintf(output, "%c", value<<24); 
 	mov____0x8(%ebp),%eax !0x-4
 	push___%eax
 	mov____$i32,%eax %0x18
@@ -474,8 +474,10 @@
 	shr____%cl,%eax
 	push___%eax
 	push___$i32 &string_open_4
-	call32 %printf
-	add____$i8,%esp !0x8
+	mov____0x32,%eax &output
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0xc
 	test___%eax,%eax
 	jmp32  %outputPointer_15_body1
 :outputPointer_15_clause1
@@ -483,7 +485,7 @@
 	je32   %outputPointer_15_body1
 	jmp32  %outputPointer_15_clause2
 :outputPointer_15_body1
-					# printf("%c", (value<<16)%256); 
+					# fprintf(output, "%c", (value<<16)%256); 
 	mov____0x8(%ebp),%eax !0x-4
 	push___%eax
 	mov____$i32,%eax %0x10
@@ -502,8 +504,10 @@
 	mov____%edx,%eax
 	push___%eax
 	push___$i32 &string_open_4
-	call32 %printf
-	add____$i8,%esp !0x8
+	mov____0x32,%eax &output
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0xc
 	test___%eax,%eax
 	jmp32  %outputPointer_15_body2
 :outputPointer_15_clause2
@@ -511,7 +515,7 @@
 	je32   %outputPointer_15_body2
 	jmp32  %outputPointer_15_clause3
 :outputPointer_15_body2
-					# printf("%c", (value<<8)%256); 
+					# fprintf(output, "%c", (value<<8)%256); 
 	mov____0x8(%ebp),%eax !0x-4
 	push___%eax
 	mov____$i32,%eax %0x8
@@ -530,8 +534,10 @@
 	mov____%edx,%eax
 	push___%eax
 	push___$i32 &string_open_4
-	call32 %printf
-	add____$i8,%esp !0x8
+	mov____0x32,%eax &output
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0xc
 	test___%eax,%eax
 	jmp32  %outputPointer_15_body3
 :outputPointer_15_clause3
@@ -539,7 +545,7 @@
 	je32   %outputPointer_15_body3
 	jmp32  %outputPointer_15_clause4
 :outputPointer_15_body3
-					# printf("%c", value%256); 
+					# fprintf(output, "%c", value%256); 
 	mov____0x8(%ebp),%eax !0x-4
 	push___%eax
 	mov____$i32,%eax %0x100
@@ -551,8 +557,10 @@
 	mov____%edx,%eax
 	push___%eax
 	push___$i32 &string_open_4
-	call32 %printf
-	add____$i8,%esp !0x8
+	mov____0x32,%eax &output
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0xc
 	test___%eax,%eax
 	jmp32  %outputPointer_15_body4
 :outputPointer_15_clause4
@@ -562,9 +570,9 @@
 	jmp32  %outputPointer_9_break
 :outputPointer_9_else
 					# while (number_of_bytes > 0) ...
-	jmp32  %outputPointer_95_continue
-:outputPointer_95_loop
-					# uint8_t byte = value%256; 
+	jmp32  %outputPointer_99_continue
+:outputPointer_99_loop
+					# unsigned byte = value%256; 
 	mov____0x8(%ebp),%eax !0x-4
 	push___%eax
 	mov____$i32,%eax %0x100
@@ -586,18 +594,20 @@
 	idiv___%ebx
 	mov____%eax,0x8(%ebp) !0x-4
 	test___%eax,%eax
-					# printf("%c", byte); 
+					# fprintf(output, "%c", byte); 
 	push___0x8(%ebp) !0x-8
 	push___$i32 &string_open_4
-	call32 %printf
-	add____$i8,%esp !0x8
+	mov____0x32,%eax &output
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0xc
 	test___%eax,%eax
 					# number_of_bytes = number_of_bytes - 1
 	mov____0x8(%ebp),%eax !0xc
 	add____$i8,%eax !0x-1
 	mov____%eax,0x8(%ebp) !0xc
 	test___%eax,%eax
-:outputPointer_95_continue
+:outputPointer_99_continue
 	mov____0x8(%ebp),%eax !0xc
 	push___%eax
 	mov____$i32,%eax %0x0
@@ -608,9 +618,9 @@
 	movzbl_%al,%eax
 	test___%eax,%eax
 					# jmp test LABEL
-	jle32  %outputPointer_95_break
-	jmp32  %outputPointer_95_loop
-:outputPointer_95_break
+	jle32  %outputPointer_99_break
+	jmp32  %outputPointer_99_loop
+:outputPointer_99_break
 :outputPointer_9_break
 	leave
 	ret
@@ -718,20 +728,20 @@
 :storePointer_1_break
 					# char temp[255 + 1] = {0, }; 
 	mov____$i32,%eax %0x0
-	mov____%eax,0x32(%ebp) %0x-400
+	mov____%al,0x32(%ebp) %0x-100
 					# memset(temp, 0, 255 + 1); 
 	mov____$i32,%eax %0xff
 	add____$i8,%eax !0x1
 	push___%eax
 	mov____$i32,%eax %0x0
 	push___%eax
-	lea____0x32(%ebp),%eax %0x-400
+	lea____0x32(%ebp),%eax %0x-100
 	push___%eax
 	call32 %memset
 	add____$i8,%esp !0xc
 	test___%eax,%eax
-					# bool base_sep_p = consume_token(source_file, temp) == 62; 
-	lea____0x32(%ebp),%eax %0x-400
+					# int base_sep_p = consume_token(source_file, temp) == 62; 
+	lea____0x32(%ebp),%eax %0x-100
 	push___%eax
 	push___0x8(%ebp) !0xc
 	call32 %consume_token
@@ -743,50 +753,50 @@
 	sub____%edx,%eax
 	sete___%al
 	movzbl_%al,%eax
-	mov____%eax,0x32(%ebp) %0x-404
+	mov____%eax,0x32(%ebp) %0x-104
 					# int target = GetTarget(temp); 
-	lea____0x32(%ebp),%eax %0x-400
+	lea____0x32(%ebp),%eax %0x-100
 	push___%eax
 	call32 %GetTarget
 	add____$i8,%esp !0x4
-	mov____%eax,0x32(%ebp) %0x-408
+	mov____%eax,0x32(%ebp) %0x-108
 					# int displacement; 
 					# int base = ip; 
 	mov____0x8(%ebp),%eax !0x10
-	mov____%eax,0x32(%ebp) %0x-410
+	mov____%eax,0x32(%ebp) %0x-110
 					# if (base_sep_p) ...
-	mov____0x32(%ebp),%eax %0x-404
+	mov____0x32(%ebp),%eax %0x-104
 	test___%eax,%eax
 					# jmp test LABEL
 	test___%eax,%eax
 	je32   %storePointer_109_break
 					# char temp2[255 + 1] = {0, }; 
 	mov____$i32,%eax %0x0
-	mov____%eax,0x32(%ebp) %0x-810
+	mov____%al,0x32(%ebp) %0x-210
 					# memset(temp2, 0, 255 + 1); 
 	mov____$i32,%eax %0xff
 	add____$i8,%eax !0x1
 	push___%eax
 	mov____$i32,%eax %0x0
 	push___%eax
-	lea____0x32(%ebp),%eax %0x-810
+	lea____0x32(%ebp),%eax %0x-210
 	push___%eax
 	call32 %memset
 	add____$i8,%esp !0xc
 	test___%eax,%eax
 					# consume_token(source_file, temp2); 
-	lea____0x32(%ebp),%eax %0x-810
+	lea____0x32(%ebp),%eax %0x-210
 	push___%eax
 	push___0x8(%ebp) !0xc
 	call32 %consume_token
 	add____$i8,%esp !0x8
 	test___%eax,%eax
 					# base = GetTarget(temp2)
-	lea____0x32(%ebp),%eax %0x-810
+	lea____0x32(%ebp),%eax %0x-210
 	push___%eax
 	call32 %GetTarget
 	add____$i8,%esp !0x4
-	mov____%eax,0x32(%ebp) %0x-410
+	mov____%eax,0x32(%ebp) %0x-110
 	test___%eax,%eax
 	jmp32  %storePointer_109_break
 :storePointer_109_break
@@ -798,14 +808,14 @@
 	jmp32  %storePointer_139_clause1
 :storePointer_139_body0
 					# displacement = target - base + 4
-	mov____0x32(%ebp),%eax %0x-408
+	mov____0x32(%ebp),%eax %0x-108
 	push___%eax
-	mov____0x32(%ebp),%eax %0x-410
+	mov____0x32(%ebp),%eax %0x-110
 	mov____%eax,%edx
 	pop____%eax
 	sub____%edx,%eax
 	add____$i8,%eax !0x4
-	mov____%eax,0x32(%ebp) %0x-40c
+	mov____%eax,0x32(%ebp) %0x-10c
 	test___%eax,%eax
 	jmp32  %storePointer_139_break
 	jmp32  %storePointer_139_body1
@@ -817,13 +827,13 @@
 	jmp32  %storePointer_139_clause2
 :storePointer_139_body1
 					# displacement = target - base
-	mov____0x32(%ebp),%eax %0x-408
+	mov____0x32(%ebp),%eax %0x-108
 	push___%eax
-	mov____0x32(%ebp),%eax %0x-410
+	mov____0x32(%ebp),%eax %0x-110
 	mov____%eax,%edx
 	pop____%eax
 	sub____%edx,%eax
-	mov____%eax,0x32(%ebp) %0x-40c
+	mov____%eax,0x32(%ebp) %0x-10c
 	test___%eax,%eax
 	jmp32  %storePointer_139_break
 	jmp32  %storePointer_139_body2
@@ -857,7 +867,7 @@
 					# outputPointer(displacement, 1); 
 	mov____$i32,%eax %0x1
 	push___%eax
-	push___0x32(%ebp) %0x-40c
+	push___0x32(%ebp) %0x-10c
 	call32 %outputPointer
 	add____$i8,%esp !0x8
 	test___%eax,%eax
@@ -877,7 +887,7 @@
 					# outputPointer(target, 2); 
 	mov____$i32,%eax %0x2
 	push___%eax
-	push___0x32(%ebp) %0x-408
+	push___0x32(%ebp) %0x-108
 	call32 %outputPointer
 	add____$i8,%esp !0x8
 	test___%eax,%eax
@@ -897,7 +907,7 @@
 					# outputPointer(displacement, 2); 
 	mov____$i32,%eax %0x2
 	push___%eax
-	push___0x32(%ebp) %0x-40c
+	push___0x32(%ebp) %0x-10c
 	call32 %outputPointer
 	add____$i8,%esp !0x8
 	test___%eax,%eax
@@ -917,7 +927,7 @@
 					# outputPointer(target, 4); 
 	mov____$i32,%eax %0x4
 	push___%eax
-	push___0x32(%ebp) %0x-408
+	push___0x32(%ebp) %0x-108
 	call32 %outputPointer
 	add____$i8,%esp !0x8
 	test___%eax,%eax
@@ -937,7 +947,7 @@
 					# outputPointer(displacement, 4); 
 	mov____$i32,%eax %0x4
 	push___%eax
-	push___0x32(%ebp) %0x-40c
+	push___0x32(%ebp) %0x-10c
 	call32 %outputPointer
 	add____$i8,%esp !0x8
 	test___%eax,%eax
@@ -1207,7 +1217,7 @@
 	call32 %open
 	add____$i8,%esp !0x8
 	mov____%eax,0x8(%ebp) !0x-8
-					# bool toggle = 0; 
+					# int toggle = 0; 
 	mov____$i32,%eax %0x0
 	mov____%eax,0x8(%ebp) !0x-c
 					# int c; 
@@ -1476,7 +1486,7 @@
 	call32 %second_pass
 	add____$i8,%esp !0x4
 	mov____%eax,0x8(%ebp) !0x-4
-					# FILE *source_file = open(input->filename, 0); 
+					# int source_file = open(input->filename, 0); 
 	mov____$i32,%eax %0x0
 	push___%eax
 	mov____%ebp,%eax
@@ -1489,10 +1499,10 @@
 	call32 %open
 	add____$i8,%esp !0x8
 	mov____%eax,0x8(%ebp) !0x-8
-					# bool toggle = 0; 
+					# int toggle = 0; 
 	mov____$i32,%eax %0x0
 	mov____%eax,0x8(%ebp) !0x-c
-					# uint8_t holder = 0; 
+					# unsigned holder = 0; 
 	mov____$i32,%eax %0x0
 	mov____%eax,0x8(%ebp) !0x-10
 					# int c; 
@@ -1619,8 +1629,8 @@
 					# jmp test LABEL
 	test___%eax,%eax
 	je32   %second_pass_131_else
-					# printf("%c", holder*16 + hex(c, source_file)); 
-	movzbl_0x8(%ebp),%eax !0x-10
+					# fprintf(output, "%c", holder*16 + hex(c, source_file)); 
+	mov____0x8(%ebp),%eax !0x-10
 	push___%eax
 	mov____$i32,%eax %0x10
 	mov____%eax,%edx
@@ -1636,8 +1646,10 @@
 	add____%edx,%eax
 	push___%eax
 	push___$i32 &string_open_4
-	call32 %printf
-	add____$i8,%esp !0x8
+	mov____0x32,%eax &output
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0xc
 	test___%eax,%eax
 					# ip = ip + 1
 	mov____0x8(%ebp),%eax !0x-4
@@ -1733,27 +1745,38 @@
 					# struct input_files *input = 0; 
 	mov____$i32,%eax %0x0
 	mov____%eax,0x8(%ebp) !0x-4
+					# output = 1
+	mov____$i32,%eax %0x1
+	mov____%eax,0x32 &output
+	test___%eax,%eax
+					# char *output_file = ""; 
+	mov____$i32,%eax &string_open_17
+	mov____%eax,0x8(%ebp) !0x-8
+					# exec_enable = 0
+	mov____$i32,%eax %0x0
+	mov____%eax,0x32 &exec_enable
+	test___%eax,%eax
 					# int c; 
 					# int option_index = 0; 
 	mov____$i32,%eax %0x0
-	mov____%eax,0x8(%ebp) !0x-c
-					# while ((c = getopt_long(argc, argv, "B:f:h:V", long_options, &option_index))      != -1) ...
-	jmp32  %main_24_continue
-:main_24_loop
+	mov____%eax,0x8(%ebp) !0x-10
+					# while ((c = getopt_long(argc, argv, "B:f:h:o:V", long_options, &option_index))      != -1) ...
+	jmp32  %main_35_continue
+:main_35_loop
 					# switch (c) {   ...} 
-	mov____0x8(%ebp),%eax !0x-8
-:main_27_clause0
+	mov____0x8(%ebp),%eax !0x-c
+:main_38_clause0
 	cmp____$i8,%eax !0x0
-	je32   %main_27_body0
-	jmp32  %main_27_clause1
-:main_27_body0
-	jmp32  %main_27_break
-	jmp32  %main_27_body1
-:main_27_clause1
+	je32   %main_38_body0
+	jmp32  %main_38_clause1
+:main_38_body0
+	jmp32  %main_38_break
+	jmp32  %main_38_body1
+:main_38_clause1
 	cmp____$i8,%eax !0x41
-	je32   %main_27_body1
-	jmp32  %main_27_clause2
-:main_27_body1
+	je32   %main_38_body1
+	jmp32  %main_38_clause2
+:main_38_body1
 					# Architecture = atoi(optarg)
 	mov____0x32,%eax &optarg
 	push___%eax
@@ -1761,18 +1784,18 @@
 	add____$i8,%esp !0x4
 	mov____%eax,0x32 &Architecture
 	test___%eax,%eax
-	jmp32  %main_27_break
-	jmp32  %main_27_body2
-:main_27_clause2
+	jmp32  %main_38_break
+	jmp32  %main_38_body2
+:main_38_clause2
 	cmp____$i8,%eax !0x42
-	je32   %main_27_body2
-	jmp32  %main_27_clause3
-:main_27_body2
+	je32   %main_38_body2
+	jmp32  %main_38_clause3
+:main_38_body2
 					# char *ptr; 
 					# Base_Address = strtol(optarg, &ptr, 0)
 	mov____$i32,%eax %0x0
 	push___%eax
-	lea____0x8(%ebp),%eax !0x-10
+	lea____0x8(%ebp),%eax !0x-14
 	push___%eax
 	mov____0x32,%eax &optarg
 	push___%eax
@@ -1780,13 +1803,13 @@
 	add____$i8,%esp !0xc
 	mov____%eax,0x32 &Base_Address
 	test___%eax,%eax
-	jmp32  %main_27_break
-	jmp32  %main_27_body3
-:main_27_clause3
+	jmp32  %main_38_break
+	jmp32  %main_38_body3
+:main_38_clause3
 	cmp____$i8,%eax !0x68
-	je32   %main_27_body3
-	jmp32  %main_27_clause4
-:main_27_body3
+	je32   %main_38_body3
+	jmp32  %main_38_clause4
+:main_38_body3
 					# fprintf(2,      "Usage: %s -f FILENAME1 {-f FILENAME2} (--BigEndian|--LittleEndian) [--BaseAddress 12345] [--Architecture 12345]\n"     , argv[0]); 
 	mov____$i32,%eax %0x0
 	shl____$i8,%eax !0x2
@@ -1797,14 +1820,14 @@
 	add____%edx,%eax
 	mov____(%eax),%eax
 	push___%eax
-	push___$i32 &string_open_15
+	push___$i32 &string_open_18
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
 	add____$i8,%esp !0xc
 	test___%eax,%eax
 					# fprintf(2, "Architecture 0: Knight; 1: x86; 2: AMD64"); 
-	push___$i32 &string_open_16
+	push___$i32 &string_open_19
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -1816,12 +1839,12 @@
 	call32 %exit
 	add____$i8,%esp !0x4
 	test___%eax,%eax
-	jmp32  %main_27_body4
-:main_27_clause4
+	jmp32  %main_38_body4
+:main_38_clause4
 	cmp____$i8,%eax !0x66
-	je32   %main_27_body4
-	jmp32  %main_27_clause5
-:main_27_body4
+	je32   %main_38_body4
+	jmp32  %main_38_clause5
+:main_38_body4
 					# struct input_files *temp = calloc(1, sizeof(struct input_files)); 
 	mov____$i32,%eax %0x8
 	push___%eax
@@ -1829,12 +1852,12 @@
 	push___%eax
 	call32 %calloc
 	add____$i8,%esp !0x8
-	mov____%eax,0x8(%ebp) !0x-14
+	mov____%eax,0x8(%ebp) !0x-18
 					# temp->filename = optarg
 	mov____0x32,%eax &optarg
 	push___%eax
 	mov____%ebp,%eax
-	add____$i8,%eax !0x-14
+	add____$i8,%eax !0x-18
 	mov____(%eax),%eax
 	add____$i8,%eax !0x4
 	mov____%eax,%edx
@@ -1845,7 +1868,7 @@
 	mov____0x8(%ebp),%eax !0x-4
 	push___%eax
 	mov____%ebp,%eax
-	add____$i8,%eax !0x-14
+	add____$i8,%eax !0x-18
 	mov____(%eax),%eax
 	add____$i8,%eax !0x0
 	mov____%eax,%edx
@@ -1853,18 +1876,37 @@
 	mov____%eax,(%edx)
 	test___%eax,%eax
 					# input = temp
-	mov____0x8(%ebp),%eax !0x-14
+	mov____0x8(%ebp),%eax !0x-18
 	mov____%eax,0x8(%ebp) !0x-4
 	test___%eax,%eax
-	jmp32  %main_27_break
-	jmp32  %main_27_body5
-:main_27_clause5
+	jmp32  %main_38_break
+	jmp32  %main_38_body5
+:main_38_clause5
+	cmp____$i8,%eax !0x6f
+	je32   %main_38_body5
+	jmp32  %main_38_clause6
+:main_38_body5
+					# output_file = optarg
+	mov____0x32,%eax &optarg
+	mov____%eax,0x8(%ebp) !0x-8
+	test___%eax,%eax
+					# output = open(output_file, 1)
+	mov____$i32,%eax %0x1
+	push___%eax
+	push___0x8(%ebp) !0x-8
+	call32 %open
+	add____$i8,%esp !0x8
+	mov____%eax,0x32 &output
+	test___%eax,%eax
+	jmp32  %main_38_break
+	jmp32  %main_38_body6
+:main_38_clause6
 	cmp____$i8,%eax !0x56
-	je32   %main_27_body5
-	jmp32  %main_27_clause6
-:main_27_body5
-					# fprintf(1, "hex2 0.2\n"); 
-	push___$i32 &string_open_17
+	je32   %main_38_body6
+	jmp32  %main_38_clause7
+:main_38_body6
+					# fprintf(1, "hex2 0.3\n"); 
+	push___$i32 &string_open_20
 	mov____$i32,%eax %0x1
 	push___%eax
 	call32 %fprintf
@@ -1876,11 +1918,11 @@
 	call32 %exit
 	add____$i8,%esp !0x4
 	test___%eax,%eax
-	jmp32  %main_27_body6
-:main_27_clause6
-:main_27_body6
+	jmp32  %main_38_body7
+:main_38_clause7
+:main_38_body7
 					# fprintf(2, "Unknown option\n"); 
-	push___$i32 &string_open_18
+	push___$i32 &string_open_21
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -1892,18 +1934,18 @@
 	call32 %exit
 	add____$i8,%esp !0x4
 	test___%eax,%eax
-:main_27_break
-:main_24_continue
-					# c = getopt_long(argc, argv, "B:f:h:V", long_options, &option_index)
-	lea____0x8(%ebp),%eax !0x-c
+:main_38_break
+:main_35_continue
+					# c = getopt_long(argc, argv, "B:f:h:o:V", long_options, &option_index)
+	lea____0x8(%ebp),%eax !0x-10
 	push___%eax
 	push___$i32 &long_options
-	push___$i32 &string_open_19
+	push___$i32 &string_open_22
 	push___0x8(%ebp) !0xc
 	push___0x8(%ebp) !0x8
 	call32 %getopt_long
 	add____$i8,%esp !0x14
-	mov____%eax,0x8(%ebp) !0x-8
+	mov____%eax,0x8(%ebp) !0x-c
 	push___%eax
 	push___%eax
 	mov____$i32,%eax %0x1
@@ -1924,9 +1966,9 @@
 	sahf
 	pop____%eax
 					# jmp test LABEL
-	jne32  %main_24_break
-	jmp32  %main_24_loop
-:main_24_break
+	jne32  %main_35_break
+	jmp32  %main_35_loop
+:main_35_break
 					# if (0 == input) ...
 	mov____$i32,%eax %0x0
 	push___%eax
@@ -1937,12 +1979,12 @@
 	sete___%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jne32  %main_185_break
+	jne32  %main_214_break
 	mov____$i32,%eax %0x1
 	leave
 	ret
-	jmp32  %main_185_break
-:main_185_break
+	jmp32  %main_214_break
+:main_214_break
 					# first_pass(input); 
 	push___0x8(%ebp) !0x-4
 	call32 %first_pass
@@ -1953,6 +1995,51 @@
 	call32 %second_pass
 	add____$i8,%esp !0x4
 	test___%eax,%eax
+					# if (exec_enable) ...
+	mov____0x32,%eax &exec_enable
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %main_234_break
+					# if (0 != chmod(output_file, 0750)) ...
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____$i32,%eax %0x1e8
+	push___%eax
+	push___0x8(%ebp) !0x-8
+	call32 %chmod
+	add____$i8,%esp !0x8
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %main_240_break
+					# fprintf(2, "Unable to change permissions\n"); 
+	push___$i32 &string_open_23
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0x8
+	test___%eax,%eax
+					# exit(1); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %exit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %main_240_break
+:main_240_break
+	jmp32  %main_234_break
+:main_234_break
 	mov____$i32,%eax %0x0
 	leave
 	ret
@@ -1981,6 +2068,9 @@
 :opterr
 !0x00 !0x00 !0x00 !0x00
 
+:output
+!0x00 !0x00 !0x00 !0x00
+
 :jump_table
 !0x00 !0x00 !0x00 !0x00
 
@@ -1991,6 +2081,9 @@
 !0x00 !0x00 !0x00 !0x00
 
 :Architecture
+!0x00 !0x00 !0x00 !0x00
+
+:exec_enable
 !0x00 !0x00 !0x00 !0x00
 
 :string_open_0
@@ -2028,36 +2121,49 @@
 "LittleEndian"
 
 :string_open_10
-"file"
+"exec_enable"
 
 :string_open_11
-"Architecture"
+"file"
 
 :string_open_12
-"BaseAddress"
+"Architecture"
 
 :string_open_13
-"help"
+"BaseAddress"
 
 :string_open_14
+"output"
+
+:string_open_15
+"help"
+
+:string_open_16
 "version"
 
 :long_options
-&string_open_8 !0x00 !0x00 !0x00 !0x00 &BigEndian !0x01 !0x00 !0x00 !0x00 &string_open_9 !0x00 !0x00 !0x00 !0x00 &BigEndian !0x00 !0x00 !0x00 !0x00 &string_open_10 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x66 !0x00 !0x00 !0x00 &string_open_11 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x41 !0x00 !0x00 !0x00 &string_open_12 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x42 !0x00 !0x00 !0x00 &string_open_13 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x68 !0x00 !0x00 !0x00 &string_open_14 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x56 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
-
-:string_open_15
-!0x55 !0x73 !0x61 !0x67 !0x65 !0x3a !0x20 !0x25 !0x73 !0x20 !0x2d !0x66 !0x20 !0x46 !0x49 !0x4c !0x45 !0x4e !0x41 !0x4d !0x45 !0x31 !0x20 !0x7b !0x2d !0x66 !0x20 !0x46 !0x49 !0x4c !0x45 !0x4e !0x41 !0x4d !0x45 !0x32 !0x7d !0x20 !0x28 !0x2d !0x2d !0x42 !0x69 !0x67 !0x45 !0x6e !0x64 !0x69 !0x61 !0x6e !0x7c !0x2d !0x2d !0x4c !0x69 !0x74 !0x74 !0x6c !0x65 !0x45 !0x6e !0x64 !0x69 !0x61 !0x6e !0x29 !0x20 !0x5b !0x2d !0x2d !0x42 !0x61 !0x73 !0x65 !0x41 !0x64 !0x64 !0x72 !0x65 !0x73 !0x73 !0x20 !0x31 !0x32 !0x33 !0x34 !0x35 !0x5d !0x20 !0x5b !0x2d !0x2d !0x41 !0x72 !0x63 !0x68 !0x69 !0x74 !0x65 !0x63 !0x74 !0x75 !0x72 !0x65 !0x20 !0x31 !0x32 !0x33 !0x34 !0x35 !0x5d !0x0a !0x00
-
-:string_open_16
-"Architecture 0: Knight; 1: x86; 2: AMD64"
+&string_open_8 !0x00 !0x00 !0x00 !0x00 &BigEndian !0x01 !0x00 !0x00 !0x00 &string_open_9 !0x00 !0x00 !0x00 !0x00 &BigEndian !0x00 !0x00 !0x00 !0x00 &string_open_10 !0x00 !0x00 !0x00 !0x00 &exec_enable !0x01 !0x00 !0x00 !0x00 &string_open_11 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x66 !0x00 !0x00 !0x00 &string_open_12 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x41 !0x00 !0x00 !0x00 &string_open_13 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x42 !0x00 !0x00 !0x00 &string_open_14 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x6f !0x00 !0x00 !0x00 &string_open_15 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x68 !0x00 !0x00 !0x00 &string_open_16 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x56 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
 
 :string_open_17
-"hex2 0.2
-"
+""
 
 :string_open_18
+!0x55 !0x73 !0x61 !0x67 !0x65 !0x3a !0x20 !0x25 !0x73 !0x20 !0x2d !0x66 !0x20 !0x46 !0x49 !0x4c !0x45 !0x4e !0x41 !0x4d !0x45 !0x31 !0x20 !0x7b !0x2d !0x66 !0x20 !0x46 !0x49 !0x4c !0x45 !0x4e !0x41 !0x4d !0x45 !0x32 !0x7d !0x20 !0x28 !0x2d !0x2d !0x42 !0x69 !0x67 !0x45 !0x6e !0x64 !0x69 !0x61 !0x6e !0x7c !0x2d !0x2d !0x4c !0x69 !0x74 !0x74 !0x6c !0x65 !0x45 !0x6e !0x64 !0x69 !0x61 !0x6e !0x29 !0x20 !0x5b !0x2d !0x2d !0x42 !0x61 !0x73 !0x65 !0x41 !0x64 !0x64 !0x72 !0x65 !0x73 !0x73 !0x20 !0x31 !0x32 !0x33 !0x34 !0x35 !0x5d !0x20 !0x5b !0x2d !0x2d !0x41 !0x72 !0x63 !0x68 !0x69 !0x74 !0x65 !0x63 !0x74 !0x75 !0x72 !0x65 !0x20 !0x31 !0x32 !0x33 !0x34 !0x35 !0x5d !0x0a !0x00
+
+:string_open_19
+"Architecture 0: Knight; 1: x86; 2: AMD64"
+
+:string_open_20
+"hex2 0.3
+"
+
+:string_open_21
 "Unknown option
 "
 
-:string_open_19
-"B:f:h:V"
+:string_open_22
+"B:f:h:o:V"
+
+:string_open_23
+"Unable to change permissions
+"

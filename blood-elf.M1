@@ -141,10 +141,10 @@
 	mov____0x8(%ebp),%eax !0x-4
 	mov____%eax,0x32 &jump_table
 	test___%eax,%eax
-					# entry->name = calloc(255 + 1, sizeof(char))
+					# entry->name = calloc(4096 + 1, sizeof(char))
 	mov____$i32,%eax %0x1
 	push___%eax
-	mov____$i32,%eax %0xff
+	mov____$i32,%eax %0x1000
 	add____$i8,%eax !0x1
 	push___%eax
 	call32 %calloc

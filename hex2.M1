@@ -206,7 +206,7 @@
 	mov____%esp,%ebp
 	sub____%esp,$i32 %0x1054
 					# struct entry *entry = calloc(1, sizeof(struct entry)); 
-	mov____$i32,%eax %0x108
+	mov____$i32,%eax %0x1009
 	push___%eax
 	mov____$i32,%eax %0x1
 	push___%eax
@@ -726,22 +726,22 @@
 :storePointer_51_break
 :storePointer_26_break
 :storePointer_1_break
-					# char temp[255 + 1] = {0, }; 
+					# char temp[4096 + 1] = {0, }; 
 	mov____$i32,%eax %0x0
-	mov____%al,0x32(%ebp) %0x-100
-					# memset(temp, 0, 255 + 1); 
-	mov____$i32,%eax %0xff
+	mov____%al,0x32(%ebp) %0x-1004
+					# memset(temp, 0, 4096 + 1); 
+	mov____$i32,%eax %0x1000
 	add____$i8,%eax !0x1
 	push___%eax
 	mov____$i32,%eax %0x0
 	push___%eax
-	lea____0x32(%ebp),%eax %0x-100
+	lea____0x32(%ebp),%eax %0x-1004
 	push___%eax
 	call32 %memset
 	add____$i8,%esp !0xc
 	test___%eax,%eax
 					# int base_sep_p = consume_token(source_file, temp) == 62; 
-	lea____0x32(%ebp),%eax %0x-100
+	lea____0x32(%ebp),%eax %0x-1004
 	push___%eax
 	push___0x8(%ebp) !0xc
 	call32 %consume_token
@@ -753,50 +753,50 @@
 	sub____%edx,%eax
 	sete___%al
 	movzbl_%al,%eax
-	mov____%eax,0x32(%ebp) %0x-104
+	mov____%eax,0x32(%ebp) %0x-1008
 					# int target = GetTarget(temp); 
-	lea____0x32(%ebp),%eax %0x-100
+	lea____0x32(%ebp),%eax %0x-1004
 	push___%eax
 	call32 %GetTarget
 	add____$i8,%esp !0x4
-	mov____%eax,0x32(%ebp) %0x-108
+	mov____%eax,0x32(%ebp) %0x-100c
 					# int displacement; 
 					# int base = ip; 
 	mov____0x8(%ebp),%eax !0x10
-	mov____%eax,0x32(%ebp) %0x-110
+	mov____%eax,0x32(%ebp) %0x-1014
 					# if (base_sep_p) ...
-	mov____0x32(%ebp),%eax %0x-104
+	mov____0x32(%ebp),%eax %0x-1008
 	test___%eax,%eax
 					# jmp test LABEL
 	test___%eax,%eax
 	je32   %storePointer_109_break
-					# char temp2[255 + 1] = {0, }; 
+					# char temp2[4096 + 1] = {0, }; 
 	mov____$i32,%eax %0x0
-	mov____%al,0x32(%ebp) %0x-210
-					# memset(temp2, 0, 255 + 1); 
-	mov____$i32,%eax %0xff
+	mov____%al,0x32(%ebp) %0x-2018
+					# memset(temp2, 0, 4096 + 1); 
+	mov____$i32,%eax %0x1000
 	add____$i8,%eax !0x1
 	push___%eax
 	mov____$i32,%eax %0x0
 	push___%eax
-	lea____0x32(%ebp),%eax %0x-210
+	lea____0x32(%ebp),%eax %0x-2018
 	push___%eax
 	call32 %memset
 	add____$i8,%esp !0xc
 	test___%eax,%eax
 					# consume_token(source_file, temp2); 
-	lea____0x32(%ebp),%eax %0x-210
+	lea____0x32(%ebp),%eax %0x-2018
 	push___%eax
 	push___0x8(%ebp) !0xc
 	call32 %consume_token
 	add____$i8,%esp !0x8
 	test___%eax,%eax
 					# base = GetTarget(temp2)
-	lea____0x32(%ebp),%eax %0x-210
+	lea____0x32(%ebp),%eax %0x-2018
 	push___%eax
 	call32 %GetTarget
 	add____$i8,%esp !0x4
-	mov____%eax,0x32(%ebp) %0x-110
+	mov____%eax,0x32(%ebp) %0x-1014
 	test___%eax,%eax
 	jmp32  %storePointer_109_break
 :storePointer_109_break
@@ -808,14 +808,14 @@
 	jmp32  %storePointer_139_clause1
 :storePointer_139_body0
 					# displacement = target - base + 4
-	mov____0x32(%ebp),%eax %0x-108
+	mov____0x32(%ebp),%eax %0x-100c
 	push___%eax
-	mov____0x32(%ebp),%eax %0x-110
+	mov____0x32(%ebp),%eax %0x-1014
 	mov____%eax,%edx
 	pop____%eax
 	sub____%edx,%eax
 	add____$i8,%eax !0x4
-	mov____%eax,0x32(%ebp) %0x-10c
+	mov____%eax,0x32(%ebp) %0x-1010
 	test___%eax,%eax
 	jmp32  %storePointer_139_break
 	jmp32  %storePointer_139_body1
@@ -827,13 +827,13 @@
 	jmp32  %storePointer_139_clause2
 :storePointer_139_body1
 					# displacement = target - base
-	mov____0x32(%ebp),%eax %0x-108
+	mov____0x32(%ebp),%eax %0x-100c
 	push___%eax
-	mov____0x32(%ebp),%eax %0x-110
+	mov____0x32(%ebp),%eax %0x-1014
 	mov____%eax,%edx
 	pop____%eax
 	sub____%edx,%eax
-	mov____%eax,0x32(%ebp) %0x-10c
+	mov____%eax,0x32(%ebp) %0x-1010
 	test___%eax,%eax
 	jmp32  %storePointer_139_break
 	jmp32  %storePointer_139_body2
@@ -867,7 +867,7 @@
 					# outputPointer(displacement, 1); 
 	mov____$i32,%eax %0x1
 	push___%eax
-	push___0x32(%ebp) %0x-10c
+	push___0x32(%ebp) %0x-1010
 	call32 %outputPointer
 	add____$i8,%esp !0x8
 	test___%eax,%eax
@@ -887,7 +887,7 @@
 					# outputPointer(target, 2); 
 	mov____$i32,%eax %0x2
 	push___%eax
-	push___0x32(%ebp) %0x-108
+	push___0x32(%ebp) %0x-100c
 	call32 %outputPointer
 	add____$i8,%esp !0x8
 	test___%eax,%eax
@@ -907,7 +907,7 @@
 					# outputPointer(displacement, 2); 
 	mov____$i32,%eax %0x2
 	push___%eax
-	push___0x32(%ebp) %0x-10c
+	push___0x32(%ebp) %0x-1010
 	call32 %outputPointer
 	add____$i8,%esp !0x8
 	test___%eax,%eax
@@ -927,7 +927,7 @@
 					# outputPointer(target, 4); 
 	mov____$i32,%eax %0x4
 	push___%eax
-	push___0x32(%ebp) %0x-108
+	push___0x32(%ebp) %0x-100c
 	call32 %outputPointer
 	add____$i8,%esp !0x8
 	test___%eax,%eax
@@ -947,7 +947,7 @@
 					# outputPointer(displacement, 4); 
 	mov____$i32,%eax %0x4
 	push___%eax
-	push___0x32(%ebp) %0x-10c
+	push___0x32(%ebp) %0x-1010
 	call32 %outputPointer
 	add____$i8,%esp !0x8
 	test___%eax,%eax
@@ -1262,7 +1262,7 @@
 					# jmp test LABEL
 	jne32  %first_pass_61_else
 					# c = consume_token(source_file, token)
-	lea____0x32(%ebp),%eax %0x-110
+	lea____0x32(%ebp),%eax %0x-1014
 	push___%eax
 	push___0x8(%ebp) !0x-8
 	call32 %consume_token
@@ -1301,7 +1301,7 @@
 	jne32  %first_pass_82_else
 :first_pass_82_else_skip_b_83
 					# c = consume_token(source_file, token)
-	lea____0x32(%ebp),%eax %0x-110
+	lea____0x32(%ebp),%eax %0x-1014
 	push___%eax
 	push___0x8(%ebp) !0x-8
 	call32 %consume_token
@@ -1340,7 +1340,7 @@
 	jne32  %first_pass_113_else
 :first_pass_113_else_skip_b_114
 					# c = consume_token(source_file, token)
-	lea____0x32(%ebp),%eax %0x-110
+	lea____0x32(%ebp),%eax %0x-1014
 	push___%eax
 	push___0x8(%ebp) !0x-8
 	call32 %consume_token
@@ -1359,7 +1359,7 @@
 					# jmp test LABEL
 	jne32  %first_pass_137_break
 					# c = consume_token(source_file, token)
-	lea____0x32(%ebp),%eax %0x-110
+	lea____0x32(%ebp),%eax %0x-1014
 	push___%eax
 	push___0x8(%ebp) !0x-8
 	call32 %consume_token
@@ -1511,14 +1511,14 @@
 	push___0x8(%ebp) !0x-8
 	call32 %fgetc
 	add____$i8,%esp !0x4
-	mov____%eax,0x32(%ebp) %0x-114
+	mov____%eax,0x32(%ebp) %0x-1018
 	test___%eax,%eax
 	jmp32  %second_pass_40_initial_skip
 :second_pass_40_loop
 					# if (58 == c) ...else ...
 	mov____$i32,%eax %0x3a
 	push___%eax
-	mov____0x32(%ebp),%eax %0x-114
+	mov____0x32(%ebp),%eax %0x-1018
 	mov____%eax,%edx
 	pop____%eax
 	sub____%edx,%eax
@@ -1527,19 +1527,19 @@
 					# jmp test LABEL
 	jne32  %second_pass_48_else
 					# c = consume_token(source_file, token)
-	lea____0x32(%ebp),%eax %0x-110
+	lea____0x32(%ebp),%eax %0x-1014
 	push___%eax
 	push___0x8(%ebp) !0x-8
 	call32 %consume_token
 	add____$i8,%esp !0x8
-	mov____%eax,0x32(%ebp) %0x-114
+	mov____%eax,0x32(%ebp) %0x-1018
 	test___%eax,%eax
 	jmp32  %second_pass_48_break
 :second_pass_48_else
 					# if ((((33 == c || 64 == c) || 36 == c) || 37 == c) || 38 == c) ...else ...
 	mov____$i32,%eax %0x21
 	push___%eax
-	mov____0x32(%ebp),%eax %0x-114
+	mov____0x32(%ebp),%eax %0x-1018
 	mov____%eax,%edx
 	pop____%eax
 	sub____%edx,%eax
@@ -1551,7 +1551,7 @@
 :second_pass_64_else_b_65_b_65_b_65_b_65
 	mov____$i32,%eax %0x40
 	push___%eax
-	mov____0x32(%ebp),%eax %0x-114
+	mov____0x32(%ebp),%eax %0x-1018
 	mov____%eax,%edx
 	pop____%eax
 	sub____%edx,%eax
@@ -1564,7 +1564,7 @@
 :second_pass_64_else_b_65_b_65_b_65
 	mov____$i32,%eax %0x24
 	push___%eax
-	mov____0x32(%ebp),%eax %0x-114
+	mov____0x32(%ebp),%eax %0x-1018
 	mov____%eax,%edx
 	pop____%eax
 	sub____%edx,%eax
@@ -1577,7 +1577,7 @@
 :second_pass_64_else_b_65_b_65
 	mov____$i32,%eax %0x25
 	push___%eax
-	mov____0x32(%ebp),%eax %0x-114
+	mov____0x32(%ebp),%eax %0x-1018
 	mov____%eax,%edx
 	pop____%eax
 	sub____%edx,%eax
@@ -1590,7 +1590,7 @@
 :second_pass_64_else_b_65
 	mov____$i32,%eax %0x26
 	push___%eax
-	mov____0x32(%ebp),%eax %0x-114
+	mov____0x32(%ebp),%eax %0x-1018
 	mov____%eax,%edx
 	pop____%eax
 	sub____%edx,%eax
@@ -1602,7 +1602,7 @@
 					# ip = storePointer(c, source_file, ip)
 	push___0x8(%ebp) !0x-4
 	push___0x8(%ebp) !0x-8
-	push___0x32(%ebp) %0x-114
+	push___0x32(%ebp) %0x-1018
 	call32 %storePointer
 	add____$i8,%esp !0xc
 	mov____%eax,0x8(%ebp) !0x-4
@@ -1613,7 +1613,7 @@
 	mov____$i32,%eax %0x0
 	push___%eax
 	push___0x8(%ebp) !0x-8
-	push___0x32(%ebp) %0x-114
+	push___0x32(%ebp) %0x-1018
 	call32 %hex
 	add____$i8,%esp !0x8
 	mov____%eax,%edx
@@ -1638,7 +1638,7 @@
 	mul____%edx
 	push___%eax
 	push___0x8(%ebp) !0x-8
-	push___0x32(%ebp) %0x-114
+	push___0x32(%ebp) %0x-1018
 	call32 %hex
 	add____$i8,%esp !0x8
 	mov____%eax,%edx
@@ -1664,7 +1664,7 @@
 :second_pass_131_else
 					# holder = hex(c, source_file)
 	push___0x8(%ebp) !0x-8
-	push___0x32(%ebp) %0x-114
+	push___0x32(%ebp) %0x-1018
 	call32 %hex
 	add____$i8,%esp !0x8
 	mov____%eax,0x8(%ebp) !0x-10
@@ -1686,7 +1686,7 @@
 	push___0x8(%ebp) !0x-8
 	call32 %fgetc
 	add____$i8,%esp !0x4
-	mov____%eax,0x32(%ebp) %0x-114
+	mov____%eax,0x32(%ebp) %0x-1018
 :second_pass_40_initial_skip
 	push___%eax
 	mov____$i32,%eax %0x1
@@ -1695,7 +1695,7 @@
 	mov____$i32,%eax %0x0
 	sub____%edx,%eax
 	push___%eax
-	mov____0x32(%ebp),%eax %0x-114
+	mov____0x32(%ebp),%eax %0x-1018
 	mov____%eax,%edx
 	pop____%eax
 	push___%eax
@@ -1791,11 +1791,10 @@
 	je32   %main_38_body2
 	jmp32  %main_38_clause3
 :main_38_body2
-					# char *ptr; 
-					# Base_Address = strtol(optarg, &ptr, 0)
+					# Base_Address = strtol(optarg, 0, 0)
 	mov____$i32,%eax %0x0
 	push___%eax
-	lea____0x8(%ebp),%eax !0x-14
+	mov____$i32,%eax %0x0
 	push___%eax
 	mov____0x32,%eax &optarg
 	push___%eax
@@ -1852,12 +1851,12 @@
 	push___%eax
 	call32 %calloc
 	add____$i8,%esp !0x8
-	mov____%eax,0x8(%ebp) !0x-18
+	mov____%eax,0x8(%ebp) !0x-14
 					# temp->filename = optarg
 	mov____0x32,%eax &optarg
 	push___%eax
 	mov____%ebp,%eax
-	add____$i8,%eax !0x-18
+	add____$i8,%eax !0x-14
 	mov____(%eax),%eax
 	add____$i8,%eax !0x4
 	mov____%eax,%edx
@@ -1868,7 +1867,7 @@
 	mov____0x8(%ebp),%eax !0x-4
 	push___%eax
 	mov____%ebp,%eax
-	add____$i8,%eax !0x-18
+	add____$i8,%eax !0x-14
 	mov____(%eax),%eax
 	add____$i8,%eax !0x0
 	mov____%eax,%edx
@@ -1876,7 +1875,7 @@
 	mov____%eax,(%edx)
 	test___%eax,%eax
 					# input = temp
-	mov____0x8(%ebp),%eax !0x-18
+	mov____0x8(%ebp),%eax !0x-14
 	mov____%eax,0x8(%ebp) !0x-4
 	test___%eax,%eax
 	jmp32  %main_38_break
@@ -1890,12 +1889,29 @@
 	mov____0x32,%eax &optarg
 	mov____%eax,0x8(%ebp) !0x-8
 	test___%eax,%eax
-					# output = open(output_file, 1)
+					# output = open(output_file, (64 | 512) | 1, 00400 | 00200)
+	mov____$i32,%eax %0x100
+	push___%eax
+	mov____$i32,%eax %0x80
+	mov____%eax,%edx
+	pop____%eax
+	or_____%edx,%eax
+	push___%eax
+	mov____$i32,%eax %0x40
+	push___%eax
+	mov____$i32,%eax %0x200
+	mov____%eax,%edx
+	pop____%eax
+	or_____%edx,%eax
+	push___%eax
 	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	pop____%eax
+	or_____%edx,%eax
 	push___%eax
 	push___0x8(%ebp) !0x-8
 	call32 %open
-	add____$i8,%esp !0x8
+	add____$i8,%esp !0xc
 	mov____%eax,0x32 &output
 	test___%eax,%eax
 	jmp32  %main_38_break
@@ -1979,12 +1995,12 @@
 	sete___%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jne32  %main_214_break
+	jne32  %main_228_break
 	mov____$i32,%eax %0x1
 	leave
 	ret
-	jmp32  %main_214_break
-:main_214_break
+	jmp32  %main_228_break
+:main_228_break
 					# first_pass(input); 
 	push___0x8(%ebp) !0x-4
 	call32 %first_pass
@@ -2000,7 +2016,7 @@
 	test___%eax,%eax
 					# jmp test LABEL
 	test___%eax,%eax
-	je32   %main_234_break
+	je32   %main_248_break
 					# if (0 != chmod(output_file, 0750)) ...
 	mov____$i32,%eax %0x0
 	push___%eax
@@ -2022,7 +2038,7 @@
 	sahf
 	pop____%eax
 					# jmp test LABEL
-	jne32  %main_240_break
+	jne32  %main_254_break
 					# fprintf(2, "Unable to change permissions\n"); 
 	push___$i32 &string_open_23
 	mov____$i32,%eax %0x2
@@ -2036,10 +2052,10 @@
 	call32 %exit
 	add____$i8,%esp !0x4
 	test___%eax,%eax
-	jmp32  %main_240_break
-:main_240_break
-	jmp32  %main_234_break
-:main_234_break
+	jmp32  %main_254_break
+:main_254_break
+	jmp32  %main_248_break
+:main_248_break
 	mov____$i32,%eax %0x0
 	leave
 	ret

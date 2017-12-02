@@ -1217,6 +1217,39 @@
 	call32 %open
 	add____$i8,%esp !0x8
 	mov____%eax,0x8(%ebp) !0x-8
+					# if (0 == source_file) ...
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_first_pass_33_break
+					# fprintf(2, "The file: %s can not be opened!\n", input->filename); 
+	mov____%ebp,%eax
+	add____$i8,%eax !0x8
+	mov____(%eax),%eax
+	add____$i8,%eax !0x4
+					# input->filename
+	mov____(%eax),%eax
+	push___%eax
+	push___$i32 &string_open_8
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+					# exit(1); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %exit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %_first_pass_33_break
+:_first_pass_33_break
 					# int toggle = 0; 
 	mov____$i32,%eax %0x0
 	mov____%eax,0x8(%ebp) !0x-c
@@ -1228,8 +1261,8 @@
 	add____$i8,%esp !0x4
 	mov____%eax,0x8(%ebp) !0x-10
 	test___%eax,%eax
-	jmp32  %_first_pass_37_initial_skip
-:_first_pass_37_loop
+	jmp32  %_first_pass_64_initial_skip
+:_first_pass_64_loop
 					# if (58 == c) ...
 	mov____$i32,%eax %0x3a
 	push___%eax
@@ -1240,7 +1273,7 @@
 	sete___%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jne32  %_first_pass_45_break
+	jne32  %_first_pass_72_break
 					# c = storeLabel(source_file, ip)
 	push___0x8(%ebp) !0x-4
 	push___0x8(%ebp) !0x-8
@@ -1248,8 +1281,8 @@
 	add____$i8,%esp !0x8
 	mov____%eax,0x8(%ebp) !0x-10
 	test___%eax,%eax
-	jmp32  %_first_pass_45_break
-:_first_pass_45_break
+	jmp32  %_first_pass_72_break
+:_first_pass_72_break
 					# if (33 == c) ...else ...
 	mov____$i32,%eax %0x21
 	push___%eax
@@ -1260,7 +1293,7 @@
 	sete___%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jne32  %_first_pass_61_else
+	jne32  %_first_pass_88_else
 					# c = consume_token(source_file, token)
 	lea____0x32(%ebp),%eax %0x-1014
 	push___%eax
@@ -1274,8 +1307,8 @@
 	add____$i8,%eax !0x1
 	mov____%eax,0x8(%ebp) !0x-4
 	test___%eax,%eax
-	jmp32  %_first_pass_61_break
-:_first_pass_61_else
+	jmp32  %_first_pass_88_break
+:_first_pass_88_else
 					# if (64 == c || 36 == c) ...else ...
 	mov____$i32,%eax %0x40
 	push___%eax
@@ -1286,9 +1319,9 @@
 	sete___%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jne32  %_first_pass_82_else_b_83
-	jmp32  %_first_pass_82_else_skip_b_83
-:_first_pass_82_else_b_83
+	jne32  %_first_pass_109_else_b_110
+	jmp32  %_first_pass_109_else_skip_b_110
+:_first_pass_109_else_b_110
 	mov____$i32,%eax %0x24
 	push___%eax
 	mov____0x8(%ebp),%eax !0x-10
@@ -1298,8 +1331,8 @@
 	sete___%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jne32  %_first_pass_82_else
-:_first_pass_82_else_skip_b_83
+	jne32  %_first_pass_109_else
+:_first_pass_109_else_skip_b_110
 					# c = consume_token(source_file, token)
 	lea____0x32(%ebp),%eax %0x-1014
 	push___%eax
@@ -1313,8 +1346,8 @@
 	add____$i8,%eax !0x2
 	mov____%eax,0x8(%ebp) !0x-4
 	test___%eax,%eax
-	jmp32  %_first_pass_82_break
-:_first_pass_82_else
+	jmp32  %_first_pass_109_break
+:_first_pass_109_else
 					# if (37 == c || 38 == c) ...else ...
 	mov____$i32,%eax %0x25
 	push___%eax
@@ -1325,9 +1358,9 @@
 	sete___%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jne32  %_first_pass_113_else_b_114
-	jmp32  %_first_pass_113_else_skip_b_114
-:_first_pass_113_else_b_114
+	jne32  %_first_pass_140_else_b_141
+	jmp32  %_first_pass_140_else_skip_b_141
+:_first_pass_140_else_b_141
 	mov____$i32,%eax %0x26
 	push___%eax
 	mov____0x8(%ebp),%eax !0x-10
@@ -1337,8 +1370,8 @@
 	sete___%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jne32  %_first_pass_113_else
-:_first_pass_113_else_skip_b_114
+	jne32  %_first_pass_140_else
+:_first_pass_140_else_skip_b_141
 					# c = consume_token(source_file, token)
 	lea____0x32(%ebp),%eax %0x-1014
 	push___%eax
@@ -1357,7 +1390,7 @@
 	sete___%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jne32  %_first_pass_137_break
+	jne32  %_first_pass_164_break
 					# c = consume_token(source_file, token)
 	lea____0x32(%ebp),%eax %0x-1014
 	push___%eax
@@ -1366,15 +1399,15 @@
 	add____$i8,%esp !0x8
 	mov____%eax,0x8(%ebp) !0x-10
 	test___%eax,%eax
-	jmp32  %_first_pass_137_break
-:_first_pass_137_break
+	jmp32  %_first_pass_164_break
+:_first_pass_164_break
 					# ip = ip + 4
 	mov____0x8(%ebp),%eax !0x-4
 	add____$i8,%eax !0x4
 	mov____%eax,0x8(%ebp) !0x-4
 	test___%eax,%eax
-	jmp32  %_first_pass_113_break
-:_first_pass_113_else
+	jmp32  %_first_pass_140_break
+:_first_pass_140_else
 					# if (0 <= hex(c, source_file)) ...
 	mov____$i32,%eax %0x0
 	push___%eax
@@ -1388,20 +1421,20 @@
 	setle__%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jg32   %_first_pass_160_break
+	jg32   %_first_pass_187_break
 					# if (toggle) ...
 	mov____0x8(%ebp),%eax !0x-c
 	test___%eax,%eax
 					# jmp test LABEL
 	test___%eax,%eax
-	je32   %_first_pass_170_break
+	je32   %_first_pass_197_break
 					# ip = ip + 1
 	mov____0x8(%ebp),%eax !0x-4
 	add____$i8,%eax !0x1
 	mov____%eax,0x8(%ebp) !0x-4
 	test___%eax,%eax
-	jmp32  %_first_pass_170_break
-:_first_pass_170_break
+	jmp32  %_first_pass_197_break
+:_first_pass_197_break
 					# toggle = !toggle
 	mov____0x8(%ebp),%eax !0x-c
 	test___%eax,%eax
@@ -1409,18 +1442,18 @@
 	movzbl_%al,%eax
 	mov____%eax,0x8(%ebp) !0x-c
 	test___%eax,%eax
-	jmp32  %_first_pass_160_break
-:_first_pass_160_break
-:_first_pass_113_break
-:_first_pass_82_break
-:_first_pass_61_break
-:_first_pass_37_continue
+	jmp32  %_first_pass_187_break
+:_first_pass_187_break
+:_first_pass_140_break
+:_first_pass_109_break
+:_first_pass_88_break
+:_first_pass_64_continue
 					# c = fgetc(source_file)
 	push___0x8(%ebp) !0x-8
 	call32 %fgetc
 	add____$i8,%esp !0x4
 	mov____%eax,0x8(%ebp) !0x-10
-:_first_pass_37_initial_skip
+:_first_pass_64_initial_skip
 	push___%eax
 	mov____$i32,%eax %0x1
 	mov____%eax,%edx
@@ -1442,9 +1475,9 @@
 	sahf
 	pop____%eax
 					# jmp test LABEL
-	jne32  %_first_pass_37_break
-	jmp32  %_first_pass_37_loop
-:_first_pass_37_break
+	jne32  %_first_pass_64_break
+	jmp32  %_first_pass_64_loop
+:_first_pass_64_break
 					# fclose(source_file); 
 	push___0x8(%ebp) !0x-8
 	call32 %fclose
@@ -1499,6 +1532,39 @@
 	call32 %open
 	add____$i8,%esp !0x8
 	mov____%eax,0x8(%ebp) !0x-8
+					# if (0 == source_file) ...
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_second_pass_33_break
+					# fprintf(2, "The file: %s can not be opened!\nWTF-pass2\n", input->filename); 
+	mov____%ebp,%eax
+	add____$i8,%eax !0x8
+	mov____(%eax),%eax
+	add____$i8,%eax !0x4
+					# input->filename
+	mov____(%eax),%eax
+	push___%eax
+	push___$i32 &string_open_9
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+					# exit(1); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %exit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %_second_pass_33_break
+:_second_pass_33_break
 					# int toggle = 0; 
 	mov____$i32,%eax %0x0
 	mov____%eax,0x8(%ebp) !0x-c
@@ -1513,8 +1579,8 @@
 	add____$i8,%esp !0x4
 	mov____%eax,0x32(%ebp) %0x-1018
 	test___%eax,%eax
-	jmp32  %_second_pass_40_initial_skip
-:_second_pass_40_loop
+	jmp32  %_second_pass_67_initial_skip
+:_second_pass_67_loop
 					# if (58 == c) ...else ...
 	mov____$i32,%eax %0x3a
 	push___%eax
@@ -1525,7 +1591,7 @@
 	sete___%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jne32  %_second_pass_48_else
+	jne32  %_second_pass_75_else
 					# c = consume_token(source_file, token)
 	lea____0x32(%ebp),%eax %0x-1014
 	push___%eax
@@ -1534,8 +1600,8 @@
 	add____$i8,%esp !0x8
 	mov____%eax,0x32(%ebp) %0x-1018
 	test___%eax,%eax
-	jmp32  %_second_pass_48_break
-:_second_pass_48_else
+	jmp32  %_second_pass_75_break
+:_second_pass_75_else
 					# if ((((33 == c || 64 == c) || 36 == c) || 37 == c) || 38 == c) ...else ...
 	mov____$i32,%eax %0x21
 	push___%eax
@@ -1546,9 +1612,9 @@
 	sete___%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jne32  %_second_pass_64_else_b_65_b_65_b_65_b_65
-	jmp32  %_second_pass_64_else_b_65_b_65_b_65_skip_b_65
-:_second_pass_64_else_b_65_b_65_b_65_b_65
+	jne32  %_second_pass_91_else_b_92_b_92_b_92_b_92
+	jmp32  %_second_pass_91_else_b_92_b_92_b_92_skip_b_92
+:_second_pass_91_else_b_92_b_92_b_92_b_92
 	mov____$i32,%eax %0x40
 	push___%eax
 	mov____0x32(%ebp),%eax %0x-1018
@@ -1558,10 +1624,10 @@
 	sete___%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jne32  %_second_pass_64_else_b_65_b_65_b_65
-:_second_pass_64_else_b_65_b_65_b_65_skip_b_65
-	jmp32  %_second_pass_64_else_b_65_b_65_skip_b_65
-:_second_pass_64_else_b_65_b_65_b_65
+	jne32  %_second_pass_91_else_b_92_b_92_b_92
+:_second_pass_91_else_b_92_b_92_b_92_skip_b_92
+	jmp32  %_second_pass_91_else_b_92_b_92_skip_b_92
+:_second_pass_91_else_b_92_b_92_b_92
 	mov____$i32,%eax %0x24
 	push___%eax
 	mov____0x32(%ebp),%eax %0x-1018
@@ -1571,10 +1637,10 @@
 	sete___%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jne32  %_second_pass_64_else_b_65_b_65
-:_second_pass_64_else_b_65_b_65_skip_b_65
-	jmp32  %_second_pass_64_else_b_65_skip_b_65
-:_second_pass_64_else_b_65_b_65
+	jne32  %_second_pass_91_else_b_92_b_92
+:_second_pass_91_else_b_92_b_92_skip_b_92
+	jmp32  %_second_pass_91_else_b_92_skip_b_92
+:_second_pass_91_else_b_92_b_92
 	mov____$i32,%eax %0x25
 	push___%eax
 	mov____0x32(%ebp),%eax %0x-1018
@@ -1584,10 +1650,10 @@
 	sete___%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jne32  %_second_pass_64_else_b_65
-:_second_pass_64_else_b_65_skip_b_65
-	jmp32  %_second_pass_64_else_skip_b_65
-:_second_pass_64_else_b_65
+	jne32  %_second_pass_91_else_b_92
+:_second_pass_91_else_b_92_skip_b_92
+	jmp32  %_second_pass_91_else_skip_b_92
+:_second_pass_91_else_b_92
 	mov____$i32,%eax %0x26
 	push___%eax
 	mov____0x32(%ebp),%eax %0x-1018
@@ -1597,8 +1663,8 @@
 	sete___%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jne32  %_second_pass_64_else
-:_second_pass_64_else_skip_b_65
+	jne32  %_second_pass_91_else
+:_second_pass_91_else_skip_b_92
 					# ip = storePointer(c, source_file, ip)
 	push___0x8(%ebp) !0x-4
 	push___0x8(%ebp) !0x-8
@@ -1607,8 +1673,8 @@
 	add____$i8,%esp !0xc
 	mov____%eax,0x8(%ebp) !0x-4
 	test___%eax,%eax
-	jmp32  %_second_pass_64_break
-:_second_pass_64_else
+	jmp32  %_second_pass_91_break
+:_second_pass_91_else
 					# if (0 <= hex(c, source_file)) ...
 	mov____$i32,%eax %0x0
 	push___%eax
@@ -1622,13 +1688,13 @@
 	setle__%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jg32   %_second_pass_121_break
+	jg32   %_second_pass_148_break
 					# if (toggle) ...else ...
 	mov____0x8(%ebp),%eax !0x-c
 	test___%eax,%eax
 					# jmp test LABEL
 	test___%eax,%eax
-	je32   %_second_pass_131_else
+	je32   %_second_pass_158_else
 					# fprintf(output, "%c", holder*16 + hex(c, source_file)); 
 	mov____0x8(%ebp),%eax !0x-10
 	push___%eax
@@ -1660,8 +1726,8 @@
 	mov____$i32,%eax %0x0
 	mov____%eax,0x8(%ebp) !0x-10
 	test___%eax,%eax
-	jmp32  %_second_pass_131_break
-:_second_pass_131_else
+	jmp32  %_second_pass_158_break
+:_second_pass_158_else
 					# holder = hex(c, source_file)
 	push___0x8(%ebp) !0x-8
 	push___0x32(%ebp) %0x-1018
@@ -1669,7 +1735,7 @@
 	add____$i8,%esp !0x8
 	mov____%eax,0x8(%ebp) !0x-10
 	test___%eax,%eax
-:_second_pass_131_break
+:_second_pass_158_break
 					# toggle = !toggle
 	mov____0x8(%ebp),%eax !0x-c
 	test___%eax,%eax
@@ -1677,17 +1743,17 @@
 	movzbl_%al,%eax
 	mov____%eax,0x8(%ebp) !0x-c
 	test___%eax,%eax
-	jmp32  %_second_pass_121_break
-:_second_pass_121_break
-:_second_pass_64_break
-:_second_pass_48_break
-:_second_pass_40_continue
+	jmp32  %_second_pass_148_break
+:_second_pass_148_break
+:_second_pass_91_break
+:_second_pass_75_break
+:_second_pass_67_continue
 					# c = fgetc(source_file)
 	push___0x8(%ebp) !0x-8
 	call32 %fgetc
 	add____$i8,%esp !0x4
 	mov____%eax,0x32(%ebp) %0x-1018
-:_second_pass_40_initial_skip
+:_second_pass_67_initial_skip
 	push___%eax
 	mov____$i32,%eax %0x1
 	mov____%eax,%edx
@@ -1709,9 +1775,9 @@
 	sahf
 	pop____%eax
 					# jmp test LABEL
-	jne32  %_second_pass_40_break
-	jmp32  %_second_pass_40_loop
-:_second_pass_40_break
+	jne32  %_second_pass_67_break
+	jmp32  %_second_pass_67_loop
+:_second_pass_67_break
 					# fclose(source_file); 
 	push___0x8(%ebp) !0x-8
 	call32 %fclose
@@ -1750,7 +1816,7 @@
 	mov____%eax,0x32 &output
 	test___%eax,%eax
 					# char *output_file = ""; 
-	mov____$i32,%eax &string_open_17
+	mov____$i32,%eax &string_open_19
 	mov____%eax,0x8(%ebp) !0x-8
 					# exec_enable = 0
 	mov____$i32,%eax %0x0
@@ -1819,14 +1885,14 @@
 	add____%edx,%eax
 	mov____(%eax),%eax
 	push___%eax
-	push___$i32 &string_open_18
+	push___$i32 &string_open_20
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
 	add____$i8,%esp !0xc
 	test___%eax,%eax
 					# fprintf(2, "Architecture 0: Knight; 1: x86; 2: AMD64"); 
-	push___$i32 &string_open_19
+	push___$i32 &string_open_21
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -1914,6 +1980,34 @@
 	add____$i8,%esp !0xc
 	mov____%eax,0x32 &output
 	test___%eax,%eax
+					# if (0 == output) ...
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x32,%eax &output
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_main_174_break
+					# fprintf(2, "The file: %s can not be opened!\n", optarg); 
+	mov____0x32,%eax &optarg
+	push___%eax
+	push___$i32 &string_open_8
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+					# exit(1); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %exit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %_main_174_break
+:_main_174_break
 	jmp32  %_main_38_break
 	jmp32  %_main_38_body6
 :_main_38_clause6
@@ -1922,7 +2016,7 @@
 	jmp32  %_main_38_clause7
 :_main_38_body6
 					# fprintf(1, "hex2 0.3\n"); 
-	push___$i32 &string_open_20
+	push___$i32 &string_open_22
 	mov____$i32,%eax %0x1
 	push___%eax
 	call32 %fprintf
@@ -1938,7 +2032,7 @@
 :_main_38_clause7
 :_main_38_body7
 					# fprintf(2, "Unknown option\n"); 
-	push___$i32 &string_open_21
+	push___$i32 &string_open_23
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -1956,7 +2050,7 @@
 	lea____0x8(%ebp),%eax !0x-10
 	push___%eax
 	push___$i32 &long_options
-	push___$i32 &string_open_22
+	push___$i32 &string_open_24
 	push___0x8(%ebp) !0xc
 	push___0x8(%ebp) !0x8
 	call32 %getopt_long
@@ -1995,12 +2089,12 @@
 	sete___%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jne32  %_main_228_break
+	jne32  %_main_250_break
 	mov____$i32,%eax %0x1
 	leave
 	ret
-	jmp32  %_main_228_break
-:_main_228_break
+	jmp32  %_main_250_break
+:_main_250_break
 					# first_pass(input); 
 	push___0x8(%ebp) !0x-4
 	call32 %first_pass
@@ -2016,7 +2110,7 @@
 	test___%eax,%eax
 					# jmp test LABEL
 	test___%eax,%eax
-	je32   %_main_248_break
+	je32   %_main_270_break
 					# if (0 != chmod(output_file, 0750)) ...
 	mov____$i32,%eax %0x0
 	push___%eax
@@ -2038,9 +2132,9 @@
 	sahf
 	pop____%eax
 					# jmp test LABEL
-	jne32  %_main_254_break
+	jne32  %_main_276_break
 					# fprintf(2, "Unable to change permissions\n"); 
-	push___$i32 &string_open_23
+	push___$i32 &string_open_25
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -2052,10 +2146,10 @@
 	call32 %exit
 	add____$i8,%esp !0x4
 	test___%eax,%eax
-	jmp32  %_main_254_break
-:_main_254_break
-	jmp32  %_main_248_break
-:_main_248_break
+	jmp32  %_main_276_break
+:_main_276_break
+	jmp32  %_main_270_break
+:_main_270_break
 	mov____$i32,%eax %0x0
 	leave
 	ret
@@ -2131,55 +2225,64 @@
 "
 
 :string_open_8
-"BigEndian"
+"The file: %s can not be opened!
+"
 
 :string_open_9
-"LittleEndian"
+"The file: %s can not be opened!
+WTF-pass2
+"
 
 :string_open_10
-"exec_enable"
+"BigEndian"
 
 :string_open_11
-"file"
+"LittleEndian"
 
 :string_open_12
-"Architecture"
+"exec_enable"
 
 :string_open_13
-"BaseAddress"
+"file"
 
 :string_open_14
-"output"
+"Architecture"
 
 :string_open_15
-"help"
+"BaseAddress"
 
 :string_open_16
+"output"
+
+:string_open_17
+"help"
+
+:string_open_18
 "version"
 
 :long_options
-&string_open_8 !0x00 !0x00 !0x00 !0x00 &BigEndian !0x01 !0x00 !0x00 !0x00 &string_open_9 !0x00 !0x00 !0x00 !0x00 &BigEndian !0x00 !0x00 !0x00 !0x00 &string_open_10 !0x00 !0x00 !0x00 !0x00 &exec_enable !0x01 !0x00 !0x00 !0x00 &string_open_11 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x66 !0x00 !0x00 !0x00 &string_open_12 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x41 !0x00 !0x00 !0x00 &string_open_13 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x42 !0x00 !0x00 !0x00 &string_open_14 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x6f !0x00 !0x00 !0x00 &string_open_15 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x68 !0x00 !0x00 !0x00 &string_open_16 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x56 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
-
-:string_open_17
-""
-
-:string_open_18
-!0x55 !0x73 !0x61 !0x67 !0x65 !0x3a !0x20 !0x25 !0x73 !0x20 !0x2d !0x66 !0x20 !0x46 !0x49 !0x4c !0x45 !0x4e !0x41 !0x4d !0x45 !0x31 !0x20 !0x7b !0x2d !0x66 !0x20 !0x46 !0x49 !0x4c !0x45 !0x4e !0x41 !0x4d !0x45 !0x32 !0x7d !0x20 !0x28 !0x2d !0x2d !0x42 !0x69 !0x67 !0x45 !0x6e !0x64 !0x69 !0x61 !0x6e !0x7c !0x2d !0x2d !0x4c !0x69 !0x74 !0x74 !0x6c !0x65 !0x45 !0x6e !0x64 !0x69 !0x61 !0x6e !0x29 !0x20 !0x5b !0x2d !0x2d !0x42 !0x61 !0x73 !0x65 !0x41 !0x64 !0x64 !0x72 !0x65 !0x73 !0x73 !0x20 !0x31 !0x32 !0x33 !0x34 !0x35 !0x5d !0x20 !0x5b !0x2d !0x2d !0x41 !0x72 !0x63 !0x68 !0x69 !0x74 !0x65 !0x63 !0x74 !0x75 !0x72 !0x65 !0x20 !0x31 !0x32 !0x33 !0x34 !0x35 !0x5d !0x0a !0x00
+&string_open_10 !0x00 !0x00 !0x00 !0x00 &BigEndian !0x01 !0x00 !0x00 !0x00 &string_open_11 !0x00 !0x00 !0x00 !0x00 &BigEndian !0x00 !0x00 !0x00 !0x00 &string_open_12 !0x00 !0x00 !0x00 !0x00 &exec_enable !0x01 !0x00 !0x00 !0x00 &string_open_13 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x66 !0x00 !0x00 !0x00 &string_open_14 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x41 !0x00 !0x00 !0x00 &string_open_15 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x42 !0x00 !0x00 !0x00 &string_open_16 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x6f !0x00 !0x00 !0x00 &string_open_17 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x68 !0x00 !0x00 !0x00 &string_open_18 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x56 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
 
 :string_open_19
-"Architecture 0: Knight; 1: x86; 2: AMD64"
+""
 
 :string_open_20
+!0x55 !0x73 !0x61 !0x67 !0x65 !0x3a !0x20 !0x25 !0x73 !0x20 !0x2d !0x66 !0x20 !0x46 !0x49 !0x4c !0x45 !0x4e !0x41 !0x4d !0x45 !0x31 !0x20 !0x7b !0x2d !0x66 !0x20 !0x46 !0x49 !0x4c !0x45 !0x4e !0x41 !0x4d !0x45 !0x32 !0x7d !0x20 !0x28 !0x2d !0x2d !0x42 !0x69 !0x67 !0x45 !0x6e !0x64 !0x69 !0x61 !0x6e !0x7c !0x2d !0x2d !0x4c !0x69 !0x74 !0x74 !0x6c !0x65 !0x45 !0x6e !0x64 !0x69 !0x61 !0x6e !0x29 !0x20 !0x5b !0x2d !0x2d !0x42 !0x61 !0x73 !0x65 !0x41 !0x64 !0x64 !0x72 !0x65 !0x73 !0x73 !0x20 !0x31 !0x32 !0x33 !0x34 !0x35 !0x5d !0x20 !0x5b !0x2d !0x2d !0x41 !0x72 !0x63 !0x68 !0x69 !0x74 !0x65 !0x63 !0x74 !0x75 !0x72 !0x65 !0x20 !0x31 !0x32 !0x33 !0x34 !0x35 !0x5d !0x0a !0x00
+
+:string_open_21
+"Architecture 0: Knight; 1: x86; 2: AMD64"
+
+:string_open_22
 "hex2 0.3
 "
 
-:string_open_21
+:string_open_23
 "Unknown option
 "
 
-:string_open_22
+:string_open_24
 "B:f:h:o:V"
 
-:string_open_23
+:string_open_25
 "Unable to change permissions
 "

@@ -170,8 +170,8 @@
 	call32 %consume_token
 	add____$i8,%esp !0x8
 	test___%eax,%eax
-					# if (':' == entry->name[0]) ...
-	mov____$i32,%eax %0x3a
+					# if ('_' == entry->name[0]) ...
+	mov____$i32,%eax %0x5f
 	push___%eax
 	mov____$i32,%eax %0x0
 	mov____%eax,%edx
@@ -373,6 +373,39 @@
 	call32 %open
 	add____$i8,%esp !0x8
 	mov____%eax,0x8(%ebp) !0x-4
+					# if (0 == source_file) ...
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_first_pass_32_break
+					# fprintf(2, "The file: %s can not be opened!\n", input->name); 
+	mov____%ebp,%eax
+	add____$i8,%eax !0x8
+	mov____(%eax),%eax
+	add____$i8,%eax !0x4
+					# input->name
+	mov____(%eax),%eax
+	push___%eax
+	push___$i32 &string_open_0
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+					# exit(1); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %exit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %_first_pass_32_break
+:_first_pass_32_break
 					# int c; 
 					# for (c = fgetc(source_file); -1 != c; c = fgetc(source_file)) ...
 					# c = fgetc(source_file)
@@ -381,8 +414,8 @@
 	add____$i8,%esp !0x4
 	mov____%eax,0x8(%ebp) !0x-8
 	test___%eax,%eax
-	jmp32  %_first_pass_33_initial_skip
-:_first_pass_33_loop
+	jmp32  %_first_pass_60_initial_skip
+:_first_pass_60_loop
 					# if (58 == c) ...else ...
 	mov____$i32,%eax %0x3a
 	push___%eax
@@ -393,14 +426,14 @@
 	sete___%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jne32  %_first_pass_41_else
+	jne32  %_first_pass_68_else
 					# storeLabel(source_file); 
 	push___0x8(%ebp) !0x-4
 	call32 %storeLabel
 	add____$i8,%esp !0x4
 	test___%eax,%eax
-	jmp32  %_first_pass_41_break
-:_first_pass_41_else
+	jmp32  %_first_pass_68_break
+:_first_pass_68_else
 					# if (c == '#' || c == ';') ...else ...
 	mov____0x8(%ebp),%eax !0x-8
 	push___%eax
@@ -411,9 +444,9 @@
 	sete___%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jne32  %_first_pass_55_else_b_56
-	jmp32  %_first_pass_55_else_skip_b_56
-:_first_pass_55_else_b_56
+	jne32  %_first_pass_82_else_b_83
+	jmp32  %_first_pass_82_else_skip_b_83
+:_first_pass_82_else_b_83
 	mov____0x8(%ebp),%eax !0x-8
 	push___%eax
 	mov____$i32,%eax %0x3b
@@ -423,15 +456,15 @@
 	sete___%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jne32  %_first_pass_55_else
-:_first_pass_55_else_skip_b_56
+	jne32  %_first_pass_82_else
+:_first_pass_82_else_skip_b_83
 					# line_Comment(source_file); 
 	push___0x8(%ebp) !0x-4
 	call32 %line_Comment
 	add____$i8,%esp !0x4
 	test___%eax,%eax
-	jmp32  %_first_pass_55_break
-:_first_pass_55_else
+	jmp32  %_first_pass_82_break
+:_first_pass_82_else
 					# if (34 == c) ...
 	mov____$i32,%eax %0x22
 	push___%eax
@@ -442,23 +475,23 @@
 	sete___%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jne32  %_first_pass_79_break
+	jne32  %_first_pass_106_break
 					# purge_string(source_file); 
 	push___0x8(%ebp) !0x-4
 	call32 %purge_string
 	add____$i8,%esp !0x4
 	test___%eax,%eax
-	jmp32  %_first_pass_79_break
-:_first_pass_79_break
-:_first_pass_55_break
-:_first_pass_41_break
-:_first_pass_33_continue
+	jmp32  %_first_pass_106_break
+:_first_pass_106_break
+:_first_pass_82_break
+:_first_pass_68_break
+:_first_pass_60_continue
 					# c = fgetc(source_file)
 	push___0x8(%ebp) !0x-4
 	call32 %fgetc
 	add____$i8,%esp !0x4
 	mov____%eax,0x8(%ebp) !0x-8
-:_first_pass_33_initial_skip
+:_first_pass_60_initial_skip
 	push___%eax
 	mov____$i32,%eax %0x1
 	mov____%eax,%edx
@@ -480,9 +513,9 @@
 	sahf
 	pop____%eax
 					# jmp test LABEL
-	jne32  %_first_pass_33_break
-	jmp32  %_first_pass_33_loop
-:_first_pass_33_break
+	jne32  %_first_pass_60_break
+	jmp32  %_first_pass_60_loop
+:_first_pass_60_break
 					# fclose(source_file); 
 	push___0x8(%ebp) !0x-4
 	call32 %fclose
@@ -544,7 +577,7 @@
 					# node->name
 	mov____(%eax),%eax
 	push___%eax
-	push___$i32 &string_open_0
+	push___$i32 &string_open_1
 	mov____0x32,%eax &output
 	push___%eax
 	call32 %fprintf
@@ -571,7 +604,7 @@
 	push___%eax
 	mov____$i32,%eax %0x25
 	push___%eax
-	push___$i32 &string_open_1
+	push___$i32 &string_open_2
 	mov____0x32,%eax &output
 	push___%eax
 	call32 %fprintf
@@ -598,7 +631,7 @@
 	mov____%eax,0x32 &output
 	test___%eax,%eax
 					# char *output_file = ""; 
-	mov____$i32,%eax &string_open_6
+	mov____$i32,%eax &string_open_7
 	mov____%eax,0x8(%ebp) !0x-8
 					# int c; 
 					# int option_index = 0; 
@@ -631,7 +664,7 @@
 	add____%edx,%eax
 	mov____(%eax),%eax
 	push___%eax
-	push___$i32 &string_open_7
+	push___$i32 &string_open_8
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -719,6 +752,39 @@
 	add____$i8,%esp !0xc
 	mov____%eax,0x32 &output
 	test___%eax,%eax
+					# if (0 == output) ...
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x32,%eax &output
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_main_124_break
+					# fprintf(2, "The file: %s can not be opened!\n", input->name); 
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x4
+					# input->name
+	mov____(%eax),%eax
+	push___%eax
+	push___$i32 &string_open_0
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+					# exit(1); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %exit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %_main_124_break
+:_main_124_break
 	jmp32  %_main_22_break
 	jmp32  %_main_22_body4
 :_main_22_clause4
@@ -727,7 +793,7 @@
 	jmp32  %_main_22_clause5
 :_main_22_body4
 					# fprintf(1,      "blood-elf 0.1\n(Basically Launches Odd Object Dump ExecutabLe Files\n"); 
-	push___$i32 &string_open_8
+	push___$i32 &string_open_9
 	mov____$i32,%eax %0x1
 	push___%eax
 	call32 %fprintf
@@ -743,7 +809,7 @@
 :_main_22_clause5
 :_main_22_body5
 					# fprintf(2, "Unknown option\n"); 
-	push___$i32 &string_open_9
+	push___$i32 &string_open_10
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -761,7 +827,7 @@
 	lea____0x8(%ebp),%eax !0x-10
 	push___%eax
 	push___$i32 &long_options
-	push___$i32 &string_open_10
+	push___$i32 &string_open_11
 	push___0x8(%ebp) !0xc
 	push___0x8(%ebp) !0x8
 	call32 %getopt_long
@@ -800,19 +866,19 @@
 	sete___%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jne32  %_main_178_break
+	jne32  %_main_205_break
 	mov____$i32,%eax %0x1
 	leave
 	ret
-	jmp32  %_main_178_break
-:_main_178_break
+	jmp32  %_main_205_break
+:_main_205_break
 					# first_pass(input); 
 	push___0x8(%ebp) !0x-4
 	call32 %first_pass
 	add____$i8,%esp !0x4
 	test___%eax,%eax
 					# fprintf(output, ":ELF_str\n!0\n"); 
-	push___$i32 &string_open_11
+	push___$i32 &string_open_12
 	mov____0x32,%eax &output
 	push___%eax
 	call32 %fprintf
@@ -835,7 +901,7 @@
 	push___%eax
 	mov____$i32,%eax %0x25
 	push___%eax
-	push___$i32 &string_open_12
+	push___$i32 &string_open_13
 	mov____0x32,%eax &output
 	push___%eax
 	call32 %fprintf
@@ -850,7 +916,7 @@
 	add____$i8,%esp !0x8
 	test___%eax,%eax
 					# fprintf(output, "\n:ELF_end\n"); 
-	push___$i32 &string_open_13
+	push___$i32 &string_open_14
 	mov____0x32,%eax &output
 	push___%eax
 	call32 %fprintf
@@ -891,9 +957,13 @@
 !0x00 !0x00 !0x00 !0x00
 
 :string_open_0
-!0x3a !0x45 !0x4c !0x46 !0x5f !0x73 !0x74 !0x72 !0x5f !0x25 !0x73 !0x0a !0x22 !0x25 !0x73 !0x22 !0x0a !0x00
+"The file: %s can not be opened!
+"
 
 :string_open_1
+!0x3a !0x45 !0x4c !0x46 !0x5f !0x73 !0x74 !0x72 !0x5f !0x25 !0x73 !0x0a !0x22 !0x25 !0x73 !0x22 !0x0a !0x00
+
+:string_open_2
 "%cELF_str_%s>ELF_str
 &%s
 %c10000
@@ -902,46 +972,46 @@
 @1
 "
 
-:string_open_2
+:string_open_3
 "file"
 
-:string_open_3
+:string_open_4
 "output"
 
-:string_open_4
+:string_open_5
 "help"
 
-:string_open_5
+:string_open_6
 "version"
 
 :long_options
-&string_open_2 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x66 !0x00 !0x00 !0x00 &string_open_3 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x6f !0x00 !0x00 !0x00 &string_open_4 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x68 !0x00 !0x00 !0x00 &string_open_5 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x56 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
-
-:string_open_6
-""
+&string_open_3 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x66 !0x00 !0x00 !0x00 &string_open_4 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x6f !0x00 !0x00 !0x00 &string_open_5 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x68 !0x00 !0x00 !0x00 &string_open_6 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x56 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
 
 :string_open_7
+""
+
+:string_open_8
 "Usage: %s -f FILENAME1 {-f FILENAME2}
 "
 
-:string_open_8
+:string_open_9
 "blood-elf 0.1
 (Basically Launches Odd Object Dump ExecutabLe Files
 "
 
-:string_open_9
+:string_open_10
 "Unknown option
 "
 
-:string_open_10
+:string_open_11
 "B:f:h:o:V"
 
-:string_open_11
+:string_open_12
 ":ELF_str
 !0
 "
 
-:string_open_12
+:string_open_13
 "%c0
 :ELF_sym
 %c0
@@ -952,7 +1022,7 @@
 @1
 "
 
-:string_open_13
+:string_open_14
 "
 :ELF_end
 "

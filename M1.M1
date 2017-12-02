@@ -3237,29 +3237,57 @@
 	add____$i8,%esp !0x8
 	mov____%eax,0x32 &source_file
 	test___%eax,%eax
+					# if (0 == source_file) ...
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x32,%eax &source_file
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_main_87_break
+					# fprintf(2, "The file: %s can not be opened!\n", optarg); 
+	mov____0x32,%eax &optarg
+	push___%eax
+	push___$i32 &string_open_24
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+					# exit(1); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %exit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %_main_87_break
+:_main_87_break
 					# Reached_EOF = 0
 	mov____$i32,%eax %0x0
 	mov____%eax,0x32 &Reached_EOF
 	test___%eax,%eax
 					# while (!Reached_EOF) ...
-	jmp32  %_main_91_continue
-:_main_91_loop
+	jmp32  %_main_113_continue
+:_main_113_loop
 					# head = Tokenize_Line(head)
 	push___0x8(%ebp) !0x-4
 	call32 %Tokenize_Line
 	add____$i8,%esp !0x4
 	mov____%eax,0x8(%ebp) !0x-4
 	test___%eax,%eax
-:_main_91_continue
+:_main_113_continue
 	mov____0x32,%eax &Reached_EOF
 	test___%eax,%eax
 	sete___%al
 	movzbl_%al,%eax
 	test___%eax,%eax
 					# jmp test LABEL
-	je32   %_main_91_break
-	jmp32  %_main_91_loop
-:_main_91_break
+	je32   %_main_113_break
+	jmp32  %_main_113_loop
+:_main_113_break
 	jmp32  %_main_23_break
 	jmp32  %_main_23_body4
 :_main_23_clause4
@@ -3293,6 +3321,34 @@
 	add____$i8,%esp !0xc
 	mov____%eax,0x32 &destination_file
 	test___%eax,%eax
+					# if (0 == destination_file) ...
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x32,%eax &destination_file
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_main_158_break
+					# fprintf(2, "The file: %s can not be opened!\n", optarg); 
+	mov____0x32,%eax &optarg
+	push___%eax
+	push___$i32 &string_open_24
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+					# exit(1); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %exit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %_main_158_break
+:_main_158_break
 	jmp32  %_main_23_break
 	jmp32  %_main_23_body5
 :_main_23_clause5
@@ -3301,7 +3357,7 @@
 	jmp32  %_main_23_clause6
 :_main_23_body5
 					# fprintf(1, "M1 0.3\n"); 
-	push___$i32 &string_open_24
+	push___$i32 &string_open_25
 	mov____$i32,%eax %0x1
 	push___%eax
 	call32 %fprintf
@@ -3317,7 +3373,7 @@
 :_main_23_clause6
 :_main_23_body6
 					# fprintf(2, "Unknown option\n"); 
-	push___$i32 &string_open_25
+	push___$i32 &string_open_26
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -3335,7 +3391,7 @@
 	lea____0x8(%ebp),%eax !0x-c
 	push___%eax
 	push___$i32 &long_options
-	push___$i32 &string_open_26
+	push___$i32 &string_open_27
 	push___0x8(%ebp) !0xc
 	push___0x8(%ebp) !0x8
 	call32 %getopt_long
@@ -3374,9 +3430,9 @@
 	sete___%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jne32  %_main_190_break
+	jne32  %_main_234_break
 					# fprintf(2, "Either no input files were given or they were empty\n"); 
-	push___$i32 &string_open_27
+	push___$i32 &string_open_28
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -3388,8 +3444,8 @@
 	call32 %exit
 	add____$i8,%esp !0x4
 	test___%eax,%eax
-	jmp32  %_main_190_break
-:_main_190_break
+	jmp32  %_main_234_break
+:_main_234_break
 					# head = reverse_list(head)
 	push___0x8(%ebp) !0x-4
 	call32 %reverse_list
@@ -3552,16 +3608,20 @@
 "Architecture 0: Knight; 1: x86; 2: AMD64"
 
 :string_open_24
-"M1 0.3
+"The file: %s can not be opened!
 "
 
 :string_open_25
-"Unknown option
+"M1 0.3
 "
 
 :string_open_26
-"f:h:o:V"
+"Unknown option
+"
 
 :string_open_27
+"f:h:o:V"
+
+:string_open_28
 "Either no input files were given or they were empty
 "

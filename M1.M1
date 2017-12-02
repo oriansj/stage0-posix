@@ -26,7 +26,7 @@
 					# jmp test LABEL
 	jne32  %_newToken_10_break
 					# fprintf(2, "calloc failed.\n"); 
-	push___$i32 &string_open_0
+	push___$i32 &_string_open_0
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -193,7 +193,7 @@
 					# jmp test LABEL
 	jne32  %_store_atom_9_break
 					# fprintf(2, "Exhusted available memory\n"); 
-	push___$i32 &string_open_1
+	push___$i32 &_string_open_1
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -337,7 +337,7 @@
 					# jmp test LABEL
 	jne32  %_store_string_9_break
 					# fprintf(2, "Exhusted available memory\n"); 
-	push___$i32 &string_open_1
+	push___$i32 &_string_open_1
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -404,7 +404,7 @@
 					# jmp test LABEL
 	jne32  %_store_string_63_break
 					# fprintf(2, "Unmatched \"!\n"); 
-	push___$i32 &string_open_2
+	push___$i32 &_string_open_2
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -431,7 +431,7 @@
 	jne32  %_store_string_88_break
 					# fprintf(2, "String: %s exceeds max string size\n", store); 
 	push___0x8(%ebp) !0x-4
-	push___$i32 &string_open_3
+	push___$i32 &_string_open_3
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -782,7 +782,7 @@
 	push___%eax
 	mov____$i32,%eax %0x1000
 	push___%eax
-	push___$i32 &string_open_4
+	push___$i32 &_string_open_4
 	mov____%ebp,%eax
 	add____$i8,%eax !0x-4
 	mov____(%eax),%eax
@@ -1578,7 +1578,7 @@
 :_range_check_15_break_skip_b_16
 					# fprintf(2, "A displacement of %d does not fit in 3 bytes", displacement); 
 	push___0x8(%ebp) !0x8
-	push___$i32 &string_open_5
+	push___$i32 &_string_open_5
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -1630,7 +1630,7 @@
 :_range_check_58_break_skip_b_59
 					# fprintf(2, "A displacement of %d does not fit in 2 bytes", displacement); 
 	push___0x8(%ebp) !0x8
-	push___$i32 &string_open_6
+	push___$i32 &_string_open_6
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -1682,7 +1682,7 @@
 :_range_check_101_break_skip_b_102
 					# fprintf(2, "A displacement of %d does not fit in 1 byte", displacement); 
 	push___0x8(%ebp) !0x8
-	push___$i32 &string_open_7
+	push___$i32 &_string_open_7
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -2556,7 +2556,7 @@
 :_LittleEndian_34_body4
 					# fprintf(2, "Recieved invalid number of bytes in LittleEndian %d\n",      Number_of_bytes); 
 	push___0x8(%ebp) !0x10
-	push___$i32 &string_open_8
+	push___$i32 &_string_open_8
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -2620,7 +2620,7 @@
 	pop____%eax
 	and____%edx,%eax
 	push___%eax
-	push___$i32 &string_open_9
+	push___$i32 &_string_open_9
 	push___0x8(%ebp) !0x-4
 	call32 %sprintf
 	add____$i8,%esp !0xc
@@ -2680,7 +2680,7 @@
 	pop____%eax
 	and____%edx,%eax
 	push___%eax
-	push___$i32 &string_open_10
+	push___$i32 &_string_open_10
 	push___0x8(%ebp) !0x-4
 	call32 %sprintf
 	add____$i8,%esp !0xc
@@ -2740,7 +2740,7 @@
 	pop____%eax
 	and____%edx,%eax
 	push___%eax
-	push___$i32 &string_open_11
+	push___$i32 &_string_open_11
 	push___0x8(%ebp) !0x-4
 	call32 %sprintf
 	add____$i8,%esp !0xc
@@ -2762,7 +2762,7 @@
 					# fprintf(2, "Given symbol %c to express immediate value %d\n", c, value); 
 	push___0x8(%ebp) !0x8
 	push___0x8(%ebp) !0xc
-	push___$i32 &string_open_12
+	push___$i32 &_string_open_12
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -3007,7 +3007,7 @@
 	test___%eax,%eax
 					# sprintf(i->Expression, "%04X", value); 
 	push___0x8(%ebp) !0x-8
-	push___$i32 &string_open_10
+	push___$i32 &_string_open_10
 	mov____%ebp,%eax
 	add____$i8,%eax !0x-4
 	mov____(%eax),%eax
@@ -3091,7 +3091,7 @@
 					# i->Expression
 	mov____(%eax),%eax
 	push___%eax
-	push___$i32 &string_open_13
+	push___$i32 &_string_open_13
 	mov____0x32,%eax &destination_file
 	push___%eax
 	call32 %fprintf
@@ -3129,7 +3129,7 @@
 	jmp32  %_print_hex_1_loop
 :_print_hex_1_break
 					# fprintf(destination_file, "\n"); 
-	push___$i32 &string_open_14
+	push___$i32 &_string_open_14
 	mov____0x32,%eax &destination_file
 	push___%eax
 	call32 %fprintf
@@ -3203,14 +3203,14 @@
 	add____%edx,%eax
 	mov____(%eax),%eax
 	push___%eax
-	push___$i32 &string_open_22
+	push___$i32 &_string_open_22
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
 	add____$i8,%esp !0xc
 	test___%eax,%eax
 					# fprintf(2, "Architecture 0: Knight; 1: x86; 2: AMD64"); 
-	push___$i32 &string_open_23
+	push___$i32 &_string_open_23
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -3251,7 +3251,7 @@
 					# fprintf(2, "The file: %s can not be opened!\n", optarg); 
 	mov____0x32,%eax &optarg
 	push___%eax
-	push___$i32 &string_open_24
+	push___$i32 &_string_open_24
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -3335,7 +3335,7 @@
 					# fprintf(2, "The file: %s can not be opened!\n", optarg); 
 	mov____0x32,%eax &optarg
 	push___%eax
-	push___$i32 &string_open_24
+	push___$i32 &_string_open_24
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -3357,7 +3357,7 @@
 	jmp32  %_main_23_clause6
 :_main_23_body5
 					# fprintf(1, "M1 0.3\n"); 
-	push___$i32 &string_open_25
+	push___$i32 &_string_open_25
 	mov____$i32,%eax %0x1
 	push___%eax
 	call32 %fprintf
@@ -3373,7 +3373,7 @@
 :_main_23_clause6
 :_main_23_body6
 					# fprintf(2, "Unknown option\n"); 
-	push___$i32 &string_open_26
+	push___$i32 &_string_open_26
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -3391,7 +3391,7 @@
 	lea____0x8(%ebp),%eax !0x-c
 	push___%eax
 	push___$i32 &long_options
-	push___$i32 &string_open_27
+	push___$i32 &_string_open_27
 	push___0x8(%ebp) !0xc
 	push___0x8(%ebp) !0x8
 	call32 %getopt_long
@@ -3432,7 +3432,7 @@
 					# jmp test LABEL
 	jne32  %_main_234_break
 					# fprintf(2, "Either no input files were given or they were empty\n"); 
-	push___$i32 &string_open_28
+	push___$i32 &_string_open_28
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -3525,103 +3525,103 @@
 :Architecture
 !0x00 !0x00 !0x00 !0x00
 
-:string_open_0
+:_string_open_0
 "calloc failed.
 "
 
-:string_open_1
+:_string_open_1
 "Exhusted available memory
 "
 
-:string_open_2
+:_string_open_2
 !0x55 !0x6e !0x6d !0x61 !0x74 !0x63 !0x68 !0x65 !0x64 !0x20 !0x22 !0x21 !0x0a !0x00
 
-:string_open_3
+:_string_open_3
 "String: %s exceeds max string size
 "
 
-:string_open_4
+:_string_open_4
 "DEFINE"
 
-:string_open_5
+:_string_open_5
 "A displacement of %d does not fit in 3 bytes"
 
-:string_open_6
+:_string_open_6
 "A displacement of %d does not fit in 2 bytes"
 
-:string_open_7
+:_string_open_7
 "A displacement of %d does not fit in 1 byte"
 
-:string_open_8
+:_string_open_8
 "Recieved invalid number of bytes in LittleEndian %d
 "
 
-:string_open_9
+:_string_open_9
 "%02X"
 
-:string_open_10
+:_string_open_10
 "%04X"
 
-:string_open_11
+:_string_open_11
 "%08X"
 
-:string_open_12
+:_string_open_12
 "Given symbol %c to express immediate value %d
 "
 
-:string_open_13
+:_string_open_13
 "
 %s"
 
-:string_open_14
+:_string_open_14
 "
 "
 
-:string_open_15
+:_string_open_15
 "Architecture"
 
-:string_open_16
+:_string_open_16
 "BigEndian"
 
-:string_open_17
+:_string_open_17
 "LittleEndian"
 
-:string_open_18
+:_string_open_18
 "file"
 
-:string_open_19
+:_string_open_19
 "output"
 
-:string_open_20
+:_string_open_20
 "help"
 
-:string_open_21
+:_string_open_21
 "version"
 
 :long_options
-&string_open_15 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x41 !0x00 !0x00 !0x00 &string_open_16 !0x00 !0x00 !0x00 !0x00 &BigEndian !0x01 !0x00 !0x00 !0x00 &string_open_17 !0x00 !0x00 !0x00 !0x00 &BigEndian !0x00 !0x00 !0x00 !0x00 &string_open_18 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x66 !0x00 !0x00 !0x00 &string_open_19 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x6f !0x00 !0x00 !0x00 &string_open_20 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x68 !0x00 !0x00 !0x00 &string_open_21 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x56 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
+&_string_open_15 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x41 !0x00 !0x00 !0x00 &_string_open_16 !0x00 !0x00 !0x00 !0x00 &BigEndian !0x01 !0x00 !0x00 !0x00 &_string_open_17 !0x00 !0x00 !0x00 !0x00 &BigEndian !0x00 !0x00 !0x00 !0x00 &_string_open_18 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x66 !0x00 !0x00 !0x00 &_string_open_19 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x6f !0x00 !0x00 !0x00 &_string_open_20 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x68 !0x00 !0x00 !0x00 &_string_open_21 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x56 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
 
-:string_open_22
+:_string_open_22
 !0x55 !0x73 !0x61 !0x67 !0x65 !0x3a !0x20 !0x25 !0x73 !0x20 !0x2d !0x66 !0x20 !0x46 !0x49 !0x4c !0x45 !0x4e !0x41 !0x4d !0x45 !0x31 !0x20 !0x7b !0x2d !0x66 !0x20 !0x46 !0x49 !0x4c !0x45 !0x4e !0x41 !0x4d !0x45 !0x32 !0x7d !0x20 !0x28 !0x2d !0x2d !0x42 !0x69 !0x67 !0x45 !0x6e !0x64 !0x69 !0x61 !0x6e !0x7c !0x2d !0x2d !0x4c !0x69 !0x74 !0x74 !0x6c !0x65 !0x45 !0x6e !0x64 !0x69 !0x61 !0x6e !0x29 !0x20 !0x5b !0x2d !0x2d !0x42 !0x61 !0x73 !0x65 !0x41 !0x64 !0x64 !0x72 !0x65 !0x73 !0x73 !0x20 !0x31 !0x32 !0x33 !0x34 !0x35 !0x5d !0x20 !0x5b !0x2d !0x2d !0x41 !0x72 !0x63 !0x68 !0x69 !0x74 !0x65 !0x63 !0x74 !0x75 !0x72 !0x65 !0x20 !0x31 !0x32 !0x33 !0x34 !0x35 !0x5d !0x0a !0x00
 
-:string_open_23
+:_string_open_23
 "Architecture 0: Knight; 1: x86; 2: AMD64"
 
-:string_open_24
+:_string_open_24
 "The file: %s can not be opened!
 "
 
-:string_open_25
+:_string_open_25
 "M1 0.3
 "
 
-:string_open_26
+:_string_open_26
 "Unknown option
 "
 
-:string_open_27
+:_string_open_27
 "f:h:o:V"
 
-:string_open_28
+:_string_open_28
 "Either no input files were given or they were empty
 "

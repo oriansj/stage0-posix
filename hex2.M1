@@ -185,7 +185,7 @@
 :_GetTarget_1_break
 					# fprintf(2, "Target label %s is not valid\n", c); 
 	push___0x8(%ebp) !0x8
-	push___$i32 &string_open_0
+	push___$i32 &_string_open_0
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -304,7 +304,7 @@
 :_range_check_15_break_skip_b_16
 					# fprintf(2, "A displacement of %d does not fit in 3 bytes", displacement); 
 	push___0x8(%ebp) !0x8
-	push___$i32 &string_open_1
+	push___$i32 &_string_open_1
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -356,7 +356,7 @@
 :_range_check_58_break_skip_b_59
 					# fprintf(2, "A displacement of %d does not fit in 2 bytes", displacement); 
 	push___0x8(%ebp) !0x8
-	push___$i32 &string_open_2
+	push___$i32 &_string_open_2
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -408,7 +408,7 @@
 :_range_check_101_break_skip_b_102
 					# fprintf(2, "A displacement of %d does not fit in 1 byte", displacement); 
 	push___0x8(%ebp) !0x8
-	push___$i32 &string_open_3
+	push___$i32 &_string_open_3
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -473,7 +473,7 @@
 	mov____%edx,%ecx
 	shr____%cl,%eax
 	push___%eax
-	push___$i32 &string_open_4
+	push___$i32 &_string_open_4
 	mov____0x32,%eax &output
 	push___%eax
 	call32 %fprintf
@@ -503,7 +503,7 @@
 	idiv___%ebx
 	mov____%edx,%eax
 	push___%eax
-	push___$i32 &string_open_4
+	push___$i32 &_string_open_4
 	mov____0x32,%eax &output
 	push___%eax
 	call32 %fprintf
@@ -533,7 +533,7 @@
 	idiv___%ebx
 	mov____%edx,%eax
 	push___%eax
-	push___$i32 &string_open_4
+	push___$i32 &_string_open_4
 	mov____0x32,%eax &output
 	push___%eax
 	call32 %fprintf
@@ -556,7 +556,7 @@
 	idiv___%ebx
 	mov____%edx,%eax
 	push___%eax
-	push___$i32 &string_open_4
+	push___$i32 &_string_open_4
 	mov____0x32,%eax &output
 	push___%eax
 	call32 %fprintf
@@ -596,7 +596,7 @@
 	test___%eax,%eax
 					# fprintf(output, "%c", byte); 
 	push___0x8(%ebp) !0x-8
-	push___$i32 &string_open_4
+	push___$i32 &_string_open_4
 	mov____0x32,%eax &output
 	push___%eax
 	call32 %fprintf
@@ -711,7 +711,7 @@
 	jmp32  %_storePointer_51_break
 :_storePointer_51_else
 					# fprintf(2, "storePointer given unknown\n"); 
-	push___$i32 &string_open_5
+	push___$i32 &_string_open_5
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -840,7 +840,7 @@
 :_storePointer_139_clause2
 :_storePointer_139_body2
 					# fprintf(2, "Unknown Architecture, aborting before harm is done\n"); 
-	push___$i32 &string_open_6
+	push___$i32 &_string_open_6
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -955,7 +955,7 @@
 :_storePointer_252_else
 					# fprintf(2, "storePointer reached impossible case: ch=%c\n", ch); 
 	push___0x8(%ebp) !0x8
-	push___$i32 &string_open_7
+	push___$i32 &_string_open_7
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -1236,7 +1236,7 @@
 					# input->filename
 	mov____(%eax),%eax
 	push___%eax
-	push___$i32 &string_open_8
+	push___$i32 &_string_open_8
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -1551,7 +1551,7 @@
 					# input->filename
 	mov____(%eax),%eax
 	push___%eax
-	push___$i32 &string_open_9
+	push___$i32 &_string_open_9
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -1711,7 +1711,7 @@
 	pop____%eax
 	add____%edx,%eax
 	push___%eax
-	push___$i32 &string_open_4
+	push___$i32 &_string_open_4
 	mov____0x32,%eax &output
 	push___%eax
 	call32 %fprintf
@@ -1816,7 +1816,7 @@
 	mov____%eax,0x32 &output
 	test___%eax,%eax
 					# char *output_file = ""; 
-	mov____$i32,%eax &string_open_19
+	mov____$i32,%eax &_string_open_19
 	mov____%eax,0x8(%ebp) !0x-8
 					# exec_enable = 0
 	mov____$i32,%eax %0x0
@@ -1885,14 +1885,14 @@
 	add____%edx,%eax
 	mov____(%eax),%eax
 	push___%eax
-	push___$i32 &string_open_20
+	push___$i32 &_string_open_20
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
 	add____$i8,%esp !0xc
 	test___%eax,%eax
 					# fprintf(2, "Architecture 0: Knight; 1: x86; 2: AMD64"); 
-	push___$i32 &string_open_21
+	push___$i32 &_string_open_21
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -1994,7 +1994,7 @@
 					# fprintf(2, "The file: %s can not be opened!\n", optarg); 
 	mov____0x32,%eax &optarg
 	push___%eax
-	push___$i32 &string_open_8
+	push___$i32 &_string_open_8
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -2016,7 +2016,7 @@
 	jmp32  %_main_38_clause7
 :_main_38_body6
 					# fprintf(1, "hex2 0.3\n"); 
-	push___$i32 &string_open_22
+	push___$i32 &_string_open_22
 	mov____$i32,%eax %0x1
 	push___%eax
 	call32 %fprintf
@@ -2032,7 +2032,7 @@
 :_main_38_clause7
 :_main_38_body7
 					# fprintf(2, "Unknown option\n"); 
-	push___$i32 &string_open_23
+	push___$i32 &_string_open_23
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -2050,7 +2050,7 @@
 	lea____0x8(%ebp),%eax !0x-10
 	push___%eax
 	push___$i32 &long_options
-	push___$i32 &string_open_24
+	push___$i32 &_string_open_24
 	push___0x8(%ebp) !0xc
 	push___0x8(%ebp) !0x8
 	call32 %getopt_long
@@ -2134,7 +2134,7 @@
 					# jmp test LABEL
 	jne32  %_main_276_break
 					# fprintf(2, "Unable to change permissions\n"); 
-	push___$i32 &string_open_25
+	push___$i32 &_string_open_25
 	mov____$i32,%eax %0x2
 	push___%eax
 	call32 %fprintf
@@ -2196,93 +2196,93 @@
 :exec_enable
 !0x00 !0x00 !0x00 !0x00
 
-:string_open_0
+:_string_open_0
 "Target label %s is not valid
 "
 
-:string_open_1
+:_string_open_1
 "A displacement of %d does not fit in 3 bytes"
 
-:string_open_2
+:_string_open_2
 "A displacement of %d does not fit in 2 bytes"
 
-:string_open_3
+:_string_open_3
 "A displacement of %d does not fit in 1 byte"
 
-:string_open_4
+:_string_open_4
 "%c"
 
-:string_open_5
+:_string_open_5
 "storePointer given unknown
 "
 
-:string_open_6
+:_string_open_6
 "Unknown Architecture, aborting before harm is done
 "
 
-:string_open_7
+:_string_open_7
 "storePointer reached impossible case: ch=%c
 "
 
-:string_open_8
+:_string_open_8
 "The file: %s can not be opened!
 "
 
-:string_open_9
+:_string_open_9
 "The file: %s can not be opened!
 WTF-pass2
 "
 
-:string_open_10
+:_string_open_10
 "BigEndian"
 
-:string_open_11
+:_string_open_11
 "LittleEndian"
 
-:string_open_12
+:_string_open_12
 "exec_enable"
 
-:string_open_13
+:_string_open_13
 "file"
 
-:string_open_14
+:_string_open_14
 "Architecture"
 
-:string_open_15
+:_string_open_15
 "BaseAddress"
 
-:string_open_16
+:_string_open_16
 "output"
 
-:string_open_17
+:_string_open_17
 "help"
 
-:string_open_18
+:_string_open_18
 "version"
 
 :long_options
-&string_open_10 !0x00 !0x00 !0x00 !0x00 &BigEndian !0x01 !0x00 !0x00 !0x00 &string_open_11 !0x00 !0x00 !0x00 !0x00 &BigEndian !0x00 !0x00 !0x00 !0x00 &string_open_12 !0x00 !0x00 !0x00 !0x00 &exec_enable !0x01 !0x00 !0x00 !0x00 &string_open_13 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x66 !0x00 !0x00 !0x00 &string_open_14 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x41 !0x00 !0x00 !0x00 &string_open_15 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x42 !0x00 !0x00 !0x00 &string_open_16 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x6f !0x00 !0x00 !0x00 &string_open_17 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x68 !0x00 !0x00 !0x00 &string_open_18 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x56 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
+&_string_open_10 !0x00 !0x00 !0x00 !0x00 &BigEndian !0x01 !0x00 !0x00 !0x00 &_string_open_11 !0x00 !0x00 !0x00 !0x00 &BigEndian !0x00 !0x00 !0x00 !0x00 &_string_open_12 !0x00 !0x00 !0x00 !0x00 &exec_enable !0x01 !0x00 !0x00 !0x00 &_string_open_13 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x66 !0x00 !0x00 !0x00 &_string_open_14 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x41 !0x00 !0x00 !0x00 &_string_open_15 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x42 !0x00 !0x00 !0x00 &_string_open_16 !0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x6f !0x00 !0x00 !0x00 &_string_open_17 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x68 !0x00 !0x00 !0x00 &_string_open_18 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x56 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
 
-:string_open_19
+:_string_open_19
 ""
 
-:string_open_20
+:_string_open_20
 !0x55 !0x73 !0x61 !0x67 !0x65 !0x3a !0x20 !0x25 !0x73 !0x20 !0x2d !0x66 !0x20 !0x46 !0x49 !0x4c !0x45 !0x4e !0x41 !0x4d !0x45 !0x31 !0x20 !0x7b !0x2d !0x66 !0x20 !0x46 !0x49 !0x4c !0x45 !0x4e !0x41 !0x4d !0x45 !0x32 !0x7d !0x20 !0x28 !0x2d !0x2d !0x42 !0x69 !0x67 !0x45 !0x6e !0x64 !0x69 !0x61 !0x6e !0x7c !0x2d !0x2d !0x4c !0x69 !0x74 !0x74 !0x6c !0x65 !0x45 !0x6e !0x64 !0x69 !0x61 !0x6e !0x29 !0x20 !0x5b !0x2d !0x2d !0x42 !0x61 !0x73 !0x65 !0x41 !0x64 !0x64 !0x72 !0x65 !0x73 !0x73 !0x20 !0x31 !0x32 !0x33 !0x34 !0x35 !0x5d !0x20 !0x5b !0x2d !0x2d !0x41 !0x72 !0x63 !0x68 !0x69 !0x74 !0x65 !0x63 !0x74 !0x75 !0x72 !0x65 !0x20 !0x31 !0x32 !0x33 !0x34 !0x35 !0x5d !0x0a !0x00
 
-:string_open_21
+:_string_open_21
 "Architecture 0: Knight; 1: x86; 2: AMD64"
 
-:string_open_22
+:_string_open_22
 "hex2 0.3
 "
 
-:string_open_23
+:_string_open_23
 "Unknown option
 "
 
-:string_open_24
+:_string_open_24
 "B:f:h:o:V"
 
-:string_open_25
+:_string_open_25
 "Unable to change permissions
 "

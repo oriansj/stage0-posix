@@ -529,52 +529,31 @@
 	push___%ebp
 	mov____%esp,%ebp
 	sub____%esp,$i32 %0x1054
-					# if (0 == node) ...
-	mov____$i32,%eax %0x0
-	push___%eax
+					# for (struct entry *i = node; 0 != i; i = i->next) ...
+					# struct entry *i = node; 
 	mov____0x8(%ebp),%eax !0x8
-	mov____%eax,%edx
-	pop____%eax
-	sub____%edx,%eax
-	sete___%al
-	movzbl_%al,%eax
-					# jmp test LABEL
-	jne32  %_output_debug_1_break
-	leave
-	ret
-	jmp32  %_output_debug_1_break
-:_output_debug_1_break
-					# output_debug(node->next, stage); 
-	push___0x8(%ebp) !0xc
-	mov____%ebp,%eax
-	add____$i8,%eax !0x8
-	mov____(%eax),%eax
-	add____$i8,%eax !0x0
-					# node->next
-	mov____(%eax),%eax
-	push___%eax
-	call32 %output_debug
-	add____$i8,%esp !0x8
-	test___%eax,%eax
+	mov____%eax,0x8(%ebp) !0x-4
+	jmp32  %_output_debug_1_initial_skip
+:_output_debug_1_loop
 					# if (stage) ...else ...
 	mov____0x8(%ebp),%eax !0xc
 	test___%eax,%eax
 					# jmp test LABEL
 	test___%eax,%eax
-	je32   %_output_debug_22_else
-					# fprintf(output, ":ELF_str_%s\n\"%s\"\n", node->name, node->name); 
+	je32   %_output_debug_7_else
+					# fprintf(output, ":ELF_str_%s\n\"%s\"\n", i->name, i->name); 
 	mov____%ebp,%eax
-	add____$i8,%eax !0x8
+	add____$i8,%eax !0x-4
 	mov____(%eax),%eax
 	add____$i8,%eax !0x4
-					# node->name
+					# i->name
 	mov____(%eax),%eax
 	push___%eax
 	mov____%ebp,%eax
-	add____$i8,%eax !0x8
+	add____$i8,%eax !0x-4
 	mov____(%eax),%eax
 	add____$i8,%eax !0x4
-					# node->name
+					# i->name
 	mov____(%eax),%eax
 	push___%eax
 	push___$i32 &_string_open_1
@@ -583,23 +562,23 @@
 	call32 %fprintf
 	add____$i8,%esp !0x10
 	test___%eax,%eax
-	jmp32  %_output_debug_22_break
-:_output_debug_22_else
-					# fprintf(output, "%cELF_str_%s>ELF_str\n&%s\n%c10000\n!2\n!0\n@1\n", 37, node->     name, node->name, 37); 
+	jmp32  %_output_debug_7_break
+:_output_debug_7_else
+					# fprintf(output, "%cELF_str_%s>ELF_str\n&%s\n%c10000\n!2\n!0\n@1\n", 37, i->name     , i->name, 37); 
 	mov____$i32,%eax %0x25
 	push___%eax
 	mov____%ebp,%eax
-	add____$i8,%eax !0x8
+	add____$i8,%eax !0x-4
 	mov____(%eax),%eax
 	add____$i8,%eax !0x4
-					# node->name
+					# i->name
 	mov____(%eax),%eax
 	push___%eax
 	mov____%ebp,%eax
-	add____$i8,%eax !0x8
+	add____$i8,%eax !0x-4
 	mov____(%eax),%eax
 	add____$i8,%eax !0x4
-					# node->name
+					# i->name
 	mov____(%eax),%eax
 	push___%eax
 	mov____$i32,%eax %0x25
@@ -610,7 +589,100 @@
 	call32 %fprintf
 	add____$i8,%esp !0x18
 	test___%eax,%eax
-:_output_debug_22_break
+:_output_debug_7_break
+:_output_debug_1_continue
+					# i = i->next
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+					# i->next
+	mov____(%eax),%eax
+	mov____%eax,0x8(%ebp) !0x-4
+:_output_debug_1_initial_skip
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %_output_debug_1_break
+	jmp32  %_output_debug_1_loop
+:_output_debug_1_break
+	leave
+	ret
+
+
+:reverse_list
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# struct entry *root = 0; 
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-4
+					# struct entry *next; 
+					# while (0 != head) ...
+	jmp32  %_reverse_list_5_continue
+:_reverse_list_5_loop
+					# next = head->next
+	mov____%ebp,%eax
+	add____$i8,%eax !0x8
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+					# head->next
+	mov____(%eax),%eax
+	mov____%eax,0x8(%ebp) !0x-8
+	test___%eax,%eax
+					# head->next = root
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x8
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+	mov____%eax,%edx
+	pop____%eax
+	mov____%eax,(%edx)
+	test___%eax,%eax
+					# root = head
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+	test___%eax,%eax
+					# head = next
+	mov____0x8(%ebp),%eax !0x-8
+	mov____%eax,0x8(%ebp) !0x8
+	test___%eax,%eax
+:_reverse_list_5_continue
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %_reverse_list_5_break
+	jmp32  %_reverse_list_5_loop
+:_reverse_list_5_break
+	mov____0x8(%ebp),%eax !0x-4
 	leave
 	ret
 
@@ -876,6 +948,13 @@
 	push___0x8(%ebp) !0x-4
 	call32 %first_pass
 	add____$i8,%esp !0x4
+	test___%eax,%eax
+					# jump_table = reverse_list(jump_table)
+	mov____0x32,%eax &jump_table
+	push___%eax
+	call32 %reverse_list
+	add____$i8,%esp !0x4
+	mov____%eax,0x32 &jump_table
 	test___%eax,%eax
 					# fprintf(output, ":ELF_str\n!0\n"); 
 	push___$i32 &_string_open_12

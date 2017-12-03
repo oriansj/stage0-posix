@@ -1788,6 +1788,502 @@
 	ret
 
 
+:hex_numerate
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# if (c >= '0' && c <= '9') ...else ...
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x30
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setge__%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jl32   %_hex_numerate_1_else
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x39
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setle__%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jg32   %_hex_numerate_1_else
+	mov____0x8(%ebp),%eax !0x8
+	add____$i8,%eax !0x-30
+	leave
+	ret
+	jmp32  %_hex_numerate_1_break
+:_hex_numerate_1_else
+					# if (c >= 'a' && c <= 'f') ...else ...
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x61
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setge__%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jl32   %_hex_numerate_21_else
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x66
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setle__%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jg32   %_hex_numerate_21_else
+	mov____0x8(%ebp),%eax !0x8
+	add____$i8,%eax !0x-57
+	leave
+	ret
+	jmp32  %_hex_numerate_21_break
+:_hex_numerate_21_else
+					# if (c >= 'A' && c <= 'F') ...else ...
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x41
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setge__%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jl32   %_hex_numerate_41_else
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x46
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setle__%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jg32   %_hex_numerate_41_else
+	mov____0x8(%ebp),%eax !0x8
+	add____$i8,%eax !0x-37
+	leave
+	ret
+	jmp32  %_hex_numerate_41_break
+:_hex_numerate_41_else
+	push___%eax
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	pop____%eax
+	mov____$i32,%eax %0x0
+	sub____%edx,%eax
+	leave
+	ret
+:_hex_numerate_41_break
+:_hex_numerate_21_break
+:_hex_numerate_1_break
+	leave
+	ret
+
+
+:decimal
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# if (c >= '0' && c <= '9') ...else ...
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x30
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setge__%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jl32   %_decimal_1_else
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x39
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setle__%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jg32   %_decimal_1_else
+	mov____0x8(%ebp),%eax !0x8
+	add____$i8,%eax !0x-30
+	leave
+	ret
+	jmp32  %_decimal_1_break
+:_decimal_1_else
+	push___%eax
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	pop____%eax
+	mov____$i32,%eax %0x0
+	sub____%edx,%eax
+	leave
+	ret
+:_decimal_1_break
+	leave
+	ret
+
+
+:numerate_string
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# int count = 0; 
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-4
+					# int index; 
+					# int negative; 
+					# if (0 == a[0]) ...else ...
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_numerate_string_6_else
+	mov____$i32,%eax %0x0
+	leave
+	ret
+	jmp32  %_numerate_string_6_break
+:_numerate_string_6_else
+					# if (a[0] == '0' && a[1] == 'x') ...else ...
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x30
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_numerate_string_24_else
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x78
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_numerate_string_24_else
+					# if ('-' == a[2]) ...else ...
+	mov____$i32,%eax %0x2d
+	push___%eax
+	mov____$i32,%eax %0x2
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_numerate_string_51_else
+					# negative = 1
+	mov____$i32,%eax %0x1
+	mov____%eax,0x8(%ebp) !0x-c
+	test___%eax,%eax
+					# index = 3
+	mov____$i32,%eax %0x3
+	mov____%eax,0x8(%ebp) !0x-8
+	test___%eax,%eax
+	jmp32  %_numerate_string_51_break
+:_numerate_string_51_else
+					# negative = 0
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-c
+	test___%eax,%eax
+					# index = 2
+	mov____$i32,%eax %0x2
+	mov____%eax,0x8(%ebp) !0x-8
+	test___%eax,%eax
+:_numerate_string_51_break
+					# while (0 != a[index]) ...
+	jmp32  %_numerate_string_84_continue
+:_numerate_string_84_loop
+					# if (-1 == hex_numerate(a[index])) ...
+	push___%eax
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	pop____%eax
+	mov____$i32,%eax %0x0
+	sub____%edx,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	push___%eax
+	call32 %hex_numerate
+	add____$i8,%esp !0x4
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_numerate_string_87_break
+	mov____$i32,%eax %0x0
+	leave
+	ret
+	jmp32  %_numerate_string_87_break
+:_numerate_string_87_break
+					# count = 16*count + hex_numerate(a[index])
+	mov____$i32,%eax %0x10
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	mul____%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	push___%eax
+	call32 %hex_numerate
+	add____$i8,%esp !0x4
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____%eax,0x8(%ebp) !0x-4
+	test___%eax,%eax
+					# index = index + 1
+	mov____0x8(%ebp),%eax !0x-8
+	add____$i8,%eax !0x1
+	mov____%eax,0x8(%ebp) !0x-8
+	test___%eax,%eax
+:_numerate_string_84_continue
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %_numerate_string_84_break
+	jmp32  %_numerate_string_84_loop
+:_numerate_string_84_break
+	jmp32  %_numerate_string_24_break
+:_numerate_string_24_else
+					# if ('-' == a[0]) ...else ...
+	mov____$i32,%eax %0x2d
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_numerate_string_154_else
+					# negative = 1
+	mov____$i32,%eax %0x1
+	mov____%eax,0x8(%ebp) !0x-c
+	test___%eax,%eax
+					# index = 1
+	mov____$i32,%eax %0x1
+	mov____%eax,0x8(%ebp) !0x-8
+	test___%eax,%eax
+	jmp32  %_numerate_string_154_break
+:_numerate_string_154_else
+					# negative = 0
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-c
+	test___%eax,%eax
+					# index = 0
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-8
+	test___%eax,%eax
+:_numerate_string_154_break
+					# while (0 != a[index]) ...
+	jmp32  %_numerate_string_187_continue
+:_numerate_string_187_loop
+					# if (-1 == decimal(a[index])) ...
+	push___%eax
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	pop____%eax
+	mov____$i32,%eax %0x0
+	sub____%edx,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	push___%eax
+	call32 %decimal
+	add____$i8,%esp !0x4
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_numerate_string_190_break
+	mov____$i32,%eax %0x0
+	leave
+	ret
+	jmp32  %_numerate_string_190_break
+:_numerate_string_190_break
+					# count = 10*count + decimal(a[index])
+	mov____$i32,%eax %0xa
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	mul____%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	push___%eax
+	call32 %decimal
+	add____$i8,%esp !0x4
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____%eax,0x8(%ebp) !0x-4
+	test___%eax,%eax
+					# index = index + 1
+	mov____0x8(%ebp),%eax !0x-8
+	add____$i8,%eax !0x1
+	mov____%eax,0x8(%ebp) !0x-8
+	test___%eax,%eax
+:_numerate_string_187_continue
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %_numerate_string_187_break
+	jmp32  %_numerate_string_187_loop
+:_numerate_string_187_break
+:_numerate_string_24_break
+:_numerate_string_6_break
+					# if (negative) ...
+	mov____0x8(%ebp),%eax !0x-c
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %_numerate_string_257_break
+					# count = count*-1
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	push___%eax
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	pop____%eax
+	mov____$i32,%eax %0x0
+	sub____%edx,%eax
+	mov____%eax,%edx
+	pop____%eax
+	mul____%edx
+	mov____%eax,0x8(%ebp) !0x-4
+	test___%eax,%eax
+	jmp32  %_numerate_string_257_break
+:_numerate_string_257_break
+	mov____0x8(%ebp),%eax !0x-4
+	leave
+	ret
+
+
 :main
 	push___%ebp
 	mov____%esp,%ebp
@@ -1857,15 +2353,11 @@
 	je32   %_main_38_body2
 	jmp32  %_main_38_clause3
 :_main_38_body2
-					# Base_Address = strtol(optarg, 0, 0)
-	mov____$i32,%eax %0x0
-	push___%eax
-	mov____$i32,%eax %0x0
-	push___%eax
+					# Base_Address = numerate_string(optarg)
 	mov____0x32,%eax &optarg
 	push___%eax
-	call32 %strtol
-	add____$i8,%esp !0xc
+	call32 %numerate_string
+	add____$i8,%esp !0x4
 	mov____%eax,0x32 &Base_Address
 	test___%eax,%eax
 	jmp32  %_main_38_break
@@ -1990,7 +2482,7 @@
 	sete___%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jne32  %_main_174_break
+	jne32  %_main_170_break
 					# fprintf(2, "The file: %s can not be opened!\n", optarg); 
 	mov____0x32,%eax &optarg
 	push___%eax
@@ -2006,8 +2498,8 @@
 	call32 %exit
 	add____$i8,%esp !0x4
 	test___%eax,%eax
-	jmp32  %_main_174_break
-:_main_174_break
+	jmp32  %_main_170_break
+:_main_170_break
 	jmp32  %_main_38_break
 	jmp32  %_main_38_body6
 :_main_38_clause6
@@ -2089,12 +2581,12 @@
 	sete___%al
 	movzbl_%al,%eax
 					# jmp test LABEL
-	jne32  %_main_250_break
+	jne32  %_main_246_break
 	mov____$i32,%eax %0x1
 	leave
 	ret
-	jmp32  %_main_250_break
-:_main_250_break
+	jmp32  %_main_246_break
+:_main_246_break
 					# first_pass(input); 
 	push___0x8(%ebp) !0x-4
 	call32 %first_pass
@@ -2110,7 +2602,7 @@
 	test___%eax,%eax
 					# jmp test LABEL
 	test___%eax,%eax
-	je32   %_main_270_break
+	je32   %_main_266_break
 					# if (0 != chmod(output_file, 0750)) ...
 	mov____$i32,%eax %0x0
 	push___%eax
@@ -2132,7 +2624,7 @@
 	sahf
 	pop____%eax
 					# jmp test LABEL
-	jne32  %_main_276_break
+	jne32  %_main_272_break
 					# fprintf(2, "Unable to change permissions\n"); 
 	push___$i32 &_string_open_25
 	mov____$i32,%eax %0x2
@@ -2146,10 +2638,10 @@
 	call32 %exit
 	add____$i8,%esp !0x4
 	test___%eax,%eax
-	jmp32  %_main_276_break
-:_main_276_break
-	jmp32  %_main_270_break
-:_main_270_break
+	jmp32  %_main_272_break
+:_main_272_break
+	jmp32  %_main_266_break
+:_main_266_break
 	mov____$i32,%eax %0x0
 	leave
 	ret

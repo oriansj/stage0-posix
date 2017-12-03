@@ -226,5 +226,14 @@ rm hex2-footer.M1
 
 # Check blood-elf
 diff -a blood-elf blood-elf-0 || echo "blood elf MISMATCH"
+# Check M1
 diff -a M1 M1-0 || echo "M1 MISMATCH"
+# Check hex2
 diff -a hex2 hex2-0 || echo "hex2 MISMATCH"
+
+#########################################
+# Phase-3 Clean up files being tested   #
+#########################################
+rm M1-0
+rm blood-elf-0
+rm hex2-0

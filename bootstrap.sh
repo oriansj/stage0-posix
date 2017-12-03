@@ -45,7 +45,7 @@ set -ex
 	--Architecture=1\
 	-f ../mes/stage0/x86.M1\
 	-f ../mes/lib/crt1.M1\
-	-f ../mes/lib/libc-mes+tcc.M1\
+	-f ../mes/lib/libc+tcc-mes.M1\
 	-f blood-elf.M1\
 	-f blood-elf-footer.M1\
 	-o blood-elf.hex2
@@ -75,7 +75,7 @@ rm blood-elf-footer.M1
 	--Architecture=1\
 	-f ../mes/stage0/x86.M1\
 	-f ../mes/lib/crt1.M1\
-	-f ../mes/lib/libc-mes+tcc.M1\
+	-f ../mes/lib/libc+tcc-mes.M1\
 	-f M1.M1\
 	-f M1-footer.M1\
 	-o M1.hex2
@@ -106,8 +106,7 @@ rm M1-footer.M1
 	--Architecture=1\
 	-f ../mes/stage0/x86.M1\
 	-f ../mes/lib/crt1.M1\
-	-f ../mes/lib/libc-mes+tcc.M1\
-	-f ../mes/lib/libc-mes+tcc.M1\
+	-f ../mes/lib/libc+tcc-mes.M1\
 	-f hex2.M1\
 	-f hex2-footer.M1\
 	-o hex2.hex2
@@ -142,7 +141,7 @@ rm hex2-footer.M1
 	--Architecture=1\
 	-f ../mes/stage0/x86.M1\
 	-f ../mes/lib/crt1.M1\
-	-f ../mes/lib/libc-mes+tcc.M1\
+	-f ../mes/lib/libc+tcc-mes.M1\
 	-f blood-elf.M1\
 	-f blood-elf-footer.M1\
 	-o blood-elf.hex2
@@ -171,7 +170,7 @@ rm blood-elf-footer.M1
 	--Architecture=1\
 	-f ../mes/stage0/x86.M1\
 	-f ../mes/lib/crt1.M1\
-	-f ../mes/lib/libc-mes+tcc.M1\
+	-f ../mes/lib/libc+tcc-mes.M1\
 	-f M1.M1\
 	-f M1-footer.M1\
 	-o M1.hex2
@@ -201,8 +200,7 @@ rm M1-footer.M1
 	--Architecture=1\
 	-f ../mes/stage0/x86.M1\
 	-f ../mes/lib/crt1.M1\
-	-f ../mes/lib/libc-mes+tcc.M1\
-	-f ../mes/lib/libc-mes+tcc.M1\
+	-f ../mes/lib/libc+tcc-mes.M1\
 	-f hex2.M1\
 	-f hex2-footer.M1\
 	-o hex2.hex2

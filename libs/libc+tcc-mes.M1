@@ -1,0 +1,5702 @@
+# -*-comment-start: "//";comment-end:""-*-
+# Mes --- Maxwell Equations of Software
+# Copyright © 2017 Jan (janneke) Nieuwenhuizen <janneke@gnu.org>
+#
+# This file is part of Mes.
+#
+# Mes is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or (at
+# your option) any later version.
+#
+# Mes is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Mes.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+:exit
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%ebx !8
+	mov____$i32,%eax SYS_exit
+	int____$0x80
+	leave
+	ret
+
+
+:write
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%ebx !8
+	mov____0x8(%ebp),%ecx !12
+	mov____0x8(%ebp),%edx !16
+	mov____$i32,%eax SYS_write
+	int____$0x80
+	leave
+	ret
+
+
+:strlen
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-4
+					# while (s[i]) ...
+	jmp32  %_strlen_3_continue
+:_strlen_3_loop
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+:_strlen_3_continue
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	test___%al,%al
+	je32   %_strlen_3_break
+	jmp32  %_strlen_3_loop
+:_strlen_3_break
+	mov____0x8(%ebp),%eax !0x-4
+	leave
+	ret
+
+
+:eputs
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %strlen
+	add____$i8,%esp !0x4
+	mov____%eax,0x8(%ebp) !0x-4
+					# write(2, s, i); 
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %write
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:puts
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %strlen
+	add____$i8,%esp !0x4
+	mov____%eax,0x8(%ebp) !0x-4
+					# write(1, s, i); 
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %write
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:read
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%ebx !8
+	mov____0x8(%ebp),%ecx !12
+	mov____0x8(%ebp),%edx !16
+	mov____$i32,%eax SYS_read
+	int____$0x80
+	leave
+	ret
+
+
+:open
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%ebx !8
+	mov____0x8(%ebp),%ecx !12
+	mov____0x8(%ebp),%edx !16
+	mov____$i32,%eax SYS_open
+	int____$0x80
+	leave
+	ret
+
+
+:chmod
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%ebx !8
+	mov____0x8(%ebp),%ecx !12
+	mov____$i32,%eax SYS_chmod
+	int____$0x80
+	leave
+	ret
+
+
+:access
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%ebx !8
+	mov____0x8(%ebp),%ecx !12
+	mov____$i32,%eax SYS_access
+	int____$0x80
+	leave
+	ret
+
+
+:brk
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%ebx !8
+	mov____$i32,%eax SYS_brk
+	int____$0x80
+	leave
+	ret
+
+
+:ioctl
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%ebx !8
+	mov____0x8(%ebp),%ecx !12
+	mov____0x8(%ebp),%edx !16
+	mov____$i32,%eax SYS_ioctl
+	int____$0x80
+	leave
+	ret
+
+
+:fsync
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%ebx !8
+	mov____$i32,%eax SYS_fsync
+	int____$0x80
+	leave
+	ret
+
+
+:isdigit
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x30
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setge__%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+	test___%eax,%eax
+	je32   %_isdigit_6_and_skip_b
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x39
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setle__%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+	test___%eax,%eax
+:_isdigit_6_and_skip_b
+	leave
+	ret
+
+
+:isxdigit
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %isdigit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jne32  %_isxdigit_4_or_skip_b
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x61
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setge__%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+	test___%eax,%eax
+	je32   %_isxdigit_12_and_skip_b
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x66
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setle__%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+	test___%eax,%eax
+:_isxdigit_12_and_skip_b
+	test___%eax,%eax
+:_isxdigit_4_or_skip_b
+	leave
+	ret
+
+
+:isspace
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x9
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+	jne32  %_isspace_6_or_skip_b
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0xa
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+:_isspace_6_or_skip_b
+	test___%eax,%eax
+	jne32  %_isspace_16_or_skip_b
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0xb
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+:_isspace_16_or_skip_b
+	test___%eax,%eax
+	jne32  %_isspace_26_or_skip_b
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0xc
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+:_isspace_26_or_skip_b
+	test___%eax,%eax
+	jne32  %_isspace_36_or_skip_b
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0xd
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+:_isspace_36_or_skip_b
+	test___%eax,%eax
+	jne32  %_isspace_46_or_skip_b
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x20
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+:_isspace_46_or_skip_b
+	leave
+	ret
+
+
+:isnumber
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# if (base == 2) ...
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____$i32,%eax %0x2
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_isnumber_1_break
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x30
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setge__%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+	test___%eax,%eax
+	je32   %_isnumber_14_and_skip_b
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x31
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setle__%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+	test___%eax,%eax
+:_isnumber_14_and_skip_b
+	leave
+	ret
+	jmp32  %_isnumber_1_break
+:_isnumber_1_break
+					# if (base == 8) ...
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____$i32,%eax %0x8
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_isnumber_27_break
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x30
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setge__%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+	test___%eax,%eax
+	je32   %_isnumber_40_and_skip_b
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x37
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setle__%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+	test___%eax,%eax
+:_isnumber_40_and_skip_b
+	leave
+	ret
+	jmp32  %_isnumber_27_break
+:_isnumber_27_break
+					# if (base == 10) ...
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____$i32,%eax %0xa
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_isnumber_53_break
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %isdigit
+	add____$i8,%esp !0x4
+	leave
+	ret
+	jmp32  %_isnumber_53_break
+:_isnumber_53_break
+					# if (base == 16) ...
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____$i32,%eax %0x10
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_isnumber_67_break
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %isxdigit
+	add____$i8,%esp !0x4
+	leave
+	ret
+	jmp32  %_isnumber_67_break
+:_isnumber_67_break
+	leave
+	ret
+
+
+:abtoi
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0x8
+	mov____(%eax),%eax
+	mov____%eax,0x8(%ebp) !0x-4
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-8
+	mov____$i32,%eax %0x1
+	mov____%eax,0x8(%ebp) !0x-c
+					# if (!base) ...
+	mov____0x8(%ebp),%eax !0xc
+	test___%eax,%eax
+	sete___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %_abtoi_8_break
+					# base = 10
+	mov____$i32,%eax %0xa
+	mov____%eax,0x8(%ebp) !0xc
+	test___%eax,%eax
+	jmp32  %_abtoi_8_break
+:_abtoi_8_break
+					# if (*s && *s == '-') ...
+	mov____0x8(%ebp),%eax !0x-4
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	test___%al,%al
+	je32   %_abtoi_21_break
+	mov____0x8(%ebp),%eax !0x-4
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x2d
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_abtoi_21_break
+					# sign = -1
+	mov____$i32,%eax %0x-1
+	mov____%eax,0x8(%ebp) !0x-c
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+	jmp32  %_abtoi_21_break
+:_abtoi_21_break
+					# while (isnumber(*s, base)) ...
+	jmp32  %_abtoi_50_continue
+:_abtoi_50_loop
+					# i *= base
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	pop____%edx
+	mul____%edx
+	mov____%eax,0x8(%ebp) !0x-8
+	test___%eax,%eax
+					# *s > '9'? ...: ...
+	mov____0x8(%ebp),%eax !0x-4
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x39
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setg___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %_abtoi_61_else
+	mov____$i32,%eax %0x61
+	add____$i8,%eax !0x-a
+	test___%eax,%eax
+	jmp32  %_abtoi_61_break
+:_abtoi_61_else
+	mov____$i32,%eax %0x30
+	test___%eax,%eax
+:_abtoi_61_break
+	mov____%eax,0x8(%ebp) !0x-10
+					# i += *s - m
+	mov____0x8(%ebp),%eax !0x-4
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-10
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	pop____%edx
+	add____%edx,%eax
+	mov____%eax,0x8(%ebp) !0x-8
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+:_abtoi_50_continue
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	call32 %isnumber
+	add____$i8,%esp !0x8
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %_abtoi_50_break
+	jmp32  %_abtoi_50_loop
+:_abtoi_50_break
+					# *p = s
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	mov____%eax,(%edx)
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x-8
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-c
+	mov____%eax,%edx
+	pop____%eax
+	mul____%edx
+	leave
+	ret
+
+
+:atoi
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	push___%eax
+	call32 %abtoi
+	add____$i8,%esp !0x8
+	leave
+	ret
+
+
+:itoa
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____$i32,%eax &itoa-itoa_buf
+	add____$i8,%eax !0xb
+	mov____%eax,0x8(%ebp) !0x-4
+					# *p = 0
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	add____$i8,0x8(%ebp) !0x-4 !0x-1
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-8
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-c
+					# if (x < 0) ...
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setl___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %_itoa_17_break
+					# sign = 1
+	mov____$i32,%eax %0x1
+	mov____%eax,0x8(%ebp) !0x-8
+	test___%eax,%eax
+					# u = -x
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	mov____$i32,%eax %0x0
+	sub____%edx,%eax
+	mov____%eax,0x8(%ebp) !0x-c
+	test___%eax,%eax
+	jmp32  %_itoa_17_break
+:_itoa_17_break
+					# do uwhile (...); 
+:_itoa_39_loop
+					# *p = '0' + u%10
+	mov____$i32,%eax %0x30
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-c
+	push___%eax
+	mov____$i32,%eax %0xa
+	mov____%eax,%edx
+	pop____%eax
+	mov____%edx,%ebx
+	xor____%edx,%edx
+	idiv___%ebx
+	mov____%edx,%eax
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	add____$i8,0x8(%ebp) !0x-4 !0x-1
+	test___%eax,%eax
+					# u = u/10
+	mov____0x8(%ebp),%eax !0x-c
+	push___%eax
+	mov____$i32,%eax %0xa
+	mov____%eax,%edx
+	pop____%eax
+	mov____%edx,%ebx
+	xor____%edx,%edx
+	idiv___%ebx
+	mov____%eax,0x8(%ebp) !0x-c
+	test___%eax,%eax
+:_itoa_39_continue
+	mov____0x8(%ebp),%eax !0x-c
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %_itoa_39_break
+	jmp32  %_itoa_39_loop
+:_itoa_39_break
+					# if (sign && *(p + 1) != '0') ...
+	mov____0x8(%ebp),%eax !0x-8
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %_itoa_74_break
+	mov____0x8(%ebp),%eax !0x-4
+	add____$i8,%eax !0x1
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x30
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %_itoa_74_break
+					# *p = '-'
+	mov____$i32,%eax %0x2d
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	add____$i8,0x8(%ebp) !0x-4 !0x-1
+	test___%eax,%eax
+	jmp32  %_itoa_74_break
+:_itoa_74_break
+	mov____0x8(%ebp),%eax !0x-4
+	add____$i8,%eax !0x1
+	leave
+	ret
+
+
+:itoab
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____$i32,%eax &itoab-itoa_buf
+	add____$i8,%eax !0xb
+	mov____%eax,0x8(%ebp) !0x-4
+					# *p = 0
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	add____$i8,0x8(%ebp) !0x-4 !0x-1
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-8
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-c
+					# if (x < 0) ...
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setl___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %_itoab_17_break
+					# sign = 1
+	mov____$i32,%eax %0x1
+	mov____%eax,0x8(%ebp) !0x-8
+	test___%eax,%eax
+					# u = -x
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	mov____$i32,%eax %0x0
+	sub____%edx,%eax
+	mov____%eax,0x8(%ebp) !0x-c
+	test___%eax,%eax
+	jmp32  %_itoab_17_break
+:_itoab_17_break
+					# do uwhile (...); 
+:_itoab_39_loop
+	mov____0x8(%ebp),%eax !0x-c
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	mov____%edx,%ebx
+	xor____%edx,%edx
+	idiv___%ebx
+	mov____%edx,%eax
+	mov____%eax,0x8(%ebp) !0x-10
+					# *p = i > 9? 'a' + i - 10: '0' + i
+					# i > 9? ...: ...
+	mov____0x8(%ebp),%eax !0x-10
+	push___%eax
+	mov____$i32,%eax %0x9
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setg___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %_itoab_48_else
+	mov____$i32,%eax %0x61
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-10
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	add____$i8,%eax !0x-a
+	test___%eax,%eax
+	jmp32  %_itoab_48_break
+:_itoab_48_else
+	mov____$i32,%eax %0x30
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-10
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	test___%eax,%eax
+:_itoab_48_break
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	add____$i8,0x8(%ebp) !0x-4 !0x-1
+	test___%eax,%eax
+					# x = u/base
+	mov____0x8(%ebp),%eax !0x-c
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	mov____%edx,%ebx
+	xor____%edx,%edx
+	idiv___%ebx
+	mov____%eax,0x8(%ebp) !0x8
+	test___%eax,%eax
+:_itoab_39_continue
+	mov____0x8(%ebp),%eax !0x-c
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %_itoab_39_break
+	jmp32  %_itoab_39_loop
+:_itoab_39_break
+					# if (sign && *(p + 1) != '0') ...
+	mov____0x8(%ebp),%eax !0x-8
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %_itoab_95_break
+	mov____0x8(%ebp),%eax !0x-4
+	add____$i8,%eax !0x1
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x30
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %_itoab_95_break
+					# *p = '-'
+	mov____$i32,%eax %0x2d
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	add____$i8,0x8(%ebp) !0x-4 !0x-1
+	test___%eax,%eax
+	jmp32  %_itoab_95_break
+:_itoab_95_break
+	mov____0x8(%ebp),%eax !0x-4
+	add____$i8,%eax !0x1
+	leave
+	ret
+
+
+:fdputc
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# write(fd, (char*)&c, 1); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x8
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	call32 %write
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:fdputs
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %strlen
+	add____$i8,%esp !0x4
+	mov____%eax,0x8(%ebp) !0x-4
+					# write(fd, s, i); 
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	call32 %write
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:eputc
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____$i32,%eax %0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %fdputc
+	add____$i8,%esp !0x8
+	leave
+	ret
+
+
+:putchar
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# write(1, (char*)&c, 1); 
+	mov____$i32,%eax %0x1
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x1
+	push___%eax
+	call32 %write
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:assert_fail
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# eputs("assert fail: "); 
+	push___$i32 &_string_libc+tcc-mes_0
+	call32 %eputs
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+					# eputs(s); 
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %eputs
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+					# eputs(" "); 
+	push___$i32 &_string_libc+tcc-mes_1
+	call32 %eputs
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+					# fail = 0
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-4
+	test___%eax,%eax
+					# *fail = 0
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	test___%eax,%eax
+	leave
+	ret
+
+
+:getchar
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# if (ungetc_char == -1) ...else ...
+	mov____0x32,%eax &ungetc_char
+	push___%eax
+	mov____$i32,%eax %0x-1
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_getchar_1_else
+	mov____$i32,%eax %0x1
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	push___%eax
+	mov____0x32,%eax &g_stdin
+	push___%eax
+	call32 %read
+	add____$i8,%esp !0xc
+	mov____%eax,0x8(%ebp) !0x-c
+					# if (r < 1) ...
+	mov____0x8(%ebp),%eax !0x-c
+	push___%eax
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setl___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %_getchar_17_break
+	mov____$i32,%eax %0x-1
+	leave
+	ret
+	jmp32  %_getchar_17_break
+:_getchar_17_break
+					# i = c
+	mov____0x8(%ebp),%eax !0x-4
+	movsbl_%al,%eax
+	mov____%eax,0x8(%ebp) !0x-8
+	test___%eax,%eax
+	jmp32  %_getchar_1_break
+:_getchar_1_else
+					# i = ungetc_buf[ungetc_char]
+	mov____0x32,%eax &ungetc_char
+	mov____%eax,%edx
+	push___%eax
+	mov____$i32,%eax &ungetc_buf
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	mov____%eax,0x8(%ebp) !0x-8
+	test___%eax,%eax
+					# ungetc_char = ungetc_char - 1
+	mov____0x32,%eax &ungetc_char
+	add____$i8,%eax !0x-1
+	mov____%eax,0x32 &ungetc_char
+	test___%eax,%eax
+:_getchar_1_break
+					# if (i < 0) ...
+	mov____0x8(%ebp),%eax !0x-8
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setl___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %_getchar_53_break
+					# i += 256
+	mov____$i32,%eax %0x100
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	pop____%edx
+	add____%edx,%eax
+	mov____%eax,0x8(%ebp) !0x-8
+	test___%eax,%eax
+	jmp32  %_getchar_53_break
+:_getchar_53_break
+	mov____0x8(%ebp),%eax !0x-8
+	leave
+	ret
+
+
+:fgetc
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____$i32,%eax %0x1
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %read
+	add____$i8,%esp !0xc
+	mov____%eax,0x8(%ebp) !0x-c
+					# if (r < 1) ...
+	mov____0x8(%ebp),%eax !0x-c
+	push___%eax
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setl___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %_fgetc_9_break
+	mov____$i32,%eax %0x-1
+	leave
+	ret
+	jmp32  %_fgetc_9_break
+:_fgetc_9_break
+					# i = c
+	mov____0x8(%ebp),%eax !0x-4
+	movsbl_%al,%eax
+	mov____%eax,0x8(%ebp) !0x-8
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x-8
+	leave
+	ret
+
+
+:free
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	leave
+	ret
+
+
+:ungetc
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x32,%eax &ungetc_char
+	push___%eax
+	mov____$i32,%eax &ungetc_char
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+					# ungetc_buf[ungetc_char] = c
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____0x32,%eax &ungetc_char
+	mov____%eax,%edx
+	push___%eax
+	mov____$i32,%eax &ungetc_buf
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x8
+	leave
+	ret
+
+
+:strcmp
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# while (*a && *b && *a == *b) ...
+	jmp32  %_strcmp_1_continue
+:_strcmp_1_loop
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x8
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0xc
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+:_strcmp_1_continue
+	mov____0x8(%ebp),%eax !0x8
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	test___%al,%al
+	je32   %_strcmp_1_break
+	mov____0x8(%ebp),%eax !0xc
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	test___%al,%al
+	je32   %_strcmp_1_break
+	mov____0x8(%ebp),%eax !0x8
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_strcmp_1_break
+	jmp32  %_strcmp_1_loop
+:_strcmp_1_break
+	mov____0x8(%ebp),%eax !0x8
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	leave
+	ret
+
+
+:strcpy
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+					# while (*src) ...
+	jmp32  %_strcpy_3_continue
+:_strcpy_3_loop
+					# *p = *src++
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0xc
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	add____$i8,0x8(%ebp) !0x-4 !0x1
+	test___%eax,%eax
+:_strcpy_3_continue
+	mov____0x8(%ebp),%eax !0xc
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	test___%al,%al
+	je32   %_strcpy_3_break
+	jmp32  %_strcpy_3_loop
+:_strcpy_3_break
+					# *p = 0
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x8
+	leave
+	ret
+
+
+:malloc
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# if (!g_brk) ...
+	mov____0x32,%eax &g_brk
+	test___%eax,%eax
+	sete___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %_malloc_1_break
+					# g_brk = brk(0)
+	mov____$i32,%eax %0x0
+	push___%eax
+	call32 %brk
+	add____$i8,%esp !0x4
+	mov____%eax,0x32 &g_brk
+	test___%eax,%eax
+	jmp32  %_malloc_1_break
+:_malloc_1_break
+					# if (brk(g_brk + size) == (void*)-1) ...
+	mov____0x32,%eax &g_brk
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	push___%eax
+	call32 %brk
+	add____$i8,%esp !0x4
+	push___%eax
+	mov____$i32,%eax %0x-1
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_malloc_16_break
+	mov____$i32,%eax %0x0
+	leave
+	ret
+	jmp32  %_malloc_16_break
+:_malloc_16_break
+	mov____0x32,%eax &g_brk
+	mov____%eax,0x8(%ebp) !0x-4
+					# g_brk += size
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____0x32,%eax &g_brk
+	pop____%edx
+	add____%edx,%eax
+	mov____%eax,0x32 &g_brk
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x-4
+	leave
+	ret
+
+
+:memcpy
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,0x8(%ebp) !0x-8
+					# while (n--) ...
+	jmp32  %_memcpy_5_continue
+:_memcpy_5_loop
+					# *p = *q++
+	mov____0x8(%ebp),%eax !0x-8
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-8
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	add____$i8,0x8(%ebp) !0x-4 !0x1
+	test___%eax,%eax
+:_memcpy_5_continue
+	mov____0x8(%ebp),%eax !0x10
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x10
+	add____$i8,(%eax) !0x-1
+	pop____%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %_memcpy_5_break
+	jmp32  %_memcpy_5_loop
+:_memcpy_5_break
+	mov____0x8(%ebp),%eax !0x8
+	leave
+	ret
+
+
+:realloc
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	call32 %malloc
+	add____$i8,%esp !0x4
+	mov____%eax,0x8(%ebp) !0x-4
+					# if (ptr && new) ...
+	mov____0x8(%ebp),%eax !0x8
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %_realloc_5_break
+	mov____0x8(%ebp),%eax !0x-4
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %_realloc_5_break
+					# memcpy(new, ptr, size); 
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	call32 %memcpy
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+					# free(ptr); 
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %free
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %_realloc_5_break
+:_realloc_5_break
+	mov____0x8(%ebp),%eax !0x-4
+	leave
+	ret
+
+
+:strncmp
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# while (*a && *b && *a == *b && --length) ...
+	jmp32  %_strncmp_1_continue
+:_strncmp_1_loop
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x8
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0xc
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+:_strncmp_1_continue
+	mov____0x8(%ebp),%eax !0x8
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	test___%al,%al
+	je32   %_strncmp_1_break
+	mov____0x8(%ebp),%eax !0xc
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	test___%al,%al
+	je32   %_strncmp_1_break
+	mov____0x8(%ebp),%eax !0x8
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_strncmp_1_break
+	mov____%ebp,%eax
+	add____$i8,%eax !0x10
+	add____$i8,(%eax) !0x-1
+	mov____0x8(%ebp),%eax !0x10
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %_strncmp_1_break
+	jmp32  %_strncmp_1_loop
+:_strncmp_1_break
+	mov____0x8(%ebp),%eax !0x8
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	leave
+	ret
+
+
+:getenv
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x32,%eax &g_environment
+	mov____%eax,0x8(%ebp) !0x-4
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %strlen
+	add____$i8,%esp !0x4
+	mov____%eax,0x8(%ebp) !0x-8
+					# while (*p) ...
+	jmp32  %_getenv_7_continue
+:_getenv_7_loop
+					# if (!strncmp(s, *p, length) && *(*p + length) == '=') ...
+	mov____0x8(%ebp),%eax !0x-8
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____(%eax),%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %strncmp
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+	sete___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %_getenv_10_break
+	mov____0x8(%ebp),%eax !0x-4
+	mov____(%eax),%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x3d
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_getenv_10_break
+	mov____0x8(%ebp),%eax !0x-4
+	mov____(%eax),%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	add____$i8,%eax !0x1
+	leave
+	ret
+	jmp32  %_getenv_10_break
+:_getenv_10_break
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	add____$i8,(%eax) !0x4
+	pop____%eax
+	test___%eax,%eax
+:_getenv_7_continue
+	mov____0x8(%ebp),%eax !0x-4
+	mov____(%eax),%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %_getenv_7_break
+	jmp32  %_getenv_7_loop
+:_getenv_7_break
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:setenv
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x32,%eax &g_environment
+	mov____%eax,0x8(%ebp) !0x-4
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %strlen
+	add____$i8,%esp !0x4
+	mov____%eax,0x8(%ebp) !0x-8
+					# while (*p) ...
+	jmp32  %_setenv_7_continue
+:_setenv_7_loop
+					# if (!strncmp(s, *p, length) && *(*p + length) == '=') ...
+	mov____0x8(%ebp),%eax !0x-8
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____(%eax),%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %strncmp
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+	sete___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %_setenv_10_break
+	mov____0x8(%ebp),%eax !0x-4
+	mov____(%eax),%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x3d
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_setenv_10_break
+	jmp32  %_setenv_7_break
+	jmp32  %_setenv_10_break
+:_setenv_10_break
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	add____$i8,(%eax) !0x4
+	pop____%eax
+	test___%eax,%eax
+:_setenv_7_continue
+	mov____0x8(%ebp),%eax !0x-4
+	mov____(%eax),%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %_setenv_7_break
+	jmp32  %_setenv_7_loop
+:_setenv_7_break
+	mov____0x8(%ebp),%eax !0x-8
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	call32 %strlen
+	add____$i8,%esp !0x4
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	add____$i8,%eax !0x2
+	push___%eax
+	call32 %malloc
+	add____$i8,%esp !0x4
+	mov____%eax,0x8(%ebp) !0x-c
+	mov____0x8(%ebp),%eax !0x-4
+	mov____(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+	mov____%eax,0x8(%ebp) !0x-10
+					# *p = entry
+	mov____0x8(%ebp),%eax !0x-c
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	mov____%eax,(%edx)
+	test___%eax,%eax
+					# strcpy(entry, s); 
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-c
+	push___%eax
+	call32 %strcpy
+	add____$i8,%esp !0x8
+	test___%eax,%eax
+					# strcpy(entry + length, "="); 
+	push___$i32 &_string_libc+tcc-mes_2
+	mov____0x8(%ebp),%eax !0x-c
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	push___%eax
+	call32 %strcpy
+	add____$i8,%esp !0x8
+	test___%eax,%eax
+					# strcpy(entry + length + 1, v); 
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-c
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	add____$i8,%eax !0x1
+	push___%eax
+	call32 %strcpy
+	add____$i8,%esp !0x8
+	test___%eax,%eax
+					# *(entry + length + strlen(v) + 2) = 0
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-c
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	call32 %strlen
+	add____$i8,%esp !0x4
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	add____$i8,%eax !0x2
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	test___%eax,%eax
+					# if (end_p) ...
+	mov____0x8(%ebp),%eax !0x-10
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %_setenv_130_break
+					# *++p = 0
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	add____$i8,(%eax) !0x4
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	mov____%eax,(%edx)
+	test___%eax,%eax
+	jmp32  %_setenv_130_break
+:_setenv_130_break
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:vprintf
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+					# while (*p) ...
+	jmp32  %_vprintf_3_continue
+:_vprintf_3_loop
+					# if (*p != '%') ...else ...
+	mov____0x8(%ebp),%eax !0x-4
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x25
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %_vprintf_6_else
+					# putchar(*p++); 
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	call32 %putchar
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %_vprintf_6_break
+:_vprintf_6_else
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x-4
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	mov____%eax,0x8(%ebp) !0x-8
+					# switch (c) {   ...} 
+	mov____0x8(%ebp),%eax !0x-8
+	movsbl_%al,%eax
+:_vprintf_39_clause0
+	cmp____$i8,%eax !0x25
+	je32   %_vprintf_39_body0
+	jmp32  %_vprintf_39_clause1
+:_vprintf_39_body0
+					# putchar(*p); 
+	mov____0x8(%ebp),%eax !0x-4
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	call32 %putchar
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %_vprintf_39_break
+:_vprintf_39_clause1
+	cmp____$i8,%eax !0x63
+	je32   %_vprintf_39_body1
+	jmp32  %_vprintf_39_clause2
+:_vprintf_39_body1
+					# c = (char)(int*)(ap = ap + 4)[-1]
+	mov____$i32,%eax %0x-1
+	shl____$i8,%eax !0x2
+	push___%eax
+					# ap = ap + 4
+	mov____0x8(%ebp),%eax !0xc
+	add____$i8,%eax !0x4
+	mov____%eax,0x8(%ebp) !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	movsbl_%al,%eax
+	mov____%eax,0x8(%ebp) !0x-c
+	test___%eax,%eax
+					# putchar(c); 
+	mov____0x8(%ebp),%eax !0x-c
+	movsbl_%al,%eax
+	push___%eax
+	call32 %putchar
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %_vprintf_39_break
+:_vprintf_39_clause2
+	cmp____$i8,%eax !0x64
+	je32   %_vprintf_39_body2
+	jmp32  %_vprintf_39_clause3
+:_vprintf_39_body2
+					# d = (int)(int*)(ap = ap + 4)[-1]
+	mov____$i32,%eax %0x-1
+	shl____$i8,%eax !0x2
+	push___%eax
+					# ap = ap + 4
+	mov____0x8(%ebp),%eax !0xc
+	add____$i8,%eax !0x4
+	mov____%eax,0x8(%ebp) !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	mov____%eax,0x8(%ebp) !0x-10
+	test___%eax,%eax
+					# puts(itoa(d)); 
+	mov____0x8(%ebp),%eax !0x-10
+	push___%eax
+	call32 %itoa
+	add____$i8,%esp !0x4
+	push___%eax
+	call32 %puts
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %_vprintf_39_break
+:_vprintf_39_clause3
+	cmp____$i8,%eax !0x73
+	je32   %_vprintf_39_body3
+	jmp32  %_vprintf_39_clause4
+:_vprintf_39_body3
+					# s = (char*)(int*)(ap = ap + 4)[-1]
+	mov____$i32,%eax %0x-1
+	shl____$i8,%eax !0x2
+	push___%eax
+					# ap = ap + 4
+	mov____0x8(%ebp),%eax !0xc
+	add____$i8,%eax !0x4
+	mov____%eax,0x8(%ebp) !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	mov____%eax,0x8(%ebp) !0x-14
+	test___%eax,%eax
+					# puts(s); 
+	mov____0x8(%ebp),%eax !0x-14
+	push___%eax
+	call32 %puts
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %_vprintf_39_break
+:_vprintf_39_clause4
+:_vprintf_39_body4
+:_vprintf_39_default
+					# putchar(*p); 
+	mov____0x8(%ebp),%eax !0x-4
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	call32 %putchar
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	jmp32  %_vprintf_39_break
+	jmp32  %_vprintf_39_break
+:_vprintf_39_clause5
+	jmp32  %_vprintf_39_default
+:_vprintf_39_break
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+:_vprintf_6_break
+:_vprintf_3_continue
+	mov____0x8(%ebp),%eax !0x-4
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	test___%al,%al
+	je32   %_vprintf_3_break
+	jmp32  %_vprintf_3_loop
+:_vprintf_3_break
+					# ap = 0
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0xc
+	movzbl_%al,%eax
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:printf
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# ap = (char*)(&format + 1)
+	mov____%ebp,%eax
+	add____$i8,%eax !0x8
+	add____$i8,%eax !0x4
+	mov____%eax,0x8(%ebp) !0x-4
+	movzbl_%al,%eax
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %vprintf
+	add____$i8,%esp !0x8
+	mov____%eax,0x8(%ebp) !0x-8
+					# ap = 0
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-4
+	movzbl_%al,%eax
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x-8
+	leave
+	ret
+
+
+:vsprintf
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,0x8(%ebp) !0x-4
+					# while (*p) ...
+	jmp32  %_vsprintf_3_continue
+:_vsprintf_3_loop
+					# if (*p != '%') ...else ...
+	mov____0x8(%ebp),%eax !0x-4
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x25
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %_vsprintf_6_else
+					# *str = *p++
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	add____$i8,0x8(%ebp) !0x8 !0x1
+	test___%eax,%eax
+	jmp32  %_vsprintf_6_break
+:_vsprintf_6_else
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x-4
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	mov____%eax,0x8(%ebp) !0x-8
+					# switch (c) {   ...} 
+	mov____0x8(%ebp),%eax !0x-8
+	movsbl_%al,%eax
+:_vsprintf_43_clause0
+	cmp____$i8,%eax !0x25
+	je32   %_vsprintf_43_body0
+	jmp32  %_vsprintf_43_clause1
+:_vsprintf_43_body0
+					# *str = *p
+	mov____0x8(%ebp),%eax !0x-4
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	add____$i8,0x8(%ebp) !0x8 !0x1
+	test___%eax,%eax
+	jmp32  %_vsprintf_43_break
+:_vsprintf_43_clause1
+	cmp____$i8,%eax !0x63
+	je32   %_vsprintf_43_body1
+	jmp32  %_vsprintf_43_clause2
+:_vsprintf_43_body1
+					# c = (char)(int*)(ap = ap + 4)[-1]
+	mov____$i32,%eax %0x-1
+	shl____$i8,%eax !0x2
+	push___%eax
+					# ap = ap + 4
+	mov____0x8(%ebp),%eax !0x10
+	add____$i8,%eax !0x4
+	mov____%eax,0x8(%ebp) !0x10
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	movsbl_%al,%eax
+	mov____%eax,0x8(%ebp) !0x-c
+	test___%eax,%eax
+					# *str = c
+	mov____0x8(%ebp),%eax !0x-c
+	movsbl_%al,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	add____$i8,0x8(%ebp) !0x8 !0x1
+	test___%eax,%eax
+	jmp32  %_vsprintf_43_break
+:_vsprintf_43_clause2
+	cmp____$i8,%eax !0x64
+	je32   %_vsprintf_43_body2
+	jmp32  %_vsprintf_43_clause3
+:_vsprintf_43_body2
+					# d = (int)(int*)(ap = ap + 4)[-1]
+	mov____$i32,%eax %0x-1
+	shl____$i8,%eax !0x2
+	push___%eax
+					# ap = ap + 4
+	mov____0x8(%ebp),%eax !0x10
+	add____$i8,%eax !0x4
+	mov____%eax,0x8(%ebp) !0x10
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	mov____%eax,0x8(%ebp) !0x-10
+	test___%eax,%eax
+					# s = itoa(d)
+	mov____0x8(%ebp),%eax !0x-10
+	push___%eax
+	call32 %itoa
+	add____$i8,%esp !0x4
+	mov____%eax,0x8(%ebp) !0x-14
+	test___%eax,%eax
+					# while (*s) ...
+	jmp32  %_vsprintf_117_continue
+:_vsprintf_117_loop
+					# *str = *s++
+	mov____0x8(%ebp),%eax !0x-14
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-14
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	add____$i8,0x8(%ebp) !0x8 !0x1
+	test___%eax,%eax
+:_vsprintf_117_continue
+	mov____0x8(%ebp),%eax !0x-14
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	test___%al,%al
+	je32   %_vsprintf_117_break
+	jmp32  %_vsprintf_117_loop
+:_vsprintf_117_break
+	jmp32  %_vsprintf_43_break
+:_vsprintf_43_clause3
+	cmp____$i8,%eax !0x73
+	je32   %_vsprintf_43_body3
+	jmp32  %_vsprintf_43_clause4
+:_vsprintf_43_body3
+					# s = (char*)(int*)(ap = ap + 4)[-1]
+	mov____$i32,%eax %0x-1
+	shl____$i8,%eax !0x2
+	push___%eax
+					# ap = ap + 4
+	mov____0x8(%ebp),%eax !0x10
+	add____$i8,%eax !0x4
+	mov____%eax,0x8(%ebp) !0x10
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	mov____%eax,0x8(%ebp) !0x-18
+	test___%eax,%eax
+					# while (*s) ...
+	jmp32  %_vsprintf_164_continue
+:_vsprintf_164_loop
+					# *str = *s++
+	mov____0x8(%ebp),%eax !0x-18
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-18
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	add____$i8,0x8(%ebp) !0x8 !0x1
+	test___%eax,%eax
+:_vsprintf_164_continue
+	mov____0x8(%ebp),%eax !0x-18
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	test___%al,%al
+	je32   %_vsprintf_164_break
+	jmp32  %_vsprintf_164_loop
+:_vsprintf_164_break
+	jmp32  %_vsprintf_43_break
+:_vsprintf_43_clause4
+:_vsprintf_43_body4
+:_vsprintf_43_default
+					# *str = *p
+	mov____0x8(%ebp),%eax !0x-4
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	add____$i8,0x8(%ebp) !0x8 !0x1
+	test___%eax,%eax
+	jmp32  %_vsprintf_43_break
+	jmp32  %_vsprintf_43_break
+:_vsprintf_43_clause5
+	jmp32  %_vsprintf_43_default
+:_vsprintf_43_break
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+:_vsprintf_6_break
+:_vsprintf_3_continue
+	mov____0x8(%ebp),%eax !0x-4
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	test___%al,%al
+	je32   %_vsprintf_3_break
+	jmp32  %_vsprintf_3_loop
+:_vsprintf_3_break
+					# ap = 0
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x10
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# *str = 0
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %strlen
+	add____$i8,%esp !0x4
+	leave
+	ret
+
+
+:sprintf
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# ap = (char*)(&format + 1)
+	mov____%ebp,%eax
+	add____$i8,%eax !0xc
+	add____$i8,%eax !0x4
+	mov____%eax,0x8(%ebp) !0x-4
+	movzbl_%al,%eax
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %vsprintf
+	add____$i8,%esp !0xc
+	mov____%eax,0x8(%ebp) !0x-8
+					# ap = 0
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-4
+	movzbl_%al,%eax
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x-8
+	leave
+	ret
+
+
+:isatty
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____$i32,%eax %0x5401
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %ioctl
+	add____$i8,%esp !0xc
+	push___%eax
+	mov____$i32,%eax %0xf0
+	mov____%eax,%edx
+	pop____%eax
+	and____%edx,%eax
+	leave
+	ret
+
+
+:close
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%ebx !8
+	mov____$i32,%eax SYS_close
+	int____$0x80
+	leave
+	ret
+
+
+:unlink
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%ebx !8
+	mov____$i32,%eax SYS_unlink
+	int____$0x80
+	leave
+	ret
+
+
+:lseek
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%ebx !8
+	mov____0x8(%ebp),%ecx !12
+	mov____0x8(%ebp),%edx !16
+	mov____$i32,%eax SYS_lseek
+	int____$0x80
+	leave
+	ret
+
+
+:getcwd
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%ebx !8
+	mov____0x8(%ebp),%ecx !12
+	mov____$i32,%eax SYS_getcwd
+	int____$0x80
+	leave
+	ret
+
+
+:dlclose
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:dlopen
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:execvp
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# eputs("execvp stub "); 
+	push___$i32 &_string_libc+tcc-mes_3
+	call32 %eputs
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:fclose
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	call32 %close
+	add____$i8,%esp !0x4
+	leave
+	ret
+
+
+:fdopen
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0x8
+	leave
+	ret
+
+
+:ferror
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+					# if (fd == -1) ...
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____$i32,%eax %0x-1
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_ferror_3_break
+	mov____$i32,%eax %0x-1
+	leave
+	ret
+	jmp32  %_ferror_3_break
+:_ferror_3_break
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:fflush
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# eputs("fflush stub "); 
+	push___$i32 &_string_libc+tcc-mes_4
+	call32 %eputs
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:fopen
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# eputs("fopen stub "); 
+	push___$i32 &_string_libc+tcc-mes_5
+	call32 %eputs
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:fprintf
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# ap = (char*)(&format + 1)
+	mov____%ebp,%eax
+	add____$i8,%eax !0xc
+	add____$i8,%eax !0x4
+	mov____%eax,0x8(%ebp) !0x-4
+	movzbl_%al,%eax
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %vfprintf
+	add____$i8,%esp !0xc
+	mov____%eax,0x8(%ebp) !0x-8
+					# ap = 0
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-4
+	movzbl_%al,%eax
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x-8
+	leave
+	ret
+
+
+:fread
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# eputs("fread stub "); 
+	push___$i32 &_string_libc+tcc-mes_6
+	call32 %eputs
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:fseek
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# eputs("fseek stub "); 
+	push___$i32 &_string_libc+tcc-mes_7
+	call32 %eputs
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:ftell
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# eputs("ftell stub "); 
+	push___$i32 &_string_libc+tcc-mes_8
+	call32 %eputs
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:fwrite
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0x14
+	mov____%eax,0x8(%ebp) !0x-4
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____0x8(%ebp),%eax !0x10
+	mov____%eax,%edx
+	pop____%eax
+	mul____%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	call32 %write
+	add____$i8,%esp !0xc
+	leave
+	ret
+
+
+:gettimeofday
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:ldexp
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# eputs("ldexp stub "); 
+	push___$i32 &_string_libc+tcc-mes_9
+	call32 %eputs
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:localtime
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# eputs("localtime stub "); 
+	push___$i32 &_string_libc+tcc-mes_10
+	call32 %eputs
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:memmove
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# if (dest < src) ...
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setl___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %_memmove_1_break
+	mov____0x8(%ebp),%eax !0x10
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %memcpy
+	add____$i8,%esp !0xc
+	leave
+	ret
+	jmp32  %_memmove_1_break
+:_memmove_1_break
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____0x8(%ebp),%eax !0x10
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____%eax,0x8(%ebp) !0x-4
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____0x8(%ebp),%eax !0x10
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____%eax,0x8(%ebp) !0x-8
+					# while (n--) ...
+	jmp32  %_memmove_31_continue
+:_memmove_31_loop
+					# *--p = *--q
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-8
+	add____$i8,(%eax) !0x-1
+	mov____0x8(%ebp),%eax !0x-8
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	add____$i8,(%eax) !0x-1
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	test___%eax,%eax
+:_memmove_31_continue
+	mov____0x8(%ebp),%eax !0x10
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x10
+	add____$i8,(%eax) !0x-1
+	pop____%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %_memmove_31_break
+	jmp32  %_memmove_31_loop
+:_memmove_31_break
+	mov____0x8(%ebp),%eax !0x8
+	leave
+	ret
+
+
+:memset
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+					# while (n--) ...
+	jmp32  %_memset_3_continue
+:_memset_3_loop
+					# *p = c
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	add____$i8,0x8(%ebp) !0x-4 !0x1
+	test___%eax,%eax
+:_memset_3_continue
+	mov____0x8(%ebp),%eax !0x10
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x10
+	add____$i8,(%eax) !0x-1
+	pop____%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %_memset_3_break
+	jmp32  %_memset_3_loop
+:_memset_3_break
+	mov____0x8(%ebp),%eax !0x8
+	leave
+	ret
+
+
+:memcmp
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,0x8(%ebp) !0x-8
+					# while (*a == *b && --n) ...
+	jmp32  %_memcmp_5_continue
+:_memcmp_5_loop
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x-8
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-8
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+:_memcmp_5_continue
+	mov____0x8(%ebp),%eax !0x-4
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_memcmp_5_break
+	mov____%ebp,%eax
+	add____$i8,%eax !0x10
+	add____$i8,(%eax) !0x-1
+	mov____0x8(%ebp),%eax !0x10
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %_memcmp_5_break
+	jmp32  %_memcmp_5_loop
+:_memcmp_5_break
+	mov____0x8(%ebp),%eax !0x-4
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	leave
+	ret
+
+
+:mprotect
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:qswap
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# memcpy(buf, a, size); 
+	mov____0x8(%ebp),%eax !0x10
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-20
+	push___%eax
+	call32 %memcpy
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+					# memcpy(a, b, size); 
+	mov____0x8(%ebp),%eax !0x10
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %memcpy
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+					# memcpy(b, buf, size); 
+	mov____0x8(%ebp),%eax !0x10
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-20
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	call32 %memcpy
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+	leave
+	ret
+
+
+:qpart
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____0x8(%ebp),%eax !0x10
+	mov____%eax,%edx
+	pop____%eax
+	mul____%edx
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____%eax,0x8(%ebp) !0x-4
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-8
+					# for (size_t j = 0; j < count; j++) ...
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-c
+	jmp32  %_qpart_13_initial_skip
+:_qpart_13_loop
+					# if (compare(base + j*size, p) < 0) ...
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-c
+	push___%eax
+	mov____0x8(%ebp),%eax !0x10
+	mov____%eax,%edx
+	pop____%eax
+	mul____%edx
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x14
+	push___%eax
+	pop____%eax
+	call___*%eax
+	add____$i8,%esp !0x8
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setl___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %_qpart_18_break
+					# qswap(base + i*size, base + j*size, size); 
+	mov____0x8(%ebp),%eax !0x10
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-c
+	push___%eax
+	mov____0x8(%ebp),%eax !0x10
+	mov____%eax,%edx
+	pop____%eax
+	mul____%edx
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	push___%eax
+	mov____0x8(%ebp),%eax !0x10
+	mov____%eax,%edx
+	pop____%eax
+	mul____%edx
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	push___%eax
+	call32 %qswap
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x-8
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-8
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+	jmp32  %_qpart_18_break
+:_qpart_18_break
+:_qpart_13_continue
+	mov____0x8(%ebp),%eax !0x-c
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-c
+	add____$i8,(%eax) !0x1
+	pop____%eax
+:_qpart_13_initial_skip
+	mov____0x8(%ebp),%eax !0x-c
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setb___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %_qpart_13_break
+	jmp32  %_qpart_13_loop
+:_qpart_13_break
+					# if (compare(base + count*size, base + i*size) < 0) ...
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	push___%eax
+	mov____0x8(%ebp),%eax !0x10
+	mov____%eax,%edx
+	pop____%eax
+	mul____%edx
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____0x8(%ebp),%eax !0x10
+	mov____%eax,%edx
+	pop____%eax
+	mul____%edx
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x14
+	push___%eax
+	pop____%eax
+	call___*%eax
+	add____$i8,%esp !0x8
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setl___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %_qpart_88_break
+					# qswap(base + i*size, base + count*size, size); 
+	mov____0x8(%ebp),%eax !0x10
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____0x8(%ebp),%eax !0x10
+	mov____%eax,%edx
+	pop____%eax
+	mul____%edx
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	push___%eax
+	mov____0x8(%ebp),%eax !0x10
+	mov____%eax,%edx
+	pop____%eax
+	mul____%edx
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	push___%eax
+	call32 %qswap
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+	jmp32  %_qpart_88_break
+:_qpart_88_break
+	mov____0x8(%ebp),%eax !0x-8
+	leave
+	ret
+
+
+:qsort
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# if (count > 1) ...
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	seta___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %_qsort_1_break
+	mov____0x8(%ebp),%eax !0x14
+	push___%eax
+	mov____0x8(%ebp),%eax !0x10
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	add____$i8,%eax !0x-1
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %qpart
+	add____$i8,%esp !0x10
+	mov____%eax,0x8(%ebp) !0x-4
+					# qsort(base, p, size, compare); 
+	mov____0x8(%ebp),%eax !0x14
+	push___%eax
+	mov____0x8(%ebp),%eax !0x10
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %qsort
+	add____$i8,%esp !0x10
+	test___%eax,%eax
+					# qsort(base + p*size, count - p, size, compare); 
+	mov____0x8(%ebp),%eax !0x14
+	push___%eax
+	mov____0x8(%ebp),%eax !0x10
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____0x8(%ebp),%eax !0x10
+	mov____%eax,%edx
+	pop____%eax
+	mul____%edx
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	push___%eax
+	call32 %qsort
+	add____$i8,%esp !0x10
+	test___%eax,%eax
+	jmp32  %_qsort_1_break
+:_qsort_1_break
+	leave
+	ret
+
+
+:remove
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# eputs("remove stub "); 
+	push___$i32 &_string_libc+tcc-mes_11
+	call32 %eputs
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:sigaction
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:sigemptyset
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:snprintf
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# ap = (char*)(&format + 1)
+	mov____%ebp,%eax
+	add____$i8,%eax !0x10
+	add____$i8,%eax !0x4
+	mov____%eax,0x8(%ebp) !0x-4
+	movzbl_%al,%eax
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____0x8(%ebp),%eax !0x10
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %vsprintf
+	add____$i8,%esp !0xc
+	mov____%eax,0x8(%ebp) !0x-8
+					# ap = 0
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-4
+	movzbl_%al,%eax
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x-8
+	leave
+	ret
+
+
+:sscanf
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# eputs("sscanf stub "); 
+	push___$i32 &_string_libc+tcc-mes_12
+	call32 %eputs
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:strcat
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %strchr
+	add____$i8,%esp !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+					# while (*src++) ...
+	jmp32  %_strcat_7_continue
+:_strcat_7_loop
+					# *p = *src++
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0xc
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	add____$i8,0x8(%ebp) !0x-4 !0x1
+	test___%eax,%eax
+:_strcat_7_continue
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0xc
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	test___%al,%al
+	je32   %_strcat_7_break
+	jmp32  %_strcat_7_loop
+:_strcat_7_break
+					# *p = 0
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x8
+	leave
+	ret
+
+
+:strchr
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+					# while (*p || !c) ...
+	jmp32  %_strchr_3_continue
+:_strchr_3_loop
+					# if (c == *p) ...
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_strchr_6_break
+	mov____0x8(%ebp),%eax !0x-4
+	leave
+	ret
+	jmp32  %_strchr_6_break
+:_strchr_6_break
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	test___%eax,%eax
+:_strchr_3_continue
+	mov____0x8(%ebp),%eax !0x-4
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	test___%al,%al
+	je32   %_strchr_3_break_b_26
+	jmp32  %_strchr_3_break_skip_b_26
+:_strchr_3_break_b_26
+	mov____0x8(%ebp),%eax !0xc
+	test___%eax,%eax
+	sete___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %_strchr_3_break
+:_strchr_3_break_skip_b_26
+	jmp32  %_strchr_3_loop
+:_strchr_3_break
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:strncpy
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+					# while (*src && length--) ...
+	jmp32  %_strncpy_3_continue
+:_strncpy_3_loop
+					# *p = *src++
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0xc
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	add____$i8,0x8(%ebp) !0x-4 !0x1
+	test___%eax,%eax
+:_strncpy_3_continue
+	mov____0x8(%ebp),%eax !0xc
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	test___%al,%al
+	je32   %_strncpy_3_break
+	mov____0x8(%ebp),%eax !0x10
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x10
+	add____$i8,(%eax) !0x-1
+	pop____%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %_strncpy_3_break
+	jmp32  %_strncpy_3_loop
+:_strncpy_3_break
+					# if (*src) ...
+	mov____0x8(%ebp),%eax !0xc
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	test___%al,%al
+	je32   %_strncpy_40_break
+	mov____0x8(%ebp),%eax !0x10
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x10
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+	jmp32  %_strncpy_40_break
+:_strncpy_40_break
+					# while (length--) ...
+	jmp32  %_strncpy_56_continue
+:_strncpy_56_loop
+					# *p = 0
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	mov____%al,(%edx)
+	add____$i8,0x8(%ebp) !0x-4 !0x1
+	test___%eax,%eax
+:_strncpy_56_continue
+	mov____0x8(%ebp),%eax !0x10
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x10
+	add____$i8,(%eax) !0x-1
+	pop____%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %_strncpy_56_break
+	jmp32  %_strncpy_56_loop
+:_strncpy_56_break
+	mov____0x8(%ebp),%eax !0x8
+	leave
+	ret
+
+
+:strrchr
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %strlen
+	add____$i8,%esp !0x4
+	mov____%eax,0x8(%ebp) !0x-4
+					# if (!n) ...
+	mov____0x8(%ebp),%eax !0x-4
+	test___%eax,%eax
+	sete___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %_strrchr_5_break
+	mov____$i32,%eax %0x0
+	leave
+	ret
+	jmp32  %_strrchr_5_break
+:_strrchr_5_break
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	add____$i8,%eax !0x-1
+	mov____%eax,0x8(%ebp) !0x-8
+					# while (*p || !c) ...
+	jmp32  %_strrchr_23_continue
+:_strrchr_23_loop
+					# if (c == *p) ...
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_strrchr_26_break
+	mov____0x8(%ebp),%eax !0x-8
+	leave
+	ret
+	jmp32  %_strrchr_26_break
+:_strrchr_26_break
+	mov____0x8(%ebp),%eax !0x-8
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-8
+	add____$i8,(%eax) !0x-1
+	pop____%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	test___%eax,%eax
+:_strrchr_23_continue
+	mov____0x8(%ebp),%eax !0x-8
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	test___%al,%al
+	je32   %_strrchr_23_break_b_44
+	jmp32  %_strrchr_23_break_skip_b_44
+:_strrchr_23_break_b_44
+	mov____0x8(%ebp),%eax !0xc
+	test___%eax,%eax
+	sete___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %_strrchr_23_break
+:_strrchr_23_break_skip_b_44
+	jmp32  %_strrchr_23_loop
+:_strrchr_23_break
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:strstr
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# eputs("strstr stub "); 
+	push___$i32 &_string_libc+tcc-mes_13
+	call32 %eputs
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:strtod
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# eputs("strtoul stub "); 
+	push___$i32 &_string_libc+tcc-mes_14
+	call32 %eputs
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	leave
+	ret
+
+
+:strtof
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %strtod
+	add____$i8,%esp !0x8
+	leave
+	ret
+
+
+:strtold
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %strtod
+	add____$i8,%esp !0x8
+	leave
+	ret
+
+
+:strtol
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# if (!strncmp(nptr, "0x", 2)) ...
+	mov____$i32,%eax %0x2
+	push___%eax
+	push___$i32 &_string_libc+tcc-mes_15
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %strncmp
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+	sete___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %_strtol_1_break
+	mov____0x8(%ebp),%eax !0x8
+	add____$i8,%eax !0x2
+	mov____%eax,0x8(%ebp) !0x-4
+	mov____$i32,%eax %0x10
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	push___%eax
+	call32 %abtoi
+	add____$i8,%esp !0x8
+	leave
+	ret
+	jmp32  %_strtol_1_break
+:_strtol_1_break
+	mov____0x8(%ebp),%eax !0x10
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x8
+	push___%eax
+	call32 %abtoi
+	add____$i8,%esp !0x8
+	leave
+	ret
+
+
+:strtoll
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# eputs("strtoll stub "); 
+	push___$i32 &_string_libc+tcc-mes_16
+	call32 %eputs
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:strtoul
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# eputs("strtoul stub "); 
+	push___$i32 &_string_libc+tcc-mes_14
+	call32 %eputs
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:strtoull
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# *endptr = p
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	mov____%eax,(%edx)
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x10
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	call32 %abtoi
+	add____$i8,%esp !0x8
+	leave
+	ret
+
+
+:time
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:vsnprintf
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0x14
+	push___%eax
+	mov____0x8(%ebp),%eax !0x10
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %vsprintf
+	add____$i8,%esp !0xc
+	leave
+	ret
+
+
+:calloc
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	mul____%edx
+	mov____%eax,0x8(%ebp) !0x-4
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	call32 %malloc
+	add____$i8,%esp !0x4
+	mov____%eax,0x8(%ebp) !0x-8
+					# memset(p, 0, count); 
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	push___%eax
+	call32 %memset
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x-8
+	leave
+	ret
+
+
+:vfprintf
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,0x8(%ebp) !0x-8
+					# while (*p) ...
+	jmp32  %_vfprintf_5_continue
+:_vfprintf_5_loop
+					# if (*p != '%') ...else ...
+	mov____0x8(%ebp),%eax !0x-8
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x25
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %_vfprintf_8_else
+					# fdputc(*p++, fd); 
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-8
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	call32 %fdputc
+	add____$i8,%esp !0x8
+	test___%eax,%eax
+	jmp32  %_vfprintf_8_break
+:_vfprintf_8_else
+	mov____0x8(%ebp),%eax !0x-8
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-8
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x-8
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	mov____%eax,0x8(%ebp) !0x-c
+					# switch (c) {   ...} 
+	mov____0x8(%ebp),%eax !0x-c
+	movsbl_%al,%eax
+:_vfprintf_43_clause0
+	cmp____$i8,%eax !0x25
+	je32   %_vfprintf_43_body0
+	jmp32  %_vfprintf_43_clause1
+:_vfprintf_43_body0
+					# fdputc(*p, fd); 
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	call32 %fdputc
+	add____$i8,%esp !0x8
+	test___%eax,%eax
+	jmp32  %_vfprintf_43_break
+:_vfprintf_43_clause1
+	cmp____$i8,%eax !0x63
+	je32   %_vfprintf_43_body1
+	jmp32  %_vfprintf_43_clause2
+:_vfprintf_43_body1
+					# c = (char)(int*)(ap = ap + 4)[-1]
+	mov____$i32,%eax %0x-1
+	shl____$i8,%eax !0x2
+	push___%eax
+					# ap = ap + 4
+	mov____0x8(%ebp),%eax !0x10
+	add____$i8,%eax !0x4
+	mov____%eax,0x8(%ebp) !0x10
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	movsbl_%al,%eax
+	mov____%eax,0x8(%ebp) !0x-10
+	test___%eax,%eax
+					# fdputc(c, fd); 
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-10
+	movsbl_%al,%eax
+	push___%eax
+	call32 %fdputc
+	add____$i8,%esp !0x8
+	test___%eax,%eax
+	jmp32  %_vfprintf_43_break
+:_vfprintf_43_clause2
+	cmp____$i8,%eax !0x64
+	je32   %_vfprintf_43_body2
+	jmp32  %_vfprintf_43_clause3
+:_vfprintf_43_body2
+					# d = (int)(int*)(ap = ap + 4)[-1]
+	mov____$i32,%eax %0x-1
+	shl____$i8,%eax !0x2
+	push___%eax
+					# ap = ap + 4
+	mov____0x8(%ebp),%eax !0x10
+	add____$i8,%eax !0x4
+	mov____%eax,0x8(%ebp) !0x10
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	mov____%eax,0x8(%ebp) !0x-14
+	test___%eax,%eax
+					# fdputs(itoa(d), fd); 
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-14
+	push___%eax
+	call32 %itoa
+	add____$i8,%esp !0x4
+	push___%eax
+	call32 %fdputs
+	add____$i8,%esp !0x8
+	test___%eax,%eax
+	jmp32  %_vfprintf_43_break
+:_vfprintf_43_clause3
+	cmp____$i8,%eax !0x73
+	je32   %_vfprintf_43_body3
+	jmp32  %_vfprintf_43_clause4
+:_vfprintf_43_body3
+					# s = (char*)(int*)(ap = ap + 4)[-1]
+	mov____$i32,%eax %0x-1
+	shl____$i8,%eax !0x2
+	push___%eax
+					# ap = ap + 4
+	mov____0x8(%ebp),%eax !0x10
+	add____$i8,%eax !0x4
+	mov____%eax,0x8(%ebp) !0x10
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	mov____%eax,0x8(%ebp) !0x-18
+	test___%eax,%eax
+					# fdputs(s, fd); 
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-18
+	push___%eax
+	call32 %fdputs
+	add____$i8,%esp !0x8
+	test___%eax,%eax
+	jmp32  %_vfprintf_43_break
+:_vfprintf_43_clause4
+:_vfprintf_43_body4
+:_vfprintf_43_default
+					# fdputc(*p, fd); 
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-8
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	call32 %fdputc
+	add____$i8,%esp !0x8
+	test___%eax,%eax
+	jmp32  %_vfprintf_43_break
+	jmp32  %_vfprintf_43_break
+:_vfprintf_43_clause5
+	jmp32  %_vfprintf_43_default
+:_vfprintf_43_break
+	mov____0x8(%ebp),%eax !0x-8
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-8
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+:_vfprintf_8_break
+:_vfprintf_5_continue
+	mov____0x8(%ebp),%eax !0x-8
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	test___%al,%al
+	je32   %_vfprintf_5_break
+	jmp32  %_vfprintf_5_loop
+:_vfprintf_5_break
+					# ap = 0
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x10
+	movzbl_%al,%eax
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+
+:_getopt_internal
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# optarg = 0
+	mov____$i32,%eax %0x0
+	mov____%eax,0x32 &optarg
+	test___%eax,%eax
+					# if (optind == 0) ...
+	mov____0x32,%eax &optind
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_5_break
+					# first_nonopt = last_nonopt = optind = 1
+					# last_nonopt = optind = 1
+					# optind = 1
+	mov____$i32,%eax %0x1
+	mov____%eax,0x32 &optind
+	mov____%eax,0x32 &last_nonopt
+	mov____%eax,0x32 &first_nonopt
+	test___%eax,%eax
+					# nextchar = 0
+	mov____$i32,%eax %0x0
+	mov____%eax,0x32 &nextchar
+	test___%eax,%eax
+	jmp32  %__getopt_internal_5_break
+:__getopt_internal_5_break
+					# if (nextchar == 0 || *nextchar == '\0') ...
+	mov____0x32,%eax &nextchar
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_27_break_b_20
+	jmp32  %__getopt_internal_27_break_skip_b_20
+:__getopt_internal_27_break_b_20
+	mov____0x32,%eax &nextchar
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_27_break
+:__getopt_internal_27_break_skip_b_20
+					# if (optind == argc) ...
+	mov____0x32,%eax &optind
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_47_break
+					# if (first_nonopt != last_nonopt) ...
+	mov____0x32,%eax &first_nonopt
+	push___%eax
+	mov____0x32,%eax &last_nonopt
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_55_break
+					# optind = first_nonopt
+	mov____0x32,%eax &first_nonopt
+	mov____%eax,0x32 &optind
+	test___%eax,%eax
+	jmp32  %__getopt_internal_55_break
+:__getopt_internal_55_break
+	mov____$i32,%eax %0x-1
+	leave
+	ret
+	jmp32  %__getopt_internal_47_break
+:__getopt_internal_47_break
+					# if (argv[optind][0] != '-' || argv[optind][1] == '\0') ...
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	push___%eax
+	mov____0x32,%eax &optind
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x2d
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_73_break_b_58
+	jmp32  %__getopt_internal_73_break_skip_b_58
+:__getopt_internal_73_break_b_58
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	push___%eax
+	mov____0x32,%eax &optind
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_73_break
+:__getopt_internal_73_break_skip_b_58
+	mov____$i32,%eax %0x-1
+	leave
+	ret
+	jmp32  %__getopt_internal_73_break
+:__getopt_internal_73_break
+					# nextchar = argv[optind] + 1 + (longopts != 0 && argv[optind][1] == '-')
+	mov____0x32,%eax &optind
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	add____$i8,%eax !0x1
+	push___%eax
+	mov____0x8(%ebp),%eax !0x14
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+	test___%eax,%eax
+	je32   %__getopt_internal_136_and_skip_b
+	test___%eax,%eax
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	push___%eax
+	mov____0x32,%eax &optind
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x2d
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+:__getopt_internal_136_and_skip_b
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____%eax,0x32 &nextchar
+	test___%eax,%eax
+	jmp32  %__getopt_internal_27_break
+:__getopt_internal_27_break
+					# if (longopts != 0 && (argv[optind][0] == '-' && (argv[optind][1] == '-' ||      long_only))) ...
+	mov____0x8(%ebp),%eax !0x14
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_165_break
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	push___%eax
+	mov____0x32,%eax &optind
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x2d
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_165_break
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	push___%eax
+	mov____0x32,%eax &optind
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x2d
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_165_break_b_171
+	jmp32  %__getopt_internal_165_break_skip_b_171
+:__getopt_internal_165_break_b_171
+	mov____0x8(%ebp),%eax !0x1c
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %__getopt_internal_165_break
+:__getopt_internal_165_break_skip_b_171
+	mov____0x32,%eax &nextchar
+	mov____%eax,0x8(%ebp) !0x-c
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-10
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-14
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-18
+					# while (*s && *s != '=') ...
+	jmp32  %__getopt_internal_229_continue
+:__getopt_internal_229_loop
+	mov____0x8(%ebp),%eax !0x-c
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-c
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+:__getopt_internal_229_continue
+	mov____0x8(%ebp),%eax !0x-c
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	test___%al,%al
+	je32   %__getopt_internal_229_break
+	mov____0x8(%ebp),%eax !0x-c
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x3d
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_229_break
+	jmp32  %__getopt_internal_229_loop
+:__getopt_internal_229_break
+					# for (p = longopts, option_index = 0; p->name; p++, option_index++) ...
+					# p = longopts
+	mov____0x8(%ebp),%eax !0x14
+	mov____%eax,0x8(%ebp) !0x-8
+					# option_index = 0
+	mov____$i32,%eax %0x0
+	mov____%eax,0x8(%ebp) !0x-4
+	test___%eax,%eax
+	jmp32  %__getopt_internal_257_initial_skip
+:__getopt_internal_257_loop
+					# if (!strncmp(p->name, nextchar, s - nextchar)) ...
+	mov____0x8(%ebp),%eax !0x-c
+	push___%eax
+	mov____0x32,%eax &nextchar
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	mov____$i32,%edx %0x1
+	mov____%edx,%ebx
+	xor____%edx,%edx
+	idiv___%ebx
+	push___%eax
+	mov____0x32,%eax &nextchar
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-8
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+					# p->name
+	mov____(%eax),%eax
+	push___%eax
+	call32 %strncmp
+	add____$i8,%esp !0xc
+	test___%eax,%eax
+	sete___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %__getopt_internal_267_break
+					# if (s - nextchar == strlen(p->name)) ...else ...
+	mov____0x8(%ebp),%eax !0x-c
+	push___%eax
+	mov____0x32,%eax &nextchar
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	mov____$i32,%edx %0x1
+	mov____%edx,%ebx
+	xor____%edx,%edx
+	idiv___%ebx
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-8
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+					# p->name
+	mov____(%eax),%eax
+	push___%eax
+	call32 %strlen
+	add____$i8,%esp !0x4
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_289_else
+					# pfound = p
+	mov____0x8(%ebp),%eax !0x-8
+	mov____%eax,0x8(%ebp) !0x-18
+	test___%eax,%eax
+					# indfound = option_index
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,0x8(%ebp) !0x-1c
+	test___%eax,%eax
+					# exact = 1
+	mov____$i32,%eax %0x1
+	mov____%eax,0x8(%ebp) !0x-10
+	test___%eax,%eax
+	jmp32  %__getopt_internal_257_break
+	jmp32  %__getopt_internal_289_break
+:__getopt_internal_289_else
+					# if (pfound == 0) ...else ...
+	mov____0x8(%ebp),%eax !0x-18
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_323_else
+					# pfound = p
+	mov____0x8(%ebp),%eax !0x-8
+	mov____%eax,0x8(%ebp) !0x-18
+	test___%eax,%eax
+					# indfound = option_index
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,0x8(%ebp) !0x-1c
+	test___%eax,%eax
+	jmp32  %__getopt_internal_323_break
+:__getopt_internal_323_else
+					# ambig = 1
+	mov____$i32,%eax %0x1
+	mov____%eax,0x8(%ebp) !0x-14
+	test___%eax,%eax
+:__getopt_internal_323_break
+:__getopt_internal_289_break
+	jmp32  %__getopt_internal_267_break
+:__getopt_internal_267_break
+:__getopt_internal_257_continue
+	mov____0x8(%ebp),%eax !0x-8
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-8
+	add____$i8,(%eax) !0x10
+	pop____%eax
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-4
+	add____$i8,(%eax) !0x1
+	pop____%eax
+:__getopt_internal_257_initial_skip
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-8
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+					# p->name
+	mov____(%eax),%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %__getopt_internal_257_break
+	jmp32  %__getopt_internal_257_loop
+:__getopt_internal_257_break
+					# if (ambig && !exact) ...
+	mov____0x8(%ebp),%eax !0x-14
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %__getopt_internal_372_break
+	mov____0x8(%ebp),%eax !0x-10
+	test___%eax,%eax
+	sete___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %__getopt_internal_372_break
+					# if (opterr) ...
+	mov____0x32,%eax &opterr
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %__getopt_internal_384_break
+					# fprintf(2, "%s: option `%s' is ambiguous ", argv[0], argv[optind]); 
+	mov____0x32,%eax &optind
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x0
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	push___%eax
+	push___$i32 &_string_libc+tcc-mes_17
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0x10
+	test___%eax,%eax
+	jmp32  %__getopt_internal_384_break
+:__getopt_internal_384_break
+					# nextchar += strlen(nextchar)
+	mov____0x32,%eax &nextchar
+	push___%eax
+	call32 %strlen
+	add____$i8,%esp !0x4
+	push___%eax
+	mov____0x32,%eax &nextchar
+	pop____%edx
+	add____%edx,%eax
+	mov____%eax,0x32 &nextchar
+	test___%eax,%eax
+	mov____0x32,%eax &optind
+	push___%eax
+	mov____$i32,%eax &optind
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+	mov____$i32,%eax %0x3f
+	leave
+	ret
+	jmp32  %__getopt_internal_372_break
+:__getopt_internal_372_break
+					# if (pfound != 0) ...
+	mov____0x8(%ebp),%eax !0x-18
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_434_break
+					# option_index = indfound
+	mov____0x8(%ebp),%eax !0x-1c
+	mov____%eax,0x8(%ebp) !0x-4
+	test___%eax,%eax
+	mov____0x32,%eax &optind
+	push___%eax
+	mov____$i32,%eax &optind
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+					# if (*s) ...else ...
+	mov____0x8(%ebp),%eax !0x-c
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	test___%al,%al
+	je32   %__getopt_internal_452_else
+					# if (pfound->has_arg) ...else ...
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-18
+	mov____(%eax),%eax
+	add____$i8,%eax !0x4
+					# pfound->has_arg
+	mov____(%eax),%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %__getopt_internal_460_else
+					# optarg = s + 1
+	mov____0x8(%ebp),%eax !0x-c
+	add____$i8,%eax !0x1
+	mov____%eax,0x32 &optarg
+	test___%eax,%eax
+	jmp32  %__getopt_internal_460_break
+:__getopt_internal_460_else
+					# if (opterr) ...
+	mov____0x32,%eax &opterr
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %__getopt_internal_477_break
+					# if (argv[optind - 1][1] == '-') ...else ...
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	push___%eax
+	mov____0x32,%eax &optind
+	add____$i8,%eax !0x-1
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x2d
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_483_else
+					# fprintf(2, "%s: option `--%s' doesn't allow an argument ", argv[0], pfound->     name); 
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-18
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+					# pfound->name
+	mov____(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x0
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	push___%eax
+	push___$i32 &_string_libc+tcc-mes_18
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0x10
+	test___%eax,%eax
+	jmp32  %__getopt_internal_483_break
+:__getopt_internal_483_else
+					# fprintf(2, "%s: option `%c%s' doesn't allow an argument ", argv[0], argv[optind      - 1][0], pfound->name); 
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-18
+	mov____(%eax),%eax
+	add____$i8,%eax !0x0
+					# pfound->name
+	mov____(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	push___%eax
+	mov____0x32,%eax &optind
+	add____$i8,%eax !0x-1
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x0
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	push___%eax
+	push___$i32 &_string_libc+tcc-mes_19
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0x14
+	test___%eax,%eax
+:__getopt_internal_483_break
+	jmp32  %__getopt_internal_477_break
+:__getopt_internal_477_break
+					# nextchar += strlen(nextchar)
+	mov____0x32,%eax &nextchar
+	push___%eax
+	call32 %strlen
+	add____$i8,%esp !0x4
+	push___%eax
+	mov____0x32,%eax &nextchar
+	pop____%edx
+	add____%edx,%eax
+	mov____%eax,0x32 &nextchar
+	test___%eax,%eax
+	mov____$i32,%eax %0x3f
+	leave
+	ret
+:__getopt_internal_460_break
+	jmp32  %__getopt_internal_452_break
+:__getopt_internal_452_else
+					# if (pfound->has_arg == 1) ...
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-18
+	mov____(%eax),%eax
+	add____$i8,%eax !0x4
+					# pfound->has_arg
+	mov____(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_581_break
+					# if (optind < argc) ...else ...
+	mov____0x32,%eax &optind
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setl___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %__getopt_internal_593_else
+					# optarg = argv[optind++]
+	mov____0x32,%eax &optind
+	push___%eax
+	mov____$i32,%eax &optind
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	mov____%eax,0x32 &optarg
+	test___%eax,%eax
+	jmp32  %__getopt_internal_593_break
+:__getopt_internal_593_else
+					# if (opterr) ...
+	mov____0x32,%eax &opterr
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %__getopt_internal_617_break
+					# fprintf(2, "%s: option `%s' requires an argument ", argv[0], argv[optind - 1])     ; 
+	mov____0x32,%eax &optind
+	add____$i8,%eax !0x-1
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x0
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	push___%eax
+	push___$i32 &_string_libc+tcc-mes_20
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0x10
+	test___%eax,%eax
+	jmp32  %__getopt_internal_617_break
+:__getopt_internal_617_break
+					# nextchar += strlen(nextchar)
+	mov____0x32,%eax &nextchar
+	push___%eax
+	call32 %strlen
+	add____$i8,%esp !0x4
+	push___%eax
+	mov____0x32,%eax &nextchar
+	pop____%edx
+	add____%edx,%eax
+	mov____%eax,0x32 &nextchar
+	test___%eax,%eax
+	mov____$i32,%eax %0x3f
+	leave
+	ret
+:__getopt_internal_593_break
+	jmp32  %__getopt_internal_581_break
+:__getopt_internal_581_break
+:__getopt_internal_452_break
+					# nextchar += strlen(nextchar)
+	mov____0x32,%eax &nextchar
+	push___%eax
+	call32 %strlen
+	add____$i8,%esp !0x4
+	push___%eax
+	mov____0x32,%eax &nextchar
+	pop____%edx
+	add____%edx,%eax
+	mov____%eax,0x32 &nextchar
+	test___%eax,%eax
+					# if (longind != 0) ...
+	mov____0x8(%ebp),%eax !0x18
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_674_break
+					# *longind = option_index
+	mov____0x8(%ebp),%eax !0x-4
+	push___%eax
+	mov____0x8(%ebp),%eax !0x18
+	mov____%eax,%edx
+	pop____%eax
+	mov____%eax,(%edx)
+	test___%eax,%eax
+	jmp32  %__getopt_internal_674_break
+:__getopt_internal_674_break
+					# if (pfound->flag) ...
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-18
+	mov____(%eax),%eax
+	add____$i8,%eax !0x8
+					# pfound->flag
+	mov____(%eax),%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %__getopt_internal_692_break
+					# *pfound->flag = pfound->val
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-18
+	mov____(%eax),%eax
+	add____$i8,%eax !0xc
+					# pfound->val
+	mov____(%eax),%eax
+	push___%eax
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-18
+	mov____(%eax),%eax
+	add____$i8,%eax !0x8
+					# pfound->flag
+	mov____(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	mov____%eax,(%edx)
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	leave
+	ret
+	jmp32  %__getopt_internal_692_break
+:__getopt_internal_692_break
+	mov____%ebp,%eax
+	add____$i8,%eax !0x-18
+	mov____(%eax),%eax
+	add____$i8,%eax !0xc
+					# pfound->val
+	mov____(%eax),%eax
+	leave
+	ret
+	jmp32  %__getopt_internal_434_break
+:__getopt_internal_434_break
+					# if ((!long_only || argv[optind][1] == '-') || strchr(optstring, *nextchar) == 0     ) ...
+	mov____0x8(%ebp),%eax !0x1c
+	test___%eax,%eax
+	sete___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %__getopt_internal_730_break_b_638_b_638
+	jmp32  %__getopt_internal_730_break_b_638_skip_b_638
+:__getopt_internal_730_break_b_638_b_638
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	push___%eax
+	mov____0x32,%eax &optind
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x2d
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_730_break_b_638
+:__getopt_internal_730_break_b_638_skip_b_638
+	jmp32  %__getopt_internal_730_break_skip_b_638
+:__getopt_internal_730_break_b_638
+	mov____0x32,%eax &nextchar
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x10
+	push___%eax
+	call32 %strchr
+	add____$i8,%esp !0x8
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_730_break
+:__getopt_internal_730_break_skip_b_638
+					# if (opterr) ...
+	mov____0x32,%eax &opterr
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %__getopt_internal_776_break
+					# if (argv[optind][1] == '-') ...else ...
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	push___%eax
+	mov____0x32,%eax &optind
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x2d
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_782_else
+					# fprintf(2, "%s: unrecognized option `--%s' ", argv[0], nextchar); 
+	mov____0x32,%eax &nextchar
+	push___%eax
+	mov____$i32,%eax %0x0
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	push___%eax
+	push___$i32 &_string_libc+tcc-mes_21
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0x10
+	test___%eax,%eax
+	jmp32  %__getopt_internal_782_break
+:__getopt_internal_782_else
+					# fprintf(2, "%s: unrecognized option `%c%s' ", argv[0], argv[optind][0],      nextchar); 
+	mov____0x32,%eax &nextchar
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	push___%eax
+	mov____0x32,%eax &optind
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x0
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	push___%eax
+	push___$i32 &_string_libc+tcc-mes_22
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0x14
+	test___%eax,%eax
+:__getopt_internal_782_break
+	jmp32  %__getopt_internal_776_break
+:__getopt_internal_776_break
+					# nextchar += strlen(nextchar)
+	mov____0x32,%eax &nextchar
+	push___%eax
+	call32 %strlen
+	add____$i8,%esp !0x4
+	push___%eax
+	mov____0x32,%eax &nextchar
+	pop____%edx
+	add____%edx,%eax
+	mov____%eax,0x32 &nextchar
+	test___%eax,%eax
+	mov____0x32,%eax &optind
+	push___%eax
+	mov____$i32,%eax &optind
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+	mov____$i32,%eax %0x3f
+	leave
+	ret
+	jmp32  %__getopt_internal_730_break
+:__getopt_internal_730_break
+	jmp32  %__getopt_internal_165_break
+:__getopt_internal_165_break
+	mov____0x32,%eax &nextchar
+	push___%eax
+	mov____$i32,%eax &nextchar
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	mov____%eax,0x8(%ebp) !0x-8
+	mov____0x8(%ebp),%eax !0x-8
+	movsbl_%al,%eax
+	push___%eax
+	mov____0x8(%ebp),%eax !0x10
+	push___%eax
+	call32 %strchr
+	add____$i8,%esp !0x8
+	mov____%eax,0x8(%ebp) !0x-c
+					# if (*nextchar == '\0') ...
+	mov____0x32,%eax &nextchar
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_892_break
+	mov____0x32,%eax &optind
+	push___%eax
+	mov____$i32,%eax &optind
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+	jmp32  %__getopt_internal_892_break
+:__getopt_internal_892_break
+					# if (temp == 0 || c == ':') ...
+	mov____0x8(%ebp),%eax !0x-c
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_910_break_b_805
+	jmp32  %__getopt_internal_910_break_skip_b_805
+:__getopt_internal_910_break_b_805
+	mov____0x8(%ebp),%eax !0x-8
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x3a
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_910_break
+:__getopt_internal_910_break_skip_b_805
+					# if (opterr) ...
+	mov____0x32,%eax &opterr
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %__getopt_internal_929_break
+					# if (c < 040 || c >= 0177) ...else ...
+	mov____0x8(%ebp),%eax !0x-8
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x20
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setl___%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %__getopt_internal_935_else_b_825
+	jmp32  %__getopt_internal_935_else_skip_b_825
+:__getopt_internal_935_else_b_825
+	mov____0x8(%ebp),%eax !0x-8
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x7f
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	setge__%al
+	movzbl_%al,%eax
+	test___%eax,%eax
+					# jmp test LABEL
+	je32   %__getopt_internal_935_else
+:__getopt_internal_935_else_skip_b_825
+					# fprintf(2, "%s: unrecognized option, character code 0%o ", argv[0], c); 
+	mov____0x8(%ebp),%eax !0x-8
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x0
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	push___%eax
+	push___$i32 &_string_libc+tcc-mes_23
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0x10
+	test___%eax,%eax
+	jmp32  %__getopt_internal_935_break
+:__getopt_internal_935_else
+					# fprintf(2, "%s: unrecognized option `-%c' ", argv[0], c); 
+	mov____0x8(%ebp),%eax !0x-8
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x0
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	push___%eax
+	push___$i32 &_string_libc+tcc-mes_24
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0x10
+	test___%eax,%eax
+:__getopt_internal_935_break
+	jmp32  %__getopt_internal_929_break
+:__getopt_internal_929_break
+	mov____$i32,%eax %0x3f
+	leave
+	ret
+	jmp32  %__getopt_internal_910_break
+:__getopt_internal_910_break
+					# if (temp[1] == ':') ...
+	mov____$i32,%eax %0x1
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-c
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x3a
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_998_break
+					# if (temp[2] == ':') ...else ...
+	mov____$i32,%eax %0x2
+	mov____%eax,%edx
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-c
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x3a
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_1013_else
+					# if (*nextchar != '\0') ...else ...
+	mov____0x32,%eax &nextchar
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_1028_else
+					# optarg = nextchar
+	mov____0x32,%eax &nextchar
+	mov____%eax,0x32 &optarg
+	test___%eax,%eax
+	mov____0x32,%eax &optind
+	push___%eax
+	mov____$i32,%eax &optind
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+	jmp32  %__getopt_internal_1028_break
+:__getopt_internal_1028_else
+					# optarg = 0
+	mov____$i32,%eax %0x0
+	mov____%eax,0x32 &optarg
+	test___%eax,%eax
+:__getopt_internal_1028_break
+					# nextchar = 0
+	mov____$i32,%eax %0x0
+	mov____%eax,0x32 &nextchar
+	test___%eax,%eax
+	jmp32  %__getopt_internal_1013_break
+:__getopt_internal_1013_else
+					# if (*nextchar != 0) ...else ...
+	mov____0x32,%eax &nextchar
+	movzbl_(%eax),%eax
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	pop____%eax
+	push___%eax
+	sub____%edx,%eax
+	setne__%al
+	movzbl_%al,%eax
+	xchg___%eax,(%esp)
+	sub____%edx,%eax
+	lahf
+	xor____$i8,%ah !0x40
+	sahf
+	pop____%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_1061_else
+					# optarg = nextchar
+	mov____0x32,%eax &nextchar
+	mov____%eax,0x32 &optarg
+	test___%eax,%eax
+	mov____0x32,%eax &optind
+	push___%eax
+	mov____$i32,%eax &optind
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	test___%eax,%eax
+	jmp32  %__getopt_internal_1061_break
+:__getopt_internal_1061_else
+					# if (optind == argc) ...else ...
+	mov____0x32,%eax &optind
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %__getopt_internal_1083_else
+					# if (opterr) ...
+	mov____0x32,%eax &opterr
+	test___%eax,%eax
+					# jmp test LABEL
+	test___%eax,%eax
+	je32   %__getopt_internal_1091_break
+					# fprintf(2, "%s: option `-%c' requires an argument ", argv[0], c); 
+	mov____0x8(%ebp),%eax !0x-8
+	movsbl_%al,%eax
+	push___%eax
+	mov____$i32,%eax %0x0
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	push___%eax
+	push___$i32 &_string_libc+tcc-mes_25
+	mov____$i32,%eax %0x2
+	push___%eax
+	call32 %fprintf
+	add____$i8,%esp !0x10
+	test___%eax,%eax
+	jmp32  %__getopt_internal_1091_break
+:__getopt_internal_1091_break
+					# c = '?'
+	mov____$i32,%eax %0x3f
+	mov____%eax,0x8(%ebp) !0x-8
+	test___%eax,%eax
+	jmp32  %__getopt_internal_1083_break
+:__getopt_internal_1083_else
+					# optarg = argv[optind++]
+	mov____0x32,%eax &optind
+	push___%eax
+	mov____$i32,%eax &optind
+	add____$i8,(%eax) !0x1
+	pop____%eax
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	mov____%eax,0x32 &optarg
+	test___%eax,%eax
+:__getopt_internal_1083_break
+:__getopt_internal_1061_break
+					# nextchar = 0
+	mov____$i32,%eax %0x0
+	mov____%eax,0x32 &nextchar
+	test___%eax,%eax
+:__getopt_internal_1013_break
+	jmp32  %__getopt_internal_998_break
+:__getopt_internal_998_break
+	mov____0x8(%ebp),%eax !0x-8
+	movsbl_%al,%eax
+	leave
+	ret
+
+
+:getopt
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x10
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %_getopt_internal
+	add____$i8,%esp !0x18
+	leave
+	ret
+
+
+:getopt_long
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____$i32,%eax %0x0
+	push___%eax
+	mov____0x8(%ebp),%eax !0x18
+	push___%eax
+	mov____0x8(%ebp),%eax !0x14
+	push___%eax
+	mov____0x8(%ebp),%eax !0x10
+	push___%eax
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	push___%eax
+	call32 %_getopt_internal
+	add____$i8,%esp !0x18
+	leave
+	ret
+
+
+:longjmp
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+					# val = val == 0? 1: val
+					# val == 0? ...: ...
+	mov____0x8(%ebp),%eax !0xc
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	pop____%eax
+	sub____%edx,%eax
+	sete___%al
+	movzbl_%al,%eax
+					# jmp test LABEL
+	jne32  %_longjmp_2_else
+	mov____$i32,%eax %0x1
+	test___%eax,%eax
+	jmp32  %_longjmp_2_break
+:_longjmp_2_else
+	mov____0x8(%ebp),%eax !0xc
+	test___%eax,%eax
+:_longjmp_2_break
+	mov____%eax,0x8(%ebp) !0xc
+	test___%eax,%eax
+	mov____0x8(%ebp),%eax !0x0c
+	mov____0x8(%ebp),%ebp !0x08
+	mov____0x8(%ebp),%ebx !0x4
+	mov____0x8(%ebp),%esp !0x8
+	mov____0x8(%ebp),%ebp !0x0
+	jmp____*%ebx
+					# exit(42); 
+	mov____$i32,%eax %0x2a
+	push___%eax
+	call32 %exit
+	add____$i8,%esp !0x4
+	test___%eax,%eax
+	leave
+	ret
+
+
+:setjmp
+	push___%ebp
+	mov____%esp,%ebp
+	sub____%esp,$i32 %0x1054
+	mov____%ebp,%eax
+	add____$i8,%eax !0x8
+	mov____%eax,0x8(%ebp) !0x-4
+					# env[0].__bp = p[-2]
+	mov____$i32,%eax %0x-2
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	add____%eax,%eax
+	add____%edx,%eax
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	add____$i8,%eax !0x0
+	mov____%eax,%edx
+	pop____%eax
+	mov____%eax,(%edx)
+	test___%eax,%eax
+					# env[0].__pc = p[-1]
+	mov____$i32,%eax %0x-1
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0x-4
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	mov____(%eax),%eax
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	add____%eax,%eax
+	add____%edx,%eax
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	add____$i8,%eax !0x4
+	mov____%eax,%edx
+	pop____%eax
+	mov____%eax,(%edx)
+	test___%eax,%eax
+					# env[0].__sp = (int)&env
+	mov____%ebp,%eax
+	add____$i8,%eax !0x8
+	push___%eax
+	mov____$i32,%eax %0x0
+	mov____%eax,%edx
+	add____%eax,%eax
+	add____%edx,%eax
+	shl____$i8,%eax !0x2
+	push___%eax
+	mov____0x8(%ebp),%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	add____%edx,%eax
+	add____$i8,%eax !0x8
+	mov____%eax,%edx
+	pop____%eax
+	mov____%eax,(%edx)
+	test___%eax,%eax
+	mov____$i32,%eax %0x0
+	leave
+	ret
+
+:itoab-itoa_buf
+!0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
+
+:itoa-itoa_buf
+!0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
+
+:buf
+!0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
+
+:g_environment
+!0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
+
+:g_stdin
+!0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
+
+:g_stdout
+!0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
+
+:g_stdin
+!0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
+
+:_string_libc+tcc-mes_0
+"assert fail: " !0x00 !0x00
+
+:_string_libc+tcc-mes_1
+"
+" !0x00 !0x00
+
+:ungetc_char
+!0x-1 !0x-1 !0x-1 !0x-1 !0x00 !0x00 !0x00 !0x00
+
+:ungetc_buf
+!0x00 !0x00 !0x00 !0x00
+
+:g_brk
+!0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
+
+:_string_libc+tcc-mes_2
+"=" !0x00 !0x00
+
+:errno
+!0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
+
+:_string_libc+tcc-mes_3
+"execvp stub
+" !0x00 !0x00 !0x00
+
+:_string_libc+tcc-mes_4
+"fflush stub
+" !0x00 !0x00 !0x00
+
+:_string_libc+tcc-mes_5
+"fopen stub
+" !0x00 !0x00 !0x00 !0x00
+
+:_string_libc+tcc-mes_6
+"fread stub
+" !0x00 !0x00 !0x00 !0x00
+
+:_string_libc+tcc-mes_7
+"fseek stub
+" !0x00 !0x00 !0x00 !0x00
+
+:_string_libc+tcc-mes_8
+"ftell stub
+" !0x00 !0x00 !0x00 !0x00
+
+:_string_libc+tcc-mes_9
+"ldexp stub
+" !0x00 !0x00 !0x00 !0x00
+
+:_string_libc+tcc-mes_10
+"localtime stub
+" !0x00 !0x00 !0x00 !0x00
+
+:_string_libc+tcc-mes_11
+"remove stub
+" !0x00 !0x00 !0x00
+
+:_string_libc+tcc-mes_12
+"sscanf stub
+" !0x00 !0x00 !0x00
+
+:_string_libc+tcc-mes_13
+"strstr stub
+" !0x00 !0x00 !0x00
+
+:_string_libc+tcc-mes_14
+"strtoul stub
+" !0x00 !0x00
+
+:_string_libc+tcc-mes_15
+"0x" !0x00
+
+:_string_libc+tcc-mes_16
+"strtoll stub
+" !0x00 !0x00
+
+:optarg
+!0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
+
+:optind
+!0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
+
+:opterr
+!0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
+
+:optarg
+!0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
+
+:optind
+!0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
+
+:nextchar
+!0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
+
+:opterr
+!0x01 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
+
+:first_nonopt
+!0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
+
+:last_nonopt
+!0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00
+
+:_string_libc+tcc-mes_17
+"%s: option `%s' is ambiguous
+" !0x00 !0x00
+
+:_string_libc+tcc-mes_18
+"%s: option `--%s' doesn't allow an argument
+" !0x00 !0x00 !0x00
+
+:_string_libc+tcc-mes_19
+"%s: option `%c%s' doesn't allow an argument
+" !0x00 !0x00 !0x00
+
+:_string_libc+tcc-mes_20
+"%s: option `%s' requires an argument
+" !0x00 !0x00
+
+:_string_libc+tcc-mes_21
+"%s: unrecognized option `--%s'
+" !0x00 !0x00 !0x00 !0x00
+
+:_string_libc+tcc-mes_22
+"%s: unrecognized option `%c%s'
+" !0x00 !0x00 !0x00 !0x00
+
+:_string_libc+tcc-mes_23
+"%s: unrecognized option, character code 0%o
+" !0x00 !0x00 !0x00
+
+:_string_libc+tcc-mes_24
+"%s: unrecognized option `-%c'
+" !0x00
+
+:_string_libc+tcc-mes_25
+"%s: option `-%c' requires an argument
+" !0x00
+
+:errno
+!0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00 !0x00

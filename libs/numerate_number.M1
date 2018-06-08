@@ -1,0 +1,871 @@
+
+# Core program
+
+# Defining function numerate_number
+:FUNCTION_numerate_number
+# Defining local result
+LOAD_IMMEDIATE_eax %16
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax %1
+PUSH_eax	#_process_expression2
+CALL_IMMEDIATE %FUNCTION_calloc
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+PUSH_eax	#result
+# Defining local i
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#i
+# IF_numerate_number_0
+
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %16
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
+TEST
+JUMP_EQ %ELSE_numerate_number_0
+
+LOAD_EFFECTIVE_ADDRESS %4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %48
+POP_ebx	# _common_recursion
+STORE_CHAR
+LOAD_EFFECTIVE_ADDRESS %4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %10
+POP_ebx	# _common_recursion
+STORE_CHAR
+LOAD_EFFECTIVE_ADDRESS %4
+LOAD_INTEGER
+POP_ebx	# _return_result_locals
+POP_ebx	# _return_result_locals
+RETURN
+JUMP %_END_IF_numerate_number_0
+
+:ELSE_numerate_number_0
+
+:_END_IF_numerate_number_0
+
+# IF_numerate_number_1
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %16
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+CMP
+SETG
+MOVEZBL
+TEST
+JUMP_EQ %ELSE_numerate_number_1
+LOAD_EFFECTIVE_ADDRESS %4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %45
+POP_ebx	# _common_recursion
+STORE_CHAR
+LOAD_EFFECTIVE_ADDRESS %0
+
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+STORE_INTEGER
+LOAD_EFFECTIVE_ADDRESS %12
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %16
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+SUBTRACT_eax_from_ebx_into_ebx
+MOVE_ebx_to_eax
+POP_ebx	# _common_recursion
+MULTIPLY_eax_by_ebx_into_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+JUMP %_END_IF_numerate_number_1
+:ELSE_numerate_number_1
+:_END_IF_numerate_number_1
+# Defining local divisor
+LOAD_IMMEDIATE_eax %0x3B9ACA00
+PUSH_eax	#divisor
+:WHILE_numerate_number_2
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %20
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %8
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+XCHG_eax_ebx
+LOAD_IMMEDIATE_edx %0
+DIVIDE_eax_by_ebx_into_eax
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
+TEST
+JUMP_EQ %END_WHILE_numerate_number_2
+# THEN_while_numerate_number_2
+LOAD_EFFECTIVE_ADDRESS %0
+
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %10
+POP_ebx	# _common_recursion
+XCHG_eax_ebx
+LOAD_IMMEDIATE_edx %0
+DIVIDE_eax_by_ebx_into_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+JUMP %WHILE_numerate_number_2
+:END_WHILE_numerate_number_2
+:WHILE_numerate_number_3
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %4
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+CMP
+SETL
+MOVEZBL
+TEST
+JUMP_EQ %END_WHILE_numerate_number_3
+# THEN_while_numerate_number_3
+LOAD_EFFECTIVE_ADDRESS %8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %8
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %20
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %8
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+XCHG_eax_ebx
+LOAD_IMMEDIATE_edx %0
+DIVIDE_eax_by_ebx_into_eax
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %48
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_CHAR
+LOAD_EFFECTIVE_ADDRESS %16
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %20
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %8
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+XCHG_eax_ebx
+LOAD_IMMEDIATE_edx %0
+MODULUS_eax_from_ebx_into_ebx
+MOVE_edx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+LOAD_EFFECTIVE_ADDRESS %0
+
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %10
+POP_ebx	# _common_recursion
+XCHG_eax_ebx
+LOAD_IMMEDIATE_edx %0
+DIVIDE_eax_by_ebx_into_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+LOAD_EFFECTIVE_ADDRESS %4
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+JUMP %WHILE_numerate_number_3
+:END_WHILE_numerate_number_3
+LOAD_EFFECTIVE_ADDRESS %8
+LOAD_INTEGER
+POP_ebx	# _return_result_locals
+POP_ebx	# _return_result_locals
+POP_ebx	# _return_result_locals
+RETURN
+# Defining function char2hex
+:FUNCTION_char2hex
+# IF_char2hex_0
+
+LOAD_EFFECTIVE_ADDRESS %4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %48
+POP_ebx	# _common_recursion
+CMP
+SETGE
+MOVEZBL
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %57
+POP_ebx	# _common_recursion
+CMP
+SETLE
+MOVEZBL
+POP_ebx	# _common_recursion
+AND_eax_ebx
+TEST
+JUMP_EQ %ELSE_char2hex_0
+
+LOAD_EFFECTIVE_ADDRESS %4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %48
+POP_ebx	# _common_recursion
+SUBTRACT_eax_from_ebx_into_ebx
+MOVE_ebx_to_eax
+RETURN
+JUMP %_END_IF_char2hex_0
+
+:ELSE_char2hex_0
+
+# IF_char2hex_1
+LOAD_EFFECTIVE_ADDRESS %4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %97
+POP_ebx	# _common_recursion
+CMP
+SETGE
+MOVEZBL
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %102
+POP_ebx	# _common_recursion
+CMP
+SETLE
+MOVEZBL
+POP_ebx	# _common_recursion
+AND_eax_ebx
+TEST
+JUMP_EQ %ELSE_char2hex_1
+LOAD_EFFECTIVE_ADDRESS %4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %87
+POP_ebx	# _common_recursion
+SUBTRACT_eax_from_ebx_into_ebx
+MOVE_ebx_to_eax
+RETURN
+JUMP %_END_IF_char2hex_1
+:ELSE_char2hex_1
+# IF_char2hex_2
+LOAD_EFFECTIVE_ADDRESS %4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %65
+POP_ebx	# _common_recursion
+CMP
+SETGE
+MOVEZBL
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %70
+POP_ebx	# _common_recursion
+CMP
+SETLE
+MOVEZBL
+POP_ebx	# _common_recursion
+AND_eax_ebx
+TEST
+JUMP_EQ %ELSE_char2hex_2
+LOAD_EFFECTIVE_ADDRESS %4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %55
+POP_ebx	# _common_recursion
+SUBTRACT_eax_from_ebx_into_ebx
+MOVE_ebx_to_eax
+RETURN
+JUMP %_END_IF_char2hex_2
+:ELSE_char2hex_2
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+SUBTRACT_eax_from_ebx_into_ebx
+MOVE_ebx_to_eax
+RETURN
+:_END_IF_char2hex_2
+:_END_IF_char2hex_1
+:_END_IF_char2hex_0
+
+RETURN
+# Defining function hex2char
+:FUNCTION_hex2char
+# IF_hex2char_0
+
+LOAD_EFFECTIVE_ADDRESS %4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+CMP
+SETGE
+MOVEZBL
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %9
+POP_ebx	# _common_recursion
+CMP
+SETLE
+MOVEZBL
+POP_ebx	# _common_recursion
+AND_eax_ebx
+TEST
+JUMP_EQ %ELSE_hex2char_0
+
+LOAD_EFFECTIVE_ADDRESS %4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %48
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+RETURN
+JUMP %_END_IF_hex2char_0
+
+:ELSE_hex2char_0
+
+# IF_hex2char_1
+LOAD_EFFECTIVE_ADDRESS %4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %10
+POP_ebx	# _common_recursion
+CMP
+SETGE
+MOVEZBL
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %15
+POP_ebx	# _common_recursion
+CMP
+SETLE
+MOVEZBL
+POP_ebx	# _common_recursion
+AND_eax_ebx
+TEST
+JUMP_EQ %ELSE_hex2char_1
+LOAD_EFFECTIVE_ADDRESS %4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %55
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+RETURN
+JUMP %_END_IF_hex2char_1
+:ELSE_hex2char_1
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+SUBTRACT_eax_from_ebx_into_ebx
+MOVE_ebx_to_eax
+RETURN
+:_END_IF_hex2char_1
+:_END_IF_hex2char_0
+
+RETURN
+# Defining function char2dec
+:FUNCTION_char2dec
+# IF_char2dec_0
+
+LOAD_EFFECTIVE_ADDRESS %4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %48
+POP_ebx	# _common_recursion
+CMP
+SETGE
+MOVEZBL
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %57
+POP_ebx	# _common_recursion
+CMP
+SETLE
+MOVEZBL
+POP_ebx	# _common_recursion
+AND_eax_ebx
+TEST
+JUMP_EQ %ELSE_char2dec_0
+
+LOAD_EFFECTIVE_ADDRESS %4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %48
+POP_ebx	# _common_recursion
+SUBTRACT_eax_from_ebx_into_ebx
+MOVE_ebx_to_eax
+RETURN
+JUMP %_END_IF_char2dec_0
+
+:ELSE_char2dec_0
+
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+SUBTRACT_eax_from_ebx_into_ebx
+MOVE_ebx_to_eax
+RETURN
+:_END_IF_char2dec_0
+
+RETURN
+# Defining function dec2char
+:FUNCTION_dec2char
+# IF_dec2char_0
+
+LOAD_EFFECTIVE_ADDRESS %4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+CMP
+SETGE
+MOVEZBL
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %9
+POP_ebx	# _common_recursion
+CMP
+SETLE
+MOVEZBL
+POP_ebx	# _common_recursion
+AND_eax_ebx
+TEST
+JUMP_EQ %ELSE_dec2char_0
+
+LOAD_EFFECTIVE_ADDRESS %4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %48
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+RETURN
+JUMP %_END_IF_dec2char_0
+
+:ELSE_dec2char_0
+
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+SUBTRACT_eax_from_ebx_into_ebx
+MOVE_ebx_to_eax
+RETURN
+:_END_IF_dec2char_0
+
+RETURN
+# Defining function numerate_string
+:FUNCTION_numerate_string
+# Defining local count
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#count
+# Defining local index
+PUSH_eax	#index
+# Defining local negative
+PUSH_eax	#negative
+# IF_numerate_string_0
+
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %20
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+LOAD_BYTE
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
+TEST
+JUMP_EQ %ELSE_numerate_string_0
+
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _return_result_locals
+POP_ebx	# _return_result_locals
+POP_ebx	# _return_result_locals
+RETURN
+JUMP %_END_IF_numerate_string_0
+
+:ELSE_numerate_string_0
+
+# IF_numerate_string_1
+LOAD_EFFECTIVE_ADDRESS %16
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+LOAD_BYTE
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %48
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %20
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+LOAD_BYTE
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %120
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
+POP_ebx	# _common_recursion
+AND_eax_ebx
+TEST
+JUMP_EQ %ELSE_numerate_string_1
+# IF_numerate_string_2
+LOAD_IMMEDIATE_eax %45
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %20
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %2
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+LOAD_BYTE
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
+TEST
+JUMP_EQ %ELSE_numerate_string_2
+LOAD_EFFECTIVE_ADDRESS %0
+
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+STORE_INTEGER
+LOAD_EFFECTIVE_ADDRESS %4
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %3
+POP_ebx	# _common_recursion
+STORE_INTEGER
+JUMP %_END_IF_numerate_string_2
+:ELSE_numerate_string_2
+LOAD_EFFECTIVE_ADDRESS %0
+
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+STORE_INTEGER
+LOAD_EFFECTIVE_ADDRESS %4
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %2
+POP_ebx	# _common_recursion
+STORE_INTEGER
+:_END_IF_numerate_string_2
+:WHILE_numerate_string_3
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %20
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %12
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+LOAD_BYTE
+POP_ebx	# _common_recursion
+CMP
+SETNE
+MOVEZBL
+TEST
+JUMP_EQ %END_WHILE_numerate_string_3
+# THEN_while_numerate_string_3
+# IF_numerate_string_4
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+SUBTRACT_eax_from_ebx_into_ebx
+MOVE_ebx_to_eax
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %20
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %12
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+LOAD_BYTE
+PUSH_eax	#_process_expression1
+CALL_IMMEDIATE %FUNCTION_char2hex
+POP_ebx	# _process_expression_locals
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
+TEST
+JUMP_EQ %ELSE_numerate_string_4
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _return_result_locals
+POP_ebx	# _return_result_locals
+POP_ebx	# _return_result_locals
+RETURN
+JUMP %_END_IF_numerate_string_4
+:ELSE_numerate_string_4
+:_END_IF_numerate_string_4
+LOAD_EFFECTIVE_ADDRESS %8
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %16
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %16
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+MULTIPLY_eax_by_ebx_into_eax
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %24
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %16
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+LOAD_BYTE
+PUSH_eax	#_process_expression1
+CALL_IMMEDIATE %FUNCTION_char2hex
+POP_ebx	# _process_expression_locals
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+LOAD_EFFECTIVE_ADDRESS %4
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+JUMP %WHILE_numerate_string_3
+:END_WHILE_numerate_string_3
+JUMP %_END_IF_numerate_string_1
+:ELSE_numerate_string_1
+# IF_numerate_string_5
+LOAD_IMMEDIATE_eax %45
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %20
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+LOAD_BYTE
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
+TEST
+JUMP_EQ %ELSE_numerate_string_5
+LOAD_EFFECTIVE_ADDRESS %0
+
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+STORE_INTEGER
+LOAD_EFFECTIVE_ADDRESS %4
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+STORE_INTEGER
+JUMP %_END_IF_numerate_string_5
+:ELSE_numerate_string_5
+LOAD_EFFECTIVE_ADDRESS %0
+
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+STORE_INTEGER
+LOAD_EFFECTIVE_ADDRESS %4
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+STORE_INTEGER
+:_END_IF_numerate_string_5
+:WHILE_numerate_string_6
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %20
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %12
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+LOAD_BYTE
+POP_ebx	# _common_recursion
+CMP
+SETNE
+MOVEZBL
+TEST
+JUMP_EQ %END_WHILE_numerate_string_6
+# THEN_while_numerate_string_6
+# IF_numerate_string_7
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+SUBTRACT_eax_from_ebx_into_ebx
+MOVE_ebx_to_eax
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %20
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %12
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+LOAD_BYTE
+PUSH_eax	#_process_expression1
+CALL_IMMEDIATE %FUNCTION_char2dec
+POP_ebx	# _process_expression_locals
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
+TEST
+JUMP_EQ %ELSE_numerate_string_7
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _return_result_locals
+POP_ebx	# _return_result_locals
+POP_ebx	# _return_result_locals
+RETURN
+JUMP %_END_IF_numerate_string_7
+:ELSE_numerate_string_7
+:_END_IF_numerate_string_7
+LOAD_EFFECTIVE_ADDRESS %8
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %10
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %16
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+MULTIPLY_eax_by_ebx_into_eax
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %24
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %16
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+LOAD_BYTE
+PUSH_eax	#_process_expression1
+CALL_IMMEDIATE %FUNCTION_char2dec
+POP_ebx	# _process_expression_locals
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+LOAD_EFFECTIVE_ADDRESS %4
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+JUMP %WHILE_numerate_string_6
+:END_WHILE_numerate_string_6
+:_END_IF_numerate_string_1
+:_END_IF_numerate_string_0
+
+# IF_numerate_string_8
+LOAD_EFFECTIVE_ADDRESS %0
+
+LOAD_INTEGER
+TEST
+JUMP_EQ %ELSE_numerate_string_8
+LOAD_EFFECTIVE_ADDRESS %8
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %12
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+SUBTRACT_eax_from_ebx_into_ebx
+MOVE_ebx_to_eax
+POP_ebx	# _common_recursion
+MULTIPLY_eax_by_ebx_into_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+JUMP %_END_IF_numerate_string_8
+:ELSE_numerate_string_8
+:_END_IF_numerate_string_8
+LOAD_EFFECTIVE_ADDRESS %8
+LOAD_INTEGER
+POP_ebx	# _return_result_locals
+POP_ebx	# _return_result_locals
+POP_ebx	# _return_result_locals
+RETURN
+

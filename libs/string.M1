@@ -1,0 +1,230 @@
+
+# Core program
+
+# Defining function copy_string
+:FUNCTION_copy_string
+:WHILE_copy_string_0
+
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+LOAD_BYTE
+POP_ebx	# _common_recursion
+CMP
+SETNE
+MOVEZBL
+TEST
+JUMP_EQ %END_WHILE_copy_string_0
+
+# THEN_while_copy_string_0
+
+LOAD_EFFECTIVE_ADDRESS %8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+LOAD_BYTE
+POP_ebx	# _common_recursion
+STORE_CHAR
+LOAD_EFFECTIVE_ADDRESS %8
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %12
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+LOAD_EFFECTIVE_ADDRESS %4
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+JUMP %WHILE_copy_string_0
+
+:END_WHILE_copy_string_0
+
+LOAD_EFFECTIVE_ADDRESS %8
+LOAD_INTEGER
+RETURN
+# Defining function postpend_char
+:FUNCTION_postpend_char
+# Defining local ret
+LOAD_IMMEDIATE_eax %4096
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax %1
+PUSH_eax	#_process_expression2
+CALL_IMMEDIATE %FUNCTION_calloc
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+PUSH_eax	#ret
+# Defining local hold
+LOAD_EFFECTIVE_ADDRESS %0
+
+LOAD_INTEGER
+PUSH_eax	#_process_expression1
+LOAD_EFFECTIVE_ADDRESS %16
+LOAD_INTEGER
+PUSH_eax	#_process_expression2
+CALL_IMMEDIATE %FUNCTION_copy_string
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+PUSH_eax	#hold
+LOAD_EFFECTIVE_ADDRESS %0
+
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %16
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+STORE_CHAR
+LOAD_EFFECTIVE_ADDRESS %4
+LOAD_INTEGER
+POP_ebx	# _return_result_locals
+POP_ebx	# _return_result_locals
+RETURN
+# Defining function prepend_char
+:FUNCTION_prepend_char
+# Defining local ret
+LOAD_IMMEDIATE_eax %4096
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax %1
+PUSH_eax	#_process_expression2
+CALL_IMMEDIATE %FUNCTION_calloc
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+PUSH_eax	#ret
+LOAD_EFFECTIVE_ADDRESS %0
+
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %16
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+STORE_CHAR
+LOAD_EFFECTIVE_ADDRESS %0
+
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+PUSH_eax	#_process_expression1
+LOAD_EFFECTIVE_ADDRESS %12
+LOAD_INTEGER
+PUSH_eax	#_process_expression2
+CALL_IMMEDIATE %FUNCTION_copy_string
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+LOAD_EFFECTIVE_ADDRESS %0
+
+LOAD_INTEGER
+POP_ebx	# _return_result_locals
+RETURN
+# Defining function prepend_string
+:FUNCTION_prepend_string
+# Defining local ret
+LOAD_IMMEDIATE_eax %4096
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax %1
+PUSH_eax	#_process_expression2
+CALL_IMMEDIATE %FUNCTION_calloc
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+PUSH_eax	#ret
+LOAD_EFFECTIVE_ADDRESS %0
+
+LOAD_INTEGER
+PUSH_eax	#_process_expression1
+LOAD_EFFECTIVE_ADDRESS %16
+LOAD_INTEGER
+PUSH_eax	#_process_expression2
+CALL_IMMEDIATE %FUNCTION_copy_string
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+PUSH_eax	#_process_expression1
+LOAD_EFFECTIVE_ADDRESS %12
+LOAD_INTEGER
+PUSH_eax	#_process_expression2
+CALL_IMMEDIATE %FUNCTION_copy_string
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+LOAD_EFFECTIVE_ADDRESS %0
+
+LOAD_INTEGER
+POP_ebx	# _return_result_locals
+RETURN
+# Defining function string_length
+:FUNCTION_string_length
+# Defining local i
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#i
+:WHILE_string_length_0
+
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %12
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %8
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+LOAD_BYTE
+POP_ebx	# _common_recursion
+CMP
+SETNE
+MOVEZBL
+TEST
+JUMP_EQ %END_WHILE_string_length_0
+
+# THEN_while_string_length_0
+
+LOAD_EFFECTIVE_ADDRESS %0
+
+PUSH_eax	#_common_recursion
+LOAD_EFFECTIVE_ADDRESS %4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+JUMP %WHILE_string_length_0
+
+:END_WHILE_string_length_0
+
+LOAD_EFFECTIVE_ADDRESS %0
+
+LOAD_INTEGER
+POP_ebx	# _return_result_locals
+RETURN
+

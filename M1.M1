@@ -6132,5 +6132,3 @@ Architecture 0: Knight; 1: x86; 2: AMD64; 40: armv7"
 :STRING_main_41
 "Either no input files were given or they were empty
 "
-
-:ELF_end

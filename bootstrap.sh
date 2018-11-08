@@ -26,11 +26,18 @@ stage0_PREFIX=${stage0_PREFIX-../stage0}
 # source using cc_x86.s                 #
 #########################################
 
-# Generate get_machine.M1
+# Generate kaem.M1
+# Not done yet, still requires enhancements in cc_x86
 # $stage0_PREFIX/bin/vm --rom $stage0_PREFIX/roms/cc_x86 \
 #	--memory 4M \
-#	--tape_01 $stage0_PREFIX/stage3/get_machine_x86.c \
-#	--tape_02 get_machine.M1
+#	--tape_01 $stage0_PREFIX/stage3/kaem.c \
+#	--tape_02 kaem.M1
+
+# Generate get_machine.M1
+$stage0_PREFIX/bin/vm --rom $stage0_PREFIX/roms/cc_x86 \
+	--memory 4M \
+	--tape_01 $stage0_PREFIX/stage3/get_machine_x86.c \
+	--tape_02 get_machine.M1
 
 # Generate blood-elf.M1
 $stage0_PREFIX/bin/vm --rom $stage0_PREFIX/roms/cc_x86 \
@@ -151,6 +158,63 @@ $MESCC_TOOLS_PREFIX/bin/hex2 \
 [ -f hex2.hex2 ] && rm hex2.hex2
 [ -f hex2-footer.M1 ] && rm hex2-footer.M1
 
+
+# Build kaem
+# Build debug footer
+$MESCC_TOOLS_PREFIX/bin/blood-elf -f kaem.M1 \
+	-o kaem-footer.M1
+
+# Macro assemble with libc written in M1-Macro
+$MESCC_TOOLS_PREFIX/bin/M1 -f x86_defs.M1 \
+	-f libc-core.M1 \
+	-f kaem.M1 \
+	-f kaem-footer.M1 \
+	--LittleEndian \
+	--Architecture 1 \
+	-o kaem.hex2
+
+# Resolve all linkages
+$MESCC_TOOLS_PREFIX/bin/hex2 -f ELF-i386-debug.hex2 \
+	-f kaem.hex2 \
+	--LittleEndian \
+	--Architecture 1 \
+	--BaseAddress 0x8048000 \
+	-o kaem-0 \
+	--exec_enable
+
+# Clean up temp files used in build
+[ -f kaem.hex2 ] && rm kaem.hex2
+[ -f kaem-footer.M1 ] && rm kaem-footer.M1
+
+
+# Build get_machine
+# Build debug footer
+$MESCC_TOOLS_PREFIX/bin/blood-elf -f get_machine.M1 \
+	-o get_machine-footer.M1
+
+# Macro assemble with libc written in M1-Macro
+$MESCC_TOOLS_PREFIX/bin/M1 -f x86_defs.M1 \
+	-f libc-core.M1 \
+	-f get_machine.M1 \
+	-f get_machine-footer.M1 \
+	--LittleEndian \
+	--Architecture 1 \
+	-o get_machine.hex2 || exit 3
+
+# Resolve all linkages
+$MESCC_TOOLS_PREFIX/bin/hex2 -f ELF-i386-debug.hex2 \
+	-f get_machine.hex2 \
+	--LittleEndian \
+	--Architecture 1 \
+	--BaseAddress 0x8048000 \
+	-o get_machine-0 \
+	--exec_enable
+
+# Clean up temp files used in build
+[ -f get_machine.hex2 ] && rm get_machine.hex2
+[ -f get_machine-footer.M1 ] && rm get_machine-footer.M1
+
+
 fi
 
 
@@ -165,7 +229,7 @@ fi
 
 # Build
 # M1-macro phase
-./M1-0  --LittleEndian\
+./M1-0 --LittleEndian\
 	--Architecture 1\
 	-f x86_defs.M1\
 	-f libc-core.M1\
@@ -193,7 +257,7 @@ fi
 
 # Build
 # M1-macro phase
-./M1-0 	--LittleEndian\
+./M1-0 --LittleEndian\
 	--Architecture 1\
 	-f x86_defs.M1\
 	-f libc-core.M1\
@@ -221,7 +285,7 @@ fi
 
 # Build
 # M1-macro phase
-./M1-0 	--LittleEndian\
+./M1-0 --LittleEndian\
 	--Architecture 1\
 	-f x86_defs.M1\
 	-f libc-core.M1\
@@ -242,6 +306,63 @@ fi
 [ -f hex2.hex2 ] && rm hex2.hex2
 [ -f hex2-footer.M1 ] && rm hex2-footer.M1
 
+
+# Build kaem
+# Build debug footer
+./blood-elf-0 -f kaem.M1 \
+	-o kaem-footer.M1
+
+# Macro assemble with libc written in M1-Macro
+./M1-0 -f x86_defs.M1 \
+	-f libc-core.M1 \
+	-f kaem.M1 \
+	-f kaem-footer.M1 \
+	--LittleEndian \
+	--Architecture 1 \
+	-o kaem.hex2
+
+# Resolve all linkages
+./hex2-0 -f ELF-i386-debug.hex2 \
+	-f kaem.hex2 \
+	--LittleEndian \
+	--Architecture 1 \
+	--BaseAddress 0x8048000 \
+	-o kaem \
+	--exec_enable
+
+# Clean up temp files used in build
+[ -f kaem.hex2 ] && rm kaem.hex2
+[ -f kaem-footer.M1 ] && rm kaem-footer.M1
+
+
+# Build get_machine
+# Build debug footer
+./blood-elf-0 -f get_machine.M1 \
+	-o get_machine-footer.M1
+
+# Macro assemble with libc written in M1-Macro
+./M1-0 -f x86_defs.M1 \
+	-f libc-core.M1 \
+	-f get_machine.M1 \
+	-f get_machine-footer.M1 \
+	--LittleEndian \
+	--Architecture 1 \
+	-o get_machine.hex2
+
+# Resolve all linkages
+./hex2-0 -f ELF-i386-debug.hex2 \
+	-f get_machine.hex2 \
+	--LittleEndian \
+	--Architecture 1 \
+	--BaseAddress 0x8048000 \
+	-o get_machine \
+	--exec_enable
+
+# Clean up temp files used in build
+[ -f get_machine.hex2 ] && rm get_machine.hex2
+[ -f get_machine-footer.M1 ] && rm get_machine-footer.M1
+
+
 #########################################
 # Phase-2 Check for unmatched output    #
 #########################################
@@ -252,6 +373,10 @@ diff -a blood-elf blood-elf-0 || echo "blood elf MISMATCH"
 diff -a M1 M1-0 || echo "M1 MISMATCH"
 # Check hex2
 diff -a hex2 hex2-0 || echo "hex2 MISMATCH"
+# Check kaem
+diff -a kaem kaem-0 || echo "kaem MISMATCH"
+# Check get_machine
+diff -a get_machine get_machine-0 || echo "get_machine MISMATCH"
 
 #########################################
 # Phase-3 Clean up files being tested   #
@@ -259,4 +384,6 @@ diff -a hex2 hex2-0 || echo "hex2 MISMATCH"
 # [ -f M1-0 ] && rm M1-0
 # [ -f blood-elf-0 ] && rm blood-elf-0
 # [ -f hex2-0 ] && rm hex2-0
+# [ -f kaem-0 ] && rm kaem-0
+# [ -f get_machine-0 ] && rm get_machine-0
 echo "SUCCESS"

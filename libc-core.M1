@@ -15,7 +15,28 @@
 ## along with stage0.  If not, see <http://www.gnu.org/licenses/>.
 
 :_start
+
+	COPY_esp_to_ebp             ; Protect esp
+
+	;; Prepare argv
+	LOAD_BASE_ADDRESS_eax %4    ; ARGV_address = EBP + 4
+	PUSH_eax                    ; Put argv on the stack
+
+	;; Prepare envp
+	COPY_ebp_to_eax             ; Address we need to load from
+	LOAD_INTEGER                ; Get ARGC
+	ADD_IMMEDIATE_to_eax %2     ; OFFSET = ARGC + 2
+	SAL_eax_Immediate8 !2       ; OFFSET = OFFSET * WORDSIZE
+	ADD_ebp_to_eax              ; ENVP_address = ESP + OFFSET
+	PUSH_eax                    ; Put envp on the stack
+
+	;; Stack offset
+	ADD_IMMEDIATE_to_ebp %4     ; Fix ebp
+
+	;; Perform the main loop
 	CALL_IMMEDIATE %FUNCTION_main
-	COPY_eax_to_ebx
-	LOAD_IMMEDIATE_eax %1
-	INT_80
+
+	;; Exit to kernel
+	COPY_eax_to_ebx             ; Using the return code given by main
+	LOAD_IMMEDIATE_eax %1       ; Syscall exit
+	INT_80                      ; Exit with that code

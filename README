@@ -1,0 +1,4 @@
+run kaem.run to build the bootstrap mescc-tools binaries without referencing any eternal programs
+kaem can be used to do that.
+
+run bootstrap.sh if you plan on updating from stage0

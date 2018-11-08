@@ -14,15 +14,19 @@
 ## You should have received a copy of the GNU General Public License
 ## along with stage0.  If not, see <http://www.gnu.org/licenses/>.
 
-DEFINE ADD_ebx_to_eax 01D8
+
+DEFINE ADD_IMMEDIATE_to_eax 81C0
+DEFINE ADD_IMMEDIATE_to_ebp 81C5
 DEFINE ADD_eax_to_ebx 01C3
+DEFINE ADD_ebp_to_eax 01E8
+DEFINE ADD_ebx_to_eax 01D8
 DEFINE AND_eax_ebx 21D8
 DEFINE CALL_IMMEDIATE E8
 DEFINE CALL_eax FFD0
-DEFINE CALL_IMMEDIATE E8
 DEFINE CMP 39C3
 DEFINE COPY_eax_to_ebx 89C3
 DEFINE COPY_eax_to_ecx 89C1
+DEFINE COPY_ebp_to_eax 89E8
 DEFINE COPY_ebx_to_eax 89D8
 DEFINE COPY_ebx_to_edx 89DA
 DEFINE COPY_ecx_to_ebp 89CD
@@ -82,7 +86,6 @@ DEFINE STORE_CHAR 8803
 DEFINE STORE_eax_into_ESP_IMMEDIATE8 8B4424
 DEFINE STORE_INTEGER 8903
 DEFINE SUBTRACT_eax_from_ebx_into_ebx 29C3
-DEFINE MOVE_ebx_to_eax 89D8
 DEFINE TEST 85C0
 DEFINE XCHG_eax_ebx 93
 DEFINE XOR_ebx_eax_into_eax 31D8

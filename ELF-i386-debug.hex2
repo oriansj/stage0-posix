@@ -76,8 +76,11 @@
 01 00 00 00                    # ph_align
 
 # @60
-:ELF_program_header__data
-01 00 00 00                     # ph_type: PT-LOAD = 1
+#:ELF_program_header__data      # NOT USED
+                                # FIXME: linux 4.17 does not allow this overlap
+                                #    Uhuuh, elf segment at 0000000001000000
+                                #    requested but the memory is mapped already
+00 00 00 00                     # ph_type: PT-LOAD = 1 => no load
 00 00 00 00                     # ph_offset
 &ELF_base                       # ph_vaddr
 &ELF_base                       # ph_physaddr

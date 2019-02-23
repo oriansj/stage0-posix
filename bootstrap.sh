@@ -19,6 +19,8 @@
 # along with Mes.  If not, see <http://www.gnu.org/licenses/>.
 
 set -eux
+if [ "FULL" = "${1-NOPE}" ]
+then
 stage0_PREFIX=${stage0_PREFIX-../stage0}
 
 #########################################
@@ -57,11 +59,10 @@ $stage0_PREFIX/bin/vm --rom $stage0_PREFIX/roms/cc_x86 \
 	--tape_01 $stage0_PREFIX/stage3/M1-macro_x86.c \
 	--tape_02 M1.M1
 
-
 # Sin that needs to be removed
 # Current hack generate binary seeds
 # To execute this block ./bootstrap.sh sin
-if [ "sin" = "${1-NOPE}" ]
+elif [ "sin" = "${1-NOPE}" ]
 then
 MESCC_TOOLS_PREFIX=${MESCC_TOOLS_PREFIX-../mescc-tools}
 
@@ -75,7 +76,7 @@ $MESCC_TOOLS_PREFIX/bin/blood-elf \
 # M1-macro phase
 $MESCC_TOOLS_PREFIX/bin/M1 \
 	--LittleEndian\
-	--Architecture 1\
+	--architecture x86\
 	-f x86_defs.M1\
 	-f libc-core.M1\
 	-f blood-elf.M1\
@@ -85,7 +86,7 @@ $MESCC_TOOLS_PREFIX/bin/M1 \
 # Hex2-linker phase
 $MESCC_TOOLS_PREFIX/bin/hex2 \
 	--LittleEndian\
-	--Architecture 1\
+	--architecture x86\
 	--BaseAddress 0x8048000\
 	-f ELF-i386-debug.hex2\
 	-f blood-elf.hex2\
@@ -106,7 +107,7 @@ $MESCC_TOOLS_PREFIX/bin/blood-elf \
 # M1-macro phase
 $MESCC_TOOLS_PREFIX/bin/M1 \
 	--LittleEndian\
-	--Architecture 1\
+	--architecture x86\
 	-f x86_defs.M1\
 	-f libc-core.M1\
 	-f M1.M1\
@@ -116,7 +117,7 @@ $MESCC_TOOLS_PREFIX/bin/M1 \
 # Hex2-linker phase
 $MESCC_TOOLS_PREFIX/bin/hex2 \
 	--LittleEndian\
-	--Architecture 1\
+	--architecture x86\
 	--BaseAddress 0x8048000\
 	-f ELF-i386-debug.hex2\
 	-f M1.hex2\
@@ -137,7 +138,7 @@ $MESCC_TOOLS_PREFIX/bin/blood-elf \
 # M1-macro phase
 $MESCC_TOOLS_PREFIX/bin/M1 \
 	--LittleEndian\
-	--Architecture 1\
+	--architecture x86\
 	-f x86_defs.M1\
 	-f libc-core.M1\
 	-f hex2.M1\
@@ -147,7 +148,7 @@ $MESCC_TOOLS_PREFIX/bin/M1 \
 # Hex2-linker phase
 $MESCC_TOOLS_PREFIX/bin/hex2 \
 	--LittleEndian\
-	--Architecture 1\
+	--architecture x86\
 	--BaseAddress 0x8048000\
 	-f ELF-i386-debug.hex2\
 	-f hex2.hex2\
@@ -170,14 +171,14 @@ $MESCC_TOOLS_PREFIX/bin/M1 -f x86_defs.M1 \
 	-f kaem.M1 \
 	-f kaem-footer.M1 \
 	--LittleEndian \
-	--Architecture 1 \
+	--architecture x86 \
 	-o kaem.hex2
 
 # Resolve all linkages
 $MESCC_TOOLS_PREFIX/bin/hex2 -f ELF-i386-debug.hex2 \
 	-f kaem.hex2 \
 	--LittleEndian \
-	--Architecture 1 \
+	--architecture x86 \
 	--BaseAddress 0x8048000 \
 	-o kaem-0 \
 	--exec_enable
@@ -198,14 +199,14 @@ $MESCC_TOOLS_PREFIX/bin/M1 -f x86_defs.M1 \
 	-f get_machine.M1 \
 	-f get_machine-footer.M1 \
 	--LittleEndian \
-	--Architecture 1 \
+	--architecture x86 \
 	-o get_machine.hex2 || exit 3
 
 # Resolve all linkages
 $MESCC_TOOLS_PREFIX/bin/hex2 -f ELF-i386-debug.hex2 \
 	-f get_machine.hex2 \
 	--LittleEndian \
-	--Architecture 1 \
+	--architecture x86 \
 	--BaseAddress 0x8048000 \
 	-o get_machine-0 \
 	--exec_enable
@@ -230,7 +231,7 @@ fi
 # Build
 # M1-macro phase
 ./M1-0 --LittleEndian\
-	--Architecture 1\
+	--architecture x86\
 	-f x86_defs.M1\
 	-f libc-core.M1\
 	-f blood-elf.M1\
@@ -239,7 +240,7 @@ fi
 
 # Hex2-linker phase
 ./hex2-0 --LittleEndian\
-	--Architecture 1\
+	--architecture x86\
 	--BaseAddress 0x8048000\
 	-f ELF-i386-debug.hex2\
 	-f blood-elf.hex2\
@@ -258,7 +259,7 @@ fi
 # Build
 # M1-macro phase
 ./M1-0 --LittleEndian\
-	--Architecture 1\
+	--architecture x86\
 	-f x86_defs.M1\
 	-f libc-core.M1\
 	-f M1.M1\
@@ -267,7 +268,7 @@ fi
 
 # Hex2-linker phase
 ./hex2-0 --LittleEndian\
-	--Architecture 1\
+	--architecture x86\
 	--BaseAddress 0x8048000\
 	-f ELF-i386-debug.hex2\
 	-f M1.hex2\
@@ -286,7 +287,7 @@ fi
 # Build
 # M1-macro phase
 ./M1-0 --LittleEndian\
-	--Architecture 1\
+	--architecture x86\
 	-f x86_defs.M1\
 	-f libc-core.M1\
 	-f hex2.M1\
@@ -295,7 +296,7 @@ fi
 
 # Hex2-linker phase
 ./hex2-0 --LittleEndian\
-	--Architecture 1\
+	--architecture x86\
 	--BaseAddress 0x8048000\
 	-f ELF-i386-debug.hex2\
 	-f hex2.hex2\
@@ -318,14 +319,14 @@ fi
 	-f kaem.M1 \
 	-f kaem-footer.M1 \
 	--LittleEndian \
-	--Architecture 1 \
+	--architecture x86 \
 	-o kaem.hex2
 
 # Resolve all linkages
 ./hex2-0 -f ELF-i386-debug.hex2 \
 	-f kaem.hex2 \
 	--LittleEndian \
-	--Architecture 1 \
+	--architecture x86 \
 	--BaseAddress 0x8048000 \
 	-o kaem \
 	--exec_enable
@@ -346,14 +347,14 @@ fi
 	-f get_machine.M1 \
 	-f get_machine-footer.M1 \
 	--LittleEndian \
-	--Architecture 1 \
+	--architecture x86 \
 	-o get_machine.hex2
 
 # Resolve all linkages
 ./hex2-0 -f ELF-i386-debug.hex2 \
 	-f get_machine.hex2 \
 	--LittleEndian \
-	--Architecture 1 \
+	--architecture x86 \
 	--BaseAddress 0x8048000 \
 	-o get_machine \
 	--exec_enable

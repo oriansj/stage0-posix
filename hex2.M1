@@ -1274,6 +1274,61 @@ POP_ebx	# _return_result_locals
 POP_ebx	# _return_result_locals
 POP_ebx	# _return_result_locals
 RETURN
+# Defining function in_set
+:FUNCTION_in_set
+:WHILE_in_set_0
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+LOAD_BYTE
+POP_ebx	# _common_recursion
+CMP
+SETNE
+MOVEZBL
+TEST
+JUMP_EQ %END_WHILE_in_set_0
+# THEN_while_in_set_0
+# IF_in_set_1
+LOAD_BASE_ADDRESS_eax %-4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+LOAD_BYTE
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
+TEST
+JUMP_EQ %ELSE_in_set_1
+LOAD_IMMEDIATE_eax %1
+RETURN
+JUMP %_END_IF_in_set_1
+:ELSE_in_set_1
+:_END_IF_in_set_1
+LOAD_BASE_ADDRESS_eax %-8
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+JUMP %WHILE_in_set_0
+:END_WHILE_in_set_0
+LOAD_IMMEDIATE_eax %0
+RETURN
 # Defining function chmod
 :FUNCTION_chmod
 LOAD_EFFECTIVE_ADDRESS_ebx %8
@@ -1282,6 +1337,72 @@ LOAD_EFFECTIVE_ADDRESS_ecx %4
 LOAD_INTEGER_ecx
 LOAD_IMMEDIATE_eax %15
 INT_80
+RETURN
+# Defining function line_error
+:FUNCTION_line_error
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax &GLOBAL_filename
+LOAD_INTEGER
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax %2
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_file_print
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax &STRING_line_error_0
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax %2
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_file_print
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax &GLOBAL_linenumber
+LOAD_INTEGER
+PUSH_eax	#_process_expression1
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_numerate_number
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax %2
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_file_print
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax &STRING_line_error_1
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax %2
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_file_print
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
 RETURN
 # Defining function consume_token
 :FUNCTION_consume_token
@@ -1301,36 +1422,43 @@ POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
 PUSH_eax	#c
-:DO_consume_token_0
-# IF_consume_token_1
-LOAD_IMMEDIATE_eax %0
+:WHILE_consume_token_0
+LOAD_IMMEDIATE_eax %1
 PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-8
-LOAD_INTEGER
-POP_ebx	# _common_recursion
-CMP
-SETNE
-MOVEZBL
-TEST
-JUMP_EQ %ELSE_consume_token_1
-LOAD_BASE_ADDRESS_eax %-8
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-16
+LOAD_INTEGER
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &STRING_consume_token_1
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_in_set
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+POP_ebx	# _common_recursion
+XOR_ebx_eax_into_eax
+TEST
+JUMP_EQ %END_WHILE_consume_token_0
+# THEN_while_consume_token_0
+LOAD_IMMEDIATE_eax &GLOBAL_scratch
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-12
 LOAD_INTEGER
 POP_ebx	# _common_recursion
 ADD_ebx_to_eax
 PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-20
+LOAD_BASE_ADDRESS_eax %-16
 LOAD_INTEGER
 POP_ebx	# _common_recursion
 STORE_CHAR
-JUMP %_END_IF_consume_token_1
-:ELSE_consume_token_1
-:_END_IF_consume_token_1
-LOAD_BASE_ADDRESS_eax %-16
+LOAD_BASE_ADDRESS_eax %-12
 PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-16
+LOAD_BASE_ADDRESS_eax %-12
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
 LOAD_IMMEDIATE_eax %1
@@ -1338,7 +1466,7 @@ POP_ebx	# _common_recursion
 ADD_ebx_to_eax
 POP_ebx	# _common_recursion
 STORE_INTEGER
-LOAD_BASE_ADDRESS_eax %-20
+LOAD_BASE_ADDRESS_eax %-16
 PUSH_eax	#_common_recursion
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
@@ -1353,54 +1481,194 @@ POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
 POP_ebx	# _common_recursion
 STORE_INTEGER
-LOAD_IMMEDIATE_eax %32
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-20
+JUMP %WHILE_consume_token_0
+:END_WHILE_consume_token_0
+LOAD_BASE_ADDRESS_eax %-16
 LOAD_INTEGER
-POP_ebx	# _common_recursion
-CMP
-SETNE
-MOVEZBL
+POP_ebx	# _return_result_locals
+POP_ebx	# _return_result_locals
+RETURN
+# Defining function Throwaway_token
+:FUNCTION_Throwaway_token
+# Defining local c
+PUSH_eax	#c
+:DO_Throwaway_token_0
+LOAD_BASE_ADDRESS_eax %-12
 PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %9
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-20
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_BASE_ADDRESS_eax %-4
 LOAD_INTEGER
+PUSH_eax	#_process_expression1
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_fgetc
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
 POP_ebx	# _common_recursion
-CMP
-SETNE
-MOVEZBL
-POP_ebx	# _common_recursion
-AND_eax_ebx
+STORE_INTEGER
+LOAD_IMMEDIATE_eax %1
 PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %10
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-20
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_BASE_ADDRESS_eax %-12
 LOAD_INTEGER
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &STRING_Throwaway_token_1
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_in_set
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
 POP_ebx	# _common_recursion
-CMP
-SETNE
-MOVEZBL
-POP_ebx	# _common_recursion
-AND_eax_ebx
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %62
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-20
-LOAD_INTEGER
-POP_ebx	# _common_recursion
-CMP
-SETNE
-MOVEZBL
-POP_ebx	# _common_recursion
-AND_eax_ebx
+XOR_ebx_eax_into_eax
 TEST
-JUMP_NE %DO_consume_token_0
-:DO_END_consume_token_0
-LOAD_BASE_ADDRESS_eax %-20
+JUMP_NE %DO_Throwaway_token_0
+:DO_END_Throwaway_token_0
+LOAD_BASE_ADDRESS_eax %-12
 LOAD_INTEGER
 POP_ebx	# _return_result_locals
+RETURN
+# Defining function length
+:FUNCTION_length
+# Defining local i
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#i
+:WHILE_length_0
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-12
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+LOAD_BYTE
+POP_ebx	# _common_recursion
+CMP
+SETNE
+MOVEZBL
+TEST
+JUMP_EQ %END_WHILE_length_0
+# THEN_while_length_0
+LOAD_BASE_ADDRESS_eax %-12
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-12
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+JUMP %WHILE_length_0
+:END_WHILE_length_0
+LOAD_BASE_ADDRESS_eax %-12
+LOAD_INTEGER
 POP_ebx	# _return_result_locals
+RETURN
+# Defining function Clear_Scratch
+:FUNCTION_Clear_Scratch
+:DO_Clear_Scratch_0
+LOAD_BASE_ADDRESS_eax %-4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+STORE_CHAR
+LOAD_BASE_ADDRESS_eax %-4
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+LOAD_BYTE
+POP_ebx	# _common_recursion
+CMP
+SETNE
+MOVEZBL
+TEST
+JUMP_NE %DO_Clear_Scratch_0
+:DO_END_Clear_Scratch_0
+RETURN
+# Defining function Copy_String
+:FUNCTION_Copy_String
+:WHILE_Copy_String_0
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+LOAD_BYTE
+POP_ebx	# _common_recursion
+CMP
+SETNE
+MOVEZBL
+TEST
+JUMP_EQ %END_WHILE_Copy_String_0
+# THEN_while_Copy_String_0
+LOAD_BASE_ADDRESS_eax %-8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+LOAD_BYTE
+POP_ebx	# _common_recursion
+STORE_CHAR
+LOAD_BASE_ADDRESS_eax %-4
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+LOAD_BASE_ADDRESS_eax %-8
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+JUMP %WHILE_Copy_String_0
+:END_WHILE_Copy_String_0
 RETURN
 # Defining function GetTarget
 :FUNCTION_GetTarget
@@ -1545,6 +1813,17 @@ PUSH_eax	#entry
 LOAD_BASE_ADDRESS_eax %-16
 LOAD_INTEGER
 # looking up offset
+# -> offset calculation
+LOAD_IMMEDIATE_ebx %4
+ADD_ebx_to_eax
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-8
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+STORE_INTEGER
+LOAD_BASE_ADDRESS_eax %-16
+LOAD_INTEGER
+# looking up offset
 PUSH_eax	#_common_recursion
 LOAD_IMMEDIATE_eax &GLOBAL_jump_table
 LOAD_INTEGER
@@ -1556,6 +1835,19 @@ LOAD_BASE_ADDRESS_eax %-16
 LOAD_INTEGER
 POP_ebx	# _common_recursion
 STORE_INTEGER
+# Defining local c
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_BASE_ADDRESS_eax %-4
+LOAD_INTEGER
+PUSH_eax	#_process_expression1
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_consume_token
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+PUSH_eax	#c
 LOAD_BASE_ADDRESS_eax %-16
 LOAD_INTEGER
 # looking up offset
@@ -1566,7 +1858,17 @@ PUSH_eax	#_common_recursion
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
-LOAD_IMMEDIATE_eax %4096
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax &GLOBAL_scratch
+LOAD_INTEGER
+PUSH_eax	#_process_expression1
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_length
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
 PUSH_eax	#_common_recursion
 LOAD_IMMEDIATE_eax %1
 POP_ebx	# _common_recursion
@@ -1582,11 +1884,10 @@ POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
 POP_ebx	# _common_recursion
 STORE_INTEGER
-# Defining local c
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
-LOAD_BASE_ADDRESS_eax %-4
+LOAD_IMMEDIATE_eax &GLOBAL_scratch
 LOAD_INTEGER
 PUSH_eax	#_process_expression1
 LOAD_BASE_ADDRESS_eax %-16
@@ -1598,23 +1899,22 @@ ADD_ebx_to_eax
 LOAD_INTEGER
 PUSH_eax	#_process_expression2
 COPY_edi_to_ebp
-CALL_IMMEDIATE %FUNCTION_consume_token
+CALL_IMMEDIATE %FUNCTION_Copy_String
 POP_ebx	# _process_expression_locals
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
-PUSH_eax	#c
-LOAD_BASE_ADDRESS_eax %-16
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax &GLOBAL_scratch
 LOAD_INTEGER
-# looking up offset
-# -> offset calculation
-LOAD_IMMEDIATE_ebx %4
-ADD_ebx_to_eax
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-8
-LOAD_INTEGER
-POP_ebx	# _common_recursion
-STORE_INTEGER
+PUSH_eax	#_process_expression1
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_Clear_Scratch
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
 LOAD_BASE_ADDRESS_eax %-20
 LOAD_INTEGER
 POP_ebx	# _return_result_locals
@@ -2292,6 +2592,127 @@ RETURN
 JUMP %_END_IF_Architectural_displacement_2
 :ELSE_Architectural_displacement_2
 # IF_Architectural_displacement_3
+LOAD_IMMEDIATE_eax &GLOBAL_ALIGNED
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %40
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax &GLOBAL_Architecture
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
+POP_ebx	# _common_recursion
+AND_eax_ebx
+TEST
+JUMP_EQ %ELSE_Architectural_displacement_3
+LOAD_IMMEDIATE_eax &GLOBAL_ALIGNED
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+STORE_INTEGER
+# IF_Architectural_displacement_4
+LOAD_BASE_ADDRESS_eax %-4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %3
+POP_ebx	# _common_recursion
+AND_eax_ebx
+TEST
+JUMP_EQ %ELSE_Architectural_displacement_4
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_line_error
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax &STRING_Architectural_displacement_5
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax %2
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_file_print
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax &GLOBAL_scratch
+LOAD_INTEGER
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax %2
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_file_print
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax &STRING_Architectural_displacement_6
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax %2
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_file_print
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax %1
+PUSH_eax	#_process_expression1
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_exit
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+JUMP %_END_IF_Architectural_displacement_4
+:ELSE_Architectural_displacement_4
+:_END_IF_Architectural_displacement_4
+LOAD_BASE_ADDRESS_eax %-4
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-8
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+SUBTRACT_eax_from_ebx_into_ebx
+MOVE_ebx_to_eax
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %3
+POP_ebx	# _common_recursion
+AND_eax_ebx
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %2
+POP_ebx	# _common_recursion
+COPY_eax_to_ecx
+COPY_ebx_to_eax
+SAR_eax_cl
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %2
+POP_ebx	# _common_recursion
+SUBTRACT_eax_from_ebx_into_ebx
+MOVE_ebx_to_eax
+RETURN
+JUMP %_END_IF_Architectural_displacement_3
+:ELSE_Architectural_displacement_3
+# IF_Architectural_displacement_7
 LOAD_IMMEDIATE_eax %40
 PUSH_eax	#_common_recursion
 LOAD_IMMEDIATE_eax &GLOBAL_Architecture
@@ -2301,7 +2722,7 @@ CMP
 SETE
 MOVEZBL
 TEST
-JUMP_EQ %ELSE_Architectural_displacement_3
+JUMP_EQ %ELSE_Architectural_displacement_7
 LOAD_BASE_ADDRESS_eax %-4
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
@@ -2310,9 +2731,24 @@ LOAD_INTEGER
 POP_ebx	# _common_recursion
 SUBTRACT_eax_from_ebx_into_ebx
 MOVE_ebx_to_eax
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %8
+POP_ebx	# _common_recursion
+SUBTRACT_eax_from_ebx_into_ebx
+MOVE_ebx_to_eax
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %3
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-8
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+AND_eax_ebx
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
 RETURN
-JUMP %_END_IF_Architectural_displacement_3
-:ELSE_Architectural_displacement_3
+JUMP %_END_IF_Architectural_displacement_7
+:ELSE_Architectural_displacement_7
+:_END_IF_Architectural_displacement_7
 :_END_IF_Architectural_displacement_3
 :_END_IF_Architectural_displacement_2
 :_END_IF_Architectural_displacement_1
@@ -2320,7 +2756,7 @@ JUMP %_END_IF_Architectural_displacement_3
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
-LOAD_IMMEDIATE_eax &STRING_Architectural_displacement_4
+LOAD_IMMEDIATE_eax &STRING_Architectural_displacement_8
 PUSH_eax	#_process_expression1
 LOAD_IMMEDIATE_eax %2
 PUSH_eax	#_process_expression2
@@ -2341,30 +2777,25 @@ POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
 RETURN
-# Defining function ConsumePointer
-:FUNCTION_ConsumePointer
-# IF_ConsumePointer_0
-LOAD_IMMEDIATE_eax %37
-PUSH_eax	#_common_recursion
+# Defining function Update_Pointer
+:FUNCTION_Update_Pointer
+# IF_Update_Pointer_0
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-4
 LOAD_INTEGER
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %38
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-4
-LOAD_INTEGER
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
-POP_ebx	# _common_recursion
-OR_eax_ebx
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &STRING_Update_Pointer_1
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_in_set
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
 TEST
-JUMP_EQ %ELSE_ConsumePointer_0
+JUMP_EQ %ELSE_Update_Pointer_0
 LOAD_IMMEDIATE_eax &GLOBAL_ip
 PUSH_eax	#_common_recursion
 LOAD_IMMEDIATE_eax &GLOBAL_ip
@@ -2375,30 +2806,25 @@ POP_ebx	# _common_recursion
 ADD_ebx_to_eax
 POP_ebx	# _common_recursion
 STORE_INTEGER
-JUMP %_END_IF_ConsumePointer_0
-:ELSE_ConsumePointer_0
-# IF_ConsumePointer_1
-LOAD_IMMEDIATE_eax %64
-PUSH_eax	#_common_recursion
+JUMP %_END_IF_Update_Pointer_0
+:ELSE_Update_Pointer_0
+# IF_Update_Pointer_2
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-4
 LOAD_INTEGER
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %36
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-4
-LOAD_INTEGER
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
-POP_ebx	# _common_recursion
-OR_eax_ebx
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &STRING_Update_Pointer_3
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_in_set
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
 TEST
-JUMP_EQ %ELSE_ConsumePointer_1
+JUMP_EQ %ELSE_Update_Pointer_2
 LOAD_IMMEDIATE_eax &GLOBAL_ip
 PUSH_eax	#_common_recursion
 LOAD_IMMEDIATE_eax &GLOBAL_ip
@@ -2409,9 +2835,32 @@ POP_ebx	# _common_recursion
 ADD_ebx_to_eax
 POP_ebx	# _common_recursion
 STORE_INTEGER
-JUMP %_END_IF_ConsumePointer_1
-:ELSE_ConsumePointer_1
-# IF_ConsumePointer_2
+JUMP %_END_IF_Update_Pointer_2
+:ELSE_Update_Pointer_2
+# IF_Update_Pointer_4
+LOAD_IMMEDIATE_eax %126
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-4
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
+TEST
+JUMP_EQ %ELSE_Update_Pointer_4
+LOAD_IMMEDIATE_eax &GLOBAL_ip
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax &GLOBAL_ip
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %3
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+JUMP %_END_IF_Update_Pointer_4
+:ELSE_Update_Pointer_4
+# IF_Update_Pointer_5
 LOAD_IMMEDIATE_eax %33
 PUSH_eax	#_common_recursion
 LOAD_BASE_ADDRESS_eax %-4
@@ -2421,7 +2870,7 @@ CMP
 SETE
 MOVEZBL
 TEST
-JUMP_EQ %ELSE_ConsumePointer_2
+JUMP_EQ %ELSE_Update_Pointer_5
 LOAD_IMMEDIATE_eax &GLOBAL_ip
 PUSH_eax	#_common_recursion
 LOAD_IMMEDIATE_eax &GLOBAL_ip
@@ -2432,12 +2881,19 @@ POP_ebx	# _common_recursion
 ADD_ebx_to_eax
 POP_ebx	# _common_recursion
 STORE_INTEGER
-JUMP %_END_IF_ConsumePointer_2
-:ELSE_ConsumePointer_2
+JUMP %_END_IF_Update_Pointer_5
+:ELSE_Update_Pointer_5
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
-LOAD_IMMEDIATE_eax &STRING_ConsumePointer_3
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_line_error
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax &STRING_Update_Pointer_6
 PUSH_eax	#_process_expression1
 LOAD_IMMEDIATE_eax %2
 PUSH_eax	#_process_expression2
@@ -2457,24 +2913,10 @@ CALL_IMMEDIATE %FUNCTION_exit
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
-:_END_IF_ConsumePointer_2
-:_END_IF_ConsumePointer_1
-:_END_IF_ConsumePointer_0
-PUSH_edi	# Prevent overwriting in recursion
-PUSH_ebp	# Protect the old base pointer
-COPY_esp_to_edi	# Copy new base pointer
-LOAD_BASE_ADDRESS_eax %-8
-LOAD_INTEGER
-PUSH_eax	#_process_expression1
-LOAD_BASE_ADDRESS_eax %-12
-LOAD_INTEGER
-PUSH_eax	#_process_expression2
-COPY_edi_to_ebp
-CALL_IMMEDIATE %FUNCTION_consume_token
-POP_ebx	# _process_expression_locals
-POP_ebx	# _process_expression_locals
-POP_ebp	# Restore old base pointer
-POP_edi	# Prevent overwrite
+:_END_IF_Update_Pointer_5
+:_END_IF_Update_Pointer_4
+:_END_IF_Update_Pointer_2
+:_END_IF_Update_Pointer_0
 RETURN
 # Defining function storePointer
 :FUNCTION_storePointer
@@ -2484,18 +2926,19 @@ COPY_esp_to_edi	# Copy new base pointer
 LOAD_IMMEDIATE_eax &GLOBAL_scratch
 LOAD_INTEGER
 PUSH_eax	#_process_expression1
-LOAD_IMMEDIATE_eax %0
-PUSH_eax	#_process_expression2
-LOAD_IMMEDIATE_eax %4096
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %1
-POP_ebx	# _common_recursion
-ADD_ebx_to_eax
-PUSH_eax	#_process_expression2
 COPY_edi_to_ebp
-CALL_IMMEDIATE %FUNCTION_memset
+CALL_IMMEDIATE %FUNCTION_Clear_Scratch
 POP_ebx	# _process_expression_locals
-POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_BASE_ADDRESS_eax %-4
+LOAD_INTEGER
+PUSH_eax	#_process_expression1
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_Update_Pointer
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
@@ -2503,28 +2946,14 @@ POP_edi	# Prevent overwrite
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
-LOAD_BASE_ADDRESS_eax %-4
-LOAD_INTEGER
-PUSH_eax	#_process_expression1
 LOAD_BASE_ADDRESS_eax %-8
 LOAD_INTEGER
-PUSH_eax	#_process_expression2
-LOAD_IMMEDIATE_eax &GLOBAL_scratch
-LOAD_INTEGER
-PUSH_eax	#_process_expression2
+PUSH_eax	#_process_expression1
 COPY_edi_to_ebp
-CALL_IMMEDIATE %FUNCTION_ConsumePointer
-POP_ebx	# _process_expression_locals
-POP_ebx	# _process_expression_locals
+CALL_IMMEDIATE %FUNCTION_consume_token
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %62
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
 PUSH_eax	#base_sep_p
 # Defining local target
 PUSH_edi	# Prevent overwriting in recursion
@@ -2546,28 +2975,24 @@ LOAD_IMMEDIATE_eax &GLOBAL_ip
 LOAD_INTEGER
 PUSH_eax	#base
 # IF_storePointer_0
+LOAD_IMMEDIATE_eax %62
+PUSH_eax	#_common_recursion
 LOAD_BASE_ADDRESS_eax %-16
 LOAD_INTEGER
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
 TEST
 JUMP_EQ %ELSE_storePointer_0
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
-LOAD_IMMEDIATE_eax &GLOBAL_scratch2
+LOAD_IMMEDIATE_eax &GLOBAL_scratch
 LOAD_INTEGER
 PUSH_eax	#_process_expression1
-LOAD_IMMEDIATE_eax %0
-PUSH_eax	#_process_expression2
-LOAD_IMMEDIATE_eax %4096
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %1
-POP_ebx	# _common_recursion
-ADD_ebx_to_eax
-PUSH_eax	#_process_expression2
 COPY_edi_to_ebp
-CALL_IMMEDIATE %FUNCTION_memset
-POP_ebx	# _process_expression_locals
-POP_ebx	# _process_expression_locals
+CALL_IMMEDIATE %FUNCTION_Clear_Scratch
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
@@ -2577,12 +3002,8 @@ COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-8
 LOAD_INTEGER
 PUSH_eax	#_process_expression1
-LOAD_IMMEDIATE_eax &GLOBAL_scratch2
-LOAD_INTEGER
-PUSH_eax	#_process_expression2
 COPY_edi_to_ebp
 CALL_IMMEDIATE %FUNCTION_consume_token
-POP_ebx	# _process_expression_locals
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
@@ -2591,7 +3012,7 @@ PUSH_eax	#_common_recursion
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
-LOAD_IMMEDIATE_eax &GLOBAL_scratch2
+LOAD_IMMEDIATE_eax &GLOBAL_scratch
 LOAD_INTEGER
 PUSH_eax	#_process_expression1
 COPY_edi_to_ebp
@@ -2601,9 +3022,20 @@ POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
 POP_ebx	# _common_recursion
 STORE_INTEGER
+LOAD_BASE_ADDRESS_eax %-24
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-20
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-28
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+SUBTRACT_eax_from_ebx_into_ebx
+MOVE_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
 JUMP %_END_IF_storePointer_0
 :ELSE_storePointer_0
-:_END_IF_storePointer_0
 LOAD_BASE_ADDRESS_eax %-24
 PUSH_eax	#_common_recursion
 PUSH_edi	# Prevent overwriting in recursion
@@ -2623,6 +3055,7 @@ POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
 POP_ebx	# _common_recursion
 STORE_INTEGER
+:_END_IF_storePointer_0
 # IF_storePointer_1
 LOAD_IMMEDIATE_eax %33
 PUSH_eax	#_common_recursion
@@ -2634,38 +3067,6 @@ SETE
 MOVEZBL
 TEST
 JUMP_EQ %ELSE_storePointer_1
-# IF_storePointer_2
-LOAD_IMMEDIATE_eax %40
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax &GLOBAL_Architecture
-LOAD_INTEGER
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
-TEST
-JUMP_EQ %ELSE_storePointer_2
-PUSH_edi	# Prevent overwriting in recursion
-PUSH_ebp	# Protect the old base pointer
-COPY_esp_to_edi	# Copy new base pointer
-LOAD_BASE_ADDRESS_eax %-24
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %7
-POP_ebx	# _common_recursion
-SUBTRACT_eax_from_ebx_into_ebx
-MOVE_ebx_to_eax
-PUSH_eax	#_process_expression1
-LOAD_IMMEDIATE_eax %1
-PUSH_eax	#_process_expression2
-COPY_edi_to_ebp
-CALL_IMMEDIATE %FUNCTION_outputPointer
-POP_ebx	# _process_expression_locals
-POP_ebx	# _process_expression_locals
-POP_ebp	# Restore old base pointer
-POP_edi	# Prevent overwrite
-JUMP %_END_IF_storePointer_2
-:ELSE_storePointer_2
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
@@ -2680,10 +3081,9 @@ POP_ebx	# _process_expression_locals
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
-:_END_IF_storePointer_2
 JUMP %_END_IF_storePointer_1
 :ELSE_storePointer_1
-# IF_storePointer_3
+# IF_storePointer_2
 LOAD_IMMEDIATE_eax %36
 PUSH_eax	#_common_recursion
 LOAD_BASE_ADDRESS_eax %-4
@@ -2693,7 +3093,7 @@ CMP
 SETE
 MOVEZBL
 TEST
-JUMP_EQ %ELSE_storePointer_3
+JUMP_EQ %ELSE_storePointer_2
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
@@ -2708,10 +3108,37 @@ POP_ebx	# _process_expression_locals
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
+JUMP %_END_IF_storePointer_2
+:ELSE_storePointer_2
+# IF_storePointer_3
+LOAD_IMMEDIATE_eax %64
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-4
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
+TEST
+JUMP_EQ %ELSE_storePointer_3
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_BASE_ADDRESS_eax %-24
+LOAD_INTEGER
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax %2
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_outputPointer
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
 JUMP %_END_IF_storePointer_3
 :ELSE_storePointer_3
 # IF_storePointer_4
-LOAD_IMMEDIATE_eax %64
+LOAD_IMMEDIATE_eax %126
 PUSH_eax	#_common_recursion
 LOAD_BASE_ADDRESS_eax %-4
 LOAD_INTEGER
@@ -2727,7 +3154,7 @@ COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-24
 LOAD_INTEGER
 PUSH_eax	#_process_expression1
-LOAD_IMMEDIATE_eax %2
+LOAD_IMMEDIATE_eax %3
 PUSH_eax	#_process_expression2
 COPY_edi_to_ebp
 CALL_IMMEDIATE %FUNCTION_outputPointer
@@ -2794,6 +3221,13 @@ JUMP %_END_IF_storePointer_6
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_line_error
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
 LOAD_IMMEDIATE_eax &STRING_storePointer_7
 PUSH_eax	#_process_expression1
 LOAD_IMMEDIATE_eax %2
@@ -2845,6 +3279,7 @@ POP_edi	# Prevent overwrite
 :_END_IF_storePointer_5
 :_END_IF_storePointer_4
 :_END_IF_storePointer_3
+:_END_IF_storePointer_2
 :_END_IF_storePointer_1
 POP_ebx	# _recursive_statement_locals
 POP_ebx	# _recursive_statement_locals
@@ -2867,25 +3302,24 @@ POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
 PUSH_eax	#c
 :WHILE_line_Comment_0
-LOAD_IMMEDIATE_eax %10
+LOAD_IMMEDIATE_eax %1
 PUSH_eax	#_common_recursion
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-12
 LOAD_INTEGER
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &STRING_line_Comment_1
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_in_set
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
 POP_ebx	# _common_recursion
-CMP
-SETNE
-MOVEZBL
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %13
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-12
-LOAD_INTEGER
-POP_ebx	# _common_recursion
-CMP
-SETNE
-MOVEZBL
-POP_ebx	# _common_recursion
-AND_eax_ebx
+XOR_ebx_eax_into_eax
 TEST
 JUMP_EQ %END_WHILE_line_Comment_0
 # THEN_while_line_Comment_0
@@ -2906,30 +3340,35 @@ POP_ebx	# _common_recursion
 STORE_INTEGER
 JUMP %WHILE_line_Comment_0
 :END_WHILE_line_Comment_0
+LOAD_IMMEDIATE_eax &GLOBAL_linenumber
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax &GLOBAL_linenumber
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
 POP_ebx	# _recursive_statement_locals
 RETURN
 # Defining function hex
 :FUNCTION_hex
 # IF_hex_0
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-4
 LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %48
-POP_ebx	# _common_recursion
-CMP
-SETGE
-MOVEZBL
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-4
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %57
-POP_ebx	# _common_recursion
-CMP
-SETLE
-MOVEZBL
-POP_ebx	# _common_recursion
-AND_eax_ebx
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &STRING_hex_1
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_in_set
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
 TEST
 JUMP_EQ %ELSE_hex_0
 LOAD_BASE_ADDRESS_eax %-4
@@ -2942,28 +3381,23 @@ MOVE_ebx_to_eax
 RETURN
 JUMP %_END_IF_hex_0
 :ELSE_hex_0
-# IF_hex_1
+# IF_hex_2
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-4
 LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %97
-POP_ebx	# _common_recursion
-CMP
-SETGE
-MOVEZBL
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-4
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %122
-POP_ebx	# _common_recursion
-CMP
-SETLE
-MOVEZBL
-POP_ebx	# _common_recursion
-AND_eax_ebx
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &STRING_hex_3
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_in_set
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
 TEST
-JUMP_EQ %ELSE_hex_1
+JUMP_EQ %ELSE_hex_2
 LOAD_BASE_ADDRESS_eax %-4
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
@@ -2972,30 +3406,25 @@ POP_ebx	# _common_recursion
 SUBTRACT_eax_from_ebx_into_ebx
 MOVE_ebx_to_eax
 RETURN
-JUMP %_END_IF_hex_1
-:ELSE_hex_1
-# IF_hex_2
+JUMP %_END_IF_hex_2
+:ELSE_hex_2
+# IF_hex_4
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-4
 LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %65
-POP_ebx	# _common_recursion
-CMP
-SETGE
-MOVEZBL
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-4
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %90
-POP_ebx	# _common_recursion
-CMP
-SETLE
-MOVEZBL
-POP_ebx	# _common_recursion
-AND_eax_ebx
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &STRING_hex_5
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_in_set
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
 TEST
-JUMP_EQ %ELSE_hex_2
+JUMP_EQ %ELSE_hex_4
 LOAD_BASE_ADDRESS_eax %-4
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
@@ -3004,30 +3433,25 @@ POP_ebx	# _common_recursion
 SUBTRACT_eax_from_ebx_into_ebx
 MOVE_ebx_to_eax
 RETURN
-JUMP %_END_IF_hex_2
-:ELSE_hex_2
-# IF_hex_3
+JUMP %_END_IF_hex_4
+:ELSE_hex_4
+# IF_hex_6
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-4
 LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %35
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-4
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %59
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
-POP_ebx	# _common_recursion
-OR_eax_ebx
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &STRING_hex_7
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_in_set
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
 TEST
-JUMP_EQ %ELSE_hex_3
+JUMP_EQ %ELSE_hex_6
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
@@ -3039,11 +3463,35 @@ CALL_IMMEDIATE %FUNCTION_line_Comment
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
-JUMP %_END_IF_hex_3
-:ELSE_hex_3
-:_END_IF_hex_3
+JUMP %_END_IF_hex_6
+:ELSE_hex_6
+# IF_hex_8
+LOAD_IMMEDIATE_eax %10
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-4
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
+TEST
+JUMP_EQ %ELSE_hex_8
+LOAD_IMMEDIATE_eax &GLOBAL_linenumber
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax &GLOBAL_linenumber
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+JUMP %_END_IF_hex_8
+:ELSE_hex_8
+:_END_IF_hex_8
+:_END_IF_hex_6
+:_END_IF_hex_4
 :_END_IF_hex_2
-:_END_IF_hex_1
 :_END_IF_hex_0
 LOAD_IMMEDIATE_eax %0
 PUSH_eax	#_common_recursion
@@ -3055,25 +3503,20 @@ RETURN
 # Defining function octal
 :FUNCTION_octal
 # IF_octal_0
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-4
 LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %48
-POP_ebx	# _common_recursion
-CMP
-SETGE
-MOVEZBL
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-4
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %55
-POP_ebx	# _common_recursion
-CMP
-SETLE
-MOVEZBL
-POP_ebx	# _common_recursion
-AND_eax_ebx
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &STRING_octal_1
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_in_set
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
 TEST
 JUMP_EQ %ELSE_octal_0
 LOAD_BASE_ADDRESS_eax %-4
@@ -3086,28 +3529,23 @@ MOVE_ebx_to_eax
 RETURN
 JUMP %_END_IF_octal_0
 :ELSE_octal_0
-# IF_octal_1
+# IF_octal_2
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-4
 LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %35
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-4
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %59
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
-POP_ebx	# _common_recursion
-OR_eax_ebx
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &STRING_octal_3
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_in_set
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
 TEST
-JUMP_EQ %ELSE_octal_1
+JUMP_EQ %ELSE_octal_2
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
@@ -3119,9 +3557,33 @@ CALL_IMMEDIATE %FUNCTION_line_Comment
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
-JUMP %_END_IF_octal_1
-:ELSE_octal_1
-:_END_IF_octal_1
+JUMP %_END_IF_octal_2
+:ELSE_octal_2
+# IF_octal_4
+LOAD_IMMEDIATE_eax %10
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-4
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
+TEST
+JUMP_EQ %ELSE_octal_4
+LOAD_IMMEDIATE_eax &GLOBAL_linenumber
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax &GLOBAL_linenumber
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+JUMP %_END_IF_octal_4
+:ELSE_octal_4
+:_END_IF_octal_4
+:_END_IF_octal_2
 :_END_IF_octal_0
 LOAD_IMMEDIATE_eax %0
 PUSH_eax	#_common_recursion
@@ -3133,25 +3595,20 @@ RETURN
 # Defining function binary
 :FUNCTION_binary
 # IF_binary_0
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-4
 LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %48
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-4
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %49
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
-POP_ebx	# _common_recursion
-OR_eax_ebx
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &STRING_binary_1
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_in_set
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
 TEST
 JUMP_EQ %ELSE_binary_0
 LOAD_BASE_ADDRESS_eax %-4
@@ -3164,28 +3621,23 @@ MOVE_ebx_to_eax
 RETURN
 JUMP %_END_IF_binary_0
 :ELSE_binary_0
-# IF_binary_1
+# IF_binary_2
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-4
 LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %35
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-4
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %59
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
-POP_ebx	# _common_recursion
-OR_eax_ebx
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &STRING_binary_3
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_in_set
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
 TEST
-JUMP_EQ %ELSE_binary_1
+JUMP_EQ %ELSE_binary_2
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
@@ -3197,9 +3649,33 @@ CALL_IMMEDIATE %FUNCTION_line_Comment
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
-JUMP %_END_IF_binary_1
-:ELSE_binary_1
-:_END_IF_binary_1
+JUMP %_END_IF_binary_2
+:ELSE_binary_2
+# IF_binary_4
+LOAD_IMMEDIATE_eax %10
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-4
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
+TEST
+JUMP_EQ %ELSE_binary_4
+LOAD_IMMEDIATE_eax &GLOBAL_linenumber
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax &GLOBAL_linenumber
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+JUMP %_END_IF_binary_4
+:ELSE_binary_4
+:_END_IF_binary_4
+:_END_IF_binary_2
 :_END_IF_binary_0
 LOAD_IMMEDIATE_eax %0
 PUSH_eax	#_common_recursion
@@ -3698,6 +4174,137 @@ JUMP %_END_IF_process_byte_9
 :_END_IF_process_byte_4
 :_END_IF_process_byte_0
 RETURN
+# Defining function pad_to_align
+:FUNCTION_pad_to_align
+# IF_pad_to_align_0
+LOAD_IMMEDIATE_eax %40
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax &GLOBAL_Architecture
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
+TEST
+JUMP_EQ %ELSE_pad_to_align_0
+# IF_pad_to_align_1
+LOAD_IMMEDIATE_eax %1
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax &GLOBAL_ip
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0x1
+POP_ebx	# _common_recursion
+AND_eax_ebx
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
+TEST
+JUMP_EQ %ELSE_pad_to_align_1
+LOAD_IMMEDIATE_eax &GLOBAL_ip
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax &GLOBAL_ip
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+# IF_pad_to_align_2
+LOAD_BASE_ADDRESS_eax %-4
+LOAD_INTEGER
+TEST
+JUMP_EQ %ELSE_pad_to_align_2
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &GLOBAL_output
+LOAD_INTEGER
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_fputc
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+JUMP %_END_IF_pad_to_align_2
+:ELSE_pad_to_align_2
+:_END_IF_pad_to_align_2
+JUMP %_END_IF_pad_to_align_1
+:ELSE_pad_to_align_1
+:_END_IF_pad_to_align_1
+# IF_pad_to_align_3
+LOAD_IMMEDIATE_eax %2
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax &GLOBAL_ip
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0x2
+POP_ebx	# _common_recursion
+AND_eax_ebx
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
+TEST
+JUMP_EQ %ELSE_pad_to_align_3
+LOAD_IMMEDIATE_eax &GLOBAL_ip
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax &GLOBAL_ip
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %2
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+# IF_pad_to_align_4
+LOAD_BASE_ADDRESS_eax %-4
+LOAD_INTEGER
+TEST
+JUMP_EQ %ELSE_pad_to_align_4
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &GLOBAL_output
+LOAD_INTEGER
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_fputc
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &GLOBAL_output
+LOAD_INTEGER
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_fputc
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+JUMP %_END_IF_pad_to_align_4
+:ELSE_pad_to_align_4
+:_END_IF_pad_to_align_4
+JUMP %_END_IF_pad_to_align_3
+:ELSE_pad_to_align_3
+:_END_IF_pad_to_align_3
+JUMP %_END_IF_pad_to_align_0
+:ELSE_pad_to_align_0
+:_END_IF_pad_to_align_0
+RETURN
 # Defining function first_pass
 :FUNCTION_first_pass
 # IF_first_pass_0
@@ -3728,16 +4335,27 @@ CALL_IMMEDIATE %FUNCTION_first_pass
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
-# Defining local source_file
-PUSH_edi	# Prevent overwriting in recursion
-PUSH_ebp	# Protect the old base pointer
-COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax &GLOBAL_filename
+PUSH_eax	#_common_recursion
 LOAD_BASE_ADDRESS_eax %-4
 LOAD_INTEGER
 # looking up offset
 # -> offset calculation
 LOAD_IMMEDIATE_ebx %4
 ADD_ebx_to_eax
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+STORE_INTEGER
+LOAD_IMMEDIATE_eax &GLOBAL_linenumber
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+STORE_INTEGER
+# Defining local source_file
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax &GLOBAL_filename
 LOAD_INTEGER
 PUSH_eax	#_process_expression1
 LOAD_IMMEDIATE_eax &STRING_first_pass_1
@@ -3905,83 +4523,49 @@ JUMP %_END_IF_first_pass_6
 :ELSE_first_pass_6
 :_END_IF_first_pass_6
 # IF_first_pass_7
-LOAD_IMMEDIATE_eax %33
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-16
-LOAD_INTEGER
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %64
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-16
-LOAD_INTEGER
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
-POP_ebx	# _common_recursion
-OR_eax_ebx
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %36
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-16
-LOAD_INTEGER
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
-POP_ebx	# _common_recursion
-OR_eax_ebx
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %37
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-16
-LOAD_INTEGER
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
-POP_ebx	# _common_recursion
-OR_eax_ebx
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %38
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-16
-LOAD_INTEGER
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
-POP_ebx	# _common_recursion
-OR_eax_ebx
-TEST
-JUMP_EQ %ELSE_first_pass_7
-LOAD_BASE_ADDRESS_eax %-16
-PUSH_eax	#_common_recursion
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-16
 LOAD_INTEGER
 PUSH_eax	#_process_expression1
-LOAD_BASE_ADDRESS_eax %-12
-LOAD_INTEGER
-PUSH_eax	#_process_expression2
-LOAD_IMMEDIATE_eax %0
+LOAD_IMMEDIATE_eax &STRING_first_pass_8
 PUSH_eax	#_process_expression2
 COPY_edi_to_ebp
-CALL_IMMEDIATE %FUNCTION_ConsumePointer
+CALL_IMMEDIATE %FUNCTION_in_set
 POP_ebx	# _process_expression_locals
 POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+TEST
+JUMP_EQ %ELSE_first_pass_7
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_BASE_ADDRESS_eax %-16
+LOAD_INTEGER
+PUSH_eax	#_process_expression1
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_Update_Pointer
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+LOAD_BASE_ADDRESS_eax %-16
+PUSH_eax	#_common_recursion
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_BASE_ADDRESS_eax %-12
+LOAD_INTEGER
+PUSH_eax	#_process_expression1
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_Throwaway_token
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
 POP_ebx	# _common_recursion
 STORE_INTEGER
-# IF_first_pass_8
+# IF_first_pass_9
 LOAD_IMMEDIATE_eax %62
 PUSH_eax	#_common_recursion
 LOAD_BASE_ADDRESS_eax %-16
@@ -3991,7 +4575,7 @@ CMP
 SETE
 MOVEZBL
 TEST
-JUMP_EQ %ELSE_first_pass_8
+JUMP_EQ %ELSE_first_pass_9
 LOAD_BASE_ADDRESS_eax %-16
 PUSH_eax	#_common_recursion
 PUSH_edi	# Prevent overwriting in recursion
@@ -4000,21 +4584,56 @@ COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-12
 LOAD_INTEGER
 PUSH_eax	#_process_expression1
-LOAD_IMMEDIATE_eax %0
-PUSH_eax	#_process_expression2
 COPY_edi_to_ebp
-CALL_IMMEDIATE %FUNCTION_consume_token
-POP_ebx	# _process_expression_locals
+CALL_IMMEDIATE %FUNCTION_Throwaway_token
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
 POP_ebx	# _common_recursion
 STORE_INTEGER
-JUMP %_END_IF_first_pass_8
-:ELSE_first_pass_8
-:_END_IF_first_pass_8
+JUMP %_END_IF_first_pass_9
+:ELSE_first_pass_9
+:_END_IF_first_pass_9
 JUMP %_END_IF_first_pass_7
 :ELSE_first_pass_7
+# IF_first_pass_10
+LOAD_IMMEDIATE_eax %60
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-16
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
+TEST
+JUMP_EQ %ELSE_first_pass_10
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_process_expression1
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_pad_to_align
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+JUMP %_END_IF_first_pass_10
+:ELSE_first_pass_10
+# IF_first_pass_11
+LOAD_IMMEDIATE_eax %94
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-16
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
+TEST
+JUMP_EQ %ELSE_first_pass_11
+
+#continue statement
+JUMP %_END_IF_first_pass_11
+:ELSE_first_pass_11
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
@@ -4033,6 +4652,8 @@ POP_ebx	# _process_expression_locals
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
+:_END_IF_first_pass_11
+:_END_IF_first_pass_10
 :_END_IF_first_pass_7
 JUMP %FOR_ITER_first_pass_5
 :FOR_END_first_pass_5
@@ -4080,16 +4701,27 @@ CALL_IMMEDIATE %FUNCTION_second_pass
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
-# Defining local source_file
-PUSH_edi	# Prevent overwriting in recursion
-PUSH_ebp	# Protect the old base pointer
-COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax &GLOBAL_filename
+PUSH_eax	#_common_recursion
 LOAD_BASE_ADDRESS_eax %-4
 LOAD_INTEGER
 # looking up offset
 # -> offset calculation
 LOAD_IMMEDIATE_ebx %4
 ADD_ebx_to_eax
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+STORE_INTEGER
+LOAD_IMMEDIATE_eax &GLOBAL_linenumber
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+STORE_INTEGER
+# Defining local source_file
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax &GLOBAL_filename
 LOAD_INTEGER
 PUSH_eax	#_process_expression1
 LOAD_IMMEDIATE_eax &STRING_second_pass_1
@@ -4247,11 +4879,8 @@ COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-12
 LOAD_INTEGER
 PUSH_eax	#_process_expression1
-LOAD_IMMEDIATE_eax %0
-PUSH_eax	#_process_expression2
 COPY_edi_to_ebp
-CALL_IMMEDIATE %FUNCTION_consume_token
-POP_ebx	# _process_expression_locals
+CALL_IMMEDIATE %FUNCTION_Throwaway_token
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
@@ -4260,58 +4889,20 @@ STORE_INTEGER
 JUMP %_END_IF_second_pass_6
 :ELSE_second_pass_6
 # IF_second_pass_7
-LOAD_IMMEDIATE_eax %33
-PUSH_eax	#_common_recursion
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-16
 LOAD_INTEGER
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %64
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-16
-LOAD_INTEGER
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
-POP_ebx	# _common_recursion
-OR_eax_ebx
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %36
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-16
-LOAD_INTEGER
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
-POP_ebx	# _common_recursion
-OR_eax_ebx
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %37
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-16
-LOAD_INTEGER
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
-POP_ebx	# _common_recursion
-OR_eax_ebx
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %38
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-16
-LOAD_INTEGER
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
-POP_ebx	# _common_recursion
-OR_eax_ebx
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &STRING_second_pass_8
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_in_set
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
 TEST
 JUMP_EQ %ELSE_second_pass_7
 PUSH_edi	# Prevent overwriting in recursion
@@ -4331,6 +4922,47 @@ POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
 JUMP %_END_IF_second_pass_7
 :ELSE_second_pass_7
+# IF_second_pass_9
+LOAD_IMMEDIATE_eax %60
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-16
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
+TEST
+JUMP_EQ %ELSE_second_pass_9
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax %1
+PUSH_eax	#_process_expression1
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_pad_to_align
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+JUMP %_END_IF_second_pass_9
+:ELSE_second_pass_9
+# IF_second_pass_10
+LOAD_IMMEDIATE_eax %94
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-16
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
+TEST
+JUMP_EQ %ELSE_second_pass_10
+LOAD_IMMEDIATE_eax &GLOBAL_ALIGNED
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+STORE_INTEGER
+JUMP %_END_IF_second_pass_10
+:ELSE_second_pass_10
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
@@ -4349,6 +4981,8 @@ POP_ebx	# _process_expression_locals
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
+:_END_IF_second_pass_10
+:_END_IF_second_pass_9
 :_END_IF_second_pass_7
 :_END_IF_second_pass_6
 JUMP %FOR_ITER_second_pass_5
@@ -4369,6 +5003,11 @@ POP_ebx	# _recursive_statement_locals
 RETURN
 # Defining function main
 :FUNCTION_main
+LOAD_IMMEDIATE_eax &GLOBAL_ALIGNED
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %0
+POP_ebx	# _common_recursion
+STORE_INTEGER
 LOAD_IMMEDIATE_eax &GLOBAL_BigEndian
 PUSH_eax	#_common_recursion
 LOAD_IMMEDIATE_eax %1
@@ -4431,32 +5070,13 @@ POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
 POP_ebx	# _common_recursion
 STORE_INTEGER
-LOAD_IMMEDIATE_eax &GLOBAL_scratch2
-PUSH_eax	#_common_recursion
-PUSH_edi	# Prevent overwriting in recursion
-PUSH_ebp	# Protect the old base pointer
-COPY_esp_to_edi	# Copy new base pointer
-LOAD_IMMEDIATE_eax %4096
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %1
-POP_ebx	# _common_recursion
-ADD_ebx_to_eax
-PUSH_eax	#_process_expression1
-LOAD_IMMEDIATE_eax %1
-PUSH_eax	#_process_expression2
-COPY_edi_to_ebp
-CALL_IMMEDIATE %FUNCTION_calloc
-POP_ebx	# _process_expression_locals
-POP_ebx	# _process_expression_locals
-POP_ebp	# Restore old base pointer
-POP_edi	# Prevent overwrite
-POP_ebx	# _common_recursion
-STORE_INTEGER
+# Defining local arch
+PUSH_eax	#arch
 # Defining local option_index
 LOAD_IMMEDIATE_eax %1
 PUSH_eax	#option_index
 :WHILE_main_1
-LOAD_BASE_ADDRESS_eax %-28
+LOAD_BASE_ADDRESS_eax %-32
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
 LOAD_BASE_ADDRESS_eax %-4
@@ -4474,7 +5094,7 @@ PUSH_eax	#_common_recursion
 LOAD_BASE_ADDRESS_eax %-8
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
+LOAD_BASE_ADDRESS_eax %-32
 LOAD_INTEGER
 POP_ebx	# _common_recursion
 SAL_eax_Immediate8 !2
@@ -4486,9 +5106,9 @@ SETE
 MOVEZBL
 TEST
 JUMP_EQ %ELSE_main_2
-LOAD_BASE_ADDRESS_eax %-28
+LOAD_BASE_ADDRESS_eax %-32
 PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
+LOAD_BASE_ADDRESS_eax %-32
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
 LOAD_IMMEDIATE_eax %1
@@ -4505,7 +5125,7 @@ COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-8
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
+LOAD_BASE_ADDRESS_eax %-32
 LOAD_INTEGER
 POP_ebx	# _common_recursion
 SAL_eax_Immediate8 !2
@@ -4527,9 +5147,9 @@ PUSH_eax	#_common_recursion
 LOAD_IMMEDIATE_eax %1
 POP_ebx	# _common_recursion
 STORE_INTEGER
-LOAD_BASE_ADDRESS_eax %-28
+LOAD_BASE_ADDRESS_eax %-32
 PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
+LOAD_BASE_ADDRESS_eax %-32
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
 LOAD_IMMEDIATE_eax %1
@@ -4546,7 +5166,7 @@ COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-8
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
+LOAD_BASE_ADDRESS_eax %-32
 LOAD_INTEGER
 POP_ebx	# _common_recursion
 SAL_eax_Immediate8 !2
@@ -4568,9 +5188,9 @@ PUSH_eax	#_common_recursion
 LOAD_IMMEDIATE_eax %0
 POP_ebx	# _common_recursion
 STORE_INTEGER
-LOAD_BASE_ADDRESS_eax %-28
+LOAD_BASE_ADDRESS_eax %-32
 PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
+LOAD_BASE_ADDRESS_eax %-32
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
 LOAD_IMMEDIATE_eax %1
@@ -4587,7 +5207,7 @@ COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-8
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
+LOAD_BASE_ADDRESS_eax %-32
 LOAD_INTEGER
 POP_ebx	# _common_recursion
 SAL_eax_Immediate8 !2
@@ -4609,9 +5229,9 @@ PUSH_eax	#_common_recursion
 LOAD_IMMEDIATE_eax %1
 POP_ebx	# _common_recursion
 STORE_INTEGER
-LOAD_BASE_ADDRESS_eax %-28
+LOAD_BASE_ADDRESS_eax %-32
 PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
+LOAD_BASE_ADDRESS_eax %-32
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
 LOAD_IMMEDIATE_eax %1
@@ -4628,7 +5248,7 @@ COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-8
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
+LOAD_BASE_ADDRESS_eax %-32
 LOAD_INTEGER
 POP_ebx	# _common_recursion
 SAL_eax_Immediate8 !2
@@ -4650,7 +5270,7 @@ COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-8
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
+LOAD_BASE_ADDRESS_eax %-32
 LOAD_INTEGER
 POP_ebx	# _common_recursion
 SAL_eax_Immediate8 !2
@@ -4669,15 +5289,12 @@ POP_ebx	# _common_recursion
 OR_eax_ebx
 TEST
 JUMP_EQ %ELSE_main_9
-LOAD_IMMEDIATE_eax &GLOBAL_Architecture
+LOAD_BASE_ADDRESS_eax %-28
 PUSH_eax	#_common_recursion
-PUSH_edi	# Prevent overwriting in recursion
-PUSH_ebp	# Protect the old base pointer
-COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-8
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
+LOAD_BASE_ADDRESS_eax %-32
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
 LOAD_IMMEDIATE_eax %1
@@ -4687,41 +5304,16 @@ POP_ebx	# _common_recursion
 SAL_eax_Immediate8 !2
 ADD_ebx_to_eax
 LOAD_INTEGER
-PUSH_eax	#_process_expression1
-COPY_edi_to_ebp
-CALL_IMMEDIATE %FUNCTION_numerate_string
-POP_ebx	# _process_expression_locals
-POP_ebp	# Restore old base pointer
-POP_edi	# Prevent overwrite
 POP_ebx	# _common_recursion
 STORE_INTEGER
-LOAD_BASE_ADDRESS_eax %-28
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %2
-POP_ebx	# _common_recursion
-ADD_ebx_to_eax
-POP_ebx	# _common_recursion
-STORE_INTEGER
-JUMP %_END_IF_main_9
-:ELSE_main_9
 # IF_main_12
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
-LOAD_BASE_ADDRESS_eax %-8
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax &STRING_main_13
+PUSH_eax	#_process_expression1
 LOAD_BASE_ADDRESS_eax %-28
 LOAD_INTEGER
-POP_ebx	# _common_recursion
-SAL_eax_Immediate8 !2
-ADD_ebx_to_eax
-LOAD_INTEGER
-PUSH_eax	#_process_expression1
-LOAD_IMMEDIATE_eax &STRING_main_13
 PUSH_eax	#_process_expression2
 COPY_edi_to_ebp
 CALL_IMMEDIATE %FUNCTION_match
@@ -4733,17 +5325,10 @@ PUSH_eax	#_common_recursion
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
-LOAD_BASE_ADDRESS_eax %-8
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax &STRING_main_14
+PUSH_eax	#_process_expression1
 LOAD_BASE_ADDRESS_eax %-28
 LOAD_INTEGER
-POP_ebx	# _common_recursion
-SAL_eax_Immediate8 !2
-ADD_ebx_to_eax
-LOAD_INTEGER
-PUSH_eax	#_process_expression1
-LOAD_IMMEDIATE_eax &STRING_main_14
 PUSH_eax	#_process_expression2
 COPY_edi_to_ebp
 CALL_IMMEDIATE %FUNCTION_match
@@ -4755,19 +5340,9 @@ POP_ebx	# _common_recursion
 OR_eax_ebx
 TEST
 JUMP_EQ %ELSE_main_12
-LOAD_IMMEDIATE_eax &GLOBAL_ByteMode
+LOAD_IMMEDIATE_eax &GLOBAL_Architecture
 PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %2
-POP_ebx	# _common_recursion
-STORE_INTEGER
-LOAD_BASE_ADDRESS_eax %-28
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %1
-POP_ebx	# _common_recursion
-ADD_ebx_to_eax
+LOAD_IMMEDIATE_eax %0
 POP_ebx	# _common_recursion
 STORE_INTEGER
 JUMP %_END_IF_main_12
@@ -4776,39 +5351,10 @@ JUMP %_END_IF_main_12
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
-LOAD_BASE_ADDRESS_eax %-8
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
-LOAD_INTEGER
-POP_ebx	# _common_recursion
-SAL_eax_Immediate8 !2
-ADD_ebx_to_eax
-LOAD_INTEGER
-PUSH_eax	#_process_expression1
 LOAD_IMMEDIATE_eax &STRING_main_16
-PUSH_eax	#_process_expression2
-COPY_edi_to_ebp
-CALL_IMMEDIATE %FUNCTION_match
-POP_ebx	# _process_expression_locals
-POP_ebx	# _process_expression_locals
-POP_ebp	# Restore old base pointer
-POP_edi	# Prevent overwrite
-PUSH_eax	#_common_recursion
-PUSH_edi	# Prevent overwriting in recursion
-PUSH_ebp	# Protect the old base pointer
-COPY_esp_to_edi	# Copy new base pointer
-LOAD_BASE_ADDRESS_eax %-8
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
+PUSH_eax	#_process_expression1
 LOAD_BASE_ADDRESS_eax %-28
 LOAD_INTEGER
-POP_ebx	# _common_recursion
-SAL_eax_Immediate8 !2
-ADD_ebx_to_eax
-LOAD_INTEGER
-PUSH_eax	#_process_expression1
-LOAD_IMMEDIATE_eax &STRING_main_17
 PUSH_eax	#_process_expression2
 COPY_edi_to_ebp
 CALL_IMMEDIATE %FUNCTION_match
@@ -4816,63 +5362,23 @@ POP_ebx	# _process_expression_locals
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
-POP_ebx	# _common_recursion
-OR_eax_ebx
 TEST
 JUMP_EQ %ELSE_main_15
-LOAD_IMMEDIATE_eax &GLOBAL_Base_Address
-PUSH_eax	#_common_recursion
-PUSH_edi	# Prevent overwriting in recursion
-PUSH_ebp	# Protect the old base pointer
-COPY_esp_to_edi	# Copy new base pointer
-LOAD_BASE_ADDRESS_eax %-8
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
-LOAD_INTEGER
+LOAD_IMMEDIATE_eax &GLOBAL_Architecture
 PUSH_eax	#_common_recursion
 LOAD_IMMEDIATE_eax %1
-POP_ebx	# _common_recursion
-ADD_ebx_to_eax
-POP_ebx	# _common_recursion
-SAL_eax_Immediate8 !2
-ADD_ebx_to_eax
-LOAD_INTEGER
-PUSH_eax	#_process_expression1
-COPY_edi_to_ebp
-CALL_IMMEDIATE %FUNCTION_numerate_string
-POP_ebx	# _process_expression_locals
-POP_ebp	# Restore old base pointer
-POP_edi	# Prevent overwrite
-POP_ebx	# _common_recursion
-STORE_INTEGER
-LOAD_BASE_ADDRESS_eax %-28
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %2
-POP_ebx	# _common_recursion
-ADD_ebx_to_eax
 POP_ebx	# _common_recursion
 STORE_INTEGER
 JUMP %_END_IF_main_15
 :ELSE_main_15
-# IF_main_18
+# IF_main_17
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
-LOAD_BASE_ADDRESS_eax %-8
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax &STRING_main_18
+PUSH_eax	#_process_expression1
 LOAD_BASE_ADDRESS_eax %-28
 LOAD_INTEGER
-POP_ebx	# _common_recursion
-SAL_eax_Immediate8 !2
-ADD_ebx_to_eax
-LOAD_INTEGER
-PUSH_eax	#_process_expression1
-LOAD_IMMEDIATE_eax &STRING_main_19
 PUSH_eax	#_process_expression2
 COPY_edi_to_ebp
 CALL_IMMEDIATE %FUNCTION_match
@@ -4880,32 +5386,39 @@ POP_ebx	# _process_expression_locals
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
-PUSH_eax	#_common_recursion
-PUSH_edi	# Prevent overwriting in recursion
-PUSH_ebp	# Protect the old base pointer
-COPY_esp_to_edi	# Copy new base pointer
-LOAD_BASE_ADDRESS_eax %-8
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
-LOAD_INTEGER
-POP_ebx	# _common_recursion
-SAL_eax_Immediate8 !2
-ADD_ebx_to_eax
-LOAD_INTEGER
-PUSH_eax	#_process_expression1
-LOAD_IMMEDIATE_eax &STRING_main_20
-PUSH_eax	#_process_expression2
-COPY_edi_to_ebp
-CALL_IMMEDIATE %FUNCTION_match
-POP_ebx	# _process_expression_locals
-POP_ebx	# _process_expression_locals
-POP_ebp	# Restore old base pointer
-POP_edi	# Prevent overwrite
-POP_ebx	# _common_recursion
-OR_eax_ebx
 TEST
-JUMP_EQ %ELSE_main_18
+JUMP_EQ %ELSE_main_17
+LOAD_IMMEDIATE_eax &GLOBAL_Architecture
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %2
+POP_ebx	# _common_recursion
+STORE_INTEGER
+JUMP %_END_IF_main_17
+:ELSE_main_17
+# IF_main_19
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax &STRING_main_20
+PUSH_eax	#_process_expression1
+LOAD_BASE_ADDRESS_eax %-28
+LOAD_INTEGER
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_match
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+TEST
+JUMP_EQ %ELSE_main_19
+LOAD_IMMEDIATE_eax &GLOBAL_Architecture
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %40
+POP_ebx	# _common_recursion
+STORE_INTEGER
+JUMP %_END_IF_main_19
+:ELSE_main_19
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
@@ -4922,13 +5435,7 @@ POP_edi	# Prevent overwrite
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
-LOAD_BASE_ADDRESS_eax %-8
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %0
-POP_ebx	# _common_recursion
-SAL_eax_Immediate8 !2
-ADD_ebx_to_eax
+LOAD_BASE_ADDRESS_eax %-28
 LOAD_INTEGER
 PUSH_eax	#_process_expression1
 LOAD_IMMEDIATE_eax %2
@@ -4952,78 +5459,117 @@ POP_ebx	# _process_expression_locals
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
-PUSH_edi	# Prevent overwriting in recursion
-PUSH_ebp	# Protect the old base pointer
-COPY_esp_to_edi	# Copy new base pointer
-LOAD_IMMEDIATE_eax &STRING_main_23
-PUSH_eax	#_process_expression1
+:_END_IF_main_19
+:_END_IF_main_17
+:_END_IF_main_15
+:_END_IF_main_12
+LOAD_BASE_ADDRESS_eax %-32
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-32
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
 LOAD_IMMEDIATE_eax %2
-PUSH_eax	#_process_expression2
-COPY_edi_to_ebp
-CALL_IMMEDIATE %FUNCTION_file_print
-POP_ebx	# _process_expression_locals
-POP_ebx	# _process_expression_locals
-POP_ebp	# Restore old base pointer
-POP_edi	# Prevent overwrite
-PUSH_edi	# Prevent overwriting in recursion
-PUSH_ebp	# Protect the old base pointer
-COPY_esp_to_edi	# Copy new base pointer
-LOAD_IMMEDIATE_eax &STRING_main_24
-PUSH_eax	#_process_expression1
-LOAD_IMMEDIATE_eax %2
-PUSH_eax	#_process_expression2
-COPY_edi_to_ebp
-CALL_IMMEDIATE %FUNCTION_file_print
-POP_ebx	# _process_expression_locals
-POP_ebx	# _process_expression_locals
-POP_ebp	# Restore old base pointer
-POP_edi	# Prevent overwrite
-PUSH_edi	# Prevent overwriting in recursion
-PUSH_ebp	# Protect the old base pointer
-COPY_esp_to_edi	# Copy new base pointer
-LOAD_IMMEDIATE_eax &STRING_main_25
-PUSH_eax	#_process_expression1
-LOAD_IMMEDIATE_eax %2
-PUSH_eax	#_process_expression2
-COPY_edi_to_ebp
-CALL_IMMEDIATE %FUNCTION_file_print
-POP_ebx	# _process_expression_locals
-POP_ebx	# _process_expression_locals
-POP_ebp	# Restore old base pointer
-POP_edi	# Prevent overwrite
-PUSH_edi	# Prevent overwriting in recursion
-PUSH_ebp	# Protect the old base pointer
-COPY_esp_to_edi	# Copy new base pointer
-LOAD_IMMEDIATE_eax &STRING_main_26
-PUSH_eax	#_process_expression1
-LOAD_IMMEDIATE_eax %2
-PUSH_eax	#_process_expression2
-COPY_edi_to_ebp
-CALL_IMMEDIATE %FUNCTION_file_print
-POP_ebx	# _process_expression_locals
-POP_ebx	# _process_expression_locals
-POP_ebp	# Restore old base pointer
-POP_edi	# Prevent overwrite
-PUSH_edi	# Prevent overwriting in recursion
-PUSH_ebp	# Protect the old base pointer
-COPY_esp_to_edi	# Copy new base pointer
-LOAD_IMMEDIATE_eax %0
-PUSH_eax	#_process_expression1
-COPY_edi_to_ebp
-CALL_IMMEDIATE %FUNCTION_exit
-POP_ebx	# _process_expression_locals
-POP_ebp	# Restore old base pointer
-POP_edi	# Prevent overwrite
-JUMP %_END_IF_main_18
-:ELSE_main_18
-# IF_main_27
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+JUMP %_END_IF_main_9
+:ELSE_main_9
+# IF_main_23
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-8
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
+LOAD_BASE_ADDRESS_eax %-32
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+SAL_eax_Immediate8 !2
+ADD_ebx_to_eax
+LOAD_INTEGER
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &STRING_main_24
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_match
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+PUSH_eax	#_common_recursion
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_BASE_ADDRESS_eax %-8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-32
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+SAL_eax_Immediate8 !2
+ADD_ebx_to_eax
+LOAD_INTEGER
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &STRING_main_25
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_match
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+POP_ebx	# _common_recursion
+OR_eax_ebx
+TEST
+JUMP_EQ %ELSE_main_23
+LOAD_IMMEDIATE_eax &GLOBAL_ByteMode
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %2
+POP_ebx	# _common_recursion
+STORE_INTEGER
+LOAD_BASE_ADDRESS_eax %-32
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-32
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+JUMP %_END_IF_main_23
+:ELSE_main_23
+# IF_main_26
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_BASE_ADDRESS_eax %-8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-32
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+SAL_eax_Immediate8 !2
+ADD_ebx_to_eax
+LOAD_INTEGER
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &STRING_main_27
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_match
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+PUSH_eax	#_common_recursion
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_BASE_ADDRESS_eax %-8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-32
 LOAD_INTEGER
 POP_ebx	# _common_recursion
 SAL_eax_Immediate8 !2
@@ -5038,58 +5584,19 @@ POP_ebx	# _process_expression_locals
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
-PUSH_eax	#_common_recursion
-PUSH_edi	# Prevent overwriting in recursion
-PUSH_ebp	# Protect the old base pointer
-COPY_esp_to_edi	# Copy new base pointer
-LOAD_BASE_ADDRESS_eax %-8
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
-LOAD_INTEGER
-POP_ebx	# _common_recursion
-SAL_eax_Immediate8 !2
-ADD_ebx_to_eax
-LOAD_INTEGER
-PUSH_eax	#_process_expression1
-LOAD_IMMEDIATE_eax &STRING_main_29
-PUSH_eax	#_process_expression2
-COPY_edi_to_ebp
-CALL_IMMEDIATE %FUNCTION_match
-POP_ebx	# _process_expression_locals
-POP_ebx	# _process_expression_locals
-POP_ebp	# Restore old base pointer
-POP_edi	# Prevent overwrite
 POP_ebx	# _common_recursion
 OR_eax_ebx
 TEST
-JUMP_EQ %ELSE_main_27
-# Defining local temp
+JUMP_EQ %ELSE_main_26
+LOAD_IMMEDIATE_eax &GLOBAL_Base_Address
+PUSH_eax	#_common_recursion
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
-LOAD_IMMEDIATE_eax %1
-PUSH_eax	#_process_expression1
-LOAD_IMMEDIATE_eax %8
-PUSH_eax	#_process_expression2
-COPY_edi_to_ebp
-CALL_IMMEDIATE %FUNCTION_calloc
-POP_ebx	# _process_expression_locals
-POP_ebx	# _process_expression_locals
-POP_ebp	# Restore old base pointer
-POP_edi	# Prevent overwrite
-PUSH_eax	#temp
-LOAD_BASE_ADDRESS_eax %-32
-LOAD_INTEGER
-# looking up offset
-# -> offset calculation
-LOAD_IMMEDIATE_ebx %4
-ADD_ebx_to_eax
-PUSH_eax	#_common_recursion
 LOAD_BASE_ADDRESS_eax %-8
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
+LOAD_BASE_ADDRESS_eax %-32
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
 LOAD_IMMEDIATE_eax %1
@@ -5099,25 +5606,17 @@ POP_ebx	# _common_recursion
 SAL_eax_Immediate8 !2
 ADD_ebx_to_eax
 LOAD_INTEGER
+PUSH_eax	#_process_expression1
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_numerate_string
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
 POP_ebx	# _common_recursion
 STORE_INTEGER
 LOAD_BASE_ADDRESS_eax %-32
-LOAD_INTEGER
-# looking up offset
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-20
-LOAD_INTEGER
-POP_ebx	# _common_recursion
-STORE_INTEGER
-LOAD_BASE_ADDRESS_eax %-20
 PUSH_eax	#_common_recursion
 LOAD_BASE_ADDRESS_eax %-32
-LOAD_INTEGER
-POP_ebx	# _common_recursion
-STORE_INTEGER
-LOAD_BASE_ADDRESS_eax %-28
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
 LOAD_IMMEDIATE_eax %2
@@ -5125,17 +5624,38 @@ POP_ebx	# _common_recursion
 ADD_ebx_to_eax
 POP_ebx	# _common_recursion
 STORE_INTEGER
-POP_ebx	# _recursive_statement_locals
-JUMP %_END_IF_main_27
-:ELSE_main_27
-# IF_main_30
+JUMP %_END_IF_main_26
+:ELSE_main_26
+# IF_main_29
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-8
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
+LOAD_BASE_ADDRESS_eax %-32
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+SAL_eax_Immediate8 !2
+ADD_ebx_to_eax
+LOAD_INTEGER
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &STRING_main_30
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_match
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+PUSH_eax	#_common_recursion
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_BASE_ADDRESS_eax %-8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-32
 LOAD_INTEGER
 POP_ebx	# _common_recursion
 SAL_eax_Immediate8 !2
@@ -5150,82 +5670,14 @@ POP_ebx	# _process_expression_locals
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
-PUSH_eax	#_common_recursion
-PUSH_edi	# Prevent overwriting in recursion
-PUSH_ebp	# Protect the old base pointer
-COPY_esp_to_edi	# Copy new base pointer
-LOAD_BASE_ADDRESS_eax %-8
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
-LOAD_INTEGER
-POP_ebx	# _common_recursion
-SAL_eax_Immediate8 !2
-ADD_ebx_to_eax
-LOAD_INTEGER
-PUSH_eax	#_process_expression1
-LOAD_IMMEDIATE_eax &STRING_main_32
-PUSH_eax	#_process_expression2
-COPY_edi_to_ebp
-CALL_IMMEDIATE %FUNCTION_match
-POP_ebx	# _process_expression_locals
-POP_ebx	# _process_expression_locals
-POP_ebp	# Restore old base pointer
-POP_edi	# Prevent overwrite
 POP_ebx	# _common_recursion
 OR_eax_ebx
 TEST
-JUMP_EQ %ELSE_main_30
-LOAD_BASE_ADDRESS_eax %-24
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-8
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %1
-POP_ebx	# _common_recursion
-ADD_ebx_to_eax
-POP_ebx	# _common_recursion
-SAL_eax_Immediate8 !2
-ADD_ebx_to_eax
-LOAD_INTEGER
-POP_ebx	# _common_recursion
-STORE_INTEGER
-LOAD_IMMEDIATE_eax &GLOBAL_output
-PUSH_eax	#_common_recursion
+JUMP_EQ %ELSE_main_29
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
-LOAD_BASE_ADDRESS_eax %-24
-LOAD_INTEGER
-PUSH_eax	#_process_expression1
-LOAD_IMMEDIATE_eax &STRING_main_33
-PUSH_eax	#_process_expression2
-COPY_edi_to_ebp
-CALL_IMMEDIATE %FUNCTION_fopen
-POP_ebx	# _process_expression_locals
-POP_ebx	# _process_expression_locals
-POP_ebp	# Restore old base pointer
-POP_edi	# Prevent overwrite
-POP_ebx	# _common_recursion
-STORE_INTEGER
-# IF_main_34
-LOAD_IMMEDIATE_eax %0
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax &GLOBAL_output
-LOAD_INTEGER
-POP_ebx	# _common_recursion
-CMP
-SETE
-MOVEZBL
-TEST
-JUMP_EQ %ELSE_main_34
-PUSH_edi	# Prevent overwriting in recursion
-PUSH_ebp	# Protect the old base pointer
-COPY_esp_to_edi	# Copy new base pointer
-LOAD_IMMEDIATE_eax &STRING_main_35
+LOAD_IMMEDIATE_eax &STRING_main_32
 PUSH_eax	#_process_expression1
 LOAD_IMMEDIATE_eax %2
 PUSH_eax	#_process_expression2
@@ -5241,16 +5693,50 @@ COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-8
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %1
-POP_ebx	# _common_recursion
-ADD_ebx_to_eax
+LOAD_IMMEDIATE_eax %0
 POP_ebx	# _common_recursion
 SAL_eax_Immediate8 !2
 ADD_ebx_to_eax
 LOAD_INTEGER
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax %2
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_file_print
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax &STRING_main_33
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax %2
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_file_print
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax &STRING_main_34
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax %2
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_file_print
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax &STRING_main_35
 PUSH_eax	#_process_expression1
 LOAD_IMMEDIATE_eax %2
 PUSH_eax	#_process_expression2
@@ -5276,28 +5762,15 @@ POP_edi	# Prevent overwrite
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
-LOAD_IMMEDIATE_eax %1
+LOAD_IMMEDIATE_eax %0
 PUSH_eax	#_process_expression1
 COPY_edi_to_ebp
 CALL_IMMEDIATE %FUNCTION_exit
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
-JUMP %_END_IF_main_34
-:ELSE_main_34
-:_END_IF_main_34
-LOAD_BASE_ADDRESS_eax %-28
-PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
-LOAD_INTEGER
-PUSH_eax	#_common_recursion
-LOAD_IMMEDIATE_eax %2
-POP_ebx	# _common_recursion
-ADD_ebx_to_eax
-POP_ebx	# _common_recursion
-STORE_INTEGER
-JUMP %_END_IF_main_30
-:ELSE_main_30
+JUMP %_END_IF_main_29
+:ELSE_main_29
 # IF_main_37
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
@@ -5305,7 +5778,7 @@ COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-8
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
+LOAD_BASE_ADDRESS_eax %-32
 LOAD_INTEGER
 POP_ebx	# _common_recursion
 SAL_eax_Immediate8 !2
@@ -5327,7 +5800,7 @@ COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-8
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
+LOAD_BASE_ADDRESS_eax %-32
 LOAD_INTEGER
 POP_ebx	# _common_recursion
 SAL_eax_Immediate8 !2
@@ -5346,21 +5819,68 @@ POP_ebx	# _common_recursion
 OR_eax_ebx
 TEST
 JUMP_EQ %ELSE_main_37
-LOAD_IMMEDIATE_eax &GLOBAL_ByteMode
-PUSH_eax	#_common_recursion
+# Defining local temp
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax %1
+PUSH_eax	#_process_expression1
 LOAD_IMMEDIATE_eax %8
-POP_ebx	# _common_recursion
-STORE_INTEGER
-LOAD_BASE_ADDRESS_eax %-28
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_calloc
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+PUSH_eax	#temp
+LOAD_BASE_ADDRESS_eax %-36
+LOAD_INTEGER
+# looking up offset
+# -> offset calculation
+LOAD_IMMEDIATE_ebx %4
+ADD_ebx_to_eax
 PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
+LOAD_BASE_ADDRESS_eax %-8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-32
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
 LOAD_IMMEDIATE_eax %1
 POP_ebx	# _common_recursion
 ADD_ebx_to_eax
 POP_ebx	# _common_recursion
+SAL_eax_Immediate8 !2
+ADD_ebx_to_eax
+LOAD_INTEGER
+POP_ebx	# _common_recursion
 STORE_INTEGER
+LOAD_BASE_ADDRESS_eax %-36
+LOAD_INTEGER
+# looking up offset
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-20
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+STORE_INTEGER
+LOAD_BASE_ADDRESS_eax %-20
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-36
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+STORE_INTEGER
+LOAD_BASE_ADDRESS_eax %-32
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-32
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %2
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+POP_ebx	# _recursive_statement_locals
 JUMP %_END_IF_main_37
 :ELSE_main_37
 # IF_main_40
@@ -5370,7 +5890,7 @@ COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-8
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
+LOAD_BASE_ADDRESS_eax %-32
 LOAD_INTEGER
 POP_ebx	# _common_recursion
 SAL_eax_Immediate8 !2
@@ -5392,7 +5912,7 @@ COPY_esp_to_edi	# Copy new base pointer
 LOAD_BASE_ADDRESS_eax %-8
 LOAD_INTEGER
 PUSH_eax	#_common_recursion
-LOAD_BASE_ADDRESS_eax %-28
+LOAD_BASE_ADDRESS_eax %-32
 LOAD_INTEGER
 POP_ebx	# _common_recursion
 SAL_eax_Immediate8 !2
@@ -5411,12 +5931,58 @@ POP_ebx	# _common_recursion
 OR_eax_ebx
 TEST
 JUMP_EQ %ELSE_main_40
+LOAD_BASE_ADDRESS_eax %-24
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-32
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+SAL_eax_Immediate8 !2
+ADD_ebx_to_eax
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+STORE_INTEGER
+LOAD_IMMEDIATE_eax &GLOBAL_output
+PUSH_eax	#_common_recursion
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
-LOAD_IMMEDIATE_eax &STRING_main_43
+LOAD_BASE_ADDRESS_eax %-24
+LOAD_INTEGER
 PUSH_eax	#_process_expression1
-LOAD_IMMEDIATE_eax %1
+LOAD_IMMEDIATE_eax &STRING_main_43
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_fopen
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+POP_ebx	# _common_recursion
+STORE_INTEGER
+# IF_main_44
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax &GLOBAL_output
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+CMP
+SETE
+MOVEZBL
+TEST
+JUMP_EQ %ELSE_main_44
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax &STRING_main_45
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax %2
 PUSH_eax	#_process_expression2
 COPY_edi_to_ebp
 CALL_IMMEDIATE %FUNCTION_file_print
@@ -5427,19 +5993,32 @@ POP_edi	# Prevent overwrite
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
-LOAD_IMMEDIATE_eax %0
+LOAD_BASE_ADDRESS_eax %-8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-32
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+SAL_eax_Immediate8 !2
+ADD_ebx_to_eax
+LOAD_INTEGER
 PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax %2
+PUSH_eax	#_process_expression2
 COPY_edi_to_ebp
-CALL_IMMEDIATE %FUNCTION_exit
+CALL_IMMEDIATE %FUNCTION_file_print
+POP_ebx	# _process_expression_locals
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
-JUMP %_END_IF_main_40
-:ELSE_main_40
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
-LOAD_IMMEDIATE_eax &STRING_main_44
+LOAD_IMMEDIATE_eax &STRING_main_46
 PUSH_eax	#_process_expression1
 LOAD_IMMEDIATE_eax %2
 PUSH_eax	#_process_expression2
@@ -5459,13 +6038,189 @@ CALL_IMMEDIATE %FUNCTION_exit
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
+JUMP %_END_IF_main_44
+:ELSE_main_44
+:_END_IF_main_44
+LOAD_BASE_ADDRESS_eax %-32
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-32
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %2
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+JUMP %_END_IF_main_40
+:ELSE_main_40
+# IF_main_47
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_BASE_ADDRESS_eax %-8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-32
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+SAL_eax_Immediate8 !2
+ADD_ebx_to_eax
+LOAD_INTEGER
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &STRING_main_48
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_match
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+PUSH_eax	#_common_recursion
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_BASE_ADDRESS_eax %-8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-32
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+SAL_eax_Immediate8 !2
+ADD_ebx_to_eax
+LOAD_INTEGER
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &STRING_main_49
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_match
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+POP_ebx	# _common_recursion
+OR_eax_ebx
+TEST
+JUMP_EQ %ELSE_main_47
+LOAD_IMMEDIATE_eax &GLOBAL_ByteMode
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %8
+POP_ebx	# _common_recursion
+STORE_INTEGER
+LOAD_BASE_ADDRESS_eax %-32
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-32
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_IMMEDIATE_eax %1
+POP_ebx	# _common_recursion
+ADD_ebx_to_eax
+POP_ebx	# _common_recursion
+STORE_INTEGER
+JUMP %_END_IF_main_47
+:ELSE_main_47
+# IF_main_50
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_BASE_ADDRESS_eax %-8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-32
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+SAL_eax_Immediate8 !2
+ADD_ebx_to_eax
+LOAD_INTEGER
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &STRING_main_51
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_match
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+PUSH_eax	#_common_recursion
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_BASE_ADDRESS_eax %-8
+LOAD_INTEGER
+PUSH_eax	#_common_recursion
+LOAD_BASE_ADDRESS_eax %-32
+LOAD_INTEGER
+POP_ebx	# _common_recursion
+SAL_eax_Immediate8 !2
+ADD_ebx_to_eax
+LOAD_INTEGER
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax &STRING_main_52
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_match
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+POP_ebx	# _common_recursion
+OR_eax_ebx
+TEST
+JUMP_EQ %ELSE_main_50
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax &STRING_main_53
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax %1
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_file_print
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax %0
+PUSH_eax	#_process_expression1
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_exit
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+JUMP %_END_IF_main_50
+:ELSE_main_50
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax &STRING_main_54
+PUSH_eax	#_process_expression1
+LOAD_IMMEDIATE_eax %2
+PUSH_eax	#_process_expression2
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_file_print
+POP_ebx	# _process_expression_locals
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+PUSH_edi	# Prevent overwriting in recursion
+PUSH_ebp	# Protect the old base pointer
+COPY_esp_to_edi	# Copy new base pointer
+LOAD_IMMEDIATE_eax %1
+PUSH_eax	#_process_expression1
+COPY_edi_to_ebp
+CALL_IMMEDIATE %FUNCTION_exit
+POP_ebx	# _process_expression_locals
+POP_ebp	# Restore old base pointer
+POP_edi	# Prevent overwrite
+:_END_IF_main_50
+:_END_IF_main_47
 :_END_IF_main_40
 :_END_IF_main_37
-:_END_IF_main_30
-:_END_IF_main_27
-:_END_IF_main_18
-:_END_IF_main_15
-:_END_IF_main_12
+:_END_IF_main_29
+:_END_IF_main_26
+:_END_IF_main_23
 :_END_IF_main_9
 :_END_IF_main_7
 :_END_IF_main_5
@@ -5473,7 +6228,7 @@ POP_edi	# Prevent overwrite
 :_END_IF_main_2
 JUMP %WHILE_main_1
 :END_WHILE_main_1
-# IF_main_45
+# IF_main_55
 LOAD_IMMEDIATE_eax %0
 PUSH_eax	#_common_recursion
 LOAD_BASE_ADDRESS_eax %-20
@@ -5483,15 +6238,16 @@ CMP
 SETE
 MOVEZBL
 TEST
-JUMP_EQ %ELSE_main_45
+JUMP_EQ %ELSE_main_55
 LOAD_IMMEDIATE_eax %1
 POP_ebx	# _return_result_locals
 POP_ebx	# _return_result_locals
 POP_ebx	# _return_result_locals
+POP_ebx	# _return_result_locals
 RETURN
-JUMP %_END_IF_main_45
-:ELSE_main_45
-:_END_IF_main_45
+JUMP %_END_IF_main_55
+:ELSE_main_55
+:_END_IF_main_55
 LOAD_IMMEDIATE_eax &GLOBAL_ip
 PUSH_eax	#_common_recursion
 LOAD_IMMEDIATE_eax &GLOBAL_Base_Address
@@ -5526,12 +6282,12 @@ CALL_IMMEDIATE %FUNCTION_second_pass
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
-# IF_main_46
+# IF_main_56
 LOAD_IMMEDIATE_eax &GLOBAL_exec_enable
 LOAD_INTEGER
 TEST
-JUMP_EQ %ELSE_main_46
-# IF_main_47
+JUMP_EQ %ELSE_main_56
+# IF_main_57
 LOAD_IMMEDIATE_eax %0
 PUSH_eax	#_common_recursion
 PUSH_edi	# Prevent overwriting in recursion
@@ -5553,11 +6309,11 @@ CMP
 SETNE
 MOVEZBL
 TEST
-JUMP_EQ %ELSE_main_47
+JUMP_EQ %ELSE_main_57
 PUSH_edi	# Prevent overwriting in recursion
 PUSH_ebp	# Protect the old base pointer
 COPY_esp_to_edi	# Copy new base pointer
-LOAD_IMMEDIATE_eax &STRING_main_48
+LOAD_IMMEDIATE_eax &STRING_main_58
 PUSH_eax	#_process_expression1
 LOAD_IMMEDIATE_eax %2
 PUSH_eax	#_process_expression2
@@ -5577,13 +6333,14 @@ CALL_IMMEDIATE %FUNCTION_exit
 POP_ebx	# _process_expression_locals
 POP_ebp	# Restore old base pointer
 POP_edi	# Prevent overwrite
-JUMP %_END_IF_main_47
-:ELSE_main_47
-:_END_IF_main_47
-JUMP %_END_IF_main_46
-:ELSE_main_46
-:_END_IF_main_46
+JUMP %_END_IF_main_57
+:ELSE_main_57
+:_END_IF_main_57
+JUMP %_END_IF_main_56
+:ELSE_main_56
+:_END_IF_main_56
 LOAD_IMMEDIATE_eax %0
+POP_ebx	# _return_result_locals
 POP_ebx	# _return_result_locals
 POP_ebx	# _return_result_locals
 POP_ebx	# _return_result_locals
@@ -5610,7 +6367,11 @@ NOP
 NOP
 :GLOBAL_scratch
 NOP
-:GLOBAL_scratch2
+:GLOBAL_filename
+NOP
+:GLOBAL_linenumber
+NOP
+:GLOBAL_ALIGNED
 NOP
 :GLOBAL_hold
 NOP
@@ -5618,6 +6379,16 @@ NOP
 NOP
 
 # Program strings
+:STRING_line_error_0
+":"
+:STRING_line_error_1
+' 20 3A 00'
+:STRING_consume_token_1
+" 	
+>"
+:STRING_Throwaway_token_1
+" 	
+>"
 :STRING_GetTarget_2
 "Target label "
 :STRING_GetTarget_3
@@ -5641,17 +6412,44 @@ NOP
 :STRING_range_check_13
 "Invalid number of bytes given
 "
-:STRING_Architectural_displacement_4
+:STRING_Architectural_displacement_5
+"error: Unaligned branch target: "
+:STRING_Architectural_displacement_6
+", aborting
+"
+:STRING_Architectural_displacement_8
 "Unknown Architecture, aborting before harm is done
 "
-:STRING_ConsumePointer_3
+:STRING_Update_Pointer_1
+"%&"
+:STRING_Update_Pointer_3
+"@$"
+:STRING_Update_Pointer_6
 "storePointer given unknown
 "
 :STRING_storePointer_7
-"storePointer reached impossible case: ch="
+"error: storePointer reached impossible case: ch="
 :STRING_storePointer_8
 "
 "
+:STRING_line_Comment_1
+' 0A 0D 00'
+:STRING_hex_1
+"0123456789"
+:STRING_hex_3
+"abcdef"
+:STRING_hex_5
+"ABCDEF"
+:STRING_hex_7
+"#;"
+:STRING_octal_1
+"01234567"
+:STRING_octal_3
+"#;"
+:STRING_binary_1
+"01"
+:STRING_binary_3
+"#;"
 :STRING_first_pass_1
 "r"
 :STRING_first_pass_3
@@ -5659,6 +6457,8 @@ NOP
 :STRING_first_pass_4
 " can not be opened!
 "
+:STRING_first_pass_8
+"!@$~%&"
 :STRING_second_pass_1
 "r"
 :STRING_second_pass_3
@@ -5667,6 +6467,8 @@ NOP
 " can not be opened!
 WTF-pass2
 "
+:STRING_second_pass_8
+"!@$~%&"
 :STRING_main_0
 ""
 :STRING_main_4
@@ -5678,63 +6480,75 @@ WTF-pass2
 :STRING_main_10
 "-A"
 :STRING_main_11
-"--Architecture"
+"--architecture"
 :STRING_main_13
-"-b"
+"knight-native"
 :STRING_main_14
-"--binary"
+"knight-posix"
 :STRING_main_16
-"-B"
-:STRING_main_17
-"--BaseAddress"
-:STRING_main_19
-"-h"
+"x86"
+:STRING_main_18
+"amd64"
 :STRING_main_20
-"--help"
+"armv7l"
 :STRING_main_21
-"Usage: "
+"Unknown architecture: "
 :STRING_main_22
-" -f FILENAME1 {-f FILENAME2} (--BigEndian|--LittleEndian)"
-:STRING_main_23
-" [--BaseAddress 12345] [--Architecture 12345]
-Architecture"
+" know values are: knight-native, knight-posix, x86, amd64 and armv7l"
 :STRING_main_24
-" 0: Knight; 1: x86; 2: AMD64; 40: armv7"
+"-b"
 :STRING_main_25
-"
-To leverage octal or binary"
-:STRING_main_26
-" input: --octal, --binary
-"
+"--binary"
+:STRING_main_27
+"-B"
 :STRING_main_28
-"-f"
-:STRING_main_29
-"--file"
+"--BaseAddress"
+:STRING_main_30
+"-h"
 :STRING_main_31
-"-o"
+"--help"
 :STRING_main_32
-"--output"
+"Usage: "
 :STRING_main_33
-"w"
+" -f FILENAME1 {-f FILENAME2} (--BigEndian|--LittleEndian)"
+:STRING_main_34
+" [--BaseAddress 12345] [--architecture name]
+Architecture"
 :STRING_main_35
-"The file: "
+" knight-native, knight-posix, x86, amd64 and armv7
+"
 :STRING_main_36
-" can not be opened!
+"To leverage octal or binary input: --octal, --binary
 "
 :STRING_main_38
-"-O"
+"-f"
 :STRING_main_39
-"--octal"
+"--file"
 :STRING_main_41
-"-V"
+"-o"
 :STRING_main_42
-"--version"
+"--output"
 :STRING_main_43
-"hex2 0.3
-"
-:STRING_main_44
-"Unknown option
+"w"
+:STRING_main_45
+"The file: "
+:STRING_main_46
+" can not be opened!
 "
 :STRING_main_48
+"-O"
+:STRING_main_49
+"--octal"
+:STRING_main_51
+"-V"
+:STRING_main_52
+"--version"
+:STRING_main_53
+"hex2 0.3
+"
+:STRING_main_54
+"Unknown option
+"
+:STRING_main_58
 "Unable to change permissions
 "

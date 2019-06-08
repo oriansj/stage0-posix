@@ -243,7 +243,7 @@
 	--debug \
 	-o get_machine.M1
 
-blood-elf -f get_machine.M1 -o get_machine-footer.M1
+./bin/blood-elf -f get_machine.M1 -o get_machine-footer.M1
 
 ./bin/M1 -f x86_defs.M1 \
 	-f libc-core.M1 \

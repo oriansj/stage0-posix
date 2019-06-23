@@ -66,20 +66,46 @@
 # architecture only and will be replaced by the C code version of M1
 
 ###################################
-# Phase-4 Build M2-Planet from M0 #
+# Phase-4 Build cc_x86 from M0    #
 ###################################
+./M0 cc_x86.M1 temp1
+./catm hold ELF-i386.hex2 temp1
+./hex2-0 hold cc_x86
+
+
+#########################################
+# Phase-5 Build M2-Planet from cc_x86   #
+#########################################
+./catm hold ../M2-Planet/test/common_x86/functions/file.c \
+	../M2-Planet/test/common_x86/functions/malloc.c \
+	../M2-Planet/functions/calloc.c \
+	../M2-Planet/test/common_x86/functions/exit.c \
+	../M2-Planet/functions/match.c \
+	../M2-Planet/functions/in_set.c \
+	../M2-Planet/functions/numerate_number.c \
+	../M2-Planet/functions/file_print.c \
+	../M2-Planet/functions/number_pack.c \
+	../M2-Planet/functions/fixup.c \
+	../M2-Planet/functions/string.c \
+	../M2-Planet/cc.h \
+	../M2-Planet/cc_reader.c \
+	../M2-Planet/cc_strings.c \
+	../M2-Planet/cc_types.c \
+	../M2-Planet/cc_core.c \
+	../M2-Planet/cc.c
+./cc_x86 hold M2.M1
 ./catm hold x86_defs.M1 libc-core.M1 M2.M1
 ./M0 hold temp1
 ./catm hold ELF-i386.hex2 temp1
-./hex2-0 hold M2-Planet
+./hex2-0 hold M2
 # This step will need to be replaced in the future when cc_x86.M1 is handwritten
 # One can use stage0's knight's cc_x86.S to create M2.M1 from the C source if you
 # So desire but this stage is expected as only a placeholder
 
 #############################################
-# Phase-5 Build blood-elf-0 from C sources  #
+# Phase-6 Build blood-elf-0 from C sources  #
 #############################################
-./M2-Planet --architecture x86 \
+./M2 --architecture x86 \
 	-f ../M2-Planet/test/common_x86/functions/exit.c \
 	-f ../M2-Planet/test/common_x86/functions/file.c \
 	-f ../M2-Planet/functions/file_print.c \
@@ -97,9 +123,9 @@
 # and the last piece built that isn't part of the output binaries
 
 #####################################
-# Phase-6 Build hex2 from C sources #
+# Phase-7 Build hex2 from C sources #
 #####################################
-./M2-Planet --architecture x86 \
+./M2 --architecture x86 \
 	-f ../M2-Planet/test/common_x86/functions/exit.c \
 	-f ../M2-Planet/test/common_x86/functions/file.c \
 	-f ../M2-Planet/functions/file_print.c \
@@ -122,9 +148,9 @@
 # be using the far more powerful, cross-platform version with a bunch more goodies
 
 ###################################
-# Phase-7 Build M1 from C sources #
+# Phase-8 Build M1 from C sources #
 ###################################
-./M2-Planet --architecture x86 \
+./M2 --architecture x86 \
 	-f ../M2-Planet/test/common_x86/functions/exit.c \
 	-f ../M2-Planet/test/common_x86/functions/file.c \
 	-f ../M2-Planet/functions/file_print.c \
@@ -154,9 +180,9 @@
 # version with a bunch of extra goodies.
 
 #################################################
-# Phase-8 Build final blood-elf from C sources  #
+# Phase-9 Build final blood-elf from C sources  #
 #################################################
-./M2-Planet --architecture x86 \
+./M2 --architecture x86 \
 	-f ../M2-Planet/test/common_x86/functions/exit.c \
 	-f ../M2-Planet/test/common_x86/functions/file.c \
 	-f ../M2-Planet/functions/file_print.c \
@@ -189,9 +215,9 @@
 # programs in a debuggable form with corresponding C source code.
 
 #####################################
-# Phase-9 Build kaem from C sources #
+# Phase-10 Build kaem from C sources#
 #####################################
-./M2-Planet --architecture x86 \
+./M2 --architecture x86 \
 	-f ../M2-Planet/test/common_x86/functions/exit.c \
 	-f ../M2-Planet/test/common_x86/functions/file.c \
 	-f ../M2-Planet/functions/file_print.c \
@@ -229,9 +255,9 @@
 # move/rename step applied at the end. This binary can run this script
 
 #############################################
-# Phase-10 Build get_machine from C sources #
+# Phase-11 Build get_machine from C sources #
 #############################################
-./M2-Planet --architecture x86 \
+./M2 --architecture x86 \
 	-f ../M2-Planet/test/common_x86/functions/exit.c \
 	-f ../M2-Planet/test/common_x86/functions/file.c \
 	-f ../M2-Planet/functions/file_print.c \
@@ -259,6 +285,48 @@
 	--architecture x86 \
 	--BaseAddress 0x8048000 \
 	-o bin/get_machine \
+	--exec_enable
+
+############################################
+# Phase-12 Build M2-Planet from M2-Planet  #
+############################################
+./M2 --architecture x86 \
+	-f ../M2-Planet/test/common_x86/functions/file.c \
+	-f ../M2-Planet/test/common_x86/functions/malloc.c \
+	-f ../M2-Planet/functions/calloc.c \
+	-f ../M2-Planet/test/common_x86/functions/exit.c \
+	-f ../M2-Planet/functions/match.c \
+	-f ../M2-Planet/functions/in_set.c \
+	-f ../M2-Planet/functions/numerate_number.c \
+	-f ../M2-Planet/functions/file_print.c \
+	-f ../M2-Planet/functions/number_pack.c \
+	-f ../M2-Planet/functions/fixup.c \
+	-f ../M2-Planet/functions/string.c \
+	-f ../M2-Planet/cc.h \
+	-f ../M2-Planet/cc_reader.c \
+	-f ../M2-Planet/cc_strings.c \
+	-f ../M2-Planet/cc_types.c \
+	-f ../M2-Planet/cc_core.c \
+	-f ../M2-Planet/cc.c \
+	--debug \
+	-o M2.M1
+
+./bin/blood-elf -f M2.M1 -o M2-footer.M1
+
+./bin/M1 -f x86_defs.M1 \
+	-f libc-core.M1 \
+	-f M2.M1 \
+	-f M2-footer.M1 \
+	--LittleEndian \
+	--architecture x86 \
+	-o hold
+
+./bin/hex2 -f ELF-i386-debug.hex2 \
+	-f hold \
+	--LittleEndian \
+	--architecture x86 \
+	--BaseAddress 0x8048000 \
+	-o bin/M2-Planet \
 	--exec_enable
 
 # Congrats you sucessfully completed this bootstrap

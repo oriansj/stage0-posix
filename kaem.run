@@ -98,9 +98,6 @@
 ./M0 hold temp1
 ./catm hold ELF-i386.hex2 temp1
 ./hex2-0 hold M2
-# This step will need to be replaced in the future when cc_x86.M1 is handwritten
-# One can use stage0's knight's cc_x86.S to create M2.M1 from the C source if you
-# So desire but this stage is expected as only a placeholder
 
 #############################################
 # Phase-6 Build blood-elf-0 from C sources  #

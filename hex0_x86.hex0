@@ -205,7 +205,7 @@
 	C3                          # RET
 
 #:Read_byte ; (0x8048131)
-	; Attempt to read 1 byte from STDIN
+	; Attempt to read 1 byte from Input file
 	BA 01000000                 # LOADI32_EDX %1              ; set the size of chars we want
 	B9 61810408                 # LOADI32_ECX &input          ; Where to put it
 	8B1D 55810408               # LOAD32_Absolute32_ebx &fin  ; Where are we reading from

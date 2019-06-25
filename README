@@ -4,3 +4,10 @@ kaem-optional-seed can be used to do that, as can any standard shell.
 at this time there are only 2 generated files in this repo:
 kaem-optional-seed (not required can be removed or ignored if you have a shell you trust)
 hex0-seed (you can build this from the hex0.hex0 source file and it should be bit for bit identical regardless of host)
+
+Please make sure to clone:
+https://github.com/oriansj/M2-Planet
+and
+https://savannah.nongnu.org/projects/mescc-tools
+
+As the stages after cc_x86 is built depend upon those folders to build the C versions.

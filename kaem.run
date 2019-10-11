@@ -326,5 +326,5 @@
 	-o bin/M2-Planet \
 	--exec_enable
 
-# Congrats you sucessfully completed this bootstrap
+# Congrats you successfully completed this bootstrap
 # the resulting binaries that you want are in bin

@@ -1,0 +1,6 @@
+[submodule "M2-Planet"]
+	path = M2-Planet
+	url = https://github.com/oriansj/M2-Planet.git
+[submodule "mescc-tools"]
+	path = mescc-tools
+	url = https://git.savannah.nongnu.org/git/mescc-tools.git

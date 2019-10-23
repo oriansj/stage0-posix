@@ -1,0 +1,24 @@
+# These files are generated when the build runs
+# and should never be included
+M0
+M1-macro-footer.M1
+M1-macro.M1
+M2
+M2-footer.M1
+M2.M1
+blood-elf-0
+blood-elf-footer.M1
+blood-elf.M1
+catm
+cc_x86
+get_machine-footer.M1
+get_machine.M1
+hex0
+hex1
+hex2-0
+hex2_linker-footer.M1
+hex2_linker.M1
+hold
+kaem-footer.M1
+kaem.M1
+temp1

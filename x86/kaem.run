@@ -140,7 +140,7 @@
 ./catm hold x86_defs.M1 libc-core.M1 hex2_linker.M1 hex2_linker-footer.M1
 ./M0 hold temp1
 ./catm hold ELF-i386-debug.hex2 temp1
-./hex2-0 hold bin/hex2
+./hex2-0 hold ../bin/hex2
 # This is the last stage where we will be using the handwritten hex2 and instead
 # be using the far more powerful, cross-platform version with a bunch more goodies
 
@@ -164,12 +164,12 @@
 ./blood-elf-0 -f M1-macro.M1 -o M1-macro-footer.M1
 ./catm hold x86_defs.M1 libc-core.M1 M1-macro.M1 M1-macro-footer.M1
 ./M0 hold temp1
-./bin/hex2 -f ELF-i386-debug.hex2 \
+../bin/hex2 -f ELF-i386-debug.hex2 \
 	-f temp1 \
 	--LittleEndian \
 	--architecture x86 \
 	--BaseAddress 0x8048000 \
-	-o bin/M1 \
+	-o ../bin/M1 \
 	--exec_enable
 
 # This is the last stage where catm will need to be used and the last stage where
@@ -191,7 +191,7 @@
 	-o blood-elf.M1
 
 ./blood-elf-0 -f blood-elf.M1 -o blood-elf-footer.M1
-./bin/M1 -f x86_defs.M1 \
+../bin/M1 -f x86_defs.M1 \
 	-f libc-core.M1 \
 	-f blood-elf.M1 \
 	-f blood-elf-footer.M1 \
@@ -199,12 +199,12 @@
 	--architecture x86 \
 	-o hold
 
-./bin/hex2 -f ELF-i386-debug.hex2 \
+../bin/hex2 -f ELF-i386-debug.hex2 \
 	-f hold \
 	--LittleEndian \
 	--architecture x86 \
 	--BaseAddress 0x8048000 \
-	-o bin/blood-elf \
+	-o ../bin/blood-elf \
 	--exec_enable
 
 # Now we have our shipping debuggable blood-elf, the rest will be down hill from
@@ -229,9 +229,9 @@
 	--debug \
 	-o kaem.M1
 
-./bin/blood-elf -f kaem.M1 -o kaem-footer.M1
+../bin/blood-elf -f kaem.M1 -o kaem-footer.M1
 
-./bin/M1 -f x86_defs.M1 \
+../bin/M1 -f x86_defs.M1 \
 	-f libc-core.M1 \
 	-f kaem.M1 \
 	-f kaem-footer.M1 \
@@ -239,12 +239,12 @@
 	--architecture x86 \
 	-o hold
 
-./bin/hex2 -f ELF-i386-debug.hex2 \
+../bin/hex2 -f ELF-i386-debug.hex2 \
 	-f hold \
 	--LittleEndian \
 	--architecture x86 \
 	--BaseAddress 0x8048000 \
-	-o bin/kaem \
+	-o ../bin/kaem \
 	--exec_enable
 
 # This kaem should have the exact same checksum as the kaem-optional-seed
@@ -266,9 +266,9 @@
 	--debug \
 	-o get_machine.M1
 
-./bin/blood-elf -f get_machine.M1 -o get_machine-footer.M1
+../bin/blood-elf -f get_machine.M1 -o get_machine-footer.M1
 
-./bin/M1 -f x86_defs.M1 \
+../bin/M1 -f x86_defs.M1 \
 	-f libc-core.M1 \
 	-f get_machine.M1 \
 	-f get_machine-footer.M1 \
@@ -276,12 +276,12 @@
 	--architecture x86 \
 	-o hold
 
-./bin/hex2 -f ELF-i386-debug.hex2 \
+../bin/hex2 -f ELF-i386-debug.hex2 \
 	-f hold \
 	--LittleEndian \
 	--architecture x86 \
 	--BaseAddress 0x8048000 \
-	-o bin/get_machine \
+	-o ../bin/get_machine \
 	--exec_enable
 
 ############################################
@@ -308,9 +308,9 @@
 	--debug \
 	-o M2.M1
 
-./bin/blood-elf -f M2.M1 -o M2-footer.M1
+../bin/blood-elf -f M2.M1 -o M2-footer.M1
 
-./bin/M1 -f x86_defs.M1 \
+../bin/M1 -f x86_defs.M1 \
 	-f libc-core.M1 \
 	-f M2.M1 \
 	-f M2-footer.M1 \
@@ -318,12 +318,12 @@
 	--architecture x86 \
 	-o hold
 
-./bin/hex2 -f ELF-i386-debug.hex2 \
+../bin/hex2 -f ELF-i386-debug.hex2 \
 	-f hold \
 	--LittleEndian \
 	--architecture x86 \
 	--BaseAddress 0x8048000 \
-	-o bin/M2-Planet \
+	-o ../bin/M2-Planet \
 	--exec_enable
 
 # Congrats you successfully completed this bootstrap

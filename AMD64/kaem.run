@@ -136,7 +136,7 @@
 	--debug \
 	-o hex2_linker.M1
 
-./blood-elf-0 -f hex2_linker.M1 -o hex2_linker-footer.M1
+./blood-elf-0 --64 -f hex2_linker.M1 -o hex2_linker-footer.M1
 ./catm hold amd64_defs.M1 libc-core.M1 hex2_linker.M1 hex2_linker-footer.M1
 ./M0 hold temp1
 ./catm hold ELF-amd64-debug.hex2 temp1
@@ -161,7 +161,7 @@
 	--debug \
 	-o M1-macro.M1
 
-./blood-elf-0 -f M1-macro.M1 -o M1-macro-footer.M1
+./blood-elf-0 --64 -f M1-macro.M1 -o M1-macro-footer.M1
 ./catm hold amd64_defs.M1 libc-core.M1 M1-macro.M1 M1-macro-footer.M1
 ./M0 hold temp1
 ../bin/hex2 -f ELF-amd64-debug.hex2 \
@@ -190,7 +190,7 @@
 	--debug \
 	-o blood-elf.M1
 
-./blood-elf-0 -f blood-elf.M1 -o blood-elf-footer.M1
+./blood-elf-0 --64 -f blood-elf.M1 -o blood-elf-footer.M1
 ../bin/M1 -f amd64_defs.M1 \
 	-f libc-core.M1 \
 	-f blood-elf.M1 \
@@ -229,7 +229,7 @@
 	--debug \
 	-o kaem.M1
 
-../bin/blood-elf -f kaem.M1 -o kaem-footer.M1
+../bin/blood-elf --64 -f kaem.M1 -o kaem-footer.M1
 
 ../bin/M1 -f amd64_defs.M1 \
 	-f libc-core.M1 \
@@ -266,7 +266,7 @@
 	--debug \
 	-o get_machine.M1
 
-../bin/blood-elf -f get_machine.M1 -o get_machine-footer.M1
+../bin/blood-elf --64 -f get_machine.M1 -o get_machine-footer.M1
 
 ../bin/M1 -f amd64_defs.M1 \
 	-f libc-core.M1 \
@@ -308,7 +308,7 @@
 	--debug \
 	-o M2.M1
 
-../bin/blood-elf -f M2.M1 -o M2-footer.M1
+../bin/blood-elf --64 -f M2.M1 -o M2-footer.M1
 
 ../bin/M1 -f amd64_defs.M1 \
 	-f libc-core.M1 \

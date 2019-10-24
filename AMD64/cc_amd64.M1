@@ -258,7 +258,7 @@ DEFINE ZERO_EXTEND_CL 480FB6C9
 :Done
 	; program completed Successfully
 	LOADI32_EDI %0                              ; All is well
-	LOADI32_EAX %0x3c                           ; put the exit syscall number in eax
+	LOADI32_EAX %0x3C                           ; put the exit syscall number in eax
 	SYSCALL                                     ; Call it a good day
 
 :header_string1
@@ -5008,7 +5008,7 @@ Missing ;
 ;; Does NOT return
 :Exit_Failure
 	LOADI32_EDI %1                              ; All is wrong
-	LOADI32_EAX %0x3c                           ; put the exit syscall number in eax
+	LOADI32_EAX %0x3C                           ; put the exit syscall number in eax
 	SYSCALL                                     ; Call it a bad day
 
 ;; Keywords
@@ -5320,7 +5320,7 @@ Missing ;
 	JNE32 %debug_list_iter                      ; iterate otherwise
 
 	LOADI32_EDI %666                            ; All is HELL
-	LOADI32_EAX %0x3c                           ; put the exit syscall number in eax
+	LOADI32_EAX %0x3C                           ; put the exit syscall number in eax
 	SYSCALL                                     ; Call it a bad day
 
 

@@ -1,11 +1,20 @@
-run kaem.run to build the bootstrap mescc-tools binaries without referencing any eternal programs
-kaem-optional-seed can be used to do that, as can any standard shell.
+run kaem.run to build the bootstrap mescc-tools binaries without referencing any
+eternal programs. kaem-optional-seed can be used to do that, as can any standard
+shell.
 
-or you can manually run each step by hand after reading a printed copy of the kaem.run for the bootstrap you wish to verify
+or you can manually run each step by hand after reading a printed copy of the
+kaem.run for the bootstrap you wish to verify
 
 at this time there are only 3 generated files in this repo:
 kaem-optional-seed (not required can be removed or ignored if you have a shell you trust)
 x86/hex0-seed (you can build this from the x86/hex0.hex0 source file and it should be bit for bit identical regardless of host)
 AMD64/hex0-seed (you can build this from the AMD64/hex0.hex0 source file and it should be bit for bit identical regardless of host)
 
-Please make sure to do git clone --recursive to get M2-Planet and mescc-tools as they are the C sources built
+Please make sure to do git clone --recursive to get M2-Planet and mescc-tools as
+they are the C sources built
+
+If however you desire to use NASM to verify and bootstrap instead, those files
+are in their respective architecture's folder named NASM.
+
+Should you wish to enhance any of the files, the M1 sources can be found in the
+Development folders in each respective architecture.

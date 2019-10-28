@@ -1,18 +1,18 @@
-## Copyright (C) 2016 Jeremiah Orians
-## This file is part of stage0.
+## Copyright (C) 2017 Jeremiah Orians
+## This file is part of M2-Planet.
 ##
-## stage0 is free software: you can redistribute it and/or modify
+## M2-Planet is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
 ## the Free Software Foundation, either version 3 of the License, or
 ## (at your option) any later version.
 ##
-## stage0 is distributed in the hope that it will be useful,
+## M2-Planet is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with stage0.  If not, see <http://www.gnu.org/licenses/>.
+## along with M2-Planet.  If not, see <http://www.gnu.org/licenses/>.
 
 
 DEFINE ADD_IMMEDIATE_to_eax 81C0
@@ -35,6 +35,7 @@ DEFINE COPY_esp_to_ebp 89E5
 DEFINE COPY_esp_to_ecx 89E1
 DEFINE COPY_esp_to_edi 89E7
 DEFINE DIVIDE_eax_by_ebx_into_eax F7FB
+DEFINE DIVIDES_eax_by_ebx_into_eax F7F3
 DEFINE INT_80 CD80
 DEFINE JUMP E9
 DEFINE JUMP_EQ 0F84
@@ -56,11 +57,13 @@ DEFINE LOAD_INTEGER_ebx 8B1B
 DEFINE LOAD_INTEGER_ecx 8B09
 DEFINE LOAD_INTEGER_edx 8B12
 DEFINE MODULUS_eax_from_ebx_into_ebx F7FB
+DEFINE MODULUSS_eax_from_ebx_into_ebx F7F3
 DEFINE MOVEZBL 0FB6C0
 DEFINE MOVE_ebx_to_eax 89D8
 DEFINE MOVE_ecx_to_eax 89C8
 DEFINE MOVE_edx_to_eax 89D0
-DEFINE MULTIPLY_eax_by_ebx_into_eax F7E3
+DEFINE MULTIPLY_eax_by_ebx_into_eax F7EB
+DEFINE MULTIPLYS_eax_by_ebx_into_eax F7E3
 DEFINE NOP 00000000
 DEFINE NOT_eax F7D0
 DEFINE OR_eax_ebx 09D8
@@ -83,7 +86,6 @@ DEFINE SETGE 0F9DC0
 DEFINE SETG 0F9FC0
 DEFINE SETNE 0F95C0
 DEFINE STORE_CHAR 8803
-DEFINE STORE_eax_into_ESP_IMMEDIATE8 8B4424
 DEFINE STORE_INTEGER 8903
 DEFINE SUBTRACT_eax_from_ebx_into_ebx 29C3
 DEFINE TEST 85C0

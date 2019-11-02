@@ -4,3 +4,6 @@
 [submodule "mescc-tools"]
 	path = mescc-tools
 	url = https://git.savannah.nongnu.org/git/mescc-tools.git
+[submodule "mes-m2"]
+	path = mes-m2
+	url = https://github.com/oriansj/mes-m2.git

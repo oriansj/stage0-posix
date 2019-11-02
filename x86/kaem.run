@@ -324,5 +324,53 @@
 	-o ../bin/M2-Planet \
 	--exec_enable
 
+############################################
+# Phase-13 Build Mes-M2 from M2-Planet     #
+############################################
+../bin/M2-Planet --debug --architecture x86 \
+	-f ../mes-m2/mes.h \
+	-f ../mes-m2/mes_constants.h \
+	-f ../M2-Planet/test/common_x86/functions/exit.c \
+	-f ../M2-Planet/test/common_x86/functions/malloc.c \
+	-f ../mes-m2/functions/x86/fdputc.c \
+	-f ../M2-Planet/functions/calloc.c \
+	-f ../mes-m2/functions/file_print.c \
+	-f ../mes-m2/functions/numerate.c \
+	-f ../mes-m2/functions/in_set.c \
+	-f ../mes-m2/functions/match.c \
+	-f ../mes-m2/mes_builtins.c \
+	-f ../mes-m2/mes.c \
+	-f ../mes-m2/mes_eval.c \
+	-f ../mes-m2/mes_gc.c \
+	-f ../mes-m2/mes_hash.c \
+	-f ../mes-m2/mes_init.c \
+	-f ../mes-m2/mes_lib.c \
+	-f ../mes-m2/mes_math.c \
+	-f ../mes-m2/mes_module.c \
+	-f ../mes-m2/mes_posix.c \
+	-f ../mes-m2/mes_printer.c \
+	-f ../mes-m2/mes_reader.c \
+	-f ../mes-m2/mes_strings.c \
+	-f ../mes-m2/mes_struct.c \
+	-f ../mes-m2/mes_vector.c -o mes.M1
+
+../bin/blood-elf -f mes.M1 -o mes-footer.M1
+
+../bin/M1 -f ../M2-Planet/test/common_x86/x86_defs.M1 \
+	-f ../M2-Planet/test/common_x86/libc-core.M1 \
+	-f mes.M1 \
+	-f mes-footer.M1 \
+	--LittleEndian \
+	--architecture x86 \
+	-o mes.hex2
+
+../bin/hex2 -f ../M2-Planet/test/common_x86/ELF-i386-debug.hex2 \
+	-f mes.hex2 \
+	--LittleEndian \
+	--architecture x86 \
+	--BaseAddress 0x8048000 \
+	-o ../bin/mes-m2 \
+	--exec_enable
+
 # Congrats you successfully completed this bootstrap
 # the resulting binaries that you want are in bin

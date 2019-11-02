@@ -1,0 +1,115 @@
+## Copyright (C) 2016 Jeremiah Orians
+## This file is part of stage0.
+##
+## stage0 is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## stage0 is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with stage0.  If not, see <http://www.gnu.org/licenses/>.
+
+# ELF Header
+7F 45 4C 46               ## e_ident[EI_MAG0-3] ELF's magic number
+02                        ## e_ident[EI_CLASS] Indicating 64 bit
+01                        ## e_ident[EI_DATA] Indicating little endianness
+01                        ## e_ident[EI_VERSION] Indicating original elf
+00                        ## e_ident[EI_OSABI] Set at 0 because none cares
+00                        ## e_ident[EI_ABIVERSION] See above
+00 00 00 00 00 00 00      ## e_ident[EI_PAD]
+02 00                     ## e_type Indicating Executable
+3E 00                     ## e_machine Indicating AMD64
+01 00 00 00               ## e_version Indicating original elf
+78 00 60 00 00 00 00 00   ## e_entry Address of the entry point
+40 00 00 00 00 00 00 00   ## e_phoff Address of program header table
+00 00 00 00 00 00 00 00   ## e_shoff Address of section header table
+00 00 00 00               ## e_flags
+40 00                     ## e_ehsize Indicating our 64 Byte header
+38 00                     ## e_phentsize size of a program header table
+01 00                     ## e_phnum number of entries in program table
+00 00                     ## e_shentsize size of a section header table
+00 00                     ## e_shnum number of entries in section table
+00 00                     ## e_shstrndx index of the section names
+
+# Program Header Table
+01 00 00 00               ## p_type
+06 00 00 00               ## Flags
+00 00 00 00 00 00 00 00   ## p_offset
+00 00 60 00 00 00 00 00   ## p_vaddr
+00 00 00 00 00 00 00 00   ## Undefined
+F1 00 00 00 00 00 00 00   ## p_filesz
+F1 00 00 00 00 00 00 00   ## p_memsz
+00 00 20 00 00 00 00 00   ## Required alignment
+
+; :Start
+	# first check that we got the correct number of inputs
+	58                    ; pop %rax              # Get the number of arguments
+	5f                    ; pop %rdi              # Get the program name
+	5f                    ; pop %rdi              # Get the actual argument
+
+	# Check if we have the correct number of inputs
+	48 83 f8 02           ; cmp $2, %rax
+
+	# Jump to Bail if the number is not correct
+	75 5f                 ; jne Bail
+
+	# attempt to open the file for reading
+	48 c7 c6 00 00 00 00  ; mov $0, %rsi          # prepare read_only
+	                      # we already have what we need in ebx
+	48 c7 c0 02 00 00 00  ; mov $2, %rax          # the syscall number for open()
+	0f 05                 ; syscall               # call the Kernel
+
+	# Check if we have a valid file
+	48 85 c0              ; test %rax, %rax
+
+	# Jump to Bail_file if not actual file
+	78 4a                 ; js Bail
+
+	48 89 c7              ; mov %rax, %rdi        # move the pointer to the right location
+
+; :Circle # print contents of file
+	48 c7 c2 00 00 00 40  ; mov $read_size, %rdx  # set the size of chars we want
+	48 c7 c6 f0 00 60 00  ; mov $buffer, %rsi     # Where to put it
+	                      # We already have what we need in ebx
+	48 c7 c0 00 00 00 00  ; mov $0, %rax          # the syscall number for read
+	0f 05                 ; syscall               # call the Kernel
+
+	48 85 c0              ; test %rax, %rax       # check what we got
+	74 1b                 ; jz Done               # Got EOF call it done
+
+	# Make sure we don't write a bunch of NULLs
+	48 89 c2              ; mov %rax, %rdx
+
+	# get file pointer out of the way
+	48 89 fc              ; movq %rdi, %rsp
+
+	                      # edx was already setup
+	48 c7 c7 01 00 00 00  ; mov $1, %rdi          # setup stdout write
+	48 c7 c0 01 00 00 00  ; mov $1, %rax          # setup the write
+	0f 05                 ; syscall               # call the Kernel
+
+	# now to prepare for next loop
+	48 89 e7              ; movq %rsp, %rdi
+	eb c9                 ; jmp Circle
+
+# Done
+	# program completed Successfully
+	48 c7 c7 00 00 00 00  ; mov $0, %rdi          # All is well
+	48 c7 c0 3c 00 00 00  ; mov $60, %rax         # put the exit syscall number in eax
+	0f 05                 ; syscall               # Call it a good day
+
+# Bail
+	# terminate with an error
+	48 c7 c7 01 00 00 00  ; mov $1, %rdi          # there was an error
+	48 c7 c0 3c 00 00 00  ; mov $60, %rax         # put the exit syscall number in eax
+	0f 05                 ; syscall               # bail out
+
+# Our writable space
+# 2^ 30 Should be enough per read
+# read_size = 1073741824
+; :buffer

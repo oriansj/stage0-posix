@@ -1,0 +1,178 @@
+## Copyright (C) 2016 Jeremiah Orians
+## This file is part of stage0.
+##
+## stage0 is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## stage0 is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with stage0.  If not, see <http://www.gnu.org/licenses/>.
+
+## Self Bootstrapping Hex Assembler written in Hex
+## And a shitload of comments
+## That can be converted to assembly and compiled
+
+## ELF Header
+7F 45 4C 46               ## e_ident[EI_MAG0-3] ELF's magic number
+02                        ## e_ident[EI_CLASS] Indicating 64 bit
+01                        ## e_ident[EI_DATA] Indicating little endianness
+01                        ## e_ident[EI_VERSION] Indicating original elf
+00                        ## e_ident[EI_OSABI] Set at 0 because none cares
+00                        ## e_ident[EI_ABIVERSION] See above
+00 00 00 00 00 00 00      ## e_ident[EI_PAD]
+02 00                     ## e_type Indicating Executable
+3E 00                     ## e_machine Indicating AMD64
+01 00 00 00               ## e_version Indicating original elf
+FB 00 60 00 00 00 00 00   ## e_entry Address of the entry point
+40 00 00 00 00 00 00 00   ## e_phoff Address of program header table
+00 00 00 00 00 00 00 00   ## e_shoff Address of section header table
+00 00 00 00               ## e_flags
+40 00                     ## e_ehsize Indicating our 64 Byte header
+38 00                     ## e_phentsize size of a program header table
+01 00                     ## e_phnum number of entries in program table
+00 00                     ## e_shentsize size of a section header table
+00 00                     ## e_shnum number of entries in section table
+00 00                     ## e_shstrndx index of the section names
+
+## Program Header table
+01 00 00 00               ## p_type
+06 00 00 00               ## Flags
+00 00 00 00 00 00 00 00   ## p_offset
+00 00 60 00 00 00 00 00   ## p_vaddr
+00 00 00 00 00 00 00 00   ## Undefined
+9B 01 00 00 00 00 00 00   ## p_filesz
+9B 01 00 00 00 00 00 00   ## p_memsz
+00 00 20 00 00 00 00 00   ## Required alignment
+
+## Hex
+	# Purge Comment Lines
+	48 83 f8 23           # cmp $35,%rax
+	74 26                 # je purge_comment
+	# deal all ascii less than 0
+	48 83 f8 30           # cmp $48,%rax
+	7c 6f                 # jl ascii_other
+	# deal with 0-9
+	48 83 f8 3a           # cmp $58,%rax
+	7c 5a                 # jl ascii_num
+	# deal with all ascii less than A
+	48 83 f8 41           # cmp $65,%rax
+	7c 63                 # jl ascii_other
+	# deal with A-F
+	48 83 f8 47           # cmp $71,%rax
+	7c 58                 # jl ascii_high
+	# deal with all ascii less than a
+	48 83 f8 61           # cmp $97,%rax
+	7c 57                 # jl ascii_other
+	# deal with a-f
+	48 83 f8 67           # cmp $103,%rax
+	7c 47                 # jl ascii_low
+	# The rest that remains needs to be ignored
+	eb 4f                 # jmp ascii_other
+
+## Purge Comment
+	# Attempt to read 1 byte from STDIN
+	48 c7 c2 01 00 00 00  # mov $1, %rdx          ; set the size of chars we want
+	48 c7 c6 99 01 60 00  # mov $input, %rsi      ; Where to put it
+	48 c7 c7 00 00 00 00  # mov $0, %rdi          ; Where are we reading from
+	48 c7 c0 00 00 00 00  # mov $0, %rax          ; the syscall number for read
+	0f 05                 # syscall               ; call the Kernel
+
+	48 85 c0              # test %rax, %rax       ; check what we got
+	0f 84 be 00 00 00     # jz Done               ; Got EOF call it done
+
+	# load byte
+	8a 04 25 99 01 60 00  # movb input, %al       ; load char
+	48 0f b6 c0           # movzx %al, %rax       ; We have to zero extend it to use it
+
+	# Loop if not LF
+	48 83 f8 0a           # cmp $10, %rax
+	75 c8                 # jne purge_comment
+
+	# Otherwise return -1
+	48 c7 c0 ff ff ff ff  # mov $-1, %rax
+	c3                    # ret
+
+## ascii num
+	48 83 e8 30           # sub $48, %rax
+	c3                    # ret
+## ascii low
+	48 83 e8 57           # sub $87, %rax
+	c3                    # ret
+## ascii high
+	48 83 e8 37           # sub $55, %rax
+	c3                    # ret
+## ascii other
+	48 c7 c0 ff ff ff ff  # mov $-1, %rax
+	c3                    # ret
+
+## _start
+	# Our flag for byte processing
+	49 c7 c7 ff ff ff ff  # mov $-1, %r15
+
+	# temp storage for the sum
+	49 c7 c6 00 00 00 00  # mov $0, %r14
+
+## Loop
+	# Attempt to read 1 byte from STDIN
+	48 c7 c2 01 00 00 00  # mov $1, %rdx          ; set the size of chars we want
+	48 c7 c6 99 01 60 00  # mov $input, %rsi      ; Where to put it
+	48 c7 c7 00 00 00 00  # mov $0, %rdi          ; Where are we reading from
+	48 c7 c0 00 00 00 00  # mov $0, %rax          ; the syscall number for read
+	0f 05                 # syscall               ; call the Kernel
+
+	48 85 c0              # test %rax, %rax       ; check what we got
+	74 5d                 # jz Done               ; Got EOF call it done
+
+	# load byte
+	8a 04 25 99 01 60 00  # movb input, %al       ; load char
+	48 0f b6 c0           # movzx %al, %rax       ; We have to zero extend it to use it
+
+	# process byte
+	e8 3c ff ff ff        # call hex
+
+	# deal with -1 values
+	48 83 f8 00           # cmp $0, %rax
+	7c c7                 # jl loop
+
+	# deal with toggle
+	49 83 ff 00           # cmp $0, %r15
+	7d 0c                 # jge print
+
+	# process first byte of pair
+	49 89 c6              # mov %rax, %r14
+	49 c7 c7 00 00 00 00  # mov $0, %r15
+	eb b5                 # jmp loop
+
+# process second byte of pair
+## print
+	# update the sum and store in output
+	49 c1 e6 04           # shl $4, %r14
+	4c 01 f0              # add %r14, %rax
+	88 04 25 9a 01 60 00  # mov %al, output
+
+	# flip the toggle
+	49 c7 c7 ff ff ff ff  # mov $-1, %r15
+
+	# Print our first Hex
+	48 c7 c2 01 00 00 00  # mov $1, %rdx          ; set the size of chars we want
+	48 c7 c6 9a 01 60 00  # mov $output, %rsi     ; What we are writing
+	48 c7 c7 01 00 00 00  # mov $1, %rdi          ; Stdout File Descriptor
+	48 c7 c0 01 00 00 00  # mov $1, %rax          ; the syscall number for write
+	0f 05                 # syscall               ; call the Kernel
+
+	eb 80                 # jmp loop
+
+## Done
+	# program completed Successfully
+	48 c7 c7 00 00 00 00  # mov $0, %rdi          ; All is well
+	48 c7 c0 3c 00 00 00  # mov $60, %rax         ; put the exit syscall number in eax
+	0f 05                 # syscall               ; Call it a good day
+
+## Place for input, This actually isn't required but here it is
+02 00 00

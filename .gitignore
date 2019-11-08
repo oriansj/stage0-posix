@@ -1,6 +1,7 @@
 # Make sure binaries are never imported
 bin/M1
 bin/M2-Planet
+bin/mes-m2
 bin/blood-elf
 bin/get_machine
 bin/hex2

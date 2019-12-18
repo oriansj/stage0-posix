@@ -34,6 +34,7 @@ DEFINE COPY_edi_to_ebp 89fd
 DEFINE COPY_esp_to_ebp 89E5
 DEFINE COPY_esp_to_ecx 89E1
 DEFINE COPY_esp_to_edi 89E7
+DEFINE CDTQ 99
 DEFINE DIVIDE_eax_by_ebx_into_eax F7FB
 DEFINE DIVIDES_eax_by_ebx_into_eax F7F3
 DEFINE INT_80 CD80

@@ -1,6 +1,6 @@
-run kaem.run to build the bootstrap mescc-tools binaries without referencing any
-eternal programs. kaem-optional-seed can be used to do that, as can any standard
-shell.
+run kaem.run to build the bootstrap mescc-tools, M2-Planet and mes-m2 binaries
+without referencing any eternal programs. kaem-optional-seed can be used to do
+that, as can any standard shell.
 
 or you can manually run each step by hand after reading a printed copy of the
 kaem.run for the bootstrap you wish to verify

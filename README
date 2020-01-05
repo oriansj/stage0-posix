@@ -1,20 +1,135 @@
-run kaem.run to build the bootstrap mescc-tools, M2-Planet and mes-m2 binaries
-without referencing any eternal programs. kaem-optional-seed can be used to do
-that, as can any standard shell.
+This repository contains all the various parts needed to bootstrap the
+following:
+ - mescc-tools (https://github.com/oriansj/mescc-tools), containing:
+  - blood-elf
+  - get_machine
+  - hex2
+  - M1
+ - kaem (https://github.com/oriansj/kaem)
+ - M2-Planet (https://github.com/oriansj/M2-Planet)
+ - mes-m2 (https://github.com/oriansj/mes-m2).
 
-or you can manually run each step by hand after reading a printed copy of the
-kaem.run for the bootstrap you wish to verify
+It bootstraps all these from a single 357 byte seed. The ultimate goal is for
+this to bootstrap all the way up to GCC. This will happen when mes-m2 is
+finished.
 
-at this time there are only 3 generated files in this repo:
-kaem-optional-seed (not required can be removed or ignored if you have a shell you trust)
-x86/hex0-seed (you can build this from the x86/hex0.hex0 source file and it should be bit for bit identical regardless of host)
-AMD64/hex0-seed (you can build this from the AMD64/hex0.hex0 source file and it should be bit for bit identical regardless of host)
+There are only two "missing" parts that are not source code; a shell/kaem, and a
+kernel. Kaem is a very basic build tool that basically evaulates a very simple
+script. A seed kaem that was compiled in a very optimal way and has been
+stripped right down is avaliable as kaem-optional-seed in the root of this
+repository. Otherwise, you can use a shell you trust. The kernel issue is not
+yet solved and at the moment the kernel is trusted.
 
-Please make sure to do git clone --recursive to get M2-Planet and mescc-tools as
-they are the C sources built
+This repository currently supports AMD64 and x86 (i386) architectures. To run
+the entire bootstrap process in the safest way, cd into the respective directory
+for your architecture -- AMD64 for amd64 and x86 for x86/i386 -- then run
+`../kaem-optional-seed --verbose --strict`. This uses the kaem seed rather then
+relying on your shell. `--strict` makes sure that the result will be as
+intended, and nothing breaks. (If something works without --strict but not with
+--strict please file an issue or come seek help on #bootstrappable on freenode).
+`--verbose` shows you the commands it is running as it goes.
 
-If however you desire to use NASM to verify and bootstrap instead, those files
-are in their respective architecture's folder named NASM.
+The boostrappable effort is all about trust. You should verify each of these
+programs, from the hex0 monitor up to mes-m2, along with the kaem seed and the
+kaem.run files if you can. There are some efforts to attempt to make it easier
+to verify these binaries. This is done primarily by re-writing the lowest level
+programs in assembly, so that you can recompile them, checking the hashes
+match. If they do, verify only the higher-level source since you know that
+source has the same instructions as the lower-level source.
 
-Should you wish to enhance any of the files, the M1 sources can be found in the
-Development folders in each respective architecture.
+This repository utilises submodules, so you need to clone this repository using
+`git clone --recursive`. If you have already cloned it run `git submodule update
+--init`.
+
+Note that this README may not answer all your questions. If you are still left
+wondering things like What is a kaem.run?, see the other repositories readme's
+which might answer some more tool-specific questions.
+
+We hang out on the freenode IRC network in the #bootstrappable channel.
+
+|-----------------------------|
+| How does this process work? |
+|-----------------------------|
+
+It is highly recommended that after reading this you go through the kaem.run for
+your architecture and see each of these steps in action. Note that the kaem.run
+is split into two kaem files to make it simpler to grasp. These two files are
+mescc-tools.kaem for Phase 0-12 and mes-m2.kaem for Phase 13, contained in the
+same folder as kaem.run.
+
+Most of these steps have a NASM version in the NASM/ subdirectory of the folder
+for the architecture.
+
+Phase 0: Rebuild hex0 from the hex0 seed. This is done to ensure that the hex0
+seed is untainted, and that the hex0 seed matches the compiled hex0 source. You
+should check these are identical!
+
+Phase 1: Build hex1 from the Phase 0 hex0. hex1 is a more advanced version of
+hex0 with support for single character labels (hex0 has no support for labels).
+
+Phase 1b: Build catm from Phase 0 hex0. catm is a program removing the need for
+cat or redirection by implementing equivalent functionality; eg
+cat input1 input2 > output_file would be replaced by
+catm output_file input1 input2.
+
+Phase 2: Build hex2-0 from hex1. hex2 is the final version of the hex* series
+adding support for long labels and absolute addresses. This allows it to
+function as a linker for later parts of the bootstrap. However for now we are
+only building a basic version to make the process simpler, hence the -0 on the
+end of the name.
+
+Phase 3: Build M0 from Phase 2 hex2-0. M0 is an architecture specific version of
+M1 which will come later. It is simply a temporary binary that avoids the need
+to write a cross-architecture assembler in hex2, rather writing it in M0 and
+writing a simpler assembler per architecture in hex2.
+
+Phase 4: Build cc_* from M0. cc_architecture is a per-architecture C compiler
+written in the same architecture's M0. Eg, there is cc_amd64 for amd64 and
+cc_x86 for x86. It implements only an extremely basic form of C that is used to
+bootstrap the next phase.
+
+Phase 5: Build M2-Planet from cc_*. M2-Planet is another C compiler that
+implements a slightly larger subset of C. However this is not a full-fleged
+version and is replaced towards the end.
+
+Phase 6: Build blood-elf-0 using M2-Planet. blood-elf adds ELF stubs to a
+M2-Planet program allowing us to create useful M2-Planet programs. However, this
+version is not yet full-fleged and is indicated by such with -0 on the end.
+
+From here on in, all the remaining phases are not intermediete binaries and are
+used as results. Note that we have been using hex2-0 for the whole time up until
+now. Also note that now all binaries are debuggable, can generate stack traces,
+etc, thanks to blood-elf.
+
+Phase 7: Build hex2 implementation in M2-Planet. This version of hex2 is
+cross-platform and has a number of outstanding features which are out of scope
+here. This is a useful linker that is used in the next stange of the bootstrap
+process.
+
+Note that now we are not using hex2-0; hex2-0 is replaces with hex2.
+
+Phase 8: Build M1 implementation in M2-Planet. M1 is a cross-platform version of
+M0, along with being much more powerful and faster.
+
+Note that from now we no longer need catm, as M1 has support for multiple
+inputs, and that we no longer use M0; it is replaced with M1.
+
+Phase 9: Build blood-elf implementation in M2-Planet. blood-elf was discussed
+earlier and now can be used properly to create debuggable programs with ELF
+headers.
+
+Phase 10: Build kaem. kaem is what was being used to run kaem.run scripts, and
+is useful for later stages of the bootstrap process outside this repository.
+
+Phase 11: Build get_machine. get_machine finds the architecture of the system it
+is running on, used for architecture dependent scripts used later in the
+bootstrap process.
+
+Phase 12: Build M2-Planet from M2-Planet. This is the same M2-Planet as
+discussed erlier, it just is built using itself and so is going to work more
+quickly and reliably.
+
+Phase 13: Build Mes-M2 using M2-Planet. Mes-M2 is a re-implemenation of Mes
+(https://www.gnu.org/software/mes/) designed to make mes part of the
+bootstrap process. After this is complete, we will be able to bootstrap our way
+up, through MesCC and TinyCC up to GCC.

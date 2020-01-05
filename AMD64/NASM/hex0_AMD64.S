@@ -21,18 +21,18 @@
 ; Simply jump to _start
 ; Our main function
 _start:
-	pop rax                     ;·Get·the·number·of·arguments
-	pop rdi                     ;·Get·the·program·name
-	pop rdi                     ;·Get·the·actual·input name
-	mov rsi, 0                  ;·prepare·read_only
-	mov rax, 2                  ;·the·syscall·number·for·open()
+	pop rax                     ; Get the number of arguments
+	pop rdi                     ; Get the program name
+	pop rdi                     ; Get the actual input name
+	mov rsi, 0                  ; prepare read_only
+	mov rax, 2                  ; the syscall number for open()
 	syscall                     ; Now open that damn file
 	mov r9, rax                 ; Preserve the file pointer we were given
 
-	pop rdi                     ;·Get·the·actual·output name
+	pop rdi                     ; Get the actual output name
 	mov rsi, 577                ; Prepare file as O_WRONLY|O_CREAT|O_TRUNC
 	mov rdx, 448                ; Prepare file as RWX for owner only (700 in octal)
-	mov rax, 2                  ;·the·syscall·number·for·open()
+	mov rax, 2                  ; the syscall number for open()
 	syscall                     ; Now open that damn file
 	mov r10, rax                ; Preserve the file pointer we were given
 

@@ -39,19 +39,19 @@ _start:
 	add ebx, 8192000            ; Create space for temp
 	call malloc                 ; Give ourselves 8192000 bytes to work with
 
-	pop eax                     ;·Get·the·number·of·arguments
-	pop ebx                     ;·Get·the·program·name
-	pop ebx                     ;·Get·the·actual·input name
-	mov ecx, 0                  ;·prepare·read_only
+	pop eax                     ; Get the number of arguments
+	pop ebx                     ; Get the program name
+	pop ebx                     ; Get the actual input name
+	mov ecx, 0                  ; prepare read_only
 	mov edx, 0                  ; Really sure
-	mov eax, 5                  ;·the·syscall·number·for·open()
+	mov eax, 5                  ; the syscall number for open()
 	int 0x80                    ; Now open that damn file
 	mov [Input], eax            ; Preserve the file pointer we were given
 
-	pop ebx                     ;·Get·the·actual·output name
+	pop ebx                     ; Get the actual output name
 	mov ecx, 577                ; Prepare file as O_WRONLY|O_CREAT|O_TRUNC
 	mov edx, 448                ; Prepare file as RWX for owner only (700 in octal)
-	mov eax, 5                  ;·the·syscall·number·for·open()
+	mov eax, 5                  ; the syscall number for open()
 	int 0x80                    ; Now open that damn file
 	cmp eax, 0                  ; Check for missing output
 	jg _start_out               ; Have real input

@@ -41,18 +41,18 @@ _start:
 	add rdi, 81920              ; Create space for temp
 	call malloc                 ; Give ourselves 81920 bytes to work with
 
-	pop rax                     ;·Get·the·number·of·arguments
-	pop rdi                     ;·Get·the·program·name
-	pop rdi                     ;·Get·the·actual·input name
-	mov rsi, 0                  ;·prepare·read_only
-	mov rax, 2                  ;·the·syscall·number·for·open()
+	pop rax                     ; Get the number of arguments
+	pop rdi                     ; Get the program name
+	pop rdi                     ; Get the actual input name
+	mov rsi, 0                  ; prepare read_only
+	mov rax, 2                  ; the syscall number for open()
 	syscall                     ; Now open that damn file
 	mov r9, rax                 ; Preserve the file pointer we were given
 
-	pop rdi                     ;·Get·the·actual·output name
+	pop rdi                     ; Get the actual output name
 	mov rsi, 577                ; Prepare file as O_WRONLY|O_CREAT|O_TRUNC
 	mov rdx, 448                ; Prepare file as RWX for owner only (700 in octal)
-	mov rax, 2                  ;·the·syscall·number·for·open()
+	mov rax, 2                  ; the syscall number for open()
 	syscall                     ; Now open that damn file
 	cmp rax, 0                  ; Check for missing output
 	jg _start_out               ; Have real input

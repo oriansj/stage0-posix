@@ -21,19 +21,19 @@
 ; Simply jump to _start
 ; Our main function
 _start:
-	pop eax                     ;·Get·the·number·of·arguments
-	pop ebx                     ;·Get·the·program·name
-	pop ebx                     ;·Get·the·actual·input name
-	mov ecx, 0                  ;·prepare·read_only
-	mov edx, 0                  ;·extra sure
-	mov eax, 5                  ;·the·syscall·number·for·open()
+	pop eax                     ; Get the number of arguments
+	pop ebx                     ; Get the program name
+	pop ebx                     ; Get the actual input name
+	mov ecx, 0                  ; prepare read_only
+	mov edx, 0                  ; extra sure
+	mov eax, 5                  ; the syscall number for open()
 	int 0x80                    ; Now open that damn file
 	mov [fin], eax              ; Preserve the file pointer we were given
 
-	pop ebx                     ;·Get·the·actual·output name
+	pop ebx                     ; Get the actual output name
 	mov ecx, 577                ; Prepare file as O_WRONLY|O_CREAT|O_TRUNC
 	mov edx, 448                ; Prepare file as RWX for owner only (700 in octal)
-	mov eax, 5                  ;·the·syscall·number·for·open()
+	mov eax, 5                  ; the syscall number for open()
 	int 0x80                    ; Now open that damn file
 	mov [fout], eax             ; Preserve the file pointer we were given
 

@@ -142,18 +142,18 @@ DEFINE SUBI8_ECX 83E9
 DEFINE XCHG_EAX_EBX 93
 
 :_start
-	POP_EAX                     ;·Get·the·number·of·arguments
-	POP_EBX                     ;·Get·the·program·name
-	POP_EBX                     ;·Get·the·actual·input name
-	LOADI32_ECX %0              ;·prepare·read_only
-	LOADI32_EAX %5              ;·the·syscall·number·for·open()
+	POP_EAX                     ; Get the number of arguments
+	POP_EBX                     ; Get the program name
+	POP_EBX                     ; Get the actual input name
+	LOADI32_ECX %0              ; prepare read_only
+	LOADI32_EAX %5              ; the syscall number for open()
 	INT_80                      ; Now open that damn file
 	STORE32_Absolute32_eax &Input ; Preserve the file pointer we were given
 
-	POP_EBX                     ;·Get·the·actual·output name
+	POP_EBX                     ; Get the actual output name
 	LOADI32_ECX %577            ; Prepare file as O_WRONLY|O_CREAT|O_TRUNC
 	LOADI32_EDX %384            ; Prepare file as RWX for owner only (600 in octal)
-	LOADI32_EAX %5              ; the·syscall·number·for·open()
+	LOADI32_EAX %5              ; the syscall number for open()
 	INT_80                      ; Now open that damn file
 	CMPI8_EAX !0                ; Check for missing output
 	JG32 %_start_out            ; Have real input

@@ -69,19 +69,19 @@
 ; Simply jump to _start
 ; Our main function
 # :_start ; (0x8048054)
-	58                          # POP_EAX                     ;·Get·the·number·of·arguments
-	5B                          # POP_EBX                     ;·Get·the·program·name
-	5B                          # POP_EBX                     ;·Get·the·actual·input name
-	B9 00000000                 # LOADI32_ECX %0              ;·prepare·read_only
+	58                          # POP_EAX                     ; Get the number of arguments
+	5B                          # POP_EBX                     ; Get the program name
+	5B                          # POP_EBX                     ; Get the actual input name
+	B9 00000000                 # LOADI32_ECX %0              ; prepare read_only
 	BA 00000000                 # LOADI32_EDX %0              ; Extra sure
-	B8 05000000                 # LOADI32_EAX %5              ;·the·syscall·number·for·open()
+	B8 05000000                 # LOADI32_EAX %5              ; the syscall number for open()
 	CD80                        # INT_80                      ; Now open that damn file
 	A3 55810408                 # STORE32_Absolute32_eax &fin ; Preserve the file pointer we were given
 
-	5B                          # POP_EBX                     ;·Get·the·actual·output name
+	5B                          # POP_EBX                     ; Get the actual output name
 	B9 41020000                 # LOADI32_ECX %577            ; Prepare file as O_WRONLY|O_CREAT|O_TRUNC
 	BA C0010000                 # LOADI32_EDX %448            ; Prepare file as RWX for owner only (700 in octal)
-	B8 05000000                 # LOADI32_EAX %5              ;·the·syscall·number·for·open()
+	B8 05000000                 # LOADI32_EAX %5              ; the syscall number for open()
 	CD80                        # INT_80                      ; Now open that damn file
 	A3 59810408                 # STORE32_Absolute32_eax &fout ; Preserve the file pointer we were given
 

@@ -46,12 +46,12 @@ DEFINE SYSCALL 0F05
 ; Simply jump to _start
 ; Our main function
 :_start
-	POP_RAX                     ; Get·the·number·of·arguments
-	POP_RDI                     ; Get·the·program·name
-	POP_RDI                     ; Get·the·actual·output name
+	POP_RAX                     ; Get the number of arguments
+	POP_RDI                     ; Get the program name
+	POP_RDI                     ; Get the actual output name
 	LOADI32_RSI %577            ; Prepare file as O_WRONLY|O_CREAT|O_TRUNC
 	LOADI32_RDX %384            ; Prepare file as RW for owner only (600 in octal)
-	LOADI32_RAX %2              ; the·syscall·number·for·open()
+	LOADI32_RAX %2              ; the syscall number for open()
 	SYSCALL                     ; Now open that file
 	COPY_RAX_to_R15             ; Preserve the file pointer we were given
 
@@ -66,13 +66,13 @@ DEFINE SYSCALL 0F05
 	SYSCALL                     ; Let the kernel do the work
 
 :core
-	POP_RDI                     ; Get·the·actual·input name
+	POP_RDI                     ; Get the actual input name
 	CMP_RDI_Immediate8 !0       ; Check for null string
 	JE32 %done                  ; Hit null be done
 
-	LOADI32_RSI %0              ; prepare·read_only
+	LOADI32_RSI %0              ; prepare read_only
 	LOADI32_RDX %0              ; prevent any interactions
-	LOADI32_RAX %2              ; the·syscall·number·for·open()
+	LOADI32_RAX %2              ; the syscall number for open()
 	SYSCALL                     ; Now open that damn file
 	COPY_RAX_to_R13             ; Protect INPUT
 :keep

@@ -69,8 +69,8 @@ hex0 with support for single character labels (hex0 has no support for labels).
 
 Phase 1b: Build catm from Phase 0 hex0. catm is a program removing the need for
 cat or redirection by implementing equivalent functionality; eg
-cat input1 input2 > output_file would be replaced by
-catm output_file input1 input2.
+cat input1 input2 ... inputN > output_file would be replaced by
+catm output_file input1 input2 ... inputN
 
 Phase 2: Build hex2-0 from hex1. hex2 is the final version of the hex* series
 adding support for long labels and absolute addresses. This allows it to
@@ -89,12 +89,13 @@ cc_x86 for x86. It implements only an extremely basic form of C that is used to
 bootstrap the next phase.
 
 Phase 5: Build M2-Planet from cc_*. M2-Planet is another C compiler that
-implements a slightly larger subset of C. However this is not a full-fleged
-version and is replaced towards the end.
+implements a slightly larger subset of C. However this is not an easily
+debuggable version and is replaced towards the end.
 
-Phase 6: Build blood-elf-0 using M2-Planet. blood-elf adds ELF stubs to a
-M2-Planet program allowing us to create useful M2-Planet programs. However, this
-version is not yet full-fleged and is indicated by such with -0 on the end.
+Phase 6: Build blood-elf-0 using M2-Planet. blood-elf adds dwarf stubs to a
+M1 program allowing us to create more easily debuggable programs. However, this
+version is not debuggable (as it is built without dwarf stubs) and is indicated
+by such with -0 on the end.
 
 From here on in, all the remaining phases are not intermediete binaries and are
 used as results. Note that we have been using hex2-0 for the whole time up until
@@ -106,7 +107,7 @@ cross-platform and has a number of outstanding features which are out of scope
 here. This is a useful linker that is used in the next stange of the bootstrap
 process.
 
-Note that now we are not using hex2-0; hex2-0 is replaces with hex2.
+Note that now we are not using hex2-0; hex2-0 is replaced with hex2.
 
 Phase 8: Build M1 implementation in M2-Planet. M1 is a cross-platform version of
 M0, along with being much more powerful and faster.

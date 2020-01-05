@@ -71,18 +71,18 @@
 # Our main function
 
 :a # :_start
-	58                  ; POP_RAX #·Get·the·number·of·arguments
-	5F                  ; POP_RDI #·Get·the·program·name$
-	5F                  ; POP_RDI #·Get·the·actual·input name
-	48C7C6 00000000     ; LOADI32_RSI %0 #·prepare·read_only
-	48C7C0 02000000     ; LOADI32_RAX %2 #·the·syscall·number·for·open()
+	58                  ; POP_RAX # Get the number of arguments
+	5F                  ; POP_RDI # Get the program name$
+	5F                  ; POP_RDI # Get the actual input name
+	48C7C6 00000000     ; LOADI32_RSI %0 # prepare read_only
+	48C7C0 02000000     ; LOADI32_RAX %2 # the syscall number for open()
 	0F05                ; SYSCALL # Now open that damn file
 	4989C1              ; COPY_RAX_to_R9 # Preserve the file pointer we were given
 
-	5F                  ; POP_RDI         #·Get·the·actual·output name
+	5F                  ; POP_RDI         # Get the actual output name
 	48C7C6 41020000     ; LOADI32_RSI %577 # Prepare file as O_WRONLY|O_CREAT|O_TRUNC
 	48C7C2 C0010000     ; LOADI32_RDX %448 # Prepare file as RWX for owner only (700 in octal)
-	48C7C0 02000000     ; LOADI32_RAX %2  #·the·syscall·number·for·open()
+	48C7C0 02000000     ; LOADI32_RAX %2  # the syscall number for open()
 	0F05                ; SYSCALL         # Now open that damn file
 	4989C2              ; COPY_RAX_to_R10 # Preserve the file pointer we were given
 

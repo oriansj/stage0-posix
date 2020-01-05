@@ -36,18 +36,18 @@
 ; Simply jump to _start
 ; Our main function
 :_start
-	58                          ; POP_EAX                     ;·Get·the·number·of·arguments
-	5B                          ; POP_EBX                     ;·Get·the·program·name
-	5B                          ; POP_EBX                     ;·Get·the·actual·input name
-	B9 00000000                 ; LOADI32_ECX %0              ;·prepare·read_only
-	B8 05000000                 ; LOADI32_EAX %5              ;·the·syscall·number·for·open()
+	58                          ; POP_EAX                     ; Get the number of arguments
+	5B                          ; POP_EBX                     ; Get the program name
+	5B                          ; POP_EBX                     ; Get the actual input name
+	B9 00000000                 ; LOADI32_ECX %0              ; prepare read_only
+	B8 05000000                 ; LOADI32_EAX %5              ; the syscall number for open()
 	CD80                        ; INT_80                      ; Now open that damn file
 	A3 &Input                   ; STORE32_Absolute32_eax &Input ; Preserve the file pointer we were given
 
-	5B                          ; POP_EBX                     ;·Get·the·actual·output name
+	5B                          ; POP_EBX                     ; Get the actual output name
 	B9 41020000                 ; LOADI32_ECX %577            ; Prepare file as O_WRONLY|O_CREAT|O_TRUNC
 	BA 80010000                 ; LOADI32_EDX %384            ; Prepare file as RW for owner only (600 in octal)
-	B8 05000000                 ; LOADI32_EAX %5              ; the·syscall·number·for·open()
+	B8 05000000                 ; LOADI32_EAX %5              ; the syscall number for open()
 	CD80                        ; INT_80                      ; Now open that damn file
 	83F8 00                     ; CMPI8_EAX !0                ; Check for missing output
 	0F8F %_start_out            ; JG32 %_start_out            ; Have real input

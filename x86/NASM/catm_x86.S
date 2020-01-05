@@ -26,12 +26,12 @@
 ; Simply jump to _start
 ; Our main function
 _start:
-	pop eax                     ;·Get·the·number·of·arguments
-	pop ebx                     ;·Get·the·program·name
-	pop ebx                     ;·Get·the·actual·output name
+	pop eax                     ; Get the number of arguments
+	pop ebx                     ; Get the program name
+	pop ebx                     ; Get the actual output name
 	mov ecx, 577                ; Prepare file as O_WRONLY|O_CREAT|O_TRUNC
 	mov edx, 384                ; Prepare file as RW for owner only (600 in octal)
-	mov eax, 5                  ;·the·syscall·number·for·open()
+	mov eax, 5                  ; the syscall number for open()
 	int 0x80                    ; Now open that file
 	mov ebp, eax                ; Preserve the file pointer we were given
 
@@ -46,13 +46,13 @@ _start:
 	int 0x80                    ; Let the kernel do the work
 
 core:
-	pop ebx                     ;·Get·the·actual·input name
+	pop ebx                     ; Get the actual input name
 	cmp ebx, 0                  ; Check for null string
 	je done                     ; Hit null be done
 
-	mov ecx, 0                  ;·prepare·read_only
+	mov ecx, 0                  ; prepare read_only
 	mov edx, 0                  ; prevent any interactions
-	mov eax, 5                  ;·the·syscall·number·for·open()
+	mov eax, 5                  ; the syscall number for open()
 	int 0x80                    ; Now open that damn file
 	mov esi, eax                ; Protect INPUT
 keep:

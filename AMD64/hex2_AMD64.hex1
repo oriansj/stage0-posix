@@ -87,18 +87,18 @@ CF 05 00 00 00 00 00 00 ## p_memsz
 	4881C7 00007D00             ; ADDI32_to_RDI %8192000      ; Create space for temp
 	E8 %w                       ; CALLI32 %malloc             ; Give ourselves 8192000 bytes to work with
 
-	58                          ; POP_RAX                     ;·Get·the·number·of·arguments
-	5F                          ; POP_RDI                     ;·Get·the·program·name
-	5F                          ; POP_RDI                     ;·Get·the·actual·input name
-	BE 00000000                 ; LOADI32_RSI %0              ;·prepare·read_only
-	48C7C0 02000000             ; LOADI32_RAX %2              ;·the·syscall·number·for·open()
+	58                          ; POP_RAX                     ; Get the number of arguments
+	5F                          ; POP_RDI                     ; Get the program name
+	5F                          ; POP_RDI                     ; Get the actual input name
+	BE 00000000                 ; LOADI32_RSI %0              ; prepare read_only
+	48C7C0 02000000             ; LOADI32_RAX %2              ; the syscall number for open()
 	0F05                        ; SYSCALL                     ; Now open that damn file
 	4989C1                      ; COPY_RAX_to_R9              ; Preserve the file pointer we were given
 
-	5F                          ; POP_RDI                     ;·Get·the·actual·output name
+	5F                          ; POP_RDI                     ; Get the actual output name
 	BE 41020000                 ; LOADI32_RSI %577            ; Prepare file as O_WRONLY|O_CREAT|O_TRUNC
 	BA C0010000                 ; LOADI32_RDX %448            ; Prepare file as RWX for owner only (700 in octal)
-	48C7C0 02000000             ; LOADI32_RAX %2              ;·the·syscall·number·for·open()
+	48C7C0 02000000             ; LOADI32_RAX %2              ; the syscall number for open()
 	0F05                        ; SYSCALL                     ; Now open that damn file
 	4883F8 00                   ; CMP_RAX_Immediate8 !0       ; Check for missing output
 	0F8F %R                     ; JG32 %_start_out            ; Have real input

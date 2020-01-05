@@ -36,18 +36,18 @@
 ; Simply jump to _start
 ; Our main function
 :_start
-	58                      # POP_RAX                     ;·Get·the·number·of·arguments
-	5F                      # POP_RDI                     ;·Get·the·program·name
-	5F                      # POP_RDI                     ;·Get·the·actual·input name
-	BE 00000000             # LOADI32_RSI %0              ;·prepare·read_only
-	48C7C0 02000000         # LOADI32_RAX %2              ;·the·syscall·number·for·open()
+	58                      # POP_RAX                     ; Get the number of arguments
+	5F                      # POP_RDI                     ; Get the program name
+	5F                      # POP_RDI                     ; Get the actual input name
+	BE 00000000             # LOADI32_RSI %0              ; prepare read_only
+	48C7C0 02000000         # LOADI32_RAX %2              ; the syscall number for open()
 	0F05                    # SYSCALL                     ; Now open that damn file
 	4989C7                  # COPY_RAX_to_R15             ; Preserve the file pointer we were given
 
-	5F                      # POP_RDI                     ;·Get·the·actual·output name
+	5F                      # POP_RDI                     ; Get the actual output name
 	BE 41020000             # LOADI32_RSI %577            ; Prepare file as O_WRONLY|O_CREAT|O_TRUNC
 	BA 80010000             # LOADI32_RDX %384            ; Prepare file as RW for owner only (600 in octal)
-	48C7C0 02000000         # LOADI32_RAX %2              ;·the·syscall·number·for·open()
+	48C7C0 02000000         # LOADI32_RAX %2              ; the syscall number for open()
 	0F05                    # SYSCALL                     ; Now open that damn file
 	4883F8 00               # CMP_RAX_Immediate8 !0       ; Check for missing output
 	0F8F %_start_out        # JG32 %_start_out            ; Have real input

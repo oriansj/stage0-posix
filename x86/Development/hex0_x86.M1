@@ -48,19 +48,19 @@ DEFINE TEST 85C0
 ; Simply jump to _start
 ; Our main function
 :_start
-	POP_EAX                     ;·Get·the·number·of·arguments
-	POP_EBX                     ;·Get·the·program·name
-	POP_EBX                     ;·Get·the·actual·input name
-	LOADI32_ECX %0              ;·prepare·read_only
+	POP_EAX                     ; Get the number of arguments
+	POP_EBX                     ; Get the program name
+	POP_EBX                     ; Get the actual input name
+	LOADI32_ECX %0              ; prepare read_only
 	LOADI32_EDX %0              ; Extra sure
-	LOADI32_EAX %5              ;·the·syscall·number·for·open()
+	LOADI32_EAX %5              ; the syscall number for open()
 	INT_80                      ; Now open that damn file
 	STORE32_Absolute32_eax &fin ; Preserve the file pointer we were given
 
-	POP_EBX                     ;·Get·the·actual·output name
+	POP_EBX                     ; Get the actual output name
 	LOADI32_ECX %577            ; Prepare file as O_WRONLY|O_CREAT|O_TRUNC
 	LOADI32_EDX %448            ; Prepare file as RWX for owner only (700 in octal)
-	LOADI32_EAX %5              ;·the·syscall·number·for·open()
+	LOADI32_EAX %5              ; the syscall number for open()
 	INT_80                      ; Now open that damn file
 	STORE32_Absolute32_eax &fout ; Preserve the file pointer we were given
 

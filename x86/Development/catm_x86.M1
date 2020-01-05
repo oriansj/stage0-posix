@@ -46,12 +46,12 @@ DEFINE COPY_EAX_to_EDI 89C7
 DEFINE COPY_EAX_to_EBP 89C5
 
 :_start
-	POP_EAX                     ;·Get·the·number·of·arguments
-	POP_EBX                     ;·Get·the·program·name
-	POP_EBX                     ;·Get·the·actual·output name
+	POP_EAX                     ; Get the number of arguments
+	POP_EBX                     ; Get the program name
+	POP_EBX                     ; Get the actual output name
 	LOADI32_ECX %577            ; Prepare file as O_WRONLY|O_CREAT|O_TRUNC
 	LOADI32_EDX %384            ; Prepare file as RW for owner only (600 in octal)
-	LOADI32_EAX %5              ;·the·syscall·number·for·open()
+	LOADI32_EAX %5              ; the syscall number for open()
 	INT_80                      ; Now open that file
 	COPY_EAX_to_EBP             ; Preserve the file pointer we were given
 
@@ -66,13 +66,13 @@ DEFINE COPY_EAX_to_EBP 89C5
 	INT_80                      ; Let the kernel do the work
 
 :core
-	POP_EBX                     ;·Get·the·actual·input name
+	POP_EBX                     ; Get the actual input name
 	CMPI32_EBX %0               ; Check for null string
 	JE8 !done                   ; Hit null be done
 
-	LOADI32_ECX %0              ;·prepare·read_only
+	LOADI32_ECX %0              ; prepare read_only
 	LOADI32_EDX %0              ; prevent any interactions
-	LOADI32_EAX %5              ;·the·syscall·number·for·open()
+	LOADI32_EAX %5              ; the syscall number for open()
 	INT_80                      ; Now open that damn file
 	COPY_EAX_to_ESI             ; Protect INPUT
 :keep

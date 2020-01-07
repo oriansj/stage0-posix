@@ -832,7 +832,7 @@ DEFINE SWAP_EAX_EBX 93
 	CALL32 %emit                                ; Emit it
 
 	COPY_EAX_to_EBX                             ; update globals_list
-	LOADI32_EAX &program_string_1               ; "\nNOP\n"
+	LOADI32_EAX &program_string_1               ; "\nNULL\n"
 	CALL32 %emit                                ; Emit it
 	STORE32_Absolute32_eax &globals_list        ; update globals_list
 
@@ -865,7 +865,7 @@ DEFINE SWAP_EAX_EBX 93
 ;; Strings needed by the program function
 :program_string_0  ":GLOBAL_"
 :program_string_1  "
-NOP
+NULL
 "
 
 

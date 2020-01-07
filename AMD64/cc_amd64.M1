@@ -870,7 +870,7 @@ DEFINE ZERO_EXTEND_CL 480FB6C9
 	CALLI32 %emit                               ; Emit it
 
 	COPY_RAX_to_RBX                             ; update globals_list
-	LOADI32_RAX &program_string_1               ; "\nNOP\n"
+	LOADI32_RAX &program_string_1               ; "\nNULL\n"
 	CALLI32 %emit                               ; Emit it
 	STORE64_from_RAX_into_ABS32 &globals_list   ; update globals_list
 
@@ -905,7 +905,7 @@ DEFINE ZERO_EXTEND_CL 480FB6C9
 
 :program_string_1
 "
-NOP
+NULL
 "
 
 

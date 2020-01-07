@@ -45,6 +45,7 @@
 	-f ../mes-m2/mes_vector.c \
 	-f ../mes-m2/mes_list.c \
 	-f ../mes-m2/mes_string.c \
+	-f ../mes-m2/mes_keyword.c \
 	-f ../mes-m2/mes_record.c \
 	-f ../mes-m2/mes_init.c \
 	-f ../mes-m2/mes_macro.c \

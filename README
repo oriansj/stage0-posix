@@ -39,13 +39,15 @@ source has the same instructions as the lower-level source.
 
 This repository utilises submodules, so you need to clone this repository using
 `git clone --recursive`. If you have already cloned it run `git submodule update
---init`.
+--init` or after a pull be sure to do: git submodule update --recursive
 
 Note that this README may not answer all your questions. If you are still left
 wondering things like What is a kaem.run?, see the other repositories readme's
 which might answer some more tool-specific questions.
 
 We hang out on the freenode IRC network in the #bootstrappable channel.
+And a full summary of all of the tools can be found here:
+https://github.com/oriansj/talk-notes/blob/master/bootstrappable.org
 
 |-----------------------------|
 | How does this process work? |
@@ -65,7 +67,8 @@ seed is untainted, and that the hex0 seed matches the compiled hex0 source. You
 should check these are identical!
 
 Phase 1: Build hex1 from the Phase 0 hex0. hex1 is a more advanced version of
-hex0 with support for single character labels (hex0 has no support for labels).
+hex0 with support for single character labels and a single size of relational
+jumps (hex0 has no support for labels or calculated relational jumps).
 
 Phase 1b: Build catm from Phase 0 hex0. catm is a program removing the need for
 cat or redirection by implementing equivalent functionality; eg
@@ -76,12 +79,13 @@ Phase 2: Build hex2-0 from hex1. hex2 is the final version of the hex* series
 adding support for long labels and absolute addresses. This allows it to
 function as a linker for later parts of the bootstrap. However for now we are
 only building a basic version to make the process simpler, hence the -0 on the
-end of the name.
+end of the name; as this hex2 only works for the single host architecture it was
+built upon.
 
 Phase 3: Build M0 from Phase 2 hex2-0. M0 is an architecture specific version of
 M1 which will come later. It is simply a temporary binary that avoids the need
-to write a cross-architecture assembler in hex2, rather writing it in M0 and
-writing a simpler assembler per architecture in hex2.
+to write a cross-architecture assembler in hex2, as M0 supports just enough
+functionality to build the next few stages.
 
 Phase 4: Build cc_* from M0. cc_architecture is a per-architecture C compiler
 written in the same architecture's M0. Eg, there is cc_amd64 for amd64 and

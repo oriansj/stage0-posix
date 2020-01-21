@@ -52,6 +52,7 @@
 	-f ../mes-m2/mes_posix.c \
 	-f ../mes-m2/functions/numerate_number.c \
 	-f ../mes-m2/functions/match.c \
+	-f ../mes-m2/functions/in_set.c \
 	-f ../mes-m2/functions/file_print.c \
 	-o mes.M1
 

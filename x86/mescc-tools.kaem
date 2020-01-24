@@ -110,6 +110,8 @@
 	-f ../M2-Planet/functions/calloc.c \
 	-f ../M2-Planet/functions/match.c \
 	-f ../mescc-tools/blood-elf.c \
+	-f ../M2-Planet/functions/require.c \
+	-f ../M2-Planet/functions/in_set.c \
 	-o blood-elf.M1
 
 ./catm hold x86_defs.M1 libc-core.M1 blood-elf.M1
@@ -129,6 +131,7 @@
 	-f ../M2-Planet/test/common_x86/functions/malloc.c \
 	-f ../M2-Planet/functions/calloc.c \
 	-f ../M2-Planet/functions/match.c \
+	-f ../M2-Planet/functions/require.c \
 	-f ../M2-Planet/functions/in_set.c \
 	-f ../M2-Planet/functions/numerate_number.c \
 	-f ../M2-Planet/test/common_x86/functions/stat.c \
@@ -157,6 +160,7 @@
 	-f ../M2-Planet/functions/in_set.c \
 	-f ../M2-Planet/functions/numerate_number.c \
 	-f ../M2-Planet/functions/string.c \
+	-f ../M2-Planet/functions/require.c \
 	-f ../mescc-tools/M1-macro.c \
 	--debug \
 	-o M1-macro.M1
@@ -186,6 +190,8 @@
 	-f ../M2-Planet/test/common_x86/functions/malloc.c \
 	-f ../M2-Planet/functions/calloc.c \
 	-f ../M2-Planet/functions/match.c \
+	-f ../M2-Planet/functions/require.c \
+	-f ../M2-Planet/functions/in_set.c \
 	-f ../mescc-tools/blood-elf.c \
 	--debug \
 	-o blood-elf.M1

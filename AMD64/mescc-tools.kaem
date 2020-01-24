@@ -86,6 +86,7 @@
 	../M2-Planet/functions/file_print.c \
 	../M2-Planet/functions/number_pack.c \
 	../M2-Planet/functions/string.c \
+	../M2-Planet/functions/require.c \
 	../M2-Planet/cc.h \
 	../M2-Planet/cc_reader.c \
 	../M2-Planet/cc_strings.c \
@@ -297,6 +298,7 @@
 	-f ../M2-Planet/functions/file_print.c \
 	-f ../M2-Planet/functions/number_pack.c \
 	-f ../M2-Planet/functions/string.c \
+	-f ../M2-Planet/functions/require.c \
 	-f ../M2-Planet/cc.h \
 	-f ../M2-Planet/cc_reader.c \
 	-f ../M2-Planet/cc_strings.c \

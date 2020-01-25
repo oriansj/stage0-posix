@@ -1,11 +1,11 @@
 This repository contains all the various parts needed to bootstrap the
 following:
  - mescc-tools (https://github.com/oriansj/mescc-tools), containing:
+  - M1
   - blood-elf
   - get_machine
   - hex2
-  - M1
- - kaem (https://github.com/oriansj/kaem)
+  - kaem
  - M2-Planet (https://github.com/oriansj/M2-Planet)
  - mes-m2 (https://github.com/oriansj/mes-m2).
 

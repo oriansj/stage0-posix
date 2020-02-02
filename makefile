@@ -17,8 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Mes.  If not, see <http://www.gnu.org/licenses/>.
 
-arch = x86
-KAEM = $(PWD)/kaem-optional-seed
+arch ?= x86
+KAEM ?= $(PWD)/../bootstrap-seeds/kaem-optional-seed
 PACKAGE = mescc-tools-seed
 
 .PHONY: all

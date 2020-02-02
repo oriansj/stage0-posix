@@ -6,10 +6,3 @@ bin/blood-elf
 bin/get_machine
 bin/hex2
 bin/kaem
-
-# This was a hand generated and audited file
-# Do not trust it
-# Do not update it
-# It will be eliminated when kaem is handwritten in hex0
-# Then the hex0 version will appear in it's associated architecture's folder
-kaem-optional-seed

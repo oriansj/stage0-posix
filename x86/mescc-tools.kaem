@@ -30,7 +30,7 @@
 ###############################################
 # Phase-0 Build hex0 from bootstrapped binary #
 ###############################################
-./hex0-seed hex0_x86.hex0 hex0
+../../bootstrap-seeds/POSIX/x86/hex0-seed hex0_x86.hex0 hex0
 # hex0 should have the exact same checksum as hex0-seed as they are both supposed
 # to be built from hex0_x86.hex0 and by definition must be identical
 

@@ -27,10 +27,11 @@
 # Phase 0-12 Build hex0 from bootstrapped binary #
 ##################################################
 
-kaem --verbose --strict --file mescc-tools.kaem
+../../bootstrap-seeds/kaem-optional-seed -f mescc-tools-mini-kaem.kaem
+../bin/kaem --verbose --strict -f mescc-tools-full-kaem.kaem
 
 ############################################
 # Phase-13 Build Mes-M2 from M2-Planet     #
 ############################################
 
-kaem --verbose --strict --file mes-m2.kaem
+../bin/kaem --verbose --strict --file mes-m2.kaem

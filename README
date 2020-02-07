@@ -29,13 +29,13 @@ This uses the kaem seed rather then relying on your shell.
 At this stage of the bootstrap process we use a very minimal kaem. It does not
 support all of the same arguments and features as full kaem.
 Does support:
- - `-f`
  - Line comments
  - String collection
  - Execution of commands
 Does not support:
  - `--verbose` (forced ON)
  - `--strict` (forced ON)
+ - `-f` (remove -f file should be first argument if any)
  - cd
  - set
  - etc etc etc

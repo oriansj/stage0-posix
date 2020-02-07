@@ -27,7 +27,7 @@
 # Phase 0-12 Build hex0 from bootstrapped binary #
 ##################################################
 
-../../bootstrap-seeds/kaem-optional-seed -f mescc-tools-mini-kaem.kaem
+../../bootstrap-seeds/kaem-optional-seed mescc-tools-mini-kaem.kaem
 ../bin/kaem --verbose --strict -f mescc-tools-full-kaem.kaem
 
 ############################################

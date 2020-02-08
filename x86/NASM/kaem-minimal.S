@@ -26,7 +26,8 @@ _start:
 	pop ebx                     ; Get the actual input name
 	cmp ebx, 0                  ; Check for missing output
 	jne _start_out              ; Have real input
-	mov ebx, [default_file]     ; Use "kaem.run"
+	push eax                    ; Need to adjust stack
+	mov ebx, default_file       ; Use "kaem.run"
 
 _start_out:
 	mov ecx, 0                  ; prepare read_only
@@ -37,6 +38,7 @@ _start_out:
 	jle Exit_Failure            ; Abort hard
 	mov [script], eax           ; Set input pointer
 
+	pop eax                     ; Get start of envp
 	mov ebp, esp                ; Protect envp
 
 	mov eax, 45                 ; the Syscall # for SYS_BRK

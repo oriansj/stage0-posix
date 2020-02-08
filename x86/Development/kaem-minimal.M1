@@ -74,7 +74,8 @@ DEFINE STORE8_al_into_Address_ECX 8801
 	POP_EBX                           ; Get the actual input name
 	CMPI8_EBX !0                      ; Check for missing output
 	JNE8 !_start_out                  ; Have real input
-	LOAD32_Absolute32_ebx &default_file ; Use "kaem.run"
+	PUSH_EAX                          ; Need to adjust stack
+	LOADI32_EBX &default_file         ; Use "kaem.run"
 
 :_start_out
 	LOADI32_ECX %0                    ; prepare read_only
@@ -85,6 +86,7 @@ DEFINE STORE8_al_into_Address_ECX 8801
 	JLE32 %Exit_Failure               ; Abort hard
 	STORE32_Absolute32_eax &script    ; Set input pointer
 
+	POP_EAX                           ; Get start of envp
 	COPY_ESP_to_EBP                   ; Protect envp
 
 	LOADI32_EAX %45                   ; the Syscall # for SYS_BRK

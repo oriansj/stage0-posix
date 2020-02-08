@@ -23,7 +23,7 @@ PACKAGE = mescc-tools-seed
 
 .PHONY: all
 all:
-	cd $(arch) && $(KAEM) --verbose --strict
+	cd $(arch) && $(KAEM)
 
 ###  dist
 .PHONY: dist

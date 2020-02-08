@@ -23,12 +23,24 @@ yet solved and at the moment the kernel is trusted.
 This repository currently supports AMD64 and x86 (i386) architectures. To run
 the entire bootstrap process in the safest way, cd into the respective directory
 for your architecture -- AMD64 for amd64 and x86 for x86/i386 -- then run
-`../../bootstrap-seeds/kaem-optional-seed --verbose --strict`. This uses the
-kaem seed rather then relying on your shell. `--strict` makes sure that the
-result will be as intended, and nothing breaks. (If something works without
---strict but not with --strict please file an issue or come seek help on
-#bootstrappable on freenode). `--verbose` shows you the commands it is running
-as it goes.
+`../../bootstrap-seeds/kaem-optional-seed` (after cloning bootstrap-seeds).
+This uses the kaem seed rather then relying on your shell.
+
+At this stage of the bootstrap process we use a very minimal kaem. It does not
+support all of the same arguments and features as full kaem.
+Does support:
+ - Line comments
+ - String collection
+ - Execution of commands
+Does not support:
+ - `--verbose` (forced ON)
+ - `--strict` (forced ON)
+ - `-f` (remove -f file should be first argument if any)
+ - cd
+ - set
+ - etc etc etc
+The code is at https://github.com/fosslinux/mescc-tools/tree/minimal-debug.
+It should only be used for the first stages of the bootstrap process.
 
 The boostrappable effort is all about trust. You should verify each of these
 programs, from the hex0 monitor up to mes-m2, along with the kaem seed and the
@@ -57,8 +69,10 @@ https://github.com/oriansj/talk-notes/blob/master/bootstrappable.org
 It is highly recommended that after reading this you go through the kaem.run for
 your architecture and see each of these steps in action. Note that the kaem.run
 is split into two kaem files to make it simpler to grasp. These two files are
-mescc-tools.kaem for Phase 0-12 and mes-m2.kaem for Phase 13, contained in the
-same folder as kaem.run.
+mescc-tools-mini-kaem.kaem for Phase 0-9 (uses the simple kaem),
+mescc-tools-full-kaem.kaem for Phase 10-12 (uses the full kaem for the rest of
+mescc-tools) and mes-m2.kaem for Phase 13, contained in the same folder as
+kaem.run.
 
 Most of these steps have a NASM version in the NASM/ subdirectory of the folder
 for the architecture.
@@ -120,12 +134,12 @@ M0, along with being much more powerful and faster.
 Note that from now we no longer need catm, as M1 has support for multiple
 inputs, and that we no longer use M0; it is replaced with M1.
 
-Phase 9: Build blood-elf implementation in M2-Planet. blood-elf was discussed
+Phase 9: Build kaem. kaem is what was being used to run kaem.run scripts, and
+is useful for later stages of the bootstrap process outside this repository.
+
+Phase 10: Build blood-elf implementation in M2-Planet. blood-elf was discussed
 earlier and now can be used properly to create debuggable programs with ELF
 headers.
-
-Phase 10: Build kaem. kaem is what was being used to run kaem.run scripts, and
-is useful for later stages of the bootstrap process outside this repository.
 
 Phase 11: Build get_machine. get_machine finds the architecture of the system it
 is running on, used for architecture dependent scripts used later in the

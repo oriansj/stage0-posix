@@ -22,17 +22,20 @@
 
 # Can also be run by kaem or any other shell of your personal choice
 # To run in kaem simply: kaem --verbose --strict
+# Warning all binaries prior to the use of blood-elf will not be readable by
+# Objdump, you may need to use ndism or gdb to view the assembly in the binary.
 
-##################################################
-# Phase 0-12 Build hex0 from bootstrapped binary #
-##################################################
 
-../../bootstrap-seeds/kaem-optional-seed mescc-tools-seed-kaem.kaem
-./kaem-0 mescc-tools-mini-kaem.kaem
-../bin/kaem --verbose --strict -f mescc-tools-full-kaem.kaem
 
-############################################
-# Phase-13 Build Mes-M2 from M2-Planet     #
-############################################
+###############################################
+# Phase-0 Build hex0 from bootstrapped binary #
+###############################################
+../../bootstrap-seeds/POSIX/x86/hex0-seed hex0_x86.hex0 hex0
+# hex0 should have the exact same checksum as hex0-seed as they are both supposed
+# to be built from hex0_x86.hex0 and by definition must be identical
 
-../bin/kaem --verbose --strict --file mes-m2.kaem
+#########################################
+# Phase-0b Build minimal kaem from hex0 #
+#########################################
+./hex0 ../../bootstrap-seeds/kaem-optional-seed.hex0 kaem-0
+# for checksum validation reasons

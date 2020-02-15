@@ -25,6 +25,24 @@ PACKAGE = mescc-tools-seed
 all:
 	cd $(arch) && $(KAEM)
 
+Generate-x86-answers:
+	sha256sum bin/* >| x86.answers
+
+Generate-amd64-answers:
+	sha256sum bin/* >| amd64.answers
+
+.PHONEY: clean
+clean:
+	git clean -xdf
+
+test-x86:
+	cd x86 && $(KAEM)
+	sha256sum -c x86.answers
+
+test-amd64:
+	cd AMD64 && $(KAEM)
+	sha256sum -c amd64.answers
+
 ###  dist
 .PHONY: dist
 

@@ -183,9 +183,13 @@
 	-f ../M2-Planet/functions/calloc.c \
 	-f ../M2-Planet/functions/match.c \
 	-f ../M2-Planet/functions/in_set.c \
+	-f ../M2-Planet/functions/require.c \
+	-f ../M2-Planet/functions/string.c \
 	-f ../M2-Planet/functions/numerate_number.c \
 	-f ../M2-Planet/test/common_x86/functions/fork.c \
 	-f ../M2-Planet/test/common_x86/functions/execve.c \
+	-f ../M2-Planet/test/common_x86/functions/chdir.c \
+	-f ../M2-Planet/test/common_x86/functions/getcwd.c \
 	-f ../mescc-tools/kaem.c \
 	--debug \
 	-o kaem.M1

@@ -7,6 +7,7 @@
 	-f ../M2-Planet/test/common_x86/functions/exit.c \
 	-f ../M2-Planet/test/common_x86/functions/file.c \
 	-f ../M2-Planet/functions/file_print.c \
+	-f ../mescc-tools/functions/numerate_number.c \
 	-f ../M2-Planet/test/common_x86/functions/malloc.c \
 	-f ../M2-Planet/functions/calloc.c \
 	-f ../M2-Planet/functions/match.c \

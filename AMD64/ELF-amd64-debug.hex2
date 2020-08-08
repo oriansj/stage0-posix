@@ -15,182 +15,60 @@
 ### You should have received a copy of the GNU General Public License
 ### along with M2-Planet.  If not, see <http://www.gnu.org/licenses/>.
 
-### elf64.hex2: 64 bit elf header in hex2
+### stage0's hex2 format
+###    !<label>          1 byte relative
+###    $<label>          2 byte address
+###    @<label>          2 byte relative
+###    &<label>          4 byte address
+###    %<label>          4 byte relative
+
 ### if you wish to use this header, you need to add :ELF_end to the end of your
 ### M1 or hex2 files.
 
 ## ELF Header
 
 :ELF_base
-7F 45 4C 46                    # e_ident[EI_MAG0-3] ELF's magic number
+7F 45 4C 46                               # e_ident[EI_MAG0-3] ELF's magic number
 
-02                             # e_ident[EI_CLASS] Indicating 64 bit
-01                             # e_ident[EI_DATA] Indicating little endianness
-01                             # e_ident[EI_VERSION] Indicating original elf
+02                                        # e_ident[EI_CLASS] Indicating 64 bit
+01                                        # e_ident[EI_DATA] Indicating little endianness
+01                                        # e_ident[EI_VERSION] Indicating original elf
 
-00                             # e_ident[EI_OSABI] Set at 0 because none cares
-00                             # e_ident[EI_ABIVERSION] See above
+00                                        # e_ident[EI_OSABI] Set at 0 because none cares
+00                                        # e_ident[EI_ABIVERSION] See above
 
-00 00 00 00 00 00 00           # e_ident[EI_PAD]
-02 00                          # e_type Indicating Executable
-3E 00                          # e_machine Indicating AMD64
-01 00 00 00                    # e_version Indicating original elf
+00 00 00 00 00 00 00                      # e_ident[EI_PAD]
 
-&ELF_text 00 00 00 00          # e_entry Address of the entry point
+02 00                                     # e_type Indicating Executable
+3E 00                                     # e_machine Indicating AMD64
+01 00 00 00                               # e_version Indicating original elf
+
+&ELF_text 00 00 00 00                     # e_entry Address of the entry point
 %ELF_program_headers>ELF_base 00 00 00 00 # e_phoff Address of program header table
 %ELF_section_headers>ELF_base 00 00 00 00 # e_shoff Address of section header table
 
-00 00 00 00                    # e_flags
-40 00                          # e_ehsize Indicating our 64 Byte header
+00 00 00 00                               # e_flags
 
-38 00                          # e_phentsize size of a program header table
-02 00                          # e_phnum number of entries in program table
+40 00                                     # e_ehsize Indicating our 64 Byte header
 
-40 00                          # e_shentsize size of a section header table
-07 00                          # e_shnum number of entries in section table
+38 00                                     # e_phentsize size of a program header table
+01 00                                     # e_phnum number of entries in program table
 
-04 00                          # e_shstrndx index of the section names
+40 00                                     # e_shentsize size of a section header table
+05 00                                     # e_shnum number of entries in section table
+
+02 00                                     # e_shstrndx index of the section names
+
 
 :ELF_program_headers
 :ELF_program_header__text
-01 00 00 00                   # ph_type: PT-LOAD = 1
-07 00 00 00                   # ph_flags: PF-X|PF-W|PF-R = 7
+01 00 00 00                               # ph_type: PT-LOAD = 1
+07 00 00 00                               # ph_flags: PF-X|PF-W|PF-R = 7
 00 00 00 00 00 00 00 00                   # ph_offset
 &ELF_base 00 00 00 00                     # ph_vaddr
 &ELF_base 00 00 00 00                     # ph_physaddr
 %ELF_end>ELF_base 00 00 00 00             # ph_filesz
 %ELF_end>ELF_base 00 00 00 00             # ph_memsz
 01 00 00 00 00 00 00 00                   # ph_align
-
-#:ELF_program_header__data      # NOT USED
-                                # FIXME: linux 4.17 does not allow this overlap
-                                #    Uhuuh, elf segment at 0000000001000000
-                                #    requested but the memory is mapped already
-00 00 00 00                     # ph_type: PT-LOAD = 0 => no load
-07 00 00 00                     # ph_flags: PF-X|PF-W|PF-R = 7
-00 00 00 00 00 00 00 00                    # ph_offset
-&ELF_base 00 00 00 00                      # ph_vaddr
-&ELF_base 00 00 00 00                      # ph_physaddr
-%ELF_end>ELF_base 00 00 00 00              # ph_filesz
-%ELF_end>ELF_base 00 00 00 00              # ph_memsz
-01 00 00 00 00 00 00 00                    # ph_align
-
-:ELF_comment
-4d 45 53 00 00 00 00 00                    # MES
-00 00 00 00 00 00 00 00                    # align
-00 00 00 00 00 00 00 00
-00 00 00 00 00 00 00 00
-
-4d 45 53 00 00 00 00 00                    # MES
-00 00 00 00 00 00 00 00                    # align
-00 00 00 00 00 00 00 00
-00 00 00 00 00 00 00 00
-
-:ELF_shstr
-00
-:ELF_shstr__text
-2e 74 65 78 74 00               # .text
-:ELF_shstr__data
-2e 64 61 74 61 00               # .data
-:ELF_shstr__comment
-2e 63 6f 6d 6d 65 6e 74 00      # .comment
-:ELF_shstr__shstr
-2e 73 68 73 74 72 74 61 62 00   # .shstrtab
-:ELF_shstr__sym
-2e 73 79 6d 74 61 62 00         # .symtab
-:ELF_shstr__str
-2e 73 74 72 74 61 62 00         # .strtab
-
-:ELF_section_headers
-00 00 00 00                     # sh_name
-00 00 00 00                     # sh_type
-00 00 00 00 00 00 00 00         # sh_flags
-00 00 00 00 00 00 00 00         # sh_addr
-00 00 00 00 00 00 00 00         # sh_offset
-00 00 00 00 00 00 00 00         # sh_size
-00 00 00 00                     # sh_link
-00 00 00 00                     # sh_info
-00 00 00 00 00 00 00 00         # sh_1?
-00 00 00 00 00 00 00 00         # sh_entsize
-
-:ELF_section_header_text
-%ELF_shstr__text>ELF_shstr      # sh_name
-01 00 00 00                     # sh_type = SHT_PROGBITS = 1
-06 00 00 00 00 00 00 00         # sh_flags = SHF-ALLOC|SHF-EXEC =2 | 4 = 6
-&ELF_text 00 00 00 00           # sh_addr
-%ELF_text>ELF_base 00 00 00 00  # sh_offset
-%ELF_data>ELF_text 00 00 00 00  # sh_size
-00 00 00 00                     # sh_link
-00 00 00 00                     # sh_info
-01 00 00 00 00 00 00 00         # sh_1?
-00 00 00 00 00 00 00 00         # sh_entsize
-
-:ELF_section_header_data
-%ELF_shstr__data>ELF_shstr      # sh_name
-01 00 00 00                     # sh_type = SHT_PROGBITS = 1
-03 00 00 00 00 00 00 00         # sh_flags = SHF-WRITE|SHF-ALLOC = 1 | 2 = 3
-&ELF_data 00 00 00 00           # sh_addr
-%ELF_data>ELF_base 00 00 00 00  # sh_offset
-%ELF_sym>ELF_data 00 00 00 00   # sh_size
-00 00 00 00                     # sh_link
-00 00 00 00                     # sh_info
-01 00 00 00 00 00 00 00         # sh_1?
-00 00 00 00 00 00 00 00         # sh_entsize
-
-:ELF_section_header_comment
-%ELF_shstr__comment>ELF_shstr   # sh_name
-01 00 00 00                     # sh_type = SHT_PROGBITS = 1
-00 00 00 00 00 00 00 00         # sh_flags
-&ELF_comment 00 00 00 00        # sh_addr
-%ELF_comment>ELF_base 00 00 00 00 # sh_offset
-%ELF_shstr>ELF_comment 00 00 00 00 # sh_size
-00 00 00 00                     # sh_link
-00 00 00 00                     # sh_info
-01 00 00 00 00 00 00 00         # sh_1?
-00 00 00 00 00 00 00 00         # sh_entsize
-
-:ELF_section_header_shstr
-%ELF_shstr__shstr>ELF_shstr     # sh_name
-03 00 00 00                     # sh_type: str-sht-strtab
-00 00 00 00 00 00 00 00         # sh_flags
-&ELF_shstr 00 00 00 00          # sh_addr
-%ELF_shstr>ELF_base 00 00 00 00 # sh_offset
-%ELF_section_headers>ELF_shstr 00 00 00 00 # sh_size
-00 00 00 00                     # sh_link
-00 00 00 00                     # sh_info
-01 00 00 00 00 00 00 00         # sh_1?
-00 00 00 00 00 00 00 00         # sh_entsize
-
-:ELF_section_header_sym
-%ELF_shstr__sym>ELF_shstr       # sh_name
-02 00 00 00                     # sh_type: str-sht-symtab
-00 00 00 00 00 00 00 00         # sh_flags
-&ELF_sym 00 00 00 00            # sh_addr
-%ELF_sym>ELF_base 00 00 00 00   # sh_offset
-%ELF_end>ELF_sym 00 00 00 00    # sh_size
-06 00 00 00                     # sh_link:6
-00 00 00 00                     # sh_info
-01 00 00 00 00 00 00 00         # sh_1?
-18 00 00 00 00 00 00 00         # sh_entsize
-
-:ELF_section_header_str
-%ELF_shstr__str>ELF_shstr       # sh_name
-03 00 00 00                     # sh_type: str-sht-strtab
-00 00 00 00 00 00 00 00         # sh_flags
-&ELF_str 00 00 00 00            # sh_addr
-%ELF_str>ELF_base 00 00 00 00   # sh_offset
-%ELF_sym>ELF_str 00 00 00 00    # sh_size
-00 00 00 00                     # sh_link
-00 00 00 00                     # sh_info
-01 00 00 00 00 00 00 00         # sh_1?
-00 00 00 00 00 00 00 00         # sh_entsize
-
-00 00 00 00  # align
-00 00 00 00
-
-00 00 00 00  # align
-00 00 00 00
-00 00 00 00
-00 00 00 00
 
 :ELF_text

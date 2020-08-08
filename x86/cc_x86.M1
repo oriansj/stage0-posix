@@ -4826,7 +4826,7 @@ Missing ;
 :type_function_name  "FUNCTION"
 
 :type_unsigned
-	%0                                          ; NEXT
+	&type_long                                  ; NEXT
 	%4                                          ; SIZE
 	%0                                          ; OFFSET
 	&type_unsigned                              ; INDIRECT
@@ -4835,6 +4835,15 @@ Missing ;
 	&type_unsigned_name                         ; NAME
 :type_unsigned_name  "unsigned"
 
+:type_long
+	%0                                          ; NEXT
+	%4                                          ; SIZE
+	%0                                          ; OFFSET
+	&type_long                                  ; INDIRECT
+	%0                                          ; MEMBERS
+	&type_long                                  ; TYPE
+	&type_long_name                             ; NAME
+:type_long_name  "long"
 
 ;; debug_list function
 ;; Receives struct token_list* in EAX

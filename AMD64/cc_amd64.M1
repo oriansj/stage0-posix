@@ -5239,7 +5239,7 @@ Missing ;
 "FUNCTION"
 
 :type_unsigned
-	NULL                                        ; NEXT
+	&type_long %0                               ; NEXT
 	%8 %0                                       ; SIZE
 	NULL                                        ; OFFSET
 	&type_unsigned %0                           ; INDIRECT
@@ -5249,6 +5249,16 @@ Missing ;
 :type_unsigned_name
 "unsigned"
 
+:type_long
+	NULL                                        ; NEXT
+	%8 %0                                       ; SIZE
+	NULL                                        ; OFFSET
+	&type_long %0                               ; INDIRECT
+	NULL                                        ; MEMBERS
+	&type_long %0                               ; TYPE
+	&type_long_name %0                          ; NAME
+:type_long_name
+"long"
 
 ;; debug_list function
 ;; Receives struct token_list* in RAX

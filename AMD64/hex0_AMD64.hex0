@@ -59,8 +59,8 @@
 00 00 60 00 00 00 00 00 ## p_vaddr
 00 00 60 00 00 00 00 00 ## p_physaddr
 
-AF 01 00 00 00 00 00 00 ## p_filesz
-AF 01 00 00 00 00 00 00 ## p_memsz
+95 01 00 00 00 00 00 00 ## p_filesz
+95 01 00 00 00 00 00 00 ## p_memsz
 
 01 00 00 00 00 00 00 00 ## Required alignment
 
@@ -73,15 +73,15 @@ AF 01 00 00 00 00 00 00 ## p_memsz
 	58                  ; POP_RAX         # Get the number of arguments
 	5F                  ; POP_RDI         # Get the program name
 	5F                  ; POP_RDI         # Get the actual input name
-	48C7C6 00000000     ; LOADI32_RSI %0  # prepare read_only
-	48C7C0 02000000     ; LOADI32_RAX %2  # the syscall number for open()
+	BE 00000000         ; LOADI32_ESI %0  # prepare read_only
+	B8 02000000         ; LOADI32_RAX %2  # the syscall number for open()
 	0F05                ; SYSCALL         # Now open that damn file
 	4989C1              ; COPY_RAX_to_R9  # Preserve the file pointer we were given
 
 	5F                  ; POP_RDI         # Get the actual output name
-	48C7C6 41020000     ; LOADI32_RSI %577 # Prepare file as O_WRONLY|O_CREAT|O_TRUNC
-	48C7C2 C0010000     ; LOADI32_RDX %448 # Prepare file as RWX for owner only (700 in octal)
-	48C7C0 02000000     ; LOADI32_RAX %2  # the syscall number for open()
+	BE 41020000         ; LOADI32_ESI %577 # Prepare file as O_WRONLY|O_CREAT|O_TRUNC
+	BA C0010000         ; LOADI32_EDX %448 # Prepare file as RWX for owner only (700 in octal)
+	B8 02000000         ; LOADI32_EAX %2  # the syscall number for open()
 	0F05                ; SYSCALL         # Now open that damn file
 	4989C2              ; COPY_RAX_to_R10 # Preserve the file pointer we were given
 
@@ -93,10 +93,10 @@ AF 01 00 00 00 00 00 00 ## p_memsz
 
 #:loop
 	# Read a byte
-	E8 C4000000       ; CALLI32 %read_byte
+	E8 BA000000         ; CALLI32 %read_byte
 
 	# process byte
-	E8 34000000       ; CALLI32 %hex
+	E8 34000000         ; CALLI32 %hex
 
 	# deal with -1 values
 	4883F8 00           ; CMP_RAX_Immediate8 !0
@@ -116,12 +116,12 @@ AF 01 00 00 00 00 00 00 ## p_memsz
 	# update the sum and store in output
 	49C1E6 04           ; SHL_R14_Immediate8 !4
 	4C01F0              ; ADD_RAX_R14
-	880425 7C016000     ; STORE8_al_Absolute32 &output
+	880425 68016000     ; STORE8_al_Absolute32 &output
 
 	# flip the toggle
 	49C7C7 FFFFFFFF     ; LOADI32_R15 %-1
 
-	E8 6E000000         ; CALLI32 %write_byte
+	E8 6A000000         ; CALLI32 %write_byte
 
 	EB C2               ; JMP8 !loop
 
@@ -163,7 +163,7 @@ AF 01 00 00 00 00 00 00 ## p_memsz
 
 #:purge_comment
 	# Read a byte
-	E8 54000000         ; CALLI32 %read_byte
+	E8 4A000000         ; CALLI32 %read_byte
 
 	# Loop if not LF
 	4883F8 0A           ; CMP_RAX_Immediate8 !10
@@ -192,16 +192,16 @@ AF 01 00 00 00 00 00 00 ## p_memsz
 
 #:Done
 	# program completed Successfully
-	48C7C7 00000000     ; LOADI32_RDI %0  # All is well
-	48C7C0 3C000000     ; LOADI32_RAX %60 # put the exit syscall number in rax
+	BF 00000000         ; LOADI32_EDI %0  # All is well
+	B8 3C000000         ; LOADI32_RAX %60 # put the exit syscall number in rax
 	0F05                ; SYSCALL         # Call it a good day
 
 #:write_byte
 	# Print our Hex
-	48C7C2 01000000     ; LOADI32_RDX %1  # set the size of chars we want
-	48C7C6 7C016000     ; LOADI32_RSI &output # What we are writing
+	BA 01000000         ; LOADI32_EDX %1  # set the size of chars we want
+	BE 68016000         ; LOADI32_ESI %output # What we are writing
 	4C89D7              ; COPY_R10_to_RDI # Where are we writing to
-	48C7C0 01000000     ; LOADI32_RAX %1  # the syscall number for write
+	B8 01000000         ; LOADI32_EAX %1  # the syscall number for write
 	0F05                ; SYSCALL         # call the Kernel
 	C3                  ; RET
 
@@ -212,17 +212,17 @@ AF 01 00 00 00 00 00 00 ## p_memsz
 
 #:read_byte
 	# Attempt to read 1 byte from STDIN
-	48C7C2 01000000     ; LOADI32_RDX %1  # set the size of chars we want
-	48C7C6 AB016000     ; LOADI32_RSI &input # Where to put it
+	BA 01000000         ; LOADI32_EDX %1  # set the size of chars we want
+	BE 91016000         ; LOADI32_RSI &input # Where to put it
 	4C89CF              ; COPY_R9_to_RDI  # Where are we reading from
-	48C7C0 00000000     ; LOADI32_RAX %0  # the syscall number for read
+	B8 00000000         ; LOADI32_EAX %0  # the syscall number for read
 	0F05                ; SYSCALL         # call the Kernel
 
 	4885C0              ; TEST_RAX_RAX    # check what we got
-	74 B2               ; JE8 !Done       # Got EOF call it done
+	74 C2               ; JE8 !Done       # Got EOF call it done
 
 	# load byte
-	8A0425 AB016000     ; LOAD8_al_Absolute32 &input # load char
+	8A0425 91016000     ; LOAD8_al_Absolute32 &input # load char
 	480FB6C0            ; MOVZBQ_RAX_AL   # We have to zero extend it to use it
 	C3                  ; RET
 

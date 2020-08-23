@@ -74,7 +74,7 @@
 	5F                  ; POP_RDI         # Get the program name
 	5F                  ; POP_RDI         # Get the actual input name
 	BE 00000000         ; LOADI32_ESI %0  # prepare read_only
-	B8 02000000         ; LOADI32_RAX %2  # the syscall number for open()
+	B8 02000000         ; LOADI32_EAX %2  # the syscall number for open()
 	0F05                ; SYSCALL         # Now open that damn file
 	4989C1              ; COPY_RAX_to_R9  # Preserve the file pointer we were given
 
@@ -213,7 +213,7 @@
 #:read_byte
 	# Attempt to read 1 byte from STDIN
 	BA 01000000         ; LOADI32_EDX %1  # set the size of chars we want
-	BE 91016000         ; LOADI32_RSI &input # Where to put it
+	BE 91016000         ; LOADI32_ESI &input # Where to put it
 	4C89CF              ; COPY_R9_to_RDI  # Where are we reading from
 	B8 00000000         ; LOADI32_EAX %0  # the syscall number for read
 	0F05                ; SYSCALL         # call the Kernel

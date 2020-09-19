@@ -26,3 +26,6 @@ temp1
 mes-footer.M1
 mes.M1
 mes.hex2
+
+# The files build in the NASM tests
+bin/*

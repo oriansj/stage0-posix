@@ -681,7 +681,7 @@ program_else:
 	call emit                   ; Emit it
 
 	mov rbx, rax                ; update globals_list
-	mov rax, program_string_1   ; "\nNOP\n"
+	mov rax, program_string_1   ; "\nNULL\n"
 	call emit                   ; Emit it
 	mov [globals_list], rax     ; update globals_list
 
@@ -712,7 +712,7 @@ program_done:
 
 ;; Strings needed by the program function
 program_string_0: db ":GLOBAL_", 0
-program_string_1: db 10, "NOP", 10, 0
+program_string_1: db 10, "NULL", 10, 0
 
 
 ;; declare_function function
@@ -4499,7 +4499,7 @@ type_function:
 type_function_name: db "FUNCTION", 0
 
 type_unsigned:
-	dq 0                        ; NEXT
+	dq type_long                ; NEXT
 	dq 8                        ; SIZE
 	dq 0                        ; OFFSET
 	dq type_unsigned            ; INDIRECT
@@ -4507,6 +4507,16 @@ type_unsigned:
 	dq type_unsigned            ; TYPE
 	dq type_unsigned_name       ; NAME
 type_unsigned_name: db "unsigned", 0
+
+type_long:
+	dq 0                        ; NEXT
+	dq 8                        ; SIZE
+	dq 0                        ; OFFSET
+	dq type_long                ; INDIRECT
+	dq 0                        ; MEMBERS
+	dq type_long                ; TYPE
+	dq type_long_name           ; NAME
+type_long_name: db "long", 0
 
 
 ;; debug_list function

@@ -38,7 +38,7 @@ _start:
 	call malloc                 ; Get current HEAP
 	mov rdi, rax                ; Using current
 	mov r12, rax                ; Setup MALLOC
-	add rdi, 81920              ; Create space for temp
+	add rdi, 8388608            ; Create space for temp [8MB]
 	call malloc                 ; Give ourselves 81920 bytes to work with
 
 	pop rax                     ; Get the number of arguments

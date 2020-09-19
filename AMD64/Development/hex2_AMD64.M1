@@ -113,7 +113,7 @@ DEFINE ZERO_EXTEND_BL 480FB6DB
 	CALLI32 %malloc             ; Get current HEAP
 	COPY_RAX_to_RDI             ; Using current
 	COPY_RAX_to_R12             ; Setup MALLOC
-	ADDI32_to_RDI %8192000      ; Create space for temp
+	ADDI32_to_RDI %8388608      ; Create space for temp [8MB]
 	CALLI32 %malloc             ; Give ourselves 8192000 bytes to work with
 
 	POP_RAX                     ; Get the number of arguments

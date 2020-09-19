@@ -84,7 +84,7 @@ CF 05 00 00 00 00 00 00 ## p_memsz
 	E8 %w                       ; CALLI32 %malloc             ; Get current HEAP
 	4889C7                      ; COPY_RAX_to_RDI             ; Using current
 	4989C4                      ; COPY_RAX_to_R12             ; Setup MALLOC
-	4881C7 00007D00             ; ADDI32_to_RDI %8192000      ; Create space for temp
+	4881C7 00008000             ; ADDI32_to_RDI %8388608      ; Create space for temp [8MB]
 	E8 %w                       ; CALLI32 %malloc             ; Give ourselves 8192000 bytes to work with
 
 	58                          ; POP_RAX                     ; Get the number of arguments

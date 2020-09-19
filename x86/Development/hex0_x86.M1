@@ -184,7 +184,7 @@ DEFINE TEST 85C0
 	RET
 
 :Read_byte
-	; Attempt to read 1 byte from STDIN
+	; Attempt to read 1 byte from Input file
 	LOADI32_EDX %1              ; set the size of chars we want
 	LOADI32_ECX &input          ; Where to put it
 	LOAD32_Absolute32_ebx &fin  ; Where are we reading from

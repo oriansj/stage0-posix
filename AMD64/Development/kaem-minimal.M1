@@ -1,0 +1,416 @@
+### Copyright (C) 2020 Jeremiah Orians
+### This file is part of stage0.
+###
+### stage0 is free software: you can redistribute it and/or modify
+### it under the terms of the GNU General Public License as published by
+### the Free Software Foundation, either version 3 of the License, or
+### (at your option) any later version.
+###
+### stage0 is distributed in the hope that it will be useful,
+### but WITHOUT ANY WARRANTY; without even the implied warranty of
+### MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+### GNU General Public License for more details.
+###
+### You should have received a copy of the GNU General Public License
+### along with stage0. If not, see <http://www.gnu.org/licenses/>.
+
+DEFINE ADDI8_RSI 4883C6
+DEFINE ADDI8_to_RDI 4883C7
+DEFINE ADD_RAX_to_RDI 4801C7
+DEFINE CALLI32 E8
+DEFINE CMPI8_RAX 4883F8
+DEFINE CMPI8_RDI 4883FF
+DEFINE CMP_RDI_to_RSI 4839FE
+DEFINE COPY_RAX_to_RDI 4889C7
+DEFINE COPY_RAX_to_RSI 4889C6
+DEFINE COPY_RBP_to_RDX 4889EA
+DEFINE COPY_RDI_to_RAX 4889F8
+DEFINE COPY_RDI_to_RSI 4889FE
+DEFINE COPY_RSP_to_RBP 4889E5
+DEFINE JE32 0F84
+DEFINE JE8 74
+DEFINE JL8 7C
+DEFINE JLE32 0F8E
+DEFINE JMP8 EB
+DEFINE JNE8 75
+DEFINE LEA_RSI 488D3424
+DEFINE LOAD64_RAX_from_ABS32 488B0425
+DEFINE LOAD64_RDI_from_ABS32 488B3C25
+DEFINE LOAD64_into_RAX_from_Address_RDI 488B07
+DEFINE LOAD64_into_RDI_from_Address_RDI 488B3F
+DEFINE LOAD8_into_AL_from_Address_RDI 8A07
+DEFINE LOADI32_EAX B8
+DEFINE LOADI32_EDI BF
+DEFINE LOADI32_EDX BA
+DEFINE LOADI32_ESI BE
+DEFINE LOADI32_RAX 48C7C0
+DEFINE POP_RAX 58
+DEFINE POP_RDI 5F
+DEFINE POP_RDX 5A
+DEFINE POP_RSI 5E
+DEFINE PUSH_RAX 50
+DEFINE PUSH_RDI 57
+DEFINE PUSH_RDX 52
+DEFINE PUSH_RSI 56
+DEFINE RETURN C3
+DEFINE STORE64_RAX_into_Address_RSI 488906
+DEFINE STORE64_from_RAX_into_ABS32 48890425
+DEFINE STORE64_from_RDI_into_ABS32 48893C25
+DEFINE STORE8_AL_into_Address_RSI 8806
+DEFINE SYSCALL 0F05
+DEFINE ZERO_EXTEND_AL 480FB6C0
+
+:_start
+	POP_RAX                             ; Get the number of arguments
+	POP_RDI                             ; Get the program name
+	POP_RDI                             ; Get the actual input name
+	CMPI8_RDI !0                        ; Check for missing output
+	JNE8 !_start_out                    ; Have real input
+	PUSH_RAX                            ; Need to adjust stack
+	LOADI32_EDI &default_file           ; Use "kaem.run"
+
+:_start_out
+	LOADI32_ESI %0                      ; prepare read_only
+	LOADI32_EAX %2                      ; the syscall number for open()
+	SYSCALL                             ; Now open that damn file
+
+	CMPI8_RAX !0                        ; IF NULL We couldn't open the file
+	JLE32 %Exit_Failure                 ; Abort hard
+	STORE64_from_RAX_into_ABS32 &script ; Set input pointer
+
+	POP_RAX                             ; Get start of envp
+	COPY_RSP_to_RBP                     ; Protect envp
+
+	LOADI32_EAX %12                     ; the Syscall # for SYS_BRK
+	LOADI32_EDI %0                      ; Get current brk
+	SYSCALL                             ; Let the kernel do the work
+	STORE64_from_RAX_into_ABS32 &MALLOC ; Set our malloc pointer
+
+	;; Where the main work gets done
+	;; Using RDI for tokens and RSI for tokens[i]
+:main_loop
+	LOAD64_RAX_from_ABS32 &max_args     ; Using 256 char* of space
+	CALLI32 %malloc                     ; get it
+	COPY_RAX_to_RDI                     ; set tokens
+
+	COPY_RDI_to_RSI                     ; I = 0
+	LOADI32_EAX %0                      ; Using 0
+	STORE64_from_RAX_into_ABS32 &status ; status = 0
+	STORE64_from_RAX_into_ABS32 &command_done   ; command_done = 0
+
+	;; Using RAX for result and RDI for tokens[i]
+:collect_command
+	CALLI32 %collect_token              ; Get another token
+	CMPI8_RAX !0                        ; if NULL == result
+	JE8 !collect_command_comment        ; It is a comment, don't store
+
+	STORE64_RAX_into_Address_RSI        ; tokens[i] = result
+	ADDI8_RSI !8                        ; i = i + 1 (adjusted for char* size)
+
+:collect_command_comment
+	LOAD64_RAX_from_ABS32 &command_done ; Using command_done
+	CMPI8_RAX !0                        ; IF 0 == command_done
+	JE8 !collect_command                ; keep looping
+
+	;; Deal with line comments
+	CMP_RDI_to_RSI                      ; if 0 < i
+	JE8 !main_loop                      ; It was a comment
+
+	CALLI32 %print_command              ; print the command
+	LOAD64_into_RAX_from_Address_RDI    ; program = tokens[0]
+	CMPI8_RAX !0                        ; IF NULL == program
+	JE8 !Exit_Failure                   ; Some shit went down, abort
+
+	PUSH_RDI                            ; Protect Tokens
+	LOADI32_EAX %57                     ; FORKing
+	SYSCALL                             ; int f = FORK()
+	POP_RDI                             ; Restore Tokens
+
+	CMPI8_RAX !0                        ; Check fork
+	JL8 !Exit_Failure                   ; IF f == -1 abort hard
+	JNE8 !collect_command_parent        ; IF f == 0 it is child
+
+	;; Deal with child case
+	LOADI32_EAX %59                     ; EXECVE
+	COPY_RBP_to_RDX                     ; third arg = envp
+	COPY_RDI_to_RSI                     ; second arg = tokens
+	LOAD64_into_RDI_from_Address_RDI    ; program = tokens[0]
+	SYSCALL                             ; execve(program, tokens, envp);
+	JMP8 !Exit_Failure                  ; return error
+
+:collect_command_parent
+	COPY_RAX_to_RDI                     ; first arg = f
+	LOADI32_ESI &status                 ; second arg = &status
+	LOADI32_EDX %0                      ; third arg = NULL
+	LOADI32_EAX %61                     ; WAITPID
+	SYSCALL                             ; wait4pid(f, &status, 0, 0); [r10 = 0]
+
+	LOAD64_RAX_from_ABS32 &status       ; Using status
+	CMPI8_RAX !0                        ; IF 0 == status
+	JE32 %main_loop                     ; Loop forever
+
+	;; Deal with very unhappy case
+	LOADI32_EAX &hard                   ; Using "Subprocess error\nABORTING HARD\n"
+	CALLI32 %File_Print                 ; Print it
+
+;; Exit_Failure function
+;; Receives nothing
+;; And aborts hard
+;; DOES NOT RETURN
+:Exit_Failure
+	LOADI32_EDI %1                      ; All is wrong
+	LOADI32_EAX %60                     ; put the exit syscall number in rax
+	SYSCALL                             ; Call it a bad day
+
+
+;; print_command function
+;; Recieves tokens[j] in RDI and tokens[i] in RSI
+;; Modifies RAX
+:print_command
+	PUSH_RDI                            ; Protect RDI
+	LOADI32_EAX &prefix                 ; using " +> "
+	CALLI32 %File_Print                 ; print it
+:print_command_loop
+	LOAD64_into_RAX_from_Address_RDI    ; using tokens[j]
+	CALLI32 %File_Print                 ; print it
+	ADDI8_to_RDI !8                     ; j = j + 1
+	LOADI32_EAX %32                     ; using ' '
+	CALLI32 %fputc                      ; print it
+	CMP_RDI_to_RSI                      ; IF j < i
+	JNE8 !print_command_loop            ; otherwise keep looping
+
+	LOADI32_EAX %10                     ; using '\n'
+	CALLI32 %fputc                      ; print it
+	POP_RDI                             ; Restore RDI
+	RETURN
+
+
+;; collect_token function
+;; Recieves nothing
+;; Overwrites RAX
+;; Uses RAX as C, RDI as token and RSI as token[i]
+:collect_token
+	PUSH_RDI                            ; Protect RDI
+	PUSH_RSI                            ; Protect RSI
+	LOAD64_RAX_from_ABS32 &max_string   ; Using max_string
+	CALLI32 %malloc                     ; allocate space
+	COPY_RAX_to_RDI                     ; token = malloc(max_string);
+	COPY_RAX_to_RSI                     ; i = 0; set token[i]
+
+:collect_token_loop
+	CALLI32 %fgetc                      ; c = fgetc(input);
+	CMPI8_RAX !-4                       ; if C == EOF
+	JE32 %Done                          ; We are done
+
+	CMPI8_RAX !32                       ; IF C == ' '
+	JE8 !collect_token_done             ; Space terminates token
+
+	CMPI8_RAX !9                        ; IF C == '\t'
+	JE8 !collect_token_done             ; tab terminates token
+
+	CMPI8_RAX !10                       ; IF C == '\n'
+	JNE8 !collect_token_string          ; otherwise check next
+
+	;; It is a newline
+	LOADI32_EAX %1                      ; Using 1
+	STORE64_from_RAX_into_ABS32 &command_done   ; Set command_done = TRUE
+	JMP8 !collect_token_done            ; Be done
+
+:collect_token_string
+	CMPI8_RAX !34                       ; IF C == '\"'
+	JNE8 !collect_token_comment         ; otherwise check next
+
+	;; It is a RAW STRING
+	CALLI32 %collect_string             ; Get the rest of the string
+	JMP8 !collect_token_done            ; Be done
+
+:collect_token_comment
+	CMPI8_RAX !35                       ; IF C == '#'
+	JNE8 !collect_token_escape          ; otherwise check next
+
+	;; It is a line comment
+	CALLI32 %collect_comment            ; Read it all
+	LOADI32_EAX %1                      ; Using 1
+	STORE64_from_RAX_into_ABS32 &command_done   ; Set command_done = TRUE
+	JMP8 !collect_token_done            ; Be done
+
+:collect_token_escape
+	CMPI8_RAX !92                       ; IF C == '\\'
+	JNE8 !collect_token_other           ; otherwise just store it
+
+	;; It is an escape char
+	CALLI32 %fgetc                      ; Read the char to drop
+	JMP8 !collect_token_done            ; Be done
+
+:collect_token_other
+	STORE8_AL_into_Address_RSI          ; token[i] = C
+	ADDI8_RSI !1                        ; i = i + 1
+	JMP8 !collect_token_loop            ; Keep going
+
+:collect_token_done
+	CMP_RDI_to_RSI                      ; IF i == 0
+	JNE8 !collect_token_good            ; otherwise return the token
+	LOADI32_EDI %0                      ; token = NULL
+
+:collect_token_good
+	COPY_RDI_to_RAX                     ; Return token
+	POP_RSI                             ; Restore RSI
+	POP_RDI                             ; Restore RDI
+	RETURN
+
+
+;; collect_string function
+;; Recieves target[index] in RSI
+;; Modifies RAX
+;; Uses RAX as C
+:collect_string
+	CALLI32 %fgetc                      ; C = fgetc(input)
+	CMPI8_RAX !-4                       ; if C == EOF
+	JE32 %Exit_Failure                  ; Something went horriably wrong
+
+	CMPI8_RAX !34                       ; IF C == '\"'
+	JE8 !collect_string_done            ; be done
+
+	;; deal with inside of string
+	STORE8_AL_into_Address_RSI          ; target[index] = C
+	ADDI8_RSI !1                        ; index = index + 1
+	JMP8 !collect_string                ; Keep going
+
+:collect_string_done
+	RETURN
+
+
+;; collect_comment function
+;; Recieves nothing
+;; Modifies RAX
+;; uses RAX as Int C
+;; Just throws away everything it reads
+:collect_comment
+	CALLI32 %fgetc                      ; C = fgetc(input)
+	CMPI8_RAX !-4                       ; IF C == EOF
+	JE32 %Exit_Failure                  ; abort hard
+
+	CMPI8_RAX !10                       ; IF C == '\n'
+	JNE8 !collect_comment               ; otherwise keep looping
+	RETURN
+
+
+;; Malloc isn't actually required if the program being built fits in the initial memory
+;; However, it doesn't take much to add it.
+;; Requires [MALLOC] to be initialized and RAX to have the number of desired bytes
+:malloc
+	PUSH_RDI                            ; Protect RDI
+	PUSH_RSI                            ; Protect RSI
+	PUSH_RDX                            ; Protect RDX
+	LOAD64_RDI_from_ABS32 &MALLOC       ; Using the current pointer
+	ADD_RAX_to_RDI                      ; Request the number of desired bytes
+	LOADI32_EAX %12                     ; the Syscall # for SYS_BRK
+	SYSCALL                             ; call the Kernel
+	LOAD64_RAX_from_ABS32 &MALLOC       ; Return pointer
+	STORE64_from_RDI_into_ABS32 &MALLOC ; Update pointer
+	POP_RDX                             ; Restore RDX
+	POP_RSI                             ; Restore RSI
+	POP_RDI                             ; Restore RDI
+	RETURN
+
+
+;; fgetc function
+;; Loads FILE* from [script]
+;; Returns -4 (EOF) or char in RAX
+:fgetc
+	PUSH_RDI                            ; Protect RDI
+	PUSH_RSI                            ; Protect RSI
+	PUSH_RDX                            ; Protect RDX
+	LOADI32_RAX %-4                     ; Put EOF in rax
+	PUSH_RAX                            ; Assume bad (If nothing read, value will remain EOF)
+	LEA_RSI                             ; Get stack address
+	LOAD64_RDI_from_ABS32 &script       ; Where are we reading from
+	LOADI32_EAX %0                      ; the syscall number for read
+	LOADI32_EDX %1                      ; set the size of chars we want
+	SYSCALL                             ; call the Kernel
+	POP_RAX                             ; Get either char or EOF
+	CMPI8_RAX !-4                       ; Check for EOF
+	JE8 !fgetc_done                     ; Return as is
+	ZERO_EXTEND_AL                      ; Make it useful
+:fgetc_done
+	POP_RDX                             ; Restore RDX
+	POP_RSI                             ; Restore RSI
+	POP_RDI                             ; Restore RDI
+	RETURN
+
+
+;; File_Print function
+;; Receives CHAR* in RAX
+;; calls fputc for every non-null char
+:File_Print
+	PUSH_RDI                            ; Protect RDI
+	PUSH_RSI                            ; Protect RSI
+	COPY_RAX_to_RDI                     ; Protect S
+	CMPI8_RAX !0                        ; Protect against nulls
+	JE8 !File_Print_Done                ; Simply don't try to print them
+:File_Print_Loop
+	LOAD8_into_AL_from_Address_RDI      ; Read byte
+	ZERO_EXTEND_AL                      ; zero extend
+	CMPI8_RAX !0                        ; Check for NULL
+	JE8 !File_Print_Done                ; Stop at NULL
+
+	CALLI32 %fputc                      ; write it
+	ADDI8_to_RDI !1                     ; S = S + 1
+	JMP8 !File_Print_Loop               ; Keep going
+
+:File_Print_Done
+	POP_RSI                             ; Restore RSI
+	POP_RDI                             ; Restore RDI
+	RETURN
+
+
+;; fputc function
+;; receives CHAR in RAX and load FILE* from stdout
+;; writes char and returns
+:fputc
+	PUSH_RDI                            ; Protect RDI
+	PUSH_RSI                            ; Protect RSI
+	PUSH_RDX                            ; Protect RDX
+	PUSH_RAX                            ; We are writing rax
+	LEA_RSI                             ; Get stack address
+	LOADI32_EDI %1                      ; Write to target file
+	LOADI32_EAX %1                      ; the syscall number for write
+	LOADI32_EDX %1                      ; set the size of chars we want
+	SYSCALL                             ; call the Kernel
+	POP_RAX                             ; Restore stack
+	POP_RDX                             ; Restore RDX
+	POP_RSI                             ; Restore RSI
+	POP_RDI                             ; Restore RDI
+	RETURN
+
+
+:Done
+	; program completed Successfully
+	LOADI32_EDI %0                      ; All is well
+	LOADI32_EAX %60                     ; put the exit syscall number in rax
+	SYSCALL                             ; Call it a good day
+
+:default_file
+	"kaem.run"
+:prefix
+	" +> "
+:hard
+"Subprocess error
+ABORTING HARD
+"
+:script
+%0 %0
+:tokens
+%0 %0
+:command_done
+%0 %0
+:max_args
+%2048 %0
+:max_string
+%4096 %0
+:MALLOC
+%0 %0
+:status
+%0 %0
+
+:ELF_end

@@ -37,5 +37,5 @@
 #########################################
 # Phase-0b Build minimal kaem from hex0 #
 #########################################
-./hex0 ../../bootstrap-seeds/kaem-optional-seed.hex0 kaem-0
+./hex0 kaem-minimal.hex0 kaem-0
 # for checksum validation reasons

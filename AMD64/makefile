@@ -47,12 +47,16 @@ cc_amd64-nasm: NASM/cc_amd64.S | bin
 	nasm -felf64 NASM/cc_amd64.S -o bin/cc_amd64.o
 	ld -melf_x86_64 bin/cc_amd64.o -o bin/cc_amd64-nasm
 
+kaem-nasm: NASM/kaem-minimal.S | bin
+	nasm -felf64 NASM/kaem-minimal.S -o bin/kaem.o
+	ld -melf_x86_64 bin/kaem.o -o bin/kaem-nasm
+
 # make pieces from the NASM pieces
 hex0: hex0-nasm
 	./bin/hex0-nasm hex0_AMD64.hex0 hex0
 
 kaem-0: hex0-nasm
-	./bin/hex0-nasm ../../bootstrap-seeds/kaem-optional-seed.hex0 kaem-0
+	./bin/hex0-nasm kaem-minimal.hex0 kaem-0
 
 hex1: hex0-nasm
 	./bin/hex0-nasm hex1_AMD64.hex0 hex1

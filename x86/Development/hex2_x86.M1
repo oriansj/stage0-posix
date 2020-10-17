@@ -107,7 +107,7 @@ DEFINE TEST 85C0
 	CALL32 %malloc              ; Get current HEAP
 	COPY_EAX_to_EBX             ; Using current
 	COPY_EAX_to_EBP             ; Setup MALLOC
-	ADDI32_EBX %8192000         ; Create space for temp
+	ADDI32_EBX %12582912        ; Create space for temp [12M]
 	CALL32 %malloc              ; Give ourselves 8192000 bytes to work with
 
 	POP_EAX                     ; Get the number of arguments

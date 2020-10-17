@@ -88,3 +88,6 @@ all: M2 cc_x86 M0 hex2-0 catm hex1 hex0 kaem-0
 
 test: all
 	sha256sum -c SHA256SUMS
+
+Generate_test_answers: all
+	sha256sum catm cc_x86 hex0 hex1 hex2-0 kaem-0 M0 M2 >| SHA256SUMS

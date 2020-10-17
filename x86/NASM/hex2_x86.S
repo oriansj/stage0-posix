@@ -36,7 +36,7 @@ _start:
 	call malloc                 ; Get current HEAP
 	mov ebx, eax                ; Using current
 	mov ebp, eax                ; Setup MALLOC
-	add ebx, 8192000            ; Create space for temp
+	add ebx, 12582912           ; Create space for temp [12M]
 	call malloc                 ; Give ourselves 8192000 bytes to work with
 
 	pop eax                     ; Get the number of arguments

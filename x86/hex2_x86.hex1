@@ -79,7 +79,7 @@
 	E8 %x                       ; CALL32 %malloc              ; Get current HEAP
 	89C3                        ; COPY_EAX_to_EBX             ; Using current
 	89C5                        ; COPY_EAX_to_EBP             ; Setup MALLOC
-	81C3 00007D00               ; ADDI32_EBX %8192000         ; Create space for temp
+	81C3 0000C000               ; ADDI32_EBX %12582912        ; Create space for temp [12M]
 	E8 %x                       ; CALL32 %malloc              ; Give ourselves 8192000 bytes to work with
 
 	58                          ; POP_EAX                     ; Get the number of arguments

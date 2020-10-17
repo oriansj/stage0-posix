@@ -27,8 +27,8 @@
 01                              # e_ident[EI_DATA] Indicating little endianness
 01                              # e_ident[EI_VERSION] Indicating original elf
 
-00                              # e_ident[EI_OSABI] Set at 0 because none cares
-00                              # e_ident[EI_ABIVERSION] See above
+03                              # e_ident[EI_OSABI] Set at 3 because FreeBSD is strict
+00                              # e_ident[EI_ABIVERSION] Set at 0 because none cares
 
 00 00 00 00 00 00 00            # e_ident[EI_PAD]
 

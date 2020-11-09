@@ -79,6 +79,7 @@
 	../M2-Planet/functions/number_pack.c \
 	../M2-Planet/functions/string.c \
 	../M2-Planet/functions/require.c \
+	../M2-Planet/functions/fixup.c \
 	../M2-Planet/cc.h \
 	../M2-Planet/cc_reader.c \
 	../M2-Planet/cc_strings.c \

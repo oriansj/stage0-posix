@@ -87,6 +87,7 @@
 	-f ../M2-Planet/functions/number_pack.c \
 	-f ../M2-Planet/functions/string.c \
 	-f ../M2-Planet/functions/require.c \
+	-f ../M2-Planet/test/common_amd64/functions/fixup.c \
 	-f ../M2-Planet/cc.h \
 	-f ../M2-Planet/cc_reader.c \
 	-f ../M2-Planet/cc_strings.c \

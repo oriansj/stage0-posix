@@ -77,7 +77,7 @@ cc_x86: hex2-nasm catm-nasm M0-nasm
 	./bin/hex2-nasm hold cc_x86
 
 M2: hex2-nasm catm-nasm M0-nasm cc_x86-nasm
-	./bin/catm-nasm hold ../M2-Planet/test/common_x86/functions/file.c ../M2-Planet/test/common_x86/functions/malloc.c ../M2-Planet/functions/calloc.c ../M2-Planet/test/common_x86/functions/exit.c ../M2-Planet/functions/match.c ../M2-Planet/functions/in_set.c ../M2-Planet/functions/numerate_number.c ../M2-Planet/functions/file_print.c ../M2-Planet/functions/number_pack.c ../M2-Planet/functions/string.c ../M2-Planet/functions/require.c ../M2-Planet/functions/fixup.c ../M2-Planet/cc.h ../M2-Planet/cc_reader.c ../M2-Planet/cc_strings.c ../M2-Planet/cc_types.c ../M2-Planet/cc_core.c ../M2-Planet/cc.c
+	./bin/catm-nasm hold ../M2-Planet/test/common_x86/functions/file.c ../M2-Planet/test/common_x86/functions/malloc.c ../M2-Planet/functions/calloc.c ../M2-Planet/test/common_x86/functions/exit.c ../M2-Planet/functions/match.c ../M2-Planet/functions/in_set.c ../M2-Planet/functions/numerate_number.c ../M2-Planet/functions/file_print.c ../M2-Planet/functions/number_pack.c ../M2-Planet/functions/string.c ../M2-Planet/functions/require.c ../M2-Planet/functions/fixup.c ../M2-Planet/cc.h ../M2-Planet/cc_globals.c ../M2-Planet/cc_reader.c ../M2-Planet/cc_strings.c ../M2-Planet/cc_types.c ../M2-Planet/cc_core.c ../M2-Planet/cc.c
 	./bin/cc_x86-nasm hold M2.M1
 	./bin/catm-nasm hold x86_defs.M1 libc-core.M1 M2.M1
 	./bin/M0-nasm hold temp1

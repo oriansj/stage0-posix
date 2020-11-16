@@ -81,6 +81,7 @@
 	../M2-Planet/functions/require.c \
 	../M2-Planet/functions/fixup.c \
 	../M2-Planet/cc.h \
+	../M2-Planet/cc_globals.c \
 	../M2-Planet/cc_reader.c \
 	../M2-Planet/cc_strings.c \
 	../M2-Planet/cc_types.c \

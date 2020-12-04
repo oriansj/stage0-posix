@@ -200,14 +200,14 @@ DEFINE RBRANCH 17
 :purge_comment
     PUSH_LR                     # push lr
 
-:loop0
+:purge_comment_loop
     # Read a byte
     ^~Read_byte CALL
 
     # Loop if not LF
     CMP_X0_TO_10
     SKIP_INST_EQ
-    ^~loop0 RBRANCH
+    ^~purge_comment_loop RBRANCH
 
     # Otherwise return -1
     SET_X0_TO_MINUS_1

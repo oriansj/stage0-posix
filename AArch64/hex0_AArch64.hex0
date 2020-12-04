@@ -175,14 +175,14 @@ B7 00              ## e_machine Indicating AArch64
 #:purge_comment
     FE0F1FF8                    ; PUSH_LR                     # push lr
 
-#:loop0
+#:purge_comment_loop
     # Read a byte
-    1A0000 94              ; ^~Read_byte CALL
+    1A0000 94                   ; ^~Read_byte CALL
 
     # Loop if not LF
     1F2800F1                    ; CMP_X0_TO_10
     40000054                    ; SKIP_INST_EQ
-    FDFFFF 17                   ; ^~loop0 RBRANCH
+    FDFFFF 17                   ; ^~purge_comment_loop RBRANCH
 
     # Otherwise return -1
     00008092                    ; SET_X0_TO_MINUS_1

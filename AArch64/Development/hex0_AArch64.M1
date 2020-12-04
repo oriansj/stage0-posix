@@ -269,6 +269,8 @@ DEFINE RBRANCH 17
     LDR_BYTE_W0_[X0]            # load char, unsigned so zero-extended already
     RETURN
 
+
+:ELF_data
 # Where we are putting our output
 :output
     # Reserve a byte
@@ -280,3 +282,5 @@ DEFINE RBRANCH 17
     NULL8
 
 :ELF_end
+:ELF_sym
+:ELF_str

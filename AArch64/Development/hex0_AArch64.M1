@@ -260,7 +260,7 @@ DEFINE RBRANCH 17
 
     CMP_X0_TO_0                 # Got EOF call it done
     SKIP_INST_NE
-    ^~Done BRANCH
+    ^~Done RBRANCH
 
     # load byte
     LOAD_W0_AHEAD

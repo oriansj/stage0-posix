@@ -33,7 +33,7 @@
 B7 00              ## e_machine Indicating AArch64
 01 00 00 00        ## e_version Indicating original elf
 
-78 00 40 00 00 00 00 00 ## e_entry Address of the entry point (Number of bytes this header is + Base Address)
+78 00 60 00 00 00 00 00 ## e_entry Address of the entry point (Number of bytes this header is + Base Address)
 40 00 00 00 00 00 00 00 ## e_phoff Address of program header table
 00 00 00 00 00 00 00 00 ## e_shoff Address of section header table
 
@@ -54,8 +54,8 @@ B7 00              ## e_machine Indicating AArch64
 07 00 00 00             ## Flags
 00 00 00 00 00 00 00 00 ## p_offset
 
-00 00 40 00 00 00 00 00 ## p_vaddr
-00 00 40 00 00 00 00 00 ## p_physaddr
+00 00 60 00 00 00 00 00 ## p_vaddr
+00 00 60 00 00 00 00 00 ## p_physaddr
 
 0E 02 00 00 00 00 00 00 ## p_filesz
 0E 02 00 00 00 00 00 00 ## p_memsz
@@ -118,7 +118,7 @@ B7 00              ## e_machine Indicating AArch64
     00100E8B                    ; ADD_X0_X0_X14_LSL4
     41000018                    ; LOAD_W1_AHEAD
     02000014                    ; SKIP_32_DATA
-    0C02 4000                   ; $output DATA_OFFSET 40 00
+    0C02 6000                   ; $output DATA_OFFSET 40 00
     20000039                    ; STR_BYTE_W0_[X1]
 
     # flip the toggle
@@ -217,7 +217,7 @@ B7 00              ## e_machine Indicating AArch64
     E0030AAA                    ; SET_X0_FROM_X10             # Where are we writing to
     41000018                    ; LOAD_W1_AHEAD               # What we are writing
     02000014                    ; SKIP_32_DATA
-    0C02 4000                   ; $output DATA_OFFSET
+    0C02 6000                   ; $output DATA_OFFSET
     220080D2                    ; SET_X2_TO_1                 # set the size of chars we want
     080880D2                    ; SET_X8_TO_SYS_WRITE         # the syscall number for write
     010000d4                    ; SYSCALL                     # call the Kernel
@@ -228,7 +228,7 @@ B7 00              ## e_machine Indicating AArch64
     E00309AA                    ; SET_X0_FROM_X9              # Where are we reading from
     41000018                    ; LOAD_W1_AHEAD               # Where to put it
     02000014                    ; SKIP_32_DATA
-    0D02 4000                   ; $input DATA_OFFSET
+    0D02 6000                   ; $input DATA_OFFSET
     220080D2                    ; SET_X2_TO_1                 # set the size of chars we want
     E80780D2                    ; SET_X8_TO_SYS_READ          # the syscall number for read
     010000D4                    ; SYSCALL                     # call the Kernel
@@ -240,7 +240,7 @@ B7 00              ## e_machine Indicating AArch64
     # load byte
     40000098                    ; LOAD_W0_AHEAD
     02000014                    ; SKIP_32_DATA
-    0D02 4000                   ; $input DATA_OFFSET
+    0D02 6000                   ; $input DATA_OFFSET
     00004039                    ; LDR_BYTE_W0_[X0]            # load char, unsigned so zero-extended already
     C0035FD6                    ; RETURN
 

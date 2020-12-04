@@ -25,10 +25,10 @@
 01                 ## e_ident[EI_DATA] Indicating little endianness
 01                 ## e_ident[EI_VERSION] Indicating original elf
 
-00                 ## e_ident[EI_OSABI] Set at 0 because none cares
+03                 ## e_ident[EI_OSABI] Set at 0 because none cares
 00                 ## e_ident[EI_ABIVERSION] See above
 
-00 00 40 00 00 00 00 ## e_ident[EI_PAD]
+00 00 00 00 00 00 00 ## e_ident[EI_PAD]
 02 00              ## e_type Indicating Executable
 B7 00              ## e_machine Indicating AArch64
 01 00 00 00        ## e_version Indicating original elf
@@ -51,7 +51,7 @@ B7 00              ## e_machine Indicating AArch64
 ## Program Header
 #:ELF_program_headers
 01 00 00 00             ## p_type
-06 00 00 00             ## Flags
+07 00 00 00             ## Flags
 00 00 00 00 00 00 00 00 ## p_offset
 
 00 00 40 00 00 00 00 00 ## p_vaddr

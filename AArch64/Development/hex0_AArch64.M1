@@ -89,8 +89,6 @@ DEFINE CALL 94
 DEFINE BRANCH 14
 DEFINE RBRANCH 17
 
-DEFINE DATA_OFFSET 4000
-
 # Where the ELF Header is going to hit
 # Simply jump to _start
 # Our main function
@@ -145,7 +143,7 @@ DEFINE DATA_OFFSET 4000
     ADD_X0_X0_X14_LSL4
     LOAD_W1_AHEAD
     SKIP_32_DATA
-    $output DATA_OFFSET
+    &output
     STR_BYTE_W0_[X1]
 
     # flip the toggle
@@ -244,7 +242,7 @@ DEFINE DATA_OFFSET 4000
     SET_X0_FROM_X10             # Where are we writing to
     LOAD_W1_AHEAD               # What we are writing
     SKIP_32_DATA
-    $output DATA_OFFSET
+    &output
     SET_X2_TO_1                 # set the size of chars we want
     SET_X8_TO_SYS_WRITE         # the syscall number for write
     SYSCALL                     # call the Kernel
@@ -255,7 +253,7 @@ DEFINE DATA_OFFSET 4000
     SET_X0_FROM_X9              # Where are we reading from
     LOAD_W1_AHEAD               # Where to put it
     SKIP_32_DATA
-    $input DATA_OFFSET
+    &input
     SET_X2_TO_1                 # set the size of chars we want
     SET_X8_TO_SYS_READ          # the syscall number for read
     SYSCALL                     # call the Kernel
@@ -267,7 +265,7 @@ DEFINE DATA_OFFSET 4000
     # load byte
     LOAD_W0_AHEAD
     SKIP_32_DATA
-    $input DATA_OFFSET
+    &input
     LDR_BYTE_W0_[X0]            # load char, unsigned so zero-extended already
     RETURN
 

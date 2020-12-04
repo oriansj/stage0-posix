@@ -342,7 +342,7 @@ $ELF_base 40 00 00 00 00 00                     # ph_physaddr
     E0030AAA                    ; SET_X0_FROM_X10             # Where are we writing to
     41000018                    ; LOAD_W1_AHEAD               # What we are writing
     02000014                    ; SKIP_32_DATA
-    $output 40 00
+    &output
     220080D2                    ; SET_X2_TO_1                 # set the size of chars we want
     080880D2                    ; SET_X8_TO_SYS_WRITE         # the syscall number for write
     010000d4                    ; SYSCALL                     # call the Kernel
@@ -353,7 +353,7 @@ $ELF_base 40 00 00 00 00 00                     # ph_physaddr
     E00309AA                    ; SET_X0_FROM_X9              # Where are we reading from
     41000018                    ; LOAD_W1_AHEAD               # Where to put it
     02000014                    ; SKIP_32_DATA
-    $input 40 00
+    &input
     220080D2                    ; SET_X2_TO_1                 # set the size of chars we want
     E80780D2                    ; SET_X8_TO_SYS_READ          # the syscall number for read
     010000D4                    ; SYSCALL                     # call the Kernel
@@ -365,7 +365,7 @@ $ELF_base 40 00 00 00 00 00                     # ph_physaddr
     # load byte
     40000098                    ; LOAD_W0_AHEAD
     02000014                    ; SKIP_32_DATA
-    $input 40 00
+    &input
     00004039                    ; LDR_BYTE_W0_[X0]            # load char, unsigned so zero-extended already
     C0035FD6                    ; RETURN
 

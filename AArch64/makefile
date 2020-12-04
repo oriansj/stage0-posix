@@ -22,7 +22,7 @@ bin:
 	mkdir -p bin
 
 # make the GAS pieces
-hex0-gas: GAS/hex0_AArch64.S | bin
+bin/hex0-gas: GAS/hex0_AArch64.S | bin
 	as GAS/hex0_AArch64.S -o bin/hex0.o
 	ld bin/hex0.o -o bin/hex0-gas
 

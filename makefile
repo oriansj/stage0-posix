@@ -18,12 +18,11 @@
 # along with Mes.  If not, see <http://www.gnu.org/licenses/>.
 
 arch ?= x86
-KAEM ?= $(PWD)/../bootstrap-seeds/kaem-optional-seed
 PACKAGE = mescc-tools-seed
 
 .PHONY: all
 all:
-	cd $(arch) && $(KAEM)
+	cd $(arch) && ../bootstrap-seeds/POSIX/$(arch)/kaem-optional-seed
 
 Generate-x86-answers:
 	sha256sum bin/* >| x86.answers
@@ -36,11 +35,11 @@ clean:
 	git clean -xdf
 
 test-x86:
-	cd x86 && $(KAEM)
+	cd x86 && ../bootstrap-seeds/POSIX/AMD64/kaem-optional-seed
 	sha256sum -c x86.answers
 
 test-amd64:
-	cd AMD64 && $(KAEM)
+	cd AMD64 && ../bootstrap-seeds/POSIX/x86/kaem-optional-seed
 	sha256sum -c amd64.answers
 
 ###  dist

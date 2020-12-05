@@ -1,0 +1,130 @@
+## Copyright (C) 2019 Jeremiah Orians
+## Copyright (C) 2020 Sanne Wouda
+## This file is part of stage0.
+##
+## stage0 is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## stage0 is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with stage0.  If not, see <http://www.gnu.org/licenses/>.
+
+
+    # Register usage:
+    # X15 => OUTPUT
+    # X14 => Buffer
+    # X13 => INPUT
+
+
+## ELF Header
+
+#:ELF_base
+
+7F 45 4C 46                    # e_ident[EI_MAG0-3] ELF's magic number
+
+02                             # e_ident[EI_CLASS] Indicating 64 bit
+01                             # e_ident[EI_DATA] Indicating little endianness
+01                             # e_ident[EI_VERSION] Indicating original elf
+
+03                             # e_ident[EI_OSABI] Set at 3 because FreeBSD is strict
+00                             # e_ident[EI_ABIVERSION] Set at 0 because noone cares
+
+00 00 00 00 00 00 00           # e_ident[EI_PAD]
+02 00                          # e_type Indicating Executable
+B7 00                          # e_machine Indicating AArch64
+01 00 00 00                    # e_version Indicating original elf
+
+&t 00 00 00 00          # e_entry Address of the entry point
+40 00 00 00 00 00 00 00 # e_phoff Address of program header table
+00 00 00 00 00 00 00 00 # e_shoff Address of section header table
+
+00 00 00 00                    # e_flags
+40 00                          # e_ehsize Indicating our 64 Byte header
+
+38 00                          # e_phentsize size of a program header table
+01 00                          # e_phnum number of entries in program table
+
+00 00                          # e_shentsize size of a section header table
+00 00                          # e_shnum number of entries in section table
+
+00 00                          # e_shstrndx index of the section names
+
+:p #:ELF_program_headers
+#:ELF_program_header__text
+01 00 00 00                   # ph_type: PT-LOAD = 1
+07 00 00 00                   # ph_flags: PF-X|PF-W|PF-R = 7
+00 00 00 00 00 00 00 00                   # ph_offset
+00 00 60 00 00 00 00 00                     # ph_vaddr
+00 00 60 00 00 00 00 00                     # ph_physaddr
+24 01 00 00 00 00 00 00             # ph_filesz
+24 01 00 00 00 00 00 00             # ph_memsz
+01 00 00 00 00 00 00 00                   # ph_align
+
+:t #:ELF_text
+
+# Where the ELF Header is going to hit
+# Simply jump to _start
+# Our main function
+#:_start
+    e10f41f8              ; LDR_X1_[SP,16]_WB           # Get the actual output name
+    600c8092              ; SET_X0_TO_FCNTL_H_AT_FDCWD  # AT_FDCWD, relative to current working directory
+    224880d2              ; SET_X2_TO_577               # Prepare file as O_WRONLY|O_CREAT|O_TRUNC
+    033080d2              ; SET_X3_TO_384               # Prepare file as RW for owner only (600 in octal)
+    080780d2              ; SET_X8_TO_SYS_OPENAT        # The syscall number for openat(), aarch64 has no open()
+    010000d4              ; SYSCALL                     # Now open that file
+    ef0300aa              ; SET_X15_FROM_X0             # Preserve the file pointer we were given
+
+    c81a80d2              ; SET_X8_TO_SYS_BRK           # the Syscall # for SYS_BRK
+    000080d2              ; SET_X0_TO_0                 # Get current brk
+    010000d4              ; SYSCALL                     # Let the kernel do the work
+    ee0300aa              ; SET_X14_FROM_X0             # Set our malloc pointer
+
+    c81a80d2              ; SET_X8_TO_SYS_BRK           # the Syscall # for SYS_BRK
+    e0030eaa              ; SET_X0_FROM_X14             # Using current pointer
+    00004491              ; ADD_X0_X0_0x100000          # Allocate 1MB
+    010000d4              ; SYSCALL                     # Let the kernel do the work
+
+    e4030091              ; SET_X4_FROM_SP
+:c
+    818c40f8              ; LDR_X1_[X4,8]_WB            # Get the actual input name
+    3f0000f1              ; CMP_X1_TO_0                 # Check for null string
+    41000054              ; SKIP_INST_NE                # Hit null be done
+    ^~d 14                ; ^~done FBRANCH
+
+    600c8092              ; SET_X0_TO_FCNTL_H_AT_FDCWD  # AT_FDCWD, relative to current working directory
+    020080d2              ; SET_X2_TO_0                 # prepare read_only
+    030080d2              ; SET_X3_TO_0                 # prevent any interactions
+    080780d2              ; SET_X8_TO_SYS_OPENAT        # The syscall number for openat(), aarch64 has no open()
+    010000d4              ; SYSCALL                     # Open file!
+    ed0300aa              ; SET_X13_FROM_X0             # Protect INPUT
+:k
+    0202a0d2              ; SET_X2_TO_0x100000          # set the size of chars we want
+    e1030eaa              ; SET_X1_FROM_X14             # Where to put it
+    e0030daa              ; SET_X0_FROM_X13             # Where are we reading from
+    e80780d2              ; SET_X8_TO_SYS_READ          # the syscall number for read
+    010000d4              ; SYSCALL                     # call the Kernel
+
+    e20300aa              ; SET_X2_FROM_X0              # Number of bytes to write
+    e1030eaa              ; SET_X1_FROM_X14             # What we are writing
+    e0030faa              ; SET_X0_FROM_X15             # Write to target file
+    080880d2              ; SET_X8_TO_SYS_WRITE         # the syscall number for write
+    010000d4              ; SYSCALL                     # call the Kernel
+
+    1f0044f1              ; CMP_X0_TO_0x100000          # Check if buffer was fully used
+    41000054              ; SKIP_INST_NE                # Keep looping if was full
+    ^~k 17                ; ^~keep RBRANCH
+    ^~c 17                ; ^~core RBRANCH              # Otherwise move to next file
+
+:d
+    # program completed Successfully
+    000080d2              ; SET_X0_TO_0                 # All is well
+    a80b80d2              ; SET_X8_TO_SYS_EXIT          # put the exit syscall number in eax
+    010000d4              ; SYSCALL                     # Call it a good day
+
+:e

@@ -1,0 +1,286 @@
+## Copyright (C) 2017 Jeremiah Orians
+## Copyright (C) 2020 Sanne Wouda
+## This file is part of stage0.
+##
+## stage0 is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## stage0 is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with stage0.  If not, see <http://www.gnu.org/licenses/>.
+
+DEFINE NULL8 00
+
+DEFINE PUSH_LR fe0f1ff8
+DEFINE POP_LR fe0741f8
+
+DEFINE BLR_X16 00023fd6
+DEFINE BR_X16 00021fd6
+DEFINE RETURN c0035fd6
+
+DEFINE CBNZ_X0_PAST_BR a00000b5
+
+DEFINE CMP_X0_TO_0   1f0000f1
+DEFINE CMP_X0_TO_10  1f2800f1
+DEFINE CMP_X0_TO_35  1f8c00f1
+DEFINE CMP_X0_TO_48  1fc000f1
+DEFINE CMP_X0_TO_58  1fe800f1
+DEFINE CMP_X0_TO_59  1fec00f1
+DEFINE CMP_X0_TO_65  1f0401f1
+DEFINE CMP_X0_TO_71  1f1c01f1
+DEFINE CMP_X0_TO_97  1f8401f1
+DEFINE CMP_X0_TO_103 1f9c01f1
+DEFINE CMP_X15_TO_0 ff0100f1
+
+DEFINE SET_X0_FROM_X9 e00309aa
+DEFINE SET_X0_FROM_X10 e0030aaa
+DEFINE SET_X2_FROM_X0 e20300aa
+DEFINE SET_X3_FROM_X0 e30300aa
+DEFINE SET_X9_FROM_X0 e90300aa
+DEFINE SET_X10_FROM_X0 ea0300aa
+DEFINE SET_X14_FROM_X0 ee0300aa
+
+DEFINE SET_X0_TO_0 000080d2
+DEFINE SET_X0_TO_MINUS_1 00008092
+DEFINE SET_X2_TO_0 020080d2
+DEFINE SET_X2_TO_1 220080d2
+DEFINE SET_X2_TO_577 224880d2
+DEFINE SET_X3_TO_448 033880d2
+DEFINE SET_X14_TO_0 0e0080d2
+DEFINE SET_X15_TO_0 0f0080d2
+DEFINE SET_X15_TO_MINUS_1 0f008092
+DEFINE SET_X0_TO_FCNTL_H_AT_FDCWD 600c8092
+
+DEFINE SKIP_INST_EQ 40000054
+DEFINE SKIP_INST_GE 4a000054
+DEFINE SKIP_INST_LT 4b000054
+DEFINE SKIP_INST_NE 41000054
+
+DEFINE SKIP_32_DATA 02000014
+
+DEFINE LOAD_W0_AHEAD 40000098
+DEFINE LOAD_W1_AHEAD 41000018
+DEFINE LOAD_W16_AHEAD 50000018
+
+DEFINE LDR_X1_[SP,16] e10b40f9
+DEFINE LDR_X1_[SP,24] e10f40f9
+DEFINE LDR_BYTE_W0_[X0] 00004039
+DEFINE STR_BYTE_W0_[X1] 20000039
+
+DEFINE ADD_X0_X0_X14_LSL4 00100e8b
+
+DEFINE SUB_X0_48 00c000d1
+DEFINE SUB_X0_55 00dc00d1
+DEFINE SUB_X0_87 005c01d1
+
+DEFINE SET_X8_TO_SYS_EXIT a80b80d2
+DEFINE SET_X8_TO_SYS_OPENAT 080780d2
+DEFINE SET_X8_TO_SYS_READ e80780d2
+DEFINE SET_X8_TO_SYS_WRITE 080880d2
+DEFINE SYSCALL 010000d4
+
+DEFINE CALL 94
+DEFINE BRANCH 14
+DEFINE RBRANCH 17
+
+# Where the ELF Header is going to hit
+# Simply jump to _start
+# Our main function
+:_start
+    LDR_X1_[SP,16]              # Get the actual input name
+    SET_X0_TO_FCNTL_H_AT_FDCWD  # AT_FDCWD, relative to current working directory
+    SET_X2_TO_0                 # Prepare file as read only
+    SET_X8_TO_SYS_OPENAT        # The syscall number for openat(), aarch64 has no open()
+    SYSCALL                     # Open file!
+    SET_X9_FROM_X0              # Preserve the file pointer we were given
+
+    LDR_X1_[SP,24]              # Get the output name
+    SET_X0_TO_FCNTL_H_AT_FDCWD  # AT_FDCWD, relative to current working directory
+    SET_X2_TO_577               # Prepare file as O_WRONLY|O_CREAT|O_TRUNC
+    SET_X3_TO_448               # Prepare file as RWX for owner only (700 in octal)
+    SET_X8_TO_SYS_OPENAT        # The syscall number for openat(), aarch64 has no open()
+    SYSCALL                     # Open file!
+    SET_X10_FROM_X0             # Preserve the file pointer we were given
+
+    # Our flag for byte processing
+    SET_X15_TO_MINUS_1
+
+    # temp storage for the sum
+    SET_X14_TO_0
+
+:loop
+    # Read a byte
+    ^~Read_byte CALL
+
+    # process byte
+    ^~hex CALL
+
+    # Deal with -1 values
+    CMP_X0_TO_0
+    SKIP_INST_GE
+    ^~loop RBRANCH
+
+    # deal with toggle
+    CMP_X15_TO_0
+    SKIP_INST_LT
+    ^~print BRANCH
+
+    # process first byte of pair
+    SET_X14_FROM_X0
+    SET_X15_TO_0
+
+    ^~loop RBRANCH
+
+# process second byte of pair
+:print
+    # update the sum and store in output
+    ADD_X0_X0_X14_LSL4
+    LOAD_W1_AHEAD
+    SKIP_32_DATA
+    &output
+    STR_BYTE_W0_[X1]
+
+    # flip the toggle
+    SET_X15_TO_MINUS_1
+
+    ^~write_byte CALL
+
+    ^~loop RBRANCH
+
+:hex
+    # Purge Comment Lines (#)
+    CMP_X0_TO_35
+    SKIP_INST_NE
+    ^~purge_comment BRANCH
+
+    # Purge Comment Lines (;)
+    CMP_X0_TO_59
+    SKIP_INST_NE
+    ^~purge_comment BRANCH
+
+    # deal all ascii less than 0
+    CMP_X0_TO_48
+    SKIP_INST_GE
+    ^~ascii_other BRANCH
+
+    # deal with 0-9
+    CMP_X0_TO_58
+    SKIP_INST_GE
+    ^~ascii_num BRANCH
+
+    # deal with all ascii less than A
+    CMP_X0_TO_65
+    SKIP_INST_GE
+    ^~ascii_other BRANCH
+
+    # deal with A-F
+    CMP_X0_TO_71
+    SKIP_INST_GE
+    ^~ascii_high BRANCH
+
+    # deal with all ascii less than a
+    CMP_X0_TO_97
+    SKIP_INST_GE
+    ^~ascii_other BRANCH
+
+    # deal with a-f
+    CMP_X0_TO_103
+    SKIP_INST_GE
+    ^~ascii_low BRANCH
+
+    # The rest that remains needs to be ignored
+    ^~ascii_other BRANCH
+
+:purge_comment
+    PUSH_LR                     # push lr
+
+:purge_comment_loop
+    # Read a byte
+    ^~Read_byte CALL
+
+    # Loop if not LF
+    CMP_X0_TO_10
+    SKIP_INST_EQ
+    ^~purge_comment_loop RBRANCH
+
+    # Otherwise return -1
+    SET_X0_TO_MINUS_1
+
+    POP_LR                      # pop lr
+    RETURN
+
+:ascii_num
+    SUB_X0_48
+    RETURN
+
+:ascii_low
+    SUB_X0_87
+    RETURN
+
+:ascii_high
+    SUB_X0_55
+    RETURN
+
+:ascii_other
+    SET_X0_TO_MINUS_1
+    RETURN
+
+:Done
+    # program completed Successfully
+    SET_X0_TO_0                 # All is well
+    SET_X8_TO_SYS_EXIT          # put the exit syscall number in x8
+    SYSCALL
+
+:write_byte
+    # Print our Hex
+    SET_X0_FROM_X10             # Where are we writing to
+    LOAD_W1_AHEAD               # What we are writing
+    SKIP_32_DATA
+    &output
+    SET_X2_TO_1                 # set the size of chars we want
+    SET_X8_TO_SYS_WRITE         # the syscall number for write
+    SYSCALL                     # call the Kernel
+    RETURN
+
+:Read_byte
+    # Attempt to read 1 byte from input file
+    SET_X0_FROM_X9              # Where are we reading from
+    LOAD_W1_AHEAD               # Where to put it
+    SKIP_32_DATA
+    &input
+    SET_X2_TO_1                 # set the size of chars we want
+    SET_X8_TO_SYS_READ          # the syscall number for read
+    SYSCALL                     # call the Kernel
+
+    CMP_X0_TO_0                 # Got EOF call it done
+    SKIP_INST_NE
+    ^~Done RBRANCH
+
+    # load byte
+    LOAD_W0_AHEAD
+    SKIP_32_DATA
+    &input
+    LDR_BYTE_W0_[X0]            # load char, unsigned so zero-extended already
+    RETURN
+
+
+:ELF_data
+# Where we are putting our output
+:output
+    # Reserve a byte
+    NULL8
+
+# Where we get our input
+:input
+    # Reserve a byte
+    NULL8
+
+:ELF_end
+:ELF_sym
+:ELF_str

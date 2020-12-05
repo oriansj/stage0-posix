@@ -14,29 +14,27 @@
 # You should have received a copy of the GNU General Public License
 # along with stage0.  If not, see <http://www.gnu.org/licenses/>.
 
-PATH := ../../mescc-tools/bin:$(PATH)
+VPATH = ../../bin
 
-VPATH = bin-M1:bin-hex2
+bin:
+	mkdir -p ../../bin
 
-bin-M1:
-	mkdir -p bin-M1
-
-bin-hex2:
-	mkdir -p bin-hex2
-
-bin-M1/hex0: hex0_AArch64.M1 | bin-M1
+M1-hex0: hex0_AArch64.M1 | bin
 	M1 -f hex0_AArch64.M1 --little-endian --architecture aarch64 -o hold
-	catm tmp elf.hex2 hold
-	hex2 -f tmp --base-address 0x600000 --little-endian --architecture aarch64 -o bin-M1/hex0
+	hex2 -f elf.hex2 -f hold --base-address 0x600000 --little-endian --architecture aarch64 -o ../../bin/M1-hex0
 
-bin-hex2/hex0: hex0_AArch64.hex2 | bin-hex2
-	hex2 -f hex0_AArch64.hex2 --base-address 0x600000 --little-endian --architecture aarch64 -o bin-hex2/hex0
+hex2-hex0: hex0_AArch64.hex2 | bin
+	hex2 -f hex0_AArch64.hex2 --base-address 0x600000 --little-endian --architecture aarch64 -o ../../bin/hex2-hex0
 
-all: bin-M1/hex0 bin-hex2/hex0
+# hex0 does not depend upon any labels or offsets and thus does not need base-address endianness or even architecture.
+# As it must always have exactly one output regardless of host or target.
+hex0-hex0: ../hex0_AArch64.hex0 | bin
+	hex2 -f ../hex0_AArch64.hex0 -o ../../bin/hex0-hex0
+
+all: M1-hex0 hex2-hex0 hex0-hex0
 
 test: all
-	cd bin-M1; sha256sum -c ../../SHA256SUMS --ignore-missing
-	cd bin-hex2; sha256sum -c ../../SHA256SUMS --ignore-missing
+	sha256sum -c SHA256SUMS
 
 clean:
-	rm -rf bin-M1 bin-hex2 tmp hold
+	rm -f ../../bin/hex0-hex0 ../../bin/hex2-hex0 ../../bin/M1-hex0 tmp hold

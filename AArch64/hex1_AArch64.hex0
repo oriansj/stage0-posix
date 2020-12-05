@@ -1,0 +1,464 @@
+## Copyright (C) 2017 Jeremiah Orians
+## Copyright (C) 2020 Sanne Wouda
+## This file is part of stage0.
+##
+## stage0 is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## stage0 is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with stage0.  If not, see <http://www.gnu.org/licenses/>.
+
+## ELF Header
+
+#:ELF_base
+
+7F 45 4C 46                    # e_ident[EI_MAG0-3] ELF's magic number
+
+02                             # e_ident[EI_CLASS] Indicating 64 bit
+01                             # e_ident[EI_DATA] Indicating little endianness
+01                             # e_ident[EI_VERSION] Indicating original elf
+
+03                             # e_ident[EI_OSABI] Set at 0 because none cares
+00                             # e_ident[EI_ABIVERSION] See above
+
+00 00 00 00 00 00 00           # e_ident[EI_PAD]
+02 00                          # e_type Indicating Executable
+B7 00                          # e_machine Indicating AArch64
+01 00 00 00                    # e_version Indicating original elf
+
+78 00 60 00 00 00 00 00          # e_entry Address of the entry point
+40 00 00 00 00 00 00 00 # e_phoff Address of program header table
+00 00 00 00 00 00 00 00 # e_shoff Address of section header table
+
+00 00 00 00                    # e_flags
+40 00                          # e_ehsize Indicating our 64 Byte header
+
+38 00                          # e_phentsize size of a program header table
+01 00                          # e_phnum number of entries in program table
+
+00 00                          # e_shentsize size of a section header table
+00 00                          # e_shnum number of entries in section table
+
+00 00                          # e_shstrndx index of the section names
+
+## Program Header
+#:ELF_program_headers
+01 00 00 00                   # ph_type: PT-LOAD = 1
+07 00 00 00                   # ph_flags: PF-X|PF-W|PF-R = 7
+00 00 00 00 00 00 00 00                   # ph_offset
+00 00 60 00 00 00 00 00                     # ph_vaddr
+00 00 60 00 00 00 00 00                     # ph_physaddr
+3D 04 00 00 00 00 00 00             # ph_filesz
+3D 04 00 00 00 00 00 00             # ph_memsz
+01 00 00 00 00 00 00 00                   # ph_align
+
+#:ELF_text
+
+# Where the ELF Header is going to hit
+# Simply jump to _start
+# Our main function
+#:_start
+    E10B40F9                    ; LDR_X1_[SP,16]              # Get the actual input name
+    600C8092                    ; SET_X0_TO_FCNTL_H_AT_FDCWD  # AT_FDCWD, relative to current working directory
+    020080D2                    ; SET_X2_TO_0                 # Prepare file as read only
+    080780D2                    ; SET_X8_TO_SYS_OPENAT        # The syscall number for openat(), aarch64 has no open()
+    010000D4                    ; SYSCALL                     # Open file!
+    E90300AA                    ; SET_X9_FROM_X0              # Preserve the file pointer we were given
+
+    E10F40F9                    ; LDR_X1_[SP,24]              # Get the output name
+    600C8092                    ; SET_X0_TO_FCNTL_H_AT_FDCWD  # AT_FDCWD, relative to current working directory
+    224880D2                    ; SET_X2_TO_577               # Prepare file as O_WRONLY|O_CREAT|O_TRUNC
+    033880D2                    ; SET_X3_TO_448               # Prepare file as RWX for owner only (700 in octal)
+    080780D2                    ; SET_X8_TO_SYS_OPENAT        # The syscall number for openat(), aarch64 has no open()
+    010000D4                    ; SYSCALL                     # Open file!
+    EA0300AA                    ; SET_X10_FROM_X0             # Preserve the file pointer we were given
+
+    0F008092                    ; SET_X15_TO_MINUS_1          # Our flag for byte processing
+    0E0080D2                    ; SET_X14_TO_0                # temp storage for the sum
+    0D0CA0D2                    ; SET_X13_TO_0x600000         # Our starting IP
+    0D0000 94                   ; ^~First_pass CALL           # Process it
+
+    # rewind input file
+    E00309AA                    ; SET_X0_FROM_X9              # Using our input file
+    010080D2                    ; SET_X1_TO_0                 # Offset
+    020080D2                    ; SET_X2_TO_0                 # Whence SEEK_SET
+    C80780D2                    ; SET_X8_TO_SYS_LSEEK         # lseek
+    010000D4                    ; SYSCALL
+
+    0F008092                    ; SET_X15_TO_MINUS_1          # Our flag for byte processing
+    0E0080D2                    ; SET_X14_TO_0                # temp storage for the sum
+    0D0CA0D2                    ; SET_X13_TO_0x600000         # Our starting IP
+    2E0000 94                   ; ^~Second_pass CALL          # Process it
+
+    # program competed Successfully
+    000080D2                    ; SET_X0_TO_0                 # All is well
+    A80B80D2                    ; SET_X8_TO_SYS_EXIT          # put the exit syscall number in x8
+    010000D4                    ; SYSCALL
+
+#:First_pass
+    FE0F1FF8                    ; PUSH_LR                     # push lr
+
+#:First_pass_loop
+    880000 94                   ; ^~Read_byte CALL
+
+    # Deal with EOF
+    1F1000B1                    ; CMP_X0_TO_MINUS_4
+    41000054                    ; SKIP_INST_NE
+    240000 14                   ; ^~First_pass_done BRANCH
+
+    # Check for :
+    1FE800F1                    ; CMP_X0_TO_58
+    40000054                    ; SKIP_INST_EQ
+    020000 14                   ; ^~First_pass_0 BRANCH
+
+    # Deal with label
+    A10000 94                   ; ^~StoreLabel CALL
+
+#:First_pass_0
+    # Check for $
+    1F9000F1                        ; CMP_X0_TO_36
+    41000054                        ; SKIP_INST_NE
+    140000 14                       ; ^~First_pass_abs16pointer BRANCH
+
+    # Check for ~
+    1FF801F1                        ; CMP_X0_TO_126
+    41000054                        ; SKIP_INST_NE
+    140000 14                       ; ^~First_pass_rel24pointer BRANCH
+
+    # Check for &
+    1F9800F1                        ; CMP_X0_TO_38
+    41000054                        ; SKIP_INST_NE
+    140000 14                       ; ^~First_pass_abs32pointer BRANCH
+
+    # Deal with everything else
+    4A0000 94                   ; ^~hex CALL                  # Process our char
+
+    # Deal with EOF
+    1F1000B1                    ; CMP_X0_TO_MINUS_4
+    41000054                    ; SKIP_INST_NE
+    130000 14                   ; ^~First_pass_done BRANCH
+
+    # deal with -1 values
+    1F0000F1                    ; CMP_X0_TO_0
+    4A000054                    ; SKIP_INST_GE
+    E9FFFF 17                   ; ^~First_pass_loop RBRANCH
+
+    # deal with toggle
+    FF0100F1                    ; CMP_X15_TO_0
+    41000054                    ; SKIP_INST_NE
+    020000 14                   ; ^~First_pass_1 BRANCH
+    AD050091                    ; ADD_X13_1                   # Increment IP
+
+#:First_pass_1
+    EF032FAA                    ; NOT_X15                     # Flip toggle
+    E3FFFF 17                   ; ^~First_pass_loop RBRANCH
+
+#:First_pass_abs16pointer
+    # Deal with 16-bit Pointer to label
+    6A0000 94                   ; ^~Read_byte CALL            # Drop the char
+    AD090091                    ; ADD_X13_2                   # Increment IP
+    E0FFFF 17                   ; ^~First_pass_loop RBRANCH    # Loop again
+
+#:First_pass_rel24pointer
+    # Deal with 24-bit Pointer to label
+    670000 94                   ; ^~Read_byte CALL            # Drop the char
+    AD0D0091                    ; ADD_X13_3                   # Increment IP
+    DDFFFF 17                   ; ^~First_pass_loop RBRANCH    # Loop again
+
+#:First_pass_abs32pointer
+    # Deal with 32-bit Pointer to label
+    640000 94                   ; ^~Read_byte CALL            # Drop the char
+    AD110091                    ; ADD_X13_4                   # Increment IP
+    DAFFFF17                    ; ^~First_pass_loop RBRANCH    # Loop again
+
+#:First_pass_done
+    FE0741F8                    ; POP_LR
+    C0035FD6                    ; RETURN
+
+#:Second_pass
+    FE0F1FF8                    ; PUSH_LR                     # push lr
+
+#:Second_pass_loop
+    5E0000 94                   ; ^~Read_byte CALL
+
+    # Deal with EOF
+    1F1000B1                    ; CMP_X0_TO_MINUS_4
+    41000054                    ; SKIP_INST_NE
+    2C0000 14                   ; ^~Second_pass_done BRANCH
+
+    # Simply drop the label
+    1FE800F1                    ; CMP_X0_TO_58
+    40000054                    ; SKIP_INST_EQ
+    030000 14                   ; ^~Second_pass_0 BRANCH
+    570000 94                   ; ^~Read_byte CALL
+    F8FFFF 17                   ; ^~Second_pass_loop RBRANCH
+
+#:Second_pass_0
+    # Check for $
+    1F9000F1                        ; CMP_X0_TO_36
+    41000054                        ; SKIP_INST_NE
+    140000 14                       ; ^~Second_pass_abs16pointer BRANCH
+
+    # Check for ~, assume preceded by ^
+    1FF801F1                        ; CMP_X0_TO_126
+    41000054                        ; SKIP_INST_NE
+    130000 14                       ; ^~Second_pass_rel24pointer BRANCH
+
+    # Check for $
+    1F9800F1                        ; CMP_X0_TO_38
+    41000054                        ; SKIP_INST_NE
+    120000 14                       ; ^~Second_pass_abs32pointer BRANCH
+
+    # Deal with everything else
+    1F0000 94                   ; ^~hex CALL                  # Process our char
+
+    # Deal with EOF
+    1F1000B1                    ; CMP_X0_TO_MINUS_4
+    41000054                    ; SKIP_INST_NE
+    1A0000 14                   ; ^~Second_pass_done BRANCH
+
+    # deal with -1 values
+    1F0000F1                    ; CMP_X0_TO_0
+    4A000054                    ; SKIP_INST_GE
+    E8FFFF 17                   ; ^~Second_pass_loop RBRANCH
+
+    # deal with toggle
+    FF0100F1                    ; CMP_X15_TO_0
+    41000054                    ; SKIP_INST_NE
+    0A0000 14                   ; ^~print BRANCH
+
+    # process first byte of pair
+    EE0300AA                    ; SET_X14_FROM_X0
+    0F0080D2                    ; SET_X15_TO_0
+    E2FFFF 17                   ; ^~Second_pass_loop RBRANCH
+
+#:Second_pass_abs16pointer
+    640000 94                   ; ^~StoreAbs16Pointer CALL
+    E0FFFF 17                   ; ^~Second_pass_loop RBRANCH
+
+#:Second_pass_rel24pointer
+    6E0000 94                   ; ^~StoreRel24Pointer CALL
+    DEFFFF 17                   ; ^~Second_pass_loop RBRANCH
+
+#:Second_pass_abs32pointer
+    7A0000 94                   ; ^~StoreAbs32Pointer CALL
+    DCFFFF 17                   ; ^~Second_pass_loop RBRANCH
+
+# process second byte of pair
+#:print
+    # update the sum and store in output
+    00100E8B                    ; ADD_X0_X0_X14_LSL_4
+    41000018                    ; LOAD_W1_AHEAD
+    02000014                    ; SKIP_32_DATA
+    3C04 6000                   ; &table
+    20000039                    ; STR_BYTE_W0_[X1]
+
+    # flip the toggle
+    0F008092                    ; SET_X15_TO_MINUS_1
+
+    # print our first Hex
+    220080D2                    ; SET_X2_TO_1                 # set the size of chars we want
+    430000 94                   ; ^~print_chars CALL
+
+    AD050091                    ; ADD_X13_1                   # Increment IP
+    D2FFFF 17                   ; ^~Second_pass_loop RBRANCH
+
+#:Second_pass_done
+    FE0741F8                    ; POP_LR                      # pop lr
+    C0035FD6                    ; RETURN
+
+#:hex
+    # deal with EOF
+    1F1000B1                	; CMP_X0_TO_MINUS_4
+    41000054                	; SKIP_INST_NE
+    2A0000 14                	; ^~EOF BRANCH
+
+    # Purge Comment Lines (#)
+    1F8C00F1                	; CMP_X0_TO_35
+    41000054                	; SKIP_INST_NE
+    170000 14      	            ; ^~purge_comment BRANCH
+
+    # Purge Comment Lines (;)
+    1FEC00F1                	; CMP_X0_TO_59
+    41000054                	; SKIP_INST_NE
+    140000 14      	            ; ^~purge_comment BRANCH
+
+    # deal all ascii less than 0
+    1FC000F1                	; CMP_X0_TO_48
+    4A000054                	; SKIP_INST_GE
+    1F0000 14        	        ; ^~ascii_other BRANCH
+
+    # deal with 0-9
+    1FE800F1                	; CMP_X0_TO_58
+    4A000054                	; SKIP_INST_GE
+    160000 14          	        ; ^~ascii_num BRANCH
+
+    # deal with all ascii less than A
+    1F0401F1                	; CMP_X0_TO_65
+    4A000054                	; SKIP_INST_GE
+    190000 14        	        ; ^~ascii_other BRANCH
+
+    # deal with A-F
+    1F1C01F1                	; CMP_X0_TO_71
+    4A000054                	; SKIP_INST_GE
+    140000 14         	        ; ^~ascii_high BRANCH
+
+    # deal with all ascii less than a
+    1F8401F1                	; CMP_X0_TO_97
+    4A000054                	; SKIP_INST_GE
+    130000 14        	        ; ^~ascii_other BRANCH
+
+    # deal with a-f
+    1F9C01F1                	; CMP_X0_TO_103
+    4A000054                	; SKIP_INST_GE
+    0C0000 14          	        ; ^~ascii_low BRANCH
+
+    # The rest that remains needs to be ignored
+    0F0000 14        	        ; ^~ascii_other BRANCH
+
+#:purge_comment
+    FE0F1FF8                    ; PUSH_LR                     # push lr
+
+#:loop0
+    # Read a byte
+    100000 94                   ; ^~Read_byte CALL
+
+    # Loop if not LF
+    1F2800F1                    ; CMP_X0_TO_10
+    40000054                    ; SKIP_INST_EQ
+    FDFFFF 17                   ; ^~loop0 RBRANCH
+
+    # Otherwise return -1
+    00008092                    ; SET_X0_TO_MINUS_1
+
+    FE0741F8                    ; POP_LR                      # pop lr
+    C0035FD6                    ; RETURN
+
+#:ascii_num
+    00C000D1                    ; SUB_X0_48
+    C0035FD6                    ; RETURN
+
+#:ascii_low
+    005C01D1                    ; SUB_X0_87
+    C0035FD6                    ; RETURN
+
+#:ascii_high
+    00DC00D1                    ; SUB_X0_55
+    C0035FD6                    ; RETURN
+
+#:ascii_other
+    00008092                    ; SET_X0_TO_MINUS_1
+    C0035FD6                    ; RETURN
+
+#:EOF
+    C0035FD6                    ; RETURN
+
+#:Read_byte
+    # Attempt to read 1 byte from input file
+    E00309AA        			; SET_X0_FROM_X9              # Where are we reading from
+    41000018        			; LOAD_W1_AHEAD               # Where to put it
+    02000014        			; SKIP_32_DATA
+    3C04 6000     			    ; &table
+    220080D2        			; SET_X2_TO_1                 # set the size of chars we want
+    E80780D2        			; SET_X8_TO_SYS_READ          # the syscall number for read
+    010000D4        			; SYSCALL                     # call the Kernel
+
+    1F0000F1        			; CMP_X0_TO_0
+    41000054        			; SKIP_INST_NE
+    060000 14			        ; ^~Read_byte_1 BRANCH
+
+    # load byte
+    40000098        			; LOAD_W0_AHEAD
+    02000014        			; SKIP_32_DATA
+    3C04 6000     			    ; &table
+    00004039        			; LDR_BYTE_W0_[X0]            # load char, unsigned so zero-extended already
+    C0035FD6        			; RETURN
+
+# Deal with EOF
+#:Read_byte_1
+    60008092                    ; SET_X0_TO_MINUS_4           # Put EOF in x0
+    C0035FD6                    ; RETURN
+
+#:print_chars
+    E0030AAA   					; SET_X0_FROM_X10             # Write to target file
+    41000018   					; LOAD_W1_AHEAD               # What we are writing
+    02000014   					; SKIP_32_DATA
+    3C04 6000					; &table
+    080880D2   					; SET_X8_TO_SYS_WRITE         # the syscall number for write
+    010000D4   					; SYSCALL                     # call the Kernel
+    C0035FD6   					; RETURN
+
+#:Get_table_target
+    FE0F1FF8      				; PUSH_LR                     # push lr
+    E7FFFF 97				    ; ^~Read_byte RCALL           # Get single char label
+    41000018      				; LOAD_W1_AHEAD
+    02000014      				; SKIP_32_DATA
+    3C04 6000   				; &table
+    200C008B      				; ADD_X0_X1_X0_LSL_3          # Each label in table takes 8 bytes to store
+    FE0741F8      				; POP_LR                      # pop lr
+    C0035FD6      				; RETURN
+
+#:StoreLabel
+    FE0F1FF8             		; PUSH_LR
+    F7FFFF 97		            ; ^~Get_table_target RCALL
+    0D0000F9             		; STR_X13_[X0]
+    FE0741F8             		; POP_LR
+    C0035FD6             		; RETURN
+
+#:StoreAbs16Pointer
+    FE0F1FF8             		; PUSH_LR                     # push lr
+    F2FFFF 97		            ; ^~Get_table_target RCALL    # Get address of pointer
+    000040F9             		; DEREF_X0                    # Get pointer
+    41000018             		; LOAD_W1_AHEAD
+    02000014             		; SKIP_32_DATA
+    3C04 6000          		    ; &table
+    200000F9             		; STR_X0_[X1]                 # put value in output
+    AD090091             		; ADD_X13_2                   # Increment IP
+    420080D2             		; SET_X2_TO_2                 # set the size of chars we want
+    E3FFFF 97     		        ; ^~print_chars RCALL
+    FE0741F8             		; POP_LR                      # pop lr
+    C0035FD6             		; RETURN
+
+#:StoreRel24Pointer
+    FE0F1FF8             		; PUSH_LR                     # push lr
+    E6FFFF 97		            ; ^~Get_table_target RCALL    # Get address of pointer
+    000040F9             		; DEREF_X0                    # Get pointer
+    00000DCB             		; SUB_X0_X0_X13               # target - ip
+    00FC4293             		; ASR_X0_X0_2                 # rel24 pointer is 4-byte aligned
+    41000018             		; LOAD_W1_AHEAD
+    02000014             		; SKIP_32_DATA
+    3C04 6000           		; &table
+    200000F9             		; STR_X0_[X1]                 # put value in output
+    AD0D0091             		; ADD_X13_3                   # Increment IP
+    620080D2             		; SET_X2_TO_3                 # set the size of chars we want
+    D5FFFF 97            		; ^~print_chars RCALL
+    FE0741F8             		; POP_LR                      # pop lr
+    C0035FD6             		; RETURN
+
+#:StoreAbs32Pointer
+    FE0F1FF8             		; PUSH_LR                     # push lr
+    D8FFFF 97		            ; ^~Get_table_target RCALL    # Get address of pointer
+    000040F9             		; DEREF_X0                    # Get pointer
+    41000018             		; LOAD_W1_AHEAD
+    02000014             		; SKIP_32_DATA
+    3C04 6000          		    ; &table
+    200000F9             		; STR_X0_[X1]                 # put value in output
+    AD110091             		; ADD_X13_4                   # Increment IP
+    820080D2             		; SET_X2_TO_4                 # set the size of chars we want
+    C9FFFF 97     		        ; ^~print_chars RCALL
+    FE0741F8             		; POP_LR                      # pop lr
+    C0035FD6             		; RETURN
+
+
+#:ELF_data
+#:table
+    00                          ; NULL8
+
+#:ELF_end

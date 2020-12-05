@@ -31,10 +31,25 @@ hex2-hex0: hex0_AArch64.hex2 | bin
 hex0-hex0: ../hex0_AArch64.hex0 | bin
 	hex2 -f ../hex0_AArch64.hex0 -o ../../bin/hex0-hex0
 
-all: M1-hex0 hex2-hex0 hex0-hex0
+M1-hex1: hex1_AArch64.M1 | bin
+	M1 -f hex1_AArch64.M1 --little-endian --architecture aarch64 -o hold
+	hex2 -f elf.hex2 -f hold --base-address 0x600000 --little-endian --architecture aarch64 -o ../../bin/M1-hex1
+
+hex2-hex1: hex1_AArch64.hex2 | bin
+	hex2 -f hex1_AArch64.hex2 --base-address 0x600000 --little-endian --architecture aarch64 -o ../../bin/hex2-hex1
+
+hex0-hex1: ../hex1_AArch64.hex0 | bin
+	hex2 -f ../hex1_AArch64.hex0 -o ../../bin/hex0-hex1
+
+all: M1-hex0 hex2-hex0 hex0-hex0 M1-hex1 hex2-hex1 hex0-hex1
 
 test: all
 	sha256sum -c SHA256SUMS
 
 clean:
-	rm -f ../../bin/hex0-hex0 ../../bin/hex2-hex0 ../../bin/M1-hex0 tmp hold
+	rm -f hold \
+		../../bin/hex0-hex0 ../../bin/hex2-hex0 ../../bin/M1-hex0 \
+		../../bin/hex0-hex1 ../../bin/hex2-hex1 ../../bin/M1-hex1
+
+Generate_test_answers: all
+	sha256sum ../../bin/*-hex0 ../../bin/*-hex1 >| SHA256SUMS

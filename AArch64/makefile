@@ -26,18 +26,25 @@ bin/hex0-gas: GAS/hex0_AArch64.S | bin
 	as GAS/hex0_AArch64.S -o bin/hex0.o
 	ld bin/hex0.o -o bin/hex0-gas
 
+bin/hex1-gas: GAS/hex1_AArch64.S | bin
+	as GAS/hex1_AArch64.S -o bin/hex1.o
+	ld bin/hex1.o -o bin/hex1-gas
+
 # make pieces from the GAS pieces
 hex0: hex0-gas
 	./bin/hex0-gas hex0_AArch64.hex0 hex0
 
-all: hex0
+hex1: hex0-gas
+	./bin/hex0-gas hex1_AArch64.hex0 hex1
+
+all: hex0 hex1
 
 clean:
-	rm -f hex0
+	rm -f hex0 hex1
 	rm -rf bin
 
 test: all
 	sha256sum -c SHA256SUMS
 
 Generate_test_answers: all
-	sha256sum hex0 >| SHA256SUMS
+	sha256sum hex0 hex1 >| SHA256SUMS

@@ -1,0 +1,1243 @@
+# Copyright (C) 2017 Jeremiah Orians
+# Copyright (C) 2020 Sanne Wouda
+# This file is part of stage0.
+#
+# stage0 is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# stage0 is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with stage0.  If not, see <http://www.gnu.org/licenses/>.
+
+
+DEFINE NULL64 0000000000000000
+DEFINE NULL8 00
+
+DEFINE PUSH_X0 e00f1ff8
+DEFINE PUSH_X1 e10f1ff8
+DEFINE PUSH_X2 e20f1ff8
+DEFINE PUSH_X3 e30f1ff8
+DEFINE PUSH_X4 e40f1ff8
+DEFINE PUSH_LR fe0f1ff8
+
+DEFINE POP_X0 e00741f8
+DEFINE POP_X1 e10741f8
+DEFINE POP_X2 e20741f8
+DEFINE POP_X3 e30741f8
+DEFINE POP_X4 e40741f8
+DEFINE POP_LR fe0741f8
+
+DEFINE BLR_X16 00023fd6
+DEFINE BR_X16 00021fd6
+DEFINE RETURN c0035fd6
+
+DEFINE CBNZ_X0_PAST_BR a00000b5
+
+DEFINE CBZ_X7_PAST_INST 470000b4
+
+DEFINE CMP_X0_TO_0   1f0000f1
+DEFINE CMP_X0_TO_1   1f0400f1
+DEFINE CMP_X0_TO_2   1f0800f1
+DEFINE CMP_X0_TO_9   1f2400f1
+DEFINE CMP_X0_TO_10  1f2800f1
+DEFINE CMP_X0_TO_13  1f3400f1
+DEFINE CMP_X0_TO_32  1f8000f1
+DEFINE CMP_X0_TO_33  1f8400f1
+DEFINE CMP_X0_TO_35  1f8c00f1
+DEFINE CMP_X0_TO_36  1f9000f1
+DEFINE CMP_X0_TO_37  1f9400f1
+DEFINE CMP_X0_TO_38  1f9800f1
+DEFINE CMP_X0_TO_39  1f9c00f1
+DEFINE CMP_X0_TO_48  1fc000f1
+DEFINE CMP_X0_TO_57  1fe400f1
+DEFINE CMP_X0_TO_58  1fe800f1
+DEFINE CMP_X0_TO_59  1fec00f1
+DEFINE CMP_X0_TO_62  1ff800f1
+DEFINE CMP_X0_TO_64  1f0001f1
+DEFINE CMP_X0_TO_65  1f0401f1
+DEFINE CMP_X0_TO_71  1f1c01f1
+DEFINE CMP_X0_TO_94  1f7801f1
+DEFINE CMP_X0_TO_97  1f8401f1
+DEFINE CMP_X0_TO_103 1f9c01f1
+DEFINE CMP_X0_TO_126 1ff801f1
+DEFINE CMP_X0_TO_MINUS_4 1f1000b1
+DEFINE CMP_X1_TO_0   3f0000f1
+DEFINE CMP_X1_TO_1   3f0400f1
+DEFINE CMP_X1_TO_62  3ff800f1
+DEFINE CMP_X2_TO_0   5f0000f1
+DEFINE CMP_X2_TO_9   5f2400f1
+DEFINE CMP_X2_TO_10  5f2800f1
+DEFINE CMP_X2_TO_15  5f3c00f1
+DEFINE CMP_X2_TO_37  5f9400f1
+DEFINE CMP_X2_TO_45  5fb400f1
+DEFINE CMP_X2_TO_48  5fc000f1
+DEFINE CMP_X2_TO_64  5f0001f1
+DEFINE CMP_X2_TO_120 5fe001f1
+DEFINE CMP_X3_TO_0   7f0000f1
+DEFINE CMP_X4_TO_1   9f0400f1
+DEFINE CMP_X5_TO_0   bf0000f1
+DEFINE CMP_X15_TO_0  ff0100f1
+
+DEFINE TST_X1_7 23140038
+
+DEFINE CMP_X0_X1  1f0001eb
+DEFINE CMP_X0_X2  1f0002eb
+DEFINE CMP_X2_X1  5f0001eb
+
+DEFINE SET_X0_FROM_X1 e00301aa
+DEFINE SET_X0_FROM_X2 e00302aa
+DEFINE SET_X0_FROM_X3 e00303aa
+DEFINE SET_X0_FROM_X9 e00309aa
+DEFINE SET_X0_FROM_X10 e0030aaa
+DEFINE SET_X0_FROM_X12 e0030caa
+DEFINE SET_X0_FROM_X13 e0030daa
+DEFINE SET_X0_FROM_X14 e0030eaa
+DEFINE SET_X0_FROM_X15 e0030faa
+DEFINE SET_X1_FROM_X0 e10300aa
+DEFINE SET_X1_FROM_X2 e10302aa
+DEFINE SET_X1_FROM_X3 e10303aa
+DEFINE SET_X1_FROM_X12 e1030caa
+DEFINE SET_X1_FROM_X13 e1030daa
+DEFINE SET_X1_FROM_SP e1030091
+DEFINE SET_X2_FROM_X0 e20300aa
+DEFINE SET_X2_FROM_X1 e20301aa
+DEFINE SET_X2_FROM_X6 e20306aa
+DEFINE SET_X3_FROM_X0 e30300aa
+DEFINE SET_X3_FROM_X1 e30301aa
+DEFINE SET_X5_FROM_X11 e5030baa
+DEFINE SET_X6_FROM_X13 e6030daa
+DEFINE SET_X9_FROM_X0 e90300aa
+DEFINE SET_X10_FROM_X0 ea0300aa
+DEFINE SET_X11_FROM_X0 eb0300aa
+DEFINE SET_X12_FROM_X0 ec0300aa
+DEFINE SET_X13_FROM_X0 ed0300aa
+DEFINE SET_X13_FROM_X3 ed0303aa
+DEFINE SET_X12_FROM_X1 ec0301aa
+DEFINE SET_X14_FROM_X0 ee0300aa
+DEFINE SET_X15_FROM_X0 ef0300aa
+
+DEFINE SET_X0_TO_0 000080d2
+DEFINE SET_X0_TO_1 200080d2
+DEFINE SET_X0_TO_2 400080d2
+DEFINE SET_X0_TO_3 600080d2
+DEFINE SET_X0_TO_5 a00080d2
+DEFINE SET_X0_TO_9 200180d2
+DEFINE SET_X0_TO_10 400180d2
+DEFINE SET_X0_TO_32 000480d2
+DEFINE SET_X0_TO_256 002080d2
+DEFINE SET_X0_TO_512 004080d2
+DEFINE SET_X0_TO_MINUS_1 00008092
+DEFINE SET_X0_TO_MINUS_4 60008092
+DEFINE SET_X1_TO_0 010080d2
+DEFINE SET_X1_TO_10 410180d2
+DEFINE SET_X2_TO_0 020080d2
+DEFINE SET_X2_TO_1 220080d2
+DEFINE SET_X2_TO_2 420080d2
+DEFINE SET_X2_TO_3 620080d2
+DEFINE SET_X2_TO_4 820080d2
+DEFINE SET_X2_TO_577 224880d2
+DEFINE SET_X3_TO_0 030080d2
+DEFINE SET_X3_TO_384 033080d2
+DEFINE SET_X3_TO_448 033880d2
+DEFINE SET_X4_TO_0 040080d2
+DEFINE SET_X4_TO_1 240080d2
+DEFINE SET_X7_TO_0 070080d2
+DEFINE SET_X11_TO_0 0b0080d2
+DEFINE SET_X13_TO_0 0d0080d2
+DEFINE SET_X13_TO_0x00600000 0d0ca0d2
+DEFINE SET_X14_TO_0 0e0080d2
+DEFINE SET_X15_TO_0 0f0080d2
+DEFINE SET_X15_TO_MINUS_1 0f008092
+DEFINE SET_X0_TO_FCNTL_H_AT_FDCWD 600c8092
+
+DEFINE SKIP_INST_EQ 40000054
+DEFINE SKIP_INST_GE 4a000054
+DEFINE SKIP_INST_LT 4b000054
+DEFINE SKIP_INST_NE 41000054
+DEFINE SKIP_INST_LE 4d000054
+DEFINE SKIP_INST_GT 4c000054
+
+DEFINE SKIP_32_DATA 02000014
+
+DEFINE LOAD_W0_AHEAD 40000098
+DEFINE LOAD_W1_AHEAD 41000018
+DEFINE LOAD_W4_AHEAD 44000018
+DEFINE LOAD_W16_AHEAD 50000018
+
+DEFINE LDR_X0_[X0]           000040f9
+DEFINE LDR_X0_[X0,16]        000840f9
+DEFINE LDR_X0_[X1,8]         200440f9
+DEFINE LDR_X0_[X1,24]         200c40f9
+DEFINE LDR_X0_[X2]           400040f9
+DEFINE LDR_X0_[X2,8]         400440f9
+DEFINE LDR_X0_[X2,16]        400840f9
+DEFINE LDR_X0_[X3,8]         600440f9
+DEFINE LDR_X0_[X3,16]        600840f9
+DEFINE LDR_X0_[X3,24]        600c40f9
+DEFINE LDR_X0_[X5,8]         a00440f9
+DEFINE LDR_X1_[X0,8]         010440f9
+DEFINE LDR_X1_[X0,16]        010840f9
+DEFINE LDR_X1_[X0,24]        010c40f9
+DEFINE LDR_X1_[X1]           210040f9
+DEFINE LDR_X1_[X2,16]        410840f9
+DEFINE LDR_X1_[SP,16]        e10b40f9
+DEFINE LDR_X1_[SP,24]        e10f40f9
+DEFINE LDR_X2_[X0,24]        020c40f9
+DEFINE LDR_X2_[X1]           220040f9
+DEFINE LDR_X2_[X2]           420040f9
+DEFINE LDR_X3_[X3]           630040f9
+DEFINE LDR_X3_[X5,16]        a30840f9
+DEFINE LDR_BYTE_W0_[X0]      00004039
+DEFINE LDR_BYTE_W0_[X1]      20004039
+DEFINE LDR_BYTE_W0_[X1,X2]   20686238
+DEFINE LDR_BYTE_W0_[X1]_1    20144038
+DEFINE LDR_BYTE_W0_[X2]_1    40144038
+DEFINE LDR_BYTE_W0_[X3]_1    60144038
+DEFINE LDR_BYTE_W1_[X0]_1    01144038
+DEFINE LDR_BYTE_W1_[X3]_1    61144038
+DEFINE LDR_BYTE_W1_[X4]_1    81144038
+DEFINE LDR_BYTE_W2_[X1]_1    22144038
+DEFINE LDR_BYTE_W2_[X0]      02004039
+DEFINE LDR_BYTE_W2_[X1]      22004039
+DEFINE LDR_BYTE_W3_[X4]      83004039
+
+DEFINE LDR_BYTE_W2_[X1,1]    22044039
+
+DEFINE STR_BYTE_W0_[X1]      20000039
+DEFINE STR_BYTE_W0_[X1]_1    20140038
+DEFINE STR_BYTE_W2_[X3]_1    62140038
+DEFINE STR_BYTE_W3_[X1]_1    23140038
+DEFINE STR_BYTE_W0_[X4,1]_WB 801c0038
+DEFINE STR_X0_[X1]           200000f9
+DEFINE STR_X0_[X2]           400000f9
+DEFINE STR_X0_[X2,8]         400400f9
+DEFINE STR_X0_[X2,16]        400800f9
+DEFINE STR_X0_[X2,24]        400c00f9
+DEFINE STR_X0_[X3,8]         600400f9
+DEFINE STR_X0_[X3,16]        600800f9
+DEFINE STR_X0_[X3,24]        600c00f9
+DEFINE STR_X1_[X0,24]        010c00f9
+DEFINE STR_X1_[X2,24]        410c00f9
+DEFINE STR_X2_[X3,24]        620c00f9
+DEFINE STR_X11_[X0]          0b0000f9
+DEFINE STR_X12_[X0,16]       0c0800f9
+DEFINE STR_X13_[X0,8]        0d0400f9
+DEFINE STR_X13_[X0]          0d0000f9
+DEFINE STR_X13_[X3]          6d0000f9
+
+DEFINE DEREF_X0 000040f9
+DEFINE DEREF_X5 a50040f9
+
+DEFINE ADD_X0_X0_X14_LSL_4 00100e8b
+DEFINE ADD_X0_X1_X0_LSL_3 200c008b
+DEFINE ADD_X12_X12_24 8c610091
+
+DEFINE ADD_X0_X0_X2  0000028b
+DEFINE ADD_X0_X0_X12 00000c8b
+
+DEFINE ADD_X0_X0_1    00040091
+DEFINE ADD_X0_X0_7    001c0091
+DEFINE ADD_X0_X0_48   00c00091
+DEFINE ADD_X0_X0_12MB 00007091
+DEFINE ADD_X1_X1_1   21040091
+DEFINE ADD_X1_X1_2   21080091
+DEFINE ADD_X2_X2_1   42040091
+DEFINE ADD_X3_X3_1   63040091
+DEFINE ADD_X13_X13_1 ad050091
+DEFINE ADD_X13_2     ad090091
+DEFINE ADD_X13_3     ad0d0091
+
+DEFINE SUB_X0_X0_X2 000002cb
+DEFINE SUB_X0_X0_X13 00000dcb
+
+DEFINE SUB_X0_X0_48 00c000d1
+DEFINE SUB_X0_X0_55 00dc00d1
+DEFINE SUB_X0_X0_87 005c01d1
+DEFINE SUB_X2_X2_7  421c00d1
+DEFINE SUB_X2_X2_48 42c000d1
+
+DEFINE AND_X0_X0_0xF  000c4092
+DEFINE AND_X0_X0_0xFF 001c4092
+
+DEFINE ASR_X0_X0_2 00fc4293
+DEFINE LSR_X0_X0_2 00fc42d3
+DEFINE LSR_X0_X0_4 00fc44d3
+DEFINE LSR_X0_X0_8 00fc48d3
+DEFINE LSR_X0_X0_16 00fc50d3
+DEFINE LSR_X0_X0_32 00fc60d3
+DEFINE LSL_X0_X0_3 00f07dd3
+DEFINE LSL_X0_X0_4 00ec7cd3
+
+DEFINE MUL_X0_X0_X1 007c019b
+
+DEFINE NEG_X0_X0 e00300cb
+
+DEFINE NOT_X7_X7 e70327aa
+DEFINE NOT_X15_X15 ef032faa
+
+DEFINE SET_X8_TO_SYS_BRK c81a80d2
+DEFINE SET_X8_TO_SYS_EXIT a80b80d2
+DEFINE SET_X8_TO_SYS_LSEEK c80780d2
+DEFINE SET_X8_TO_SYS_OPENAT 080780d2
+DEFINE SET_X8_TO_SYS_READ e80780d2
+DEFINE SET_X8_TO_SYS_WRITE 080880d2
+DEFINE SYSCALL 010000d4
+
+DEFINE FCALL 94
+DEFINE RCALL 97
+DEFINE FBRANCH 14
+DEFINE RBRANCH 17
+
+
+	# Register usage:
+	# X0, X8, RSI, RDI => Temps
+	# X12 => MALLOC
+	# X13 => HEAD
+	# X14 => Output_file
+	# X15 => Input_file
+
+	# Struct format: (size 32)
+	# NEXT => 0
+	# TYPE => 8
+	# TEXT => 16
+	# EXPRESSION => 24
+
+	# Types
+	# None => 0
+	# MACRO => 1
+	# STRING => 2
+
+:ELF_text
+
+# Where the ELF Header is going to hit
+# Simply jump to _start
+# Our main function
+:_start
+	LDR_X1_[SP,16]              # Get the actual input name
+    SET_X0_TO_FCNTL_H_AT_FDCWD  # AT_FDCWD, relative to current working directory
+	SET_X2_TO_0                 # prepare read_only
+    SET_X8_TO_SYS_OPENAT        # The syscall number for openat(), aarch64 has no open()
+	SYSCALL                     # Now open that damn file
+	SET_X15_FROM_X0             # Preserve the file pointer we were given
+
+    LDR_X1_[SP,24]              # Get the output name
+    SET_X0_TO_FCNTL_H_AT_FDCWD  # AT_FDCWD, relative to current working directory
+    SET_X2_TO_577               # Prepare file as O_WRONLY|O_CREAT|O_TRUNC
+    SET_X3_TO_384               # Prepare file as RWX for owner only (600 in octal)
+    SET_X8_TO_SYS_OPENAT        # The syscall number for openat(), aarch64 has no open()
+    SYSCALL                     # Open file!
+    CMP_X0_TO_0                 # Check for missing output
+    SKIP_INST_LE                # Have real output
+	^~_start_out FBRANCH
+    SET_X0_TO_1                 # Use stdout
+
+:_start_out
+	SET_X14_FROM_X0             # Preserve the file pointer we were given
+    SET_X8_TO_SYS_BRK           # the Syscall # for SYS_BRK
+	SET_X0_TO_0                 # Get current brk
+	SYSCALL                     # Let the kernel do the work
+	SET_X12_FROM_X0             # Set our malloc pointer
+
+	^~Tokenize_Line FCALL       # Get all lines
+	SET_X0_FROM_X13             # prepare for Reverse_List
+	^~Reverse_List FCALL        # Correct order
+	SET_X13_FROM_X0             # Update HEAD
+	^~Identify_Macros FCALL     # Find the DEFINEs
+	^~Line_Macro FCALL          # Apply the DEFINEs
+	^~Process_String FCALL      # Handle strings
+	^~Eval_Immediates FCALL     # Handle Numbers
+	^~Preserve_Other FCALL      # Collect the remaining
+	^~Print_Hex FCALL           # Output our results
+
+:Done
+    # program completed Successfully
+	SET_X0_TO_0                 # All is well
+    SET_X8_TO_SYS_EXIT          # put the exit syscall number in eax
+	SYSCALL                     # Call it a good day
+
+
+# Tokenize_Line Function
+# Using input file X15 and Head X13
+# Creates a linked list of structs
+# Uses X1 for in_set strings, X2 for Int C and X3 for Struct Token* p
+:Tokenize_Line
+	PUSH_X1                     # Protect X1
+	PUSH_X2                     # Protect X2
+	PUSH_X3                     # Protect X3
+	PUSH_LR
+:restart
+	^~fgetc FCALL               # Read a char
+	CMP_X0_TO_MINUS_4           # Check for EOF
+	SKIP_INST_NE                # File is collected
+	^~done FBRANCH
+
+	AND_X0_X0_0xFF              # We have to zero extend it to use it
+	SET_X2_FROM_X0              # Protect C
+
+	LOAD_W1_AHEAD               # Get pointer to "#;"
+	SKIP_32_DATA
+	&comments
+	^~In_Set FCALL              # Check for comments
+	CMP_X0_TO_1                 # If comments
+	SKIP_INST_NE                # try again
+	^~Purge_LineComment FBRANCH
+
+	SET_X0_FROM_X2              # put C in place for check
+	LOAD_W1_AHEAD               # Get pointer to "\n\t "
+	SKIP_32_DATA
+	&terminators
+	^~In_Set FCALL              # Check for terminators
+	CMP_X0_TO_1                 # If terminator
+	SKIP_INST_NE                # try again
+	^~restart RBRANCH
+
+	SET_X0_TO_32                # Malloc the struct P
+	^~malloc FCALL              # Get pointer to P
+	SET_X3_FROM_X0              # Protect P
+	STR_X13_[X3]                # P->NEXT = HEAD
+	SET_X13_FROM_X3             # HEAD = P
+
+	SET_X0_FROM_X2              # put C in place for check
+	LOAD_W1_AHEAD               # Get pointer to "\"'"
+	SKIP_32_DATA
+	&string_char
+	^~In_Set FCALL              # Check for string chars
+	CMP_X0_TO_1                 # If string char
+	SKIP_INST_NE                # Get string
+	^~Store_String FBRANCH
+
+	^~Store_Atom FCALL          # Get whole token
+	^~restart RBRANCH
+
+:done
+	POP_LR
+	POP_X3                      # Restore X3
+	POP_X2                      # Restore X2
+	POP_X1                      # Restore X1
+	RETURN
+
+
+# fgetc function
+# Receives FILE* in X15
+# Returns -4 (EOF) or char in X0
+:fgetc
+	PUSH_X1
+	PUSH_X2
+	SET_X0_TO_MINUS_4           # Put EOF in x0
+	PUSH_X0                     # Assume bad (If nothing read, value will remain EOF)
+	SET_X1_FROM_SP              # Get stack addresss
+	SET_X0_FROM_X15             # Where are we reading from
+    SET_X8_TO_SYS_READ          # the syscall number for read
+	SET_X2_TO_1                 # set the size of chars we want
+
+	SYSCALL                     # call the Kernel
+
+	POP_X0                      # Get either char or EOF
+	POP_X2
+	POP_X1
+	RETURN
+
+
+# Malloc isn't actually required if the program being built fits in the initial memory
+# However, it doesn't take much to add it.
+# Requires X12 to be initialized and X0 to have the number of desired bytes
+:malloc
+	PUSH_X1
+	ADD_X0_X0_X12               # Request the number of desired bytes
+    SET_X8_TO_SYS_BRK           # the Syscall # for SYS_BRK
+	SYSCALL                     # call the Kernel
+
+	SET_X1_FROM_X12             #save Return pointer
+	SET_X12_FROM_X0             # Update pointer
+	SET_X0_FROM_X1              # return pointer
+	POP_X1
+	RETURN
+
+
+# Purge_LineComment function
+# Reads chars until LF and jumps to restart
+:Purge_LineComment
+	^~fgetc RCALL               # Get a char
+	AND_X0_X0_0xFF              # Zero extend
+	CMP_X0_TO_10                # While not LF
+	SKIP_INST_EQ                # Keep reading
+	^~Purge_LineComment RBRANCH
+	^~restart RBRANCH
+
+
+# Store_String Function
+# Receives C in X2, HEAD in X3 and Input file in X14
+# Uses X1 for terminator, X2 for C and X3 for string
+:Store_String
+	PUSH_X1                     # Protect X1
+	PUSH_X2                     # Protect X2
+	PUSH_X3                     # Protect X3
+
+	SET_X0_TO_2                 # Using TYPE STRING
+	STR_X0_[X3,8]               # HEAD->TYPE = STRING
+	SET_X0_TO_512               # Malloc the string
+	^~malloc RCALL              # Get pointer to P
+	STR_X0_[X3,16]              # HEAD->TEXT = STRING
+	SET_X1_FROM_X2              # Protect terminator
+	SET_X3_FROM_X0              # Protect string pointer
+:Store_String_Loop
+	STR_BYTE_W2_[X3]_1
+	^~fgetc RCALL               # read next char
+	AND_X0_X0_0xFF              # Zero extend it
+	SET_X2_FROM_X0              # Update C
+    CMP_X2_X1                   # See if we hit terminator
+	SKIP_INST_EQ                # Otherwise keep looping
+	^~Store_String_Loop RBRANCH
+
+	POP_X3                      # Restore X3
+	POP_X2                      # Restore X2
+	POP_X1                      # Restore X1
+	SET_X0_FROM_X3              # Return HEAD
+	^~restart RBRANCH
+
+
+# Store_Atom Function
+# Receives C in X2, HEAD in X3 and Input file in X15
+# Uses X1 for in_set strings, X2 for C and X3 for string
+:Store_Atom
+	PUSH_X1                     # Protect X1
+	PUSH_X2                     # Protect X2
+	PUSH_X3                     # Protect X3
+	PUSH_LR
+
+	SET_X0_TO_256               # Malloc the string
+	^~malloc RCALL              # Get pointer to P
+	STR_X0_[X3,16]              # HEAD->TEXT = STRING
+	LOAD_W1_AHEAD               # Get pointer to "\n\t "
+	SKIP_32_DATA
+	&terminators
+	SET_X3_FROM_X0              # Protect string pointer
+:Store_Atom_loop
+	STR_BYTE_W2_[X3]_1          # write byte
+	^~fgetc RCALL               # read next char
+	AND_X0_X0_0xFF              # Zero extend it
+	SET_X2_FROM_X0              # Update C
+	^~In_Set FCALL              # Check for terminators
+	CMP_X0_TO_0                 # Check for "\n\t "
+	SKIP_INST_NE                # Loop otherwise
+	^~Store_Atom_loop RBRANCH
+
+	POP_LR
+	POP_X3                      # Restore X3
+	POP_X2                      # Restore X2
+	POP_X1                      # Restore X1
+	SET_X0_FROM_X3              # Return HEAD
+	RETURN
+
+
+# In_Set function
+# Receives Char C in X0 and CHAR* in X1
+# Returns 1 if true, zero if false in X0
+:In_Set
+	PUSH_X1                     # Protect X1
+	PUSH_X2                     # Protect X2
+:In_Set_loop
+	LDR_BYTE_W2_[X1]_1          # Read char
+
+	CMP_X0_X2                   # See if they match
+	SKIP_INST_NE                # return true
+	^~In_Set_True FBRANCH
+
+	CMP_X2_TO_0                 # Check for NULL
+	SKIP_INST_NE                # return false
+	^~In_Set_False FBRANCH
+
+	^~In_Set_loop RBRANCH       # Keep looping
+
+:In_Set_True
+	SET_X0_TO_1                 # Set True
+	POP_X2                      # Restore X2
+	POP_X1                      # Restore X1
+	RETURN
+
+:In_Set_False
+	SET_X0_TO_0                 # Set FALSE
+	POP_X2                      # Restore X2
+	POP_X1                      # Restore X1
+	RETURN
+
+# Char sets
+:terminators
+	"
+	 "
+
+:comments
+	"#;"
+
+:string_char
+    '22 27 00'
+
+    '00 00'                         # .p2align 2
+
+# Reverse_List function
+# Receives List in X0
+# Returns the list reversed in X0
+:Reverse_List
+	PUSH_X1                     # Protect X1
+	PUSH_X2                     # Protect X2
+	SET_X1_FROM_X0              # Set HEAD
+	SET_X0_TO_0                 # ROOT = NULL
+:Reverse_List_Loop
+	CMP_X1_TO_0                 # WHILE HEAD != NULL
+	SKIP_INST_NE                # Stop otherwise
+	^~Reverse_List_Done FBRANCH
+
+	LDR_X2_[X1]                 # NEXT = HEAD->NEXT
+	STR_X0_[X1]                 # HEAD->NEXT = ROOT
+	SET_X0_FROM_X1              # ROOT = HEAD
+	SET_X1_FROM_X2              # HEAD = NEXT
+	^~Reverse_List_Loop RBRANCH # Keep Going
+
+:Reverse_List_Done
+	POP_X2                      # Restore X2
+	POP_X1                      # Restore X1
+	RETURN
+
+
+# Identify_Macros function
+# Receives List in X0
+# Updates the list in place# does not modify registers
+# Uses X1 for DEFINE, X2 for I
+:Identify_Macros
+	PUSH_X0                     # Protect X0
+	PUSH_X1                     # Protect X1
+	PUSH_X2                     # Protect X2
+	PUSH_X3                     # Protect X3
+	PUSH_LR
+
+	LOAD_W1_AHEAD               # Setup define string
+	SKIP_32_DATA
+	&DEFINE_str
+	SET_X2_FROM_X0              # I = HEAD
+:Identify_Macros_Loop
+	LDR_X0_[X2,16]              # I->TEXT
+	^~match FCALL               # IF "DEFINE" == I->TEXT
+	CMP_X0_TO_0                 # Check if match
+	SKIP_INST_EQ                # Skip the work
+	^~Identify_Macros_Next FBRANCH
+
+    # Deal with MACRO
+	SET_X0_TO_1                 # Using MACRO
+	STR_X0_[X2,8]               # I->TYPE = MACRO
+
+	LDR_X0_[X2]                 # I->NEXT
+	LDR_X0_[X0,16]              # I->NEXT->TEXT
+	STR_X0_[X2,16]              # I->TEXT = I->NEXT->TEXT
+
+	LDR_X0_[X2]                 # I->NEXT
+	LDR_X0_[X0]                 # I->NEXT->NEXT
+	LDR_X0_[X0,16]              # I->NEXT->NEXT->TEXT
+	STR_X0_[X2,24]              # I->EXPRESSION = I->NEXT->NEXT->TEXT
+
+	LDR_X0_[X2]                 # I->NEXT
+	LDR_X0_[X0]                 # I->NEXT->NEXT
+	LDR_X0_[X0]                 # I->NEXT->NEXT->NEXT
+	STR_X0_[X2]                 # I->NEXT = I->NEXT->NEXT->NEXT
+
+:Identify_Macros_Next
+	LDR_X2_[X2]                 # I = I->NEXT
+	CMP_X2_TO_0                 # Check for NULL
+	SKIP_INST_EQ                # Keep looping otherwise
+	^~Identify_Macros_Loop RBRANCH
+
+	POP_LR
+	POP_X3                      # Restore X3
+	POP_X2                      # Restore X2
+	POP_X1                      # Restore X1
+	POP_X0                      # Restore X0
+	RETURN
+
+:DEFINE_str
+    "DEFINE"
+
+    '00'                        # .p2align 2
+
+# match function
+# Receives CHAR* in X0 and CHAR* in X1
+# Returns 0 (TRUE) or 1 (FALSE) in X0
+:match
+	PUSH_X1                     # Protect X1
+	PUSH_X2                     # Protect X2
+	PUSH_X3                     # Protect X3
+	PUSH_LR
+
+	SET_X2_FROM_X0              # S1 in place
+	SET_X3_FROM_X1              # S2 in place
+:match_Loop
+	LDR_BYTE_W0_[X2]_1          # S1[0]
+	LDR_BYTE_W1_[X3]_1          # S2[0]
+	CMP_X0_X1                   # See if they match
+	SKIP_INST_EQ                # If not
+	^~match_False FBRANCH
+
+	CMP_X0_TO_0                 # If reached end of string
+	SKIP_INST_NE                # Perfect match
+	^~match_Done FBRANCH
+	^~match_Loop RBRANCH        # Otherwise keep looping
+
+:match_False
+	SET_X0_TO_1                 # Return false
+:match_Done
+	POP_LR
+	POP_X3                      # Restore X3
+	POP_X2                      # Restore X2
+	POP_X1                      # Restore X1
+	RETURN
+
+
+# Line_Macro function
+# Receives List in X0
+# Updates the list in place# does not modify registers
+# Uses X0 for I, X1 for I->TEXT, X2 for I->EXPRESSION
+:Line_Macro
+	PUSH_X0                     # Protect X0
+	PUSH_X1                     # Protect X1
+	PUSH_X2                     # Protect X2
+	PUSH_X3                     # Protect X3
+	PUSH_LR
+:Line_Macro_Loop
+	LDR_X1_[X0,8]               # I->TYPE
+	CMP_X1_TO_1                 # IF MACRO == I->TYPE
+	SKIP_INST_EQ                # Otherwise move on
+	^~Line_Macro_Next FBRANCH
+
+    # Is a macro apply
+	LDR_X1_[X0,16]              # I->TEXT
+	LDR_X2_[X0,24]              # I->EXPRESSION
+	LDR_X0_[X0]                 # I->NEXT
+	^~Set_Expression FCALL      # Apply it
+	^~Line_Macro_Loop RBRANCH   # Move on to next
+
+:Line_Macro_Next
+	LDR_X0_[X0]                 # I->NEXT
+	CMP_X0_TO_0                 # Check for NULL
+	SKIP_INST_EQ                # Keep going
+	^~Line_Macro_Loop RBRANCH
+
+	POP_LR
+	POP_X3                      # Restore X3
+	POP_X2                      # Restore X2
+	POP_X1                      # Restore X1
+	POP_X0                      # Restore X0
+	RETURN
+
+
+# Set_Expression function
+# Receives List in X0, CHAR* in X1 and CHAR* in X2
+# Updates the list in place# does not modify registers
+# Uses X1 for C, X2 for EXP and X3 for I
+:Set_Expression
+	PUSH_X0                     # Protect X0
+	PUSH_X1                     # Protect X1
+	PUSH_X2                     # Protect X2
+	PUSH_X3                     # Protect X3
+	PUSH_LR
+	SET_X3_FROM_X0              # Set I
+:Set_Expression_Loop
+	LDR_X0_[X3,8]               # I->TYPE
+	CMP_X0_TO_1                 # IF MACRO == I->TYPE
+	SKIP_INST_NE                # Ignore and move on
+	^~Set_Expression_Next FBRANCH
+
+	LDR_X0_[X3,16]              # I->TEXT
+	^~match RCALL               # Check for match
+	CMP_X0_TO_0                 # If match
+	SKIP_INST_EQ                # Otherwise next
+	^~Set_Expression_Next FBRANCH
+
+    # We have a non-macro match
+	STR_X2_[X3,24]              # I->EXPRESSION = EXP
+
+:Set_Expression_Next
+	LDR_X3_[X3]                 # I = I->NEXT
+	CMP_X3_TO_0                 # IF NULL == I
+	SKIP_INST_EQ                # Otherwise keep looping
+	^~Set_Expression_Loop RBRANCH
+
+	POP_LR
+	POP_X3                      # Restore X3
+	POP_X2                      # Restore X2
+	POP_X1                      # Restore X1
+	POP_X0                      # Restore X0
+	RETURN
+
+
+# Process_String function
+# Receives List in X0
+# Update the list in place; does not modify registers
+# Uses X1 for I->TEXT, X2 for I and X3 for S
+:Process_String
+	PUSH_X0                     # Protect X0
+	PUSH_X1                     # Protect X1
+	PUSH_X2                     # Protect X2
+	PUSH_X3                     # Protect X3
+	PUSH_LR
+
+	SET_X2_FROM_X0              # I = HEAD
+:Process_String_loop
+	LDR_X0_[X2,8]               # I->TYPE
+	CMP_X0_TO_2                 # IF STRING == I->TYPE
+	SKIP_INST_EQ                # Skip to next
+	^~Process_String_Next FBRANCH
+
+	LDR_X1_[X2,16]              # I->TEXT
+	LDR_BYTE_W0_[X1]            # I->TEXT[0]
+	CMP_X0_TO_39                # IF '\'' == I->TEXT[0]
+	SKIP_INST_EQ                # Deal with '"'
+	^~Process_String_Raw FBRANCH
+
+    # Deal with '\''
+    ADD_X1_X1_1                 # I->TEXT + 1
+	STR_X1_[X2,24]              # I->EXPRESSION = I->TEXT + 1
+	^~Process_String_Next FBRANCH # Move on to next
+
+:Process_String_Raw
+	SET_X0_FROM_X1              # Get length of I->TEXT
+	^~string_length FCALL       # Do it
+	LSR_X0_X0_2                 # LENGTH = LENGTH >> 2
+	ADD_X0_X0_1                 # LENGTH = LENGTH + 1
+	LSL_X0_X0_3                 # LENGTH = LENGTH << 3
+	^~malloc RCALL              # Get string
+	SET_X3_FROM_X1              # S = I->TEXT
+	ADD_X3_X3_1                 # S = S + 1
+	STR_X0_[X2,24]              # I->EXPRESSION = hexify
+	SET_X1_FROM_X0              # Put hexify buffer in x1
+
+:Process_String_Raw_Loop
+	LDR_BYTE_W0_[X3]_1          # Read 1 chars
+	PUSH_X0
+	^~hex8 FCALL                # write them all
+	POP_X0
+	CMP_X0_TO_0                 # Check for NULL
+	SKIP_INST_EQ                # Keep looping
+	^~Process_String_Raw_Loop RBRANCH
+
+:Process_String_Next
+	LDR_X2_[X2]                 # I = I->NEXT
+	CMP_X2_TO_0                 # IF NULL == I
+	SKIP_INST_EQ                # Otherwise keep looping
+	^~Process_String_loop RBRANCH
+
+	POP_LR
+	POP_X3                      # Restore X3
+	POP_X2                      # Restore X2
+	POP_X1                      # Restore X1
+	POP_X0                      # Restore X0
+	RETURN
+
+
+# string_length function
+# Receives CHAR* in X0
+# Returns INT in X0
+# Uses X0 for CH, X1 for S and X2 for INDEX
+:string_length
+	PUSH_X1                     # Protect X1
+	PUSH_X2                     # Protect X2
+	SET_X1_FROM_X0              # Set S
+	SET_X2_TO_0                 # INDEX = 0
+:string_length_loop
+	LDR_BYTE_W0_[X1,X2]         # S[INDEX]
+	CMP_X0_TO_0                 # IF NULL == S[INDEX]
+	SKIP_INST_NE                # Stop
+	^~string_length_done FBRANCH
+
+	ADD_X2_X2_1                 # INDEX = INDEX + 1
+	^~string_length_loop RBRANCH # Keep going
+
+:string_length_done
+	SET_X0_FROM_X2              # RETURN INDEX
+	POP_X2                      # Restore X2
+	POP_X1                      # Restore X1
+	RETURN
+
+
+# Eval_Immediates function
+# Receives List in X0
+# Updates the list in place; does not modify registers
+# Uses X1 for I->TEXT[0], X2 for I->TEXT[1] and X3 for I
+:Eval_Immediates
+	PUSH_X0                     # Protect X0
+	PUSH_X1                     # Protect X1
+	PUSH_X2                     # Protect X2
+	PUSH_X3                     # Protect X3
+	PUSH_LR
+	SET_X3_FROM_X0              # I = HEAD
+:Eval_Immediates_Loop
+    # Check for MACRO
+	LDR_X0_[X3,8]               # I->TYPE
+	CMP_X0_TO_1                 # IF MACRO == I-TYPE
+	SKIP_INST_NE                # Skip to next
+	^~Eval_Immediates_Next FBRANCH
+
+    # Check for NULL EXPRESSION
+	LDR_X0_[X3,24]              # I->EXPRESSION
+	CMP_X0_TO_0                 # IF NULL == I->EXPRESSION
+	SKIP_INST_EQ                # Skip to next
+	^~Eval_Immediates_Next FBRANCH
+
+    # Check if number
+	LDR_X0_[X3,16]              # I->TEXT
+	LDR_BYTE_W1_[X0]_1          # I->TEXT[0]
+	LDR_BYTE_W2_[X0]            # I->TEXT[1]
+	^~numerate_string FCALL     # Convert string to INT
+	CMP_X0_TO_0                 # IF 0 == numerate_number(I->TEXT + 1)
+	SKIP_INST_EQ                # Has a value
+	^~Eval_Immediates_value FBRANCH
+
+    # Last chance for Immediate
+	CMP_X2_TO_48                # If '0' == I->TEXT[1]
+	SKIP_INST_EQ                # Skip to next
+	^~Eval_Immediates_Next FBRANCH
+
+:Eval_Immediates_value
+	^~express_number FCALL      # Convert value to hex string
+	STR_X0_[X3,24]              # I->EXPRESSION = express_number(value, I-TEXT[0])
+
+:Eval_Immediates_Next
+	LDR_X3_[X3]                 # I = I->NEXT
+	CMP_X3_TO_0                 # IF NULL == I
+	SKIP_INST_EQ                # Otherwise keep looping
+	^~Eval_Immediates_Loop RBRANCH
+
+	POP_LR
+	POP_X3                      # Restore X3
+	POP_X2                      # Restore X2
+	POP_X1                      # Restore X1
+	POP_X0                      # Restore X0
+	RETURN
+
+
+# numerate_string function
+# Receives CHAR* in X0
+# Returns value of CHAR* in X0
+# Uses X0 for VALUE, X1 for S, X2 for CH and X4 for NEGATIVE?
+:numerate_string
+	PUSH_X1                     # Protect X1
+	PUSH_X2                     # Protect X2
+	PUSH_X3                     # Protect X3
+	PUSH_X4
+	SET_X1_FROM_X0              # put S in correct place
+	SET_X0_TO_0                 # Initialize to Zero
+:numerate_string_loop
+	LDR_BYTE_W2_[X1,1]          # S[1]
+	CMP_X2_TO_120               # IF 'x' == S[1]
+	SKIP_INST_NE                # Deal with hex input
+	^~numerate_hex FBRANCH
+
+    # Assume decimal input
+	SET_X4_TO_0                 # Assume no negation
+	LDR_BYTE_W2_[X1]            # S[0]
+	CMP_X2_TO_45                # IF '-' == S[0]
+	SKIP_INST_EQ                # Skip negation
+	^~numerate_decimal FBRANCH
+
+	SET_X4_TO_1                 # Set FLAG
+	ADD_X1_X1_1                 # S = S + 1
+
+:numerate_decimal
+	LDR_BYTE_W2_[X1]            # S[0]
+	CMP_X2_TO_0                 # IF NULL == S[0]
+	SKIP_INST_NE                # We are done
+	^~numerate_decimal_done FBRANCH
+
+	PUSH_X1
+	SET_X1_TO_10
+	MUL_X0_X0_X1                # VALUE = VALUE * 10
+	POP_X1
+
+	SUB_X2_X2_48                # CH = CH - '0'
+	CMP_X2_TO_9                 # Check for illegal
+	SKIP_INST_LE                # If CH > '9'
+	^~numerate_string_fail FBRANCH
+	CMP_X2_TO_0                 # Check for illegal
+	SKIP_INST_GE                # IF CH < 0
+	^~numerate_string_fail FBRANCH
+	ADD_X0_X0_X2                # VALUE = VALUE + CH
+	ADD_X1_X1_1                 # S = S + 1
+	^~numerate_decimal RBRANCH  # Keep looping
+
+:numerate_decimal_done
+	CMP_X4_TO_1                 # Check if need to negate
+	SKIP_INST_EQ                # Nope
+	^~numerate_string_done FBRANCH
+
+	NEG_X0_X0                   # VALUE = VALUE * -1
+	^~numerate_string_done FBRANCH # Done
+
+:numerate_hex
+	ADD_X1_X1_2                 # S = S + 2
+:numerate_hex_loop
+	LDR_BYTE_W2_[X1]            # S[0]
+	CMP_X2_TO_0                 # IF NULL == S[0]
+	SKIP_INST_NE                # We are done
+	^~numerate_string_done FBRANCH
+
+	LSL_X0_X0_4                 # VALUE = VALUE << 4
+	SUB_X2_X2_48                # CH = CH - '0'
+	CMP_X2_TO_10                # IF 10 >= CH
+	SKIP_INST_GE                # NO
+	^~numerate_hex_digit FBRANCH
+	SUB_X2_X2_7                 # Push A-F into range
+:numerate_hex_digit
+	CMP_X2_TO_15                # Check for illegal
+	SKIP_INST_LE                # If CH > 'F'
+	^~numerate_string_fail FBRANCH
+	CMP_X2_TO_0                 # Check for illegal
+	SKIP_INST_GE                # IF CH < 0
+	^~numerate_string_fail FBRANCH
+	ADD_X0_X0_X2                # VALUE = VALUE + CH
+	ADD_X1_X1_1                 # S = S + 1
+	^~numerate_hex_loop RBRANCH # Keep looping
+
+:numerate_string_fail
+	SET_X0_TO_0                 # Return ZERO
+
+:numerate_string_done
+	POP_X4                      # Restore X4
+	POP_X3                      # Restore X3
+	POP_X2                      # Restore X2
+	POP_X1                      # Restore X1
+	RETURN
+
+
+# express_number function
+# Receives INT in X0 and CHAR in X1
+# Allocates a string and expresses the value in hex
+# Returns string in X0
+# Uses X0 for VALUE, X1 for S and X2 for CH
+:express_number
+	PUSH_X1                     # Protect X1
+	PUSH_X2                     # Protect X2
+	PUSH_X3                     # Protect X3
+	PUSH_LR
+
+	SET_X2_FROM_X1              # Put CH in right place
+	SET_X1_FROM_X0              # Protect VALUE
+	CMP_X2_TO_37                # IF '%' == CH
+	SKIP_INST_EQ                # Otherwise try @
+	^~express_number2 FBRANCH
+
+	SET_X0_TO_9                 # We need 9bytes
+	^~malloc RCALL              # Get S pointer
+	SET_X3_FROM_X0              # Put S and VALUE in place
+	SET_X0_FROM_X1
+	SET_X1_FROM_X3
+	PUSH_X1                     # Protect S
+	^~hex32l FCALL              # Store 32bits
+	^~express_number_done FBRANCH # done
+
+:express_number2
+	CMP_X2_TO_64                # IF '@' == CH
+	SKIP_INST_EQ                # Othrewise try !
+	^~express_number1 FBRANCH
+
+	SET_X0_TO_5                 # We need 5bytes
+	^~malloc RCALL              # Get S pointer
+	SET_X3_FROM_X0              # Put S and VALUE in place
+	SET_X0_FROM_X1
+	SET_X1_FROM_X3
+	PUSH_X1                     # Protect S
+	^~hex16l FCALL              # Store 16bits
+	^~express_number_done FBRANCH # done
+
+:express_number1
+	SET_X0_TO_3                 # We need 3bytes
+	^~malloc RCALL              # Get S pointer
+	SET_X3_FROM_X0              # Put S and VALUE in place
+	SET_X0_FROM_X1
+	SET_X1_FROM_X3
+	PUSH_X1                     # Protect S
+	^~hex8 FCALL                # Store 8bit
+
+:express_number_done
+	POP_X0                      # Restore S
+	POP_LR
+	POP_X3                      # Restore X3
+	POP_X2                      # Restore X2
+	POP_X1                      # Restore X1
+	RETURN
+
+
+# HEX to ascii routine
+# Receives INT in X0 and CHAR* in X1
+# Stores ascii of INT in CHAR*
+# Returns only modifying X0
+:hex64l
+	PUSH_LR
+	PUSH_X0                     # Protect top 32
+	^~hex32l FCALL              # Store it
+	POP_X0                      # do top 32
+	LSR_X0_X0_32                # do bottom 32 first
+	^~hex32l FCALL
+	POP_LR
+	RETURN
+
+:hex32l
+	PUSH_LR
+	PUSH_X0                     # Protect top 16
+	^~hex16l FCALL              # Store it
+	POP_X0                      # do top 16
+	LSR_X0_X0_16                # do bottom 16 first
+	^~hex16l FCALL
+	POP_LR
+	RETURN
+
+:hex16l
+	PUSH_LR
+	PUSH_X0                     # Protect top byte
+	^~hex8 FCALL                # Store it
+	POP_X0                      # do high byte
+	LSR_X0_X0_8                 # do bottom byte first
+	^~hex8 FCALL
+	POP_LR
+	RETURN
+
+:hex8
+	PUSH_LR
+	PUSH_X0                     # Protect bottom nibble
+	LSR_X0_X0_4                 # do high nibble first
+	^~hex4 FCALL                # Store it
+	POP_X0                      # do low nibble
+	^~hex4 FCALL
+	POP_LR
+	RETURN
+
+:hex4
+	AND_X0_X0_0xF               # isolate nibble
+	ADD_X0_X0_48                # convert to ascii
+	CMP_X0_TO_57                # valid digit?
+	SKIP_INST_GT                # yes
+	^~hex1 FBRANCH
+	ADD_X0_X0_7                 # use alpha range
+:hex1
+	STR_BYTE_W0_[X1]_1          # store result
+	RETURN
+
+
+# Preserve_Other function
+# Receives List in X0
+# Updates the list in place# does not modify registers
+# Uses X0 for I, X1 for I->TEXT
+:Preserve_Other
+	PUSH_X0                     # Protect X0
+	PUSH_X1                     # Protect X1
+	PUSH_X2                     # Protect X2
+	PUSH_X3                     # Protect X3
+:Preserve_Other_Loop
+	LDR_X1_[X0,24]              # I->EXPRESSION
+	CMP_X1_TO_0                 # IF NULL == I->EXPRESSION
+	SKIP_INST_EQ                # Otherwise next
+	^~Preserve_Other_Next FBRANCH
+
+    # Needs preserving
+	LDR_X1_[X0,16]              # I->TEXT
+	STR_X1_[X0,24]              # I->EXPRESSION = I->TEXT
+
+:Preserve_Other_Next
+	LDR_X0_[X0]                 # I = I->NEXT
+	CMP_X0_TO_0                 # IF NULL == I
+	SKIP_INST_EQ                # Otherwise keep looping
+	^~Preserve_Other_Loop RBRANCH
+
+	POP_X3                      # Restore X3
+	POP_X2                      # Restore X2
+	POP_X1                      # Restore X1
+	POP_X0                      # Restore X0
+	RETURN
+
+
+# Print_Hex function
+# Receives list in X0
+# walks the list and prints the I->EXPRESSION for all nodes followed by newline
+# Uses X1 for I
+:Print_Hex
+	PUSH_X1                     # Protect X1
+	PUSH_X2                     # Protect X2
+	PUSH_LR
+	SET_X1_FROM_X13             # I = Head
+:Print_Hex_Loop
+	LDR_X0_[X1,8]               # I->TYPE
+	CMP_X0_TO_1                 # IF MACRO == I->TYPE
+	SKIP_INST_NE                # Skip
+	^~Print_Hex_Next FBRANCH
+
+	LDR_X0_[X1,24]              # Using EXPRESSION
+	^~File_Print FCALL          # Print it
+	SET_X0_TO_10                # NEWLINE
+	^~fputc FCALL               # Append it
+
+:Print_Hex_Next
+	LDR_X1_[X1]                 # Iterate to next Token
+	CMP_X1_TO_0                 # Check for NULL
+	SKIP_INST_EQ                # Otherwise keep looping
+	^~Print_Hex_Loop RBRANCH
+
+	POP_LR
+	POP_X2                      # Restore X2
+	POP_X1                      # Restore X1
+	RETURN
+
+
+# File_Print function
+# Receives CHAR* in X0
+# calls fputc for every non-null char
+:File_Print
+	PUSH_X1                     # Protect X1
+	PUSH_X2                     # Protect X2
+	PUSH_LR
+	SET_X1_FROM_X0              # Protect S
+	CMP_X0_TO_0                 # Protect against nulls
+	SKIP_INST_NE                # Simply don't try to print them
+	^~File_Print_Done FBRANCH
+:File_Print_Loop
+	LDR_BYTE_W0_[X1]            # Read byte
+	CMP_X0_TO_0                 # Check for NULL
+	SKIP_INST_NE                # Stop at NULL
+	^~File_Print_Done FBRANCH
+
+	^~fputc FCALL               # write it
+	ADD_X1_X1_1                 # S = S + 1
+	^~File_Print_Loop RBRANCH   # Keep going
+
+:File_Print_Done
+	POP_LR
+	POP_X2                      # Restore X2
+	POP_X1                      # Restore X1
+	RETURN
+
+
+# fputc function
+# receives CHAR in X0 and FILE* in X14
+# writes char and Returns
+:fputc
+	PUSH_X1
+	PUSH_X2
+
+	PUSH_X0                     # We are writing x0
+	SET_X1_FROM_SP              # Get stack address
+	SET_X0_FROM_X14             # Write to target file
+    SET_X8_TO_SYS_WRITE         # the syscall number for write
+	SET_X2_TO_1                 # set the size of chars we want
+
+	SYSCALL                     # call the Kernel
+
+	POP_X0                      # Restore stack
+	POP_X2                      # Restore X3
+	POP_X1
+	RETURN
+
+:ELF_data
+:ELF_end
+:ELF_sym
+:ELF_str

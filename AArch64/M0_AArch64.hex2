@@ -1,0 +1,958 @@
+; Copyright (C) 2017 Jeremiah Orians
+; Copyright (C) 2020 Sanne Wouda
+; This file is part of stage0.
+;
+; stage0 is free software: you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation, either version 3 of the License, or
+; (at your option) any later version.
+;
+; stage0 is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with stage0.  If not, see <http://www.gnu.org/licenses/>.
+
+
+	; Register usage:
+	; X0, X8, RSI, RDI => Temps
+	; X12 => MALLOC
+	; X13 => HEAD
+	; X14 => Output_file
+	; X15 => Input_file
+
+	; Struct format: (size 32)
+	; NEXT => 0
+	; TYPE => 8
+	; TEXT => 16
+	; EXPRESSION => 24
+
+	; Types
+	; None => 0
+	; MACRO => 1
+	; STRING => 2
+
+; Where the ELF Header is going to hit
+; Simply jump to _start
+; Our main function
+:_start
+	e10b40f9                     # LDR_X1_[SP,16]                  ; Get the actual input name
+	600c8092                     # SET_X0_TO_FCNTL_H_AT_FDCWD      ; AT_FDCWD, relative to current working directory
+	020080d2                     # SET_X2_TO_0                     ; prepare read_only
+	080780d2                     # SET_X8_TO_SYS_OPENAT            ; The syscall number for openat(), aarch64 has no open()
+	010000d4                     # SYSCALL                         ; Now open that damn file
+	ef0300aa                     # SET_X15_FROM_X0                 ; Preserve the file pointer we were given
+
+	e10f40f9                     # LDR_X1_[SP,24]                  ; Get the output name
+	600c8092                     # SET_X0_TO_FCNTL_H_AT_FDCWD      ; AT_FDCWD, relative to current working directory
+	224880d2                     # SET_X2_TO_577                   ; Prepare file as O_WRONLY|O_CREAT|O_TRUNC
+	033080d2                     # SET_X3_TO_384                   ; Prepare file as RWX for owner only (600 in octal)
+	080780d2                     # SET_X8_TO_SYS_OPENAT            ; The syscall number for openat(), aarch64 has no open()
+	010000d4                     # SYSCALL                         ; Open file!
+	1f0000f1                     # CMP_X0_TO_0                     ; Check for missing output
+	4d000054                     # SKIP_INST_LE                    ; Have real output
+	^~_start_out 14              # ^~_start_out FBRANCH
+	200080d2                     # SET_X0_TO_1                     ; Use stdout
+
+:_start_out
+	ee0300aa                     # SET_X14_FROM_X0                 ; Preserve the file pointer we were given
+	c81a80d2                     # SET_X8_TO_SYS_BRK               ; the Syscall # for SYS_BRK
+	000080d2                     # SET_X0_TO_0                     ; Get current brk
+	010000d4                     # SYSCALL                         ; Let the kernel do the work
+	ec0300aa                     # SET_X12_FROM_X0                 ; Set our malloc pointer
+
+	^~Tokenize_Line 94           # ^~Tokenize_Line FCALL           ; Get all lines
+	e0030daa                     # SET_X0_FROM_X13                 ; prepare for Reverse_List
+	^~Reverse_List 94            # ^~Reverse_List FCALL            ; Correct order
+	ed0300aa                     # SET_X13_FROM_X0                 ; Update HEAD
+	^~Identify_Macros 94         # ^~Identify_Macros FCALL         ; Find the DEFINEs
+	^~Line_Macro 94              # ^~Line_Macro FCALL              ; Apply the DEFINEs
+	^~Process_String 94          # ^~Process_String FCALL          ; Handle strings
+	^~Eval_Immediates 94         # ^~Eval_Immediates FCALL         ; Handle Numbers
+	^~Preserve_Other 94          # ^~Preserve_Other FCALL          ; Collect the remaining
+	^~Print_Hex 94               # ^~Print_Hex FCALL               ; Output our results
+
+:Done
+	; program completed Successfully
+	000080d2                     # SET_X0_TO_0                     ; All is well
+	a80b80d2                     # SET_X8_TO_SYS_EXIT              ; put the exit syscall number in eax
+	010000d4                     # SYSCALL                         ; Call it a good day
+
+
+; Tokenize_Line Function
+; Using input file X15 and Head X13
+; Creates a linked list of structs
+; Uses X1 for in_set strings, X2 for Int C and X3 for Struct Token* p
+:Tokenize_Line
+	e10f1ff8                     # PUSH_X1                         ; Protect X1
+	e20f1ff8                     # PUSH_X2                         ; Protect X2
+	e30f1ff8                     # PUSH_X3                         ; Protect X3
+	fe0f1ff8                     # PUSH_LR
+:restart
+	^~fgetc 94                   # ^~fgetc FCALL                   ; Read a char
+	1f1000b1                     # CMP_X0_TO_MINUS_4               ; Check for EOF
+	41000054                     # SKIP_INST_NE                    ; File is collected
+	^~done 14                    # ^~done FBRANCH
+
+	001c4092                     # AND_X0_X0_0xFF                  ; We have to zero extend it to use it
+	e20300aa                     # SET_X2_FROM_X0                  ; Protect C
+
+	41000018                     # LOAD_W1_AHEAD                   ; Get pointer to ";;"
+	02000014                     # SKIP_32_DATA
+	&comments                    # &comments
+	^~In_Set 94                  # ^~In_Set FCALL                  ; Check for comments
+	1f0400f1                     # CMP_X0_TO_1                     ; If comments
+	41000054                     # SKIP_INST_NE                    ; try again
+	^~Purge_LineComment 14       # ^~Purge_LineComment FBRANCH
+
+	e00302aa                     # SET_X0_FROM_X2                  ; put C in place for check
+	41000018                     # LOAD_W1_AHEAD                   ; Get pointer to "\n\t "
+	02000014                     # SKIP_32_DATA
+	&terminators                 # &terminators
+	^~In_Set 94                  # ^~In_Set FCALL                  ; Check for terminators
+	1f0400f1                     # CMP_X0_TO_1                     ; If terminator
+	41000054                     # SKIP_INST_NE                    ; try again
+	^~restart 17                 # ^~restart RBRANCH
+
+	000480d2                     # SET_X0_TO_32                    ; Malloc the struct P
+	^~malloc 94                  # ^~malloc FCALL                  ; Get pointer to P
+	e30300aa                     # SET_X3_FROM_X0                  ; Protect P
+	6d0000f9                     # STR_X13_[X3]                    ; P->NEXT = HEAD
+	ed0303aa                     # SET_X13_FROM_X3                 ; HEAD = P
+
+	e00302aa                     # SET_X0_FROM_X2                  ; put C in place for check
+	41000018                     # LOAD_W1_AHEAD                   ; Get pointer to "\"'"
+	02000014                     # SKIP_32_DATA
+	&string_char                 # &string_char
+	^~In_Set 94                  # ^~In_Set FCALL                  ; Check for string chars
+	1f0400f1                     # CMP_X0_TO_1                     ; If string char
+	41000054                     # SKIP_INST_NE                    ; Get string
+	^~Store_String 14            # ^~Store_String FBRANCH
+
+	^~Store_Atom 94              # ^~Store_Atom FCALL              ; Get whole token
+	^~restart 17                 # ^~restart RBRANCH
+
+:done
+	fe0741f8                     # POP_LR
+	e30741f8                     # POP_X3                          ; Restore X3
+	e20741f8                     # POP_X2                          ; Restore X2
+	e10741f8                     # POP_X1                          ; Restore X1
+	c0035fd6                     # RETURN
+
+
+; fgetc function
+; Receives FILE* in X15
+; Returns -4 (EOF) or char in X0
+:fgetc
+	e10f1ff8                     # PUSH_X1
+	e20f1ff8                     # PUSH_X2
+	60008092                     # SET_X0_TO_MINUS_4               ; Put EOF in x0
+	e00f1ff8                     # PUSH_X0                         ; Assume bad (If nothing read, value will remain EOF)
+	e1030091                     # SET_X1_FROM_SP                  ; Get stack addresss
+	e0030faa                     # SET_X0_FROM_X15                 ; Where are we reading from
+	e80780d2                     # SET_X8_TO_SYS_READ              ; the syscall number for read
+	220080d2                     # SET_X2_TO_1                     ; set the size of chars we want
+
+	010000d4                     # SYSCALL                         ; call the Kernel
+
+	e00741f8                     # POP_X0                          ; Get either char or EOF
+	e20741f8                     # POP_X2
+	e10741f8                     # POP_X1
+	c0035fd6                     # RETURN
+
+
+; Malloc isn't actually required if the program being built fits in the initial memory
+; However, it doesn't take much to add it.
+; Requires X12 to be initialized and X0 to have the number of desired bytes
+:malloc
+	e10f1ff8                     # PUSH_X1
+	00000c8b                     # ADD_X0_X0_X12                   ; Request the number of desired bytes
+	c81a80d2                     # SET_X8_TO_SYS_BRK               ; the Syscall # for SYS_BRK
+	010000d4                     # SYSCALL                         ; call the Kernel
+
+	e1030caa                     # SET_X1_FROM_X12                 ; save Return pointer
+	ec0300aa                     # SET_X12_FROM_X0                 ; Update pointer
+	e00301aa                     # SET_X0_FROM_X1                  ; return pointer
+	e10741f8                     # POP_X1
+	c0035fd6                     # RETURN
+
+
+; Purge_LineComment function
+; Reads chars until LF and jumps to restart
+:Purge_LineComment
+	^~fgetc 97                   # ^~fgetc RCALL                   ; Get a char
+	001c4092                     # AND_X0_X0_0xFF                  ; Zero extend
+	1f2800f1                     # CMP_X0_TO_10                    ; While not LF
+	40000054                     # SKIP_INST_EQ                    ; Keep reading
+	^~Purge_LineComment 17       # ^~Purge_LineComment RBRANCH
+	^~restart 17                 # ^~restart RBRANCH
+
+
+; Store_String Function
+; Receives C in X2, HEAD in X3 and Input file in X14
+; Uses X1 for terminator, X2 for C and X3 for string
+:Store_String
+	e10f1ff8                     # PUSH_X1                         ; Protect X1
+	e20f1ff8                     # PUSH_X2                         ; Protect X2
+	e30f1ff8                     # PUSH_X3                         ; Protect X3
+
+	400080d2                     # SET_X0_TO_2                     ; Using TYPE STRING
+	600400f9                     # STR_X0_[X3,8]                   ; HEAD->TYPE = STRING
+	004080d2                     # SET_X0_TO_512                   ; Malloc the string
+	^~malloc 97                  # ^~malloc RCALL                  ; Get pointer to P
+	600800f9                     # STR_X0_[X3,16]                  ; HEAD->TEXT = STRING
+	e10302aa                     # SET_X1_FROM_X2                  ; Protect terminator
+	e30300aa                     # SET_X3_FROM_X0                  ; Protect string pointer
+:Store_String_Loop
+	62140038                     # STR_BYTE_W2_[X3]_1
+	^~fgetc 97                   # ^~fgetc RCALL                   ; read next char
+	001c4092                     # AND_X0_X0_0xFF                  ; Zero extend it
+	e20300aa                     # SET_X2_FROM_X0                  ; Update C
+	5f0001eb                     # CMP_X2_X1                       ; See if we hit terminator
+	40000054                     # SKIP_INST_EQ                    ; Otherwise keep looping
+	^~Store_String_Loop 17       # ^~Store_String_Loop RBRANCH
+
+	e30741f8                     # POP_X3                          ; Restore X3
+	e20741f8                     # POP_X2                          ; Restore X2
+	e10741f8                     # POP_X1                          ; Restore X1
+	e00303aa                     # SET_X0_FROM_X3                  ; Return HEAD
+	^~restart 17                 # ^~restart RBRANCH
+
+
+; Store_Atom Function
+; Receives C in X2, HEAD in X3 and Input file in X15
+; Uses X1 for in_set strings, X2 for C and X3 for string
+:Store_Atom
+	e10f1ff8                     # PUSH_X1                         ; Protect X1
+	e20f1ff8                     # PUSH_X2                         ; Protect X2
+	e30f1ff8                     # PUSH_X3                         ; Protect X3
+	fe0f1ff8                     # PUSH_LR
+
+	002080d2                     # SET_X0_TO_256                   ; Malloc the string
+	^~malloc 97                  # ^~malloc RCALL                  ; Get pointer to P
+	600800f9                     # STR_X0_[X3,16]                  ; HEAD->TEXT = STRING
+	41000018                     # LOAD_W1_AHEAD                   ; Get pointer to "\n\t "
+	02000014                     # SKIP_32_DATA
+	&terminators                 # &terminators
+	e30300aa                     # SET_X3_FROM_X0                  ; Protect string pointer
+:Store_Atom_loop
+	62140038                     # STR_BYTE_W2_[X3]_1              ; write byte
+	^~fgetc 97                   # ^~fgetc RCALL                   ; read next char
+	001c4092                     # AND_X0_X0_0xFF                  ; Zero extend it
+	e20300aa                     # SET_X2_FROM_X0                  ; Update C
+	^~In_Set 94                  # ^~In_Set FCALL                  ; Check for terminators
+	1f0000f1                     # CMP_X0_TO_0                     ; Check for "\n\t "
+	41000054                     # SKIP_INST_NE                    ; Loop otherwise
+	^~Store_Atom_loop 17         # ^~Store_Atom_loop RBRANCH
+
+	fe0741f8                     # POP_LR
+	e30741f8                     # POP_X3                          ; Restore X3
+	e20741f8                     # POP_X2                          ; Restore X2
+	e10741f8                     # POP_X1                          ; Restore X1
+	e00303aa                     # SET_X0_FROM_X3                  ; Return HEAD
+	c0035fd6                     # RETURN
+
+
+; In_Set function
+; Receives Char C in X0 and CHAR* in X1
+; Returns 1 if true, zero if false in X0
+:In_Set
+	e10f1ff8                     # PUSH_X1                         ; Protect X1
+	e20f1ff8                     # PUSH_X2                         ; Protect X2
+:In_Set_loop
+	22144038                     # LDR_BYTE_W2_[X1]_1              ; Read char
+
+	1f0002eb                     # CMP_X0_X2                       ; See if they match
+	41000054                     # SKIP_INST_NE                    ; return true
+	^~In_Set_True 14             # ^~In_Set_True FBRANCH
+
+	5f0000f1                     # CMP_X2_TO_0                     ; Check for NULL
+	41000054                     # SKIP_INST_NE                    ; return false
+	^~In_Set_False 14            # ^~In_Set_False FBRANCH
+
+	^~In_Set_loop 17             # ^~In_Set_loop RBRANCH           ; Keep looping
+
+:In_Set_True
+	200080d2                     # SET_X0_TO_1                     ; Set True
+	e20741f8                     # POP_X2                          ; Restore X2
+	e10741f8                     # POP_X1                          ; Restore X1
+	c0035fd6                     # RETURN
+
+:In_Set_False
+	000080d2                     # SET_X0_TO_0                     ; Set FALSE
+	e20741f8                     # POP_X2                          ; Restore X2
+	e10741f8                     # POP_X1                          ; Restore X1
+	c0035fd6                     # RETURN
+
+; Char sets
+:terminators
+	0A 09 20 00                  # "\n\t "
+
+:comments
+	23 3B 00                     # "#;"
+
+:string_char
+	22 27 00                     # '22 27 00'
+
+	00 00                        # '00 00'                         ; .p2align 2
+
+; Reverse_List function
+; Receives List in X0
+; Returns the list reversed in X0
+:Reverse_List
+	e10f1ff8                     # PUSH_X1                         ; Protect X1
+	e20f1ff8                     # PUSH_X2                         ; Protect X2
+	e10300aa                     # SET_X1_FROM_X0                  ; Set HEAD
+	000080d2                     # SET_X0_TO_0                     ; ROOT = NULL
+:Reverse_List_Loop
+	3f0000f1                     # CMP_X1_TO_0                     ; WHILE HEAD != NULL
+	41000054                     # SKIP_INST_NE                    ; Stop otherwise
+	^~Reverse_List_Done 14       # ^~Reverse_List_Done FBRANCH
+
+	220040f9                     # LDR_X2_[X1]                     ; NEXT = HEAD->NEXT
+	200000f9                     # STR_X0_[X1]                     ; HEAD->NEXT = ROOT
+	e00301aa                     # SET_X0_FROM_X1                  ; ROOT = HEAD
+	e10302aa                     # SET_X1_FROM_X2                  ; HEAD = NEXT
+	^~Reverse_List_Loop 17       # ^~Reverse_List_Loop RBRANCH     ; Keep Going
+
+:Reverse_List_Done
+	e20741f8                     # POP_X2                          ; Restore X2
+	e10741f8                     # POP_X1                          ; Restore X1
+	c0035fd6                     # RETURN
+
+
+; Identify_Macros function
+; Receives List in X0
+; Updates the list in place; does not modify registers
+; Uses X1 for DEFINE, X2 for I
+:Identify_Macros
+	e00f1ff8                     # PUSH_X0                         ; Protect X0
+	e10f1ff8                     # PUSH_X1                         ; Protect X1
+	e20f1ff8                     # PUSH_X2                         ; Protect X2
+	e30f1ff8                     # PUSH_X3                         ; Protect X3
+	fe0f1ff8                     # PUSH_LR
+
+	41000018                     # LOAD_W1_AHEAD                   ; Setup define string
+	02000014                     # SKIP_32_DATA
+	&DEFINE_str                  # &DEFINE_str
+	e20300aa                     # SET_X2_FROM_X0                  ; I = HEAD
+:Identify_Macros_Loop
+	400840f9                     # LDR_X0_[X2,16]                  ; I->TEXT
+	^~match 94                   # ^~match FCALL                   ; IF "DEFINE" == I->TEXT
+	1f0000f1                     # CMP_X0_TO_0                     ; Check if match
+	40000054                     # SKIP_INST_EQ                    ; Skip the work
+	^~Identify_Macros_Next 14    # ^~Identify_Macros_Next FBRANCH
+
+	; Deal with MACRO
+	200080d2                     # SET_X0_TO_1                     ; Using MACRO
+	400400f9                     # STR_X0_[X2,8]                   ; I->TYPE = MACRO
+
+	400040f9                     # LDR_X0_[X2]                     ; I->NEXT
+	000840f9                     # LDR_X0_[X0,16]                  ; I->NEXT->TEXT
+	400800f9                     # STR_X0_[X2,16]                  ; I->TEXT = I->NEXT->TEXT
+
+	400040f9                     # LDR_X0_[X2]                     ; I->NEXT
+	000040f9                     # LDR_X0_[X0]                     ; I->NEXT->NEXT
+	000840f9                     # LDR_X0_[X0,16]                  ; I->NEXT->NEXT->TEXT
+	400c00f9                     # STR_X0_[X2,24]                  ; I->EXPRESSION = I->NEXT->NEXT->TEXT
+
+	400040f9                     # LDR_X0_[X2]                     ; I->NEXT
+	000040f9                     # LDR_X0_[X0]                     ; I->NEXT->NEXT
+	000040f9                     # LDR_X0_[X0]                     ; I->NEXT->NEXT->NEXT
+	400000f9                     # STR_X0_[X2]                     ; I->NEXT = I->NEXT->NEXT->NEXT
+
+:Identify_Macros_Next
+	420040f9                     # LDR_X2_[X2]                     ; I = I->NEXT
+	5f0000f1                     # CMP_X2_TO_0                     ; Check for NULL
+	40000054                     # SKIP_INST_EQ                    ; Keep looping otherwise
+	^~Identify_Macros_Loop 17    # ^~Identify_Macros_Loop RBRANCH
+
+	fe0741f8                     # POP_LR
+	e30741f8                     # POP_X3                          ; Restore X3
+	e20741f8                     # POP_X2                          ; Restore X2
+	e10741f8                     # POP_X1                          ; Restore X1
+	e00741f8                     # POP_X0                          ; Restore X0
+	c0035fd6                     # RETURN
+
+:DEFINE_str
+	44 45 46 49 4E 45 00         # "DEFINE"
+
+	00                           # '00'                            ; .p2align 2
+
+; match function
+; Receives CHAR* in X0 and CHAR* in X1
+; Returns 0 (TRUE) or 1 (FALSE) in X0
+:match
+	e10f1ff8                     # PUSH_X1                         ; Protect X1
+	e20f1ff8                     # PUSH_X2                         ; Protect X2
+	e30f1ff8                     # PUSH_X3                         ; Protect X3
+	fe0f1ff8                     # PUSH_LR
+
+	e20300aa                     # SET_X2_FROM_X0                  ; S1 in place
+	e30301aa                     # SET_X3_FROM_X1                  ; S2 in place
+:match_Loop
+	40144038                     # LDR_BYTE_W0_[X2]_1              ; S1[0]
+	61144038                     # LDR_BYTE_W1_[X3]_1              ; S2[0]
+	1f0001eb                     # CMP_X0_X1                       ; See if they match
+	40000054                     # SKIP_INST_EQ                    ; If not
+	^~match_False 14             # ^~match_False FBRANCH
+
+	1f0000f1                     # CMP_X0_TO_0                     ; If reached end of string
+	41000054                     # SKIP_INST_NE                    ; Perfect match
+	^~match_Done 14              # ^~match_Done FBRANCH
+	^~match_Loop 17              # ^~match_Loop RBRANCH            ; Otherwise keep looping
+
+:match_False
+	200080d2                     # SET_X0_TO_1                     ; Return false
+:match_Done
+	fe0741f8                     # POP_LR
+	e30741f8                     # POP_X3                          ; Restore X3
+	e20741f8                     # POP_X2                          ; Restore X2
+	e10741f8                     # POP_X1                          ; Restore X1
+	c0035fd6                     # RETURN
+
+
+; Line_Macro function
+; Receives List in X0
+; Updates the list in place; does not modify registers
+; Uses X0 for I, X1 for I->TEXT, X2 for I->EXPRESSION
+:Line_Macro
+	e00f1ff8                     # PUSH_X0                         ; Protect X0
+	e10f1ff8                     # PUSH_X1                         ; Protect X1
+	e20f1ff8                     # PUSH_X2                         ; Protect X2
+	e30f1ff8                     # PUSH_X3                         ; Protect X3
+	fe0f1ff8                     # PUSH_LR
+:Line_Macro_Loop
+	010440f9                     # LDR_X1_[X0,8]                   ; I->TYPE
+	3f0400f1                     # CMP_X1_TO_1                     ; IF MACRO == I->TYPE
+	40000054                     # SKIP_INST_EQ                    ; Otherwise move on
+	^~Line_Macro_Next 14         # ^~Line_Macro_Next FBRANCH
+
+	; Is a macro apply
+	010840f9                     # LDR_X1_[X0,16]                  ; I->TEXT
+	020c40f9                     # LDR_X2_[X0,24]                  ; I->EXPRESSION
+	000040f9                     # LDR_X0_[X0]                     ; I->NEXT
+	^~Set_Expression 94          # ^~Set_Expression FCALL          ; Apply it
+	^~Line_Macro_Loop 17         # ^~Line_Macro_Loop RBRANCH       ; Move on to next
+
+:Line_Macro_Next
+	000040f9                     # LDR_X0_[X0]                     ; I->NEXT
+	1f0000f1                     # CMP_X0_TO_0                     ; Check for NULL
+	40000054                     # SKIP_INST_EQ                    ; Keep going
+	^~Line_Macro_Loop 17         # ^~Line_Macro_Loop RBRANCH
+
+	fe0741f8                     # POP_LR
+	e30741f8                     # POP_X3                          ; Restore X3
+	e20741f8                     # POP_X2                          ; Restore X2
+	e10741f8                     # POP_X1                          ; Restore X1
+	e00741f8                     # POP_X0                          ; Restore X0
+	c0035fd6                     # RETURN
+
+
+; Set_Expression function
+; Receives List in X0, CHAR* in X1 and CHAR* in X2
+; Updates the list in place; does not modify registers
+; Uses X1 for C, X2 for EXP and X3 for I
+:Set_Expression
+	e00f1ff8                     # PUSH_X0                         ; Protect X0
+	e10f1ff8                     # PUSH_X1                         ; Protect X1
+	e20f1ff8                     # PUSH_X2                         ; Protect X2
+	e30f1ff8                     # PUSH_X3                         ; Protect X3
+	fe0f1ff8                     # PUSH_LR
+	e30300aa                     # SET_X3_FROM_X0                  ; Set I
+:Set_Expression_Loop
+	600440f9                     # LDR_X0_[X3,8]                   ; I->TYPE
+	1f0400f1                     # CMP_X0_TO_1                     ; IF MACRO == I->TYPE
+	41000054                     # SKIP_INST_NE                    ; Ignore and move on
+	^~Set_Expression_Next 14     # ^~Set_Expression_Next FBRANCH
+
+	600840f9                     # LDR_X0_[X3,16]                  ; I->TEXT
+	^~match 97                   # ^~match RCALL                   ; Check for match
+	1f0000f1                     # CMP_X0_TO_0                     ; If match
+	40000054                     # SKIP_INST_EQ                    ; Otherwise next
+	^~Set_Expression_Next 14     # ^~Set_Expression_Next FBRANCH
+
+	; We have a non-macro match
+	620c00f9                     # STR_X2_[X3,24]                  ; I->EXPRESSION = EXP
+
+:Set_Expression_Next
+	630040f9                     # LDR_X3_[X3]                     ; I = I->NEXT
+	7f0000f1                     # CMP_X3_TO_0                     ; IF NULL == I
+	40000054                     # SKIP_INST_EQ                    ; Otherwise keep looping
+	^~Set_Expression_Loop 17     # ^~Set_Expression_Loop RBRANCH
+
+	fe0741f8                     # POP_LR
+	e30741f8                     # POP_X3                          ; Restore X3
+	e20741f8                     # POP_X2                          ; Restore X2
+	e10741f8                     # POP_X1                          ; Restore X1
+	e00741f8                     # POP_X0                          ; Restore X0
+	c0035fd6                     # RETURN
+
+
+; Process_String function
+; Receives List in X0
+; Update the list in place; does not modify registers
+; Uses X1 for I->TEXT, X2 for I and X3 for S
+:Process_String
+	e00f1ff8                     # PUSH_X0                         ; Protect X0
+	e10f1ff8                     # PUSH_X1                         ; Protect X1
+	e20f1ff8                     # PUSH_X2                         ; Protect X2
+	e30f1ff8                     # PUSH_X3                         ; Protect X3
+	fe0f1ff8                     # PUSH_LR
+
+	e20300aa                     # SET_X2_FROM_X0                  ; I = HEAD
+:Process_String_loop
+	400440f9                     # LDR_X0_[X2,8]                   ; I->TYPE
+	1f0800f1                     # CMP_X0_TO_2                     ; IF STRING == I->TYPE
+	40000054                     # SKIP_INST_EQ                    ; Skip to next
+	^~Process_String_Next 14     # ^~Process_String_Next FBRANCH
+
+	410840f9                     # LDR_X1_[X2,16]                  ; I->TEXT
+	20004039                     # LDR_BYTE_W0_[X1]                ; I->TEXT[0]
+	1f9c00f1                     # CMP_X0_TO_39                    ; IF '\'' == I->TEXT[0]
+	40000054                     # SKIP_INST_EQ                    ; Deal with '"'
+	^~Process_String_Raw 14      # ^~Process_String_Raw FBRANCH
+
+	; Deal with '\''
+    21040091                     # ADD_X1_X1_1                     ; I->TEXT + 1
+   	410c00f9                     # STR_X1_[X2,24]                  ; I->EXPRESSION = I->TEXT + 1
+	^~Process_String_Next 14     # ^~Process_String_Next FBRANCH   ; Move on to next
+
+:Process_String_Raw
+	e00301aa                     # SET_X0_FROM_X1                  ; Get length of I->TEXT
+	^~string_length 94           # ^~string_length FCALL           ; Do it
+	00fc42d3                     # LSR_X0_X0_2                     ; LENGTH = LENGTH >> 2
+	00040091                     # ADD_X0_X0_1                     ; LENGTH = LENGTH + 1
+	00f07dd3                     # LSL_X0_X0_3                     ; LENGTH = LENGTH << 3
+	^~malloc 97                  # ^~malloc RCALL                  ; Get string
+	e30301aa                     # SET_X3_FROM_X1                  ; S = I->TEXT
+	63040091                     # ADD_X3_X3_1                     ; S = S + 1
+	400c00f9                     # STR_X0_[X2,24]                  ; I->EXPRESSION = hexify
+	e10300aa                     # SET_X1_FROM_X0                  ; Put hexify buffer in x1
+
+:Process_String_Raw_Loop
+	60144038                     # LDR_BYTE_W0_[X3]_1              ; Read 1 chars
+	e00f1ff8                     # PUSH_X0
+	^~hex8 94                    # ^~hex8 FCALL                    ; write them all
+	e00741f8                     # POP_X0
+	1f0000f1                     # CMP_X0_TO_0                     ; Check for NULL
+	40000054                     # SKIP_INST_EQ                    ; Keep looping
+	^~Process_String_Raw_Loop 17 # ^~Process_String_Raw_Loop RBRANCH
+
+:Process_String_Next
+	420040f9                     # LDR_X2_[X2]                     ; I = I->NEXT
+	5f0000f1                     # CMP_X2_TO_0                     ; IF NULL == I
+	40000054                     # SKIP_INST_EQ                    ; Otherwise keep looping
+	^~Process_String_loop 17     # ^~Process_String_loop RBRANCH
+
+	fe0741f8                     # POP_LR
+	e30741f8                     # POP_X3                          ; Restore X3
+	e20741f8                     # POP_X2                          ; Restore X2
+	e10741f8                     # POP_X1                          ; Restore X1
+	e00741f8                     # POP_X0                          ; Restore X0
+	c0035fd6                     # RETURN
+
+
+; string_length function
+; Receives CHAR* in X0
+; Returns INT in X0
+; Uses X0 for CH, X1 for S and X2 for INDEX
+:string_length
+	e10f1ff8                     # PUSH_X1                         ; Protect X1
+	e20f1ff8                     # PUSH_X2                         ; Protect X2
+	e10300aa                     # SET_X1_FROM_X0                  ; Set S
+	020080d2                     # SET_X2_TO_0                     ; INDEX = 0
+:string_length_loop
+	20686238                     # LDR_BYTE_W0_[X1,X2]             ; S[INDEX]
+	1f0000f1                     # CMP_X0_TO_0                     ; IF NULL == S[INDEX]
+	41000054                     # SKIP_INST_NE                    ; Stop
+	^~string_length_done 14      # ^~string_length_done FBRANCH
+
+	42040091                     # ADD_X2_X2_1                     ; INDEX = INDEX + 1
+	^~string_length_loop 17      # ^~string_length_loop RBRANCH    ; Keep going
+
+:string_length_done
+	e00302aa                     # SET_X0_FROM_X2                  ; RETURN INDEX
+	e20741f8                     # POP_X2                          ; Restore X2
+	e10741f8                     # POP_X1                          ; Restore X1
+	c0035fd6                     # RETURN
+
+
+; Eval_Immediates function
+; Receives List in X0
+; Updates the list in place; does not modify registers
+; Uses X1 for I->TEXT[0], X2 for I->TEXT[1] and X3 for I
+:Eval_Immediates
+	e00f1ff8                     # PUSH_X0                         ; Protect X0
+	e10f1ff8                     # PUSH_X1                         ; Protect X1
+	e20f1ff8                     # PUSH_X2                         ; Protect X2
+	e30f1ff8                     # PUSH_X3                         ; Protect X3
+	fe0f1ff8                     # PUSH_LR
+	e30300aa                     # SET_X3_FROM_X0                  ; I = HEAD
+:Eval_Immediates_Loop
+	; Check for MACRO
+	600440f9                     # LDR_X0_[X3,8]                   ; I->TYPE
+	1f0400f1                     # CMP_X0_TO_1                     ; IF MACRO == I-TYPE
+	41000054                     # SKIP_INST_NE                    ; Skip to next
+	^~Eval_Immediates_Next 14    # ^~Eval_Immediates_Next FBRANCH
+
+	; Check for NULL EXPRESSION
+	600c40f9                     # LDR_X0_[X3,24]                  ; I->EXPRESSION
+	1f0000f1                     # CMP_X0_TO_0                     ; IF NULL == I->EXPRESSION
+	40000054                     # SKIP_INST_EQ                    ; Skip to next
+	^~Eval_Immediates_Next 14    # ^~Eval_Immediates_Next FBRANCH
+
+	; Check if number
+	600840f9                     # LDR_X0_[X3,16]                  ; I->TEXT
+	01144038                     # LDR_BYTE_W1_[X0]_1              ; I->TEXT[0]
+	02004039                     # LDR_BYTE_W2_[X0]                ; I->TEXT[1]
+	^~numerate_string 94         # ^~numerate_string FCALL         ; Convert string to INT
+	1f0000f1                     # CMP_X0_TO_0                     ; IF 0 == numerate_number(I->TEXT + 1)
+	40000054                     # SKIP_INST_EQ                    ; Has a value
+	^~Eval_Immediates_value 14   # ^~Eval_Immediates_value FBRANCH
+
+	; Last chance for Immediate
+	5fc000f1                     # CMP_X2_TO_48                    ; If '0' == I->TEXT[1]
+	40000054                     # SKIP_INST_EQ                    ; Skip to next
+	^~Eval_Immediates_Next 14    # ^~Eval_Immediates_Next FBRANCH
+
+:Eval_Immediates_value
+	^~express_number 94          # ^~express_number FCALL          ; Convert value to hex string
+	600c00f9                     # STR_X0_[X3,24]                  ; I->EXPRESSION = express_number(value, I-TEXT[0])
+
+:Eval_Immediates_Next
+	630040f9                     # LDR_X3_[X3]                     ; I = I->NEXT
+	7f0000f1                     # CMP_X3_TO_0                     ; IF NULL == I
+	40000054                     # SKIP_INST_EQ                    ; Otherwise keep looping
+	^~Eval_Immediates_Loop 17    # ^~Eval_Immediates_Loop RBRANCH
+
+	fe0741f8                     # POP_LR
+	e30741f8                     # POP_X3                          ; Restore X3
+	e20741f8                     # POP_X2                          ; Restore X2
+	e10741f8                     # POP_X1                          ; Restore X1
+	e00741f8                     # POP_X0                          ; Restore X0
+	c0035fd6                     # RETURN
+
+
+; numerate_string function
+; Receives CHAR* in X0
+; Returns value of CHAR* in X0
+; Uses X0 for VALUE, X1 for S, X2 for CH and X4 for NEGATIVE?
+:numerate_string
+	e10f1ff8                     # PUSH_X1                         ; Protect X1
+	e20f1ff8                     # PUSH_X2                         ; Protect X2
+	e30f1ff8                     # PUSH_X3                         ; Protect X3
+	e40f1ff8                     # PUSH_X4
+	e10300aa                     # SET_X1_FROM_X0                  ; put S in correct place
+	000080d2                     # SET_X0_TO_0                     ; Initialize to Zero
+:numerate_string_loop
+	22044039                     # LDR_BYTE_W2_[X1,1]              ; S[1]
+	5fe001f1                     # CMP_X2_TO_120                   ; IF 'x' == S[1]
+	41000054                     # SKIP_INST_NE                    ; Deal with hex input
+	^~numerate_hex 14            # ^~numerate_hex FBRANCH
+
+	; Assume decimal input
+	040080d2                     # SET_X4_TO_0                     ; Assume no negation
+	22004039                     # LDR_BYTE_W2_[X1]                ; S[0]
+	5fb400f1                     # CMP_X2_TO_45                    ; IF '-' == S[0]
+	40000054                     # SKIP_INST_EQ                    ; Skip negation
+	^~numerate_decimal 14        # ^~numerate_decimal FBRANCH
+
+	240080d2                     # SET_X4_TO_1                     ; Set FLAG
+	21040091                     # ADD_X1_X1_1                     ; S = S + 1
+
+:numerate_decimal
+	22004039                     # LDR_BYTE_W2_[X1]                ; S[0]
+	5f0000f1                     # CMP_X2_TO_0                     ; IF NULL == S[0]
+	41000054                     # SKIP_INST_NE                    ; We are done
+	^~numerate_decimal_done 14   # ^~numerate_decimal_done FBRANCH
+
+	e10f1ff8                     # PUSH_X1
+	410180d2                     # SET_X1_TO_10
+	007c019b                     # MUL_X0_X0_X1                    ; VALUE = VALUE * 10
+	e10741f8                     # POP_X1
+
+	42c000d1                     # SUB_X2_X2_48                    ; CH = CH - '0'
+	5f2400f1                     # CMP_X2_TO_9                     ; Check for illegal
+	4d000054                     # SKIP_INST_LE                    ; If CH > '9'
+	^~numerate_string_fail 14    # ^~numerate_string_fail FBRANCH
+	5f0000f1                     # CMP_X2_TO_0                     ; Check for illegal
+	4a000054                     # SKIP_INST_GE                    ; IF CH < 0
+	^~numerate_string_fail 14    # ^~numerate_string_fail FBRANCH
+	0000028b                     # ADD_X0_X0_X2                    ; VALUE = VALUE + CH
+	21040091                     # ADD_X1_X1_1                     ; S = S + 1
+	^~numerate_decimal 17        # ^~numerate_decimal RBRANCH      ; Keep looping
+
+:numerate_decimal_done
+	9f0400f1                     # CMP_X4_TO_1                     ; Check if need to negate
+	40000054                     # SKIP_INST_EQ                    ; Nope
+	^~numerate_string_done 14    # ^~numerate_string_done FBRANCH
+
+	e00300cb                     # NEG_X0_X0                       ; VALUE = VALUE * -1
+	^~numerate_string_done 14    # ^~numerate_string_done FBRANCH  ; Done
+
+:numerate_hex
+	21080091                     # ADD_X1_X1_2                     ; S = S + 2
+:numerate_hex_loop
+	22004039                     # LDR_BYTE_W2_[X1]                ; S[0]
+	5f0000f1                     # CMP_X2_TO_0                     ; IF NULL == S[0]
+	41000054                     # SKIP_INST_NE                    ; We are done
+	^~numerate_string_done 14    # ^~numerate_string_done FBRANCH
+
+	00ec7cd3                     # LSL_X0_X0_4                     ; VALUE = VALUE << 4
+	42c000d1                     # SUB_X2_X2_48                    ; CH = CH - '0'
+	5f2800f1                     # CMP_X2_TO_10                    ; IF 10 >= CH
+	4a000054                     # SKIP_INST_GE                    ; NO
+	^~numerate_hex_digit 14      # ^~numerate_hex_digit FBRANCH
+	421c00d1                     # SUB_X2_X2_7                     ; Push A-F into range
+:numerate_hex_digit
+	5f3c00f1                     # CMP_X2_TO_15                    ; Check for illegal
+	4d000054                     # SKIP_INST_LE                    ; If CH > 'F'
+	^~numerate_string_fail 14    # ^~numerate_string_fail FBRANCH
+	5f0000f1                     # CMP_X2_TO_0                     ; Check for illegal
+	4a000054                     # SKIP_INST_GE                    ; IF CH < 0
+	^~numerate_string_fail 14    # ^~numerate_string_fail FBRANCH
+	0000028b                     # ADD_X0_X0_X2                    ; VALUE = VALUE + CH
+	21040091                     # ADD_X1_X1_1                     ; S = S + 1
+	^~numerate_hex_loop 17       # ^~numerate_hex_loop RBRANCH     ; Keep looping
+
+:numerate_string_fail
+	000080d2                     # SET_X0_TO_0                     ; Return ZERO
+
+:numerate_string_done
+	e40741f8                     # POP_X4                          ; Restore X4
+	e30741f8                     # POP_X3                          ; Restore X3
+	e20741f8                     # POP_X2                          ; Restore X2
+	e10741f8                     # POP_X1                          ; Restore X1
+	c0035fd6                     # RETURN
+
+
+; express_number function
+; Receives INT in X0 and CHAR in X1
+; Allocates a string and expresses the value in hex
+; Returns string in X0
+; Uses X0 for VALUE, X1 for S and X2 for CH
+:express_number
+	e10f1ff8                     # PUSH_X1                         ; Protect X1
+	e20f1ff8                     # PUSH_X2                         ; Protect X2
+	e30f1ff8                     # PUSH_X3                         ; Protect X3
+	fe0f1ff8                     # PUSH_LR
+
+	e20301aa                     # SET_X2_FROM_X1                  ; Put CH in right place
+	e10300aa                     # SET_X1_FROM_X0                  ; Protect VALUE
+	5f9400f1                     # CMP_X2_TO_37                    ; IF '%' == CH
+	40000054                     # SKIP_INST_EQ                    ; Otherwise try @
+	^~express_number2 14         # ^~express_number2 FBRANCH
+
+	200180d2                     # SET_X0_TO_9                     ; We need 9bytes
+	^~malloc 97                  # ^~malloc RCALL                  ; Get S pointer
+	e30300aa                     # SET_X3_FROM_X0                  ; Put S and VALUE in place
+	e00301aa                     # SET_X0_FROM_X1
+	e10303aa                     # SET_X1_FROM_X3
+	e10f1ff8                     # PUSH_X1                         ; Protect S
+	^~hex32l 94                  # ^~hex32l FCALL                  ; Store 32bits
+	^~express_number_done 14     # ^~express_number_done FBRANCH   ; done
+
+:express_number2
+	5f0001f1                     # CMP_X2_TO_64                    ; IF '@' == CH
+	40000054                     # SKIP_INST_EQ                    ; Othrewise try !
+	^~express_number1 14         # ^~express_number1 FBRANCH
+
+	a00080d2                     # SET_X0_TO_5                     ; We need 5bytes
+	^~malloc 97                  # ^~malloc RCALL                  ; Get S pointer
+	e30300aa                     # SET_X3_FROM_X0                  ; Put S and VALUE in place
+	e00301aa                     # SET_X0_FROM_X1
+	e10303aa                     # SET_X1_FROM_X3
+	e10f1ff8                     # PUSH_X1                         ; Protect S
+	^~hex16l 94                  # ^~hex16l FCALL                  ; Store 16bits
+	^~express_number_done 14     # ^~express_number_done FBRANCH   ; done
+
+:express_number1
+	600080d2                     # SET_X0_TO_3                     ; We need 3bytes
+	^~malloc 97                  # ^~malloc RCALL                  ; Get S pointer
+	e30300aa                     # SET_X3_FROM_X0                  ; Put S and VALUE in place
+	e00301aa                     # SET_X0_FROM_X1
+	e10303aa                     # SET_X1_FROM_X3
+	e10f1ff8                     # PUSH_X1                         ; Protect S
+	^~hex8 94                    # ^~hex8 FCALL                    ; Store 8bit
+
+:express_number_done
+	e00741f8                     # POP_X0                          ; Restore S
+	fe0741f8                     # POP_LR
+	e30741f8                     # POP_X3                          ; Restore X3
+	e20741f8                     # POP_X2                          ; Restore X2
+	e10741f8                     # POP_X1                          ; Restore X1
+	c0035fd6                     # RETURN
+
+
+; HEX to ascii routine
+; Receives INT in X0 and CHAR* in X1
+; Stores ascii of INT in CHAR*
+; Returns only modifying X0
+:hex64l
+	fe0f1ff8                     # PUSH_LR
+	e00f1ff8                     # PUSH_X0                         ; Protect top 32
+	^~hex32l 94                  # ^~hex32l FCALL                  ; Store it
+	e00741f8                     # POP_X0                          ; do top 32
+	00fc60d3                     # LSR_X0_X0_32                    ; do bottom 32 first
+	^~hex32l 94                  # ^~hex32l FCALL
+	fe0741f8                     # POP_LR
+	c0035fd6                     # RETURN
+
+:hex32l
+	fe0f1ff8                     # PUSH_LR
+	e00f1ff8                     # PUSH_X0                         ; Protect top 16
+	^~hex16l 94                  # ^~hex16l FCALL                  ; Store it
+	e00741f8                     # POP_X0                          ; do top 16
+	00fc50d3                     # LSR_X0_X0_16                    ; do bottom 16 first
+	^~hex16l 94                  # ^~hex16l FCALL
+	fe0741f8                     # POP_LR
+	c0035fd6                     # RETURN
+
+:hex16l
+	fe0f1ff8                     # PUSH_LR
+	e00f1ff8                     # PUSH_X0                         ; Protect top byte
+	^~hex8 94                    # ^~hex8 FCALL                    ; Store it
+	e00741f8                     # POP_X0                          ; do high byte
+	00fc48d3                     # LSR_X0_X0_8                     ; do bottom byte first
+	^~hex8 94                    # ^~hex8 FCALL
+	fe0741f8                     # POP_LR
+	c0035fd6                     # RETURN
+
+:hex8
+	fe0f1ff8                     # PUSH_LR
+	e00f1ff8                     # PUSH_X0                         ; Protect bottom nibble
+	00fc44d3                     # LSR_X0_X0_4                     ; do high nibble first
+	^~hex4 94                    # ^~hex4 FCALL                    ; Store it
+	e00741f8                     # POP_X0                          ; do low nibble
+	^~hex4 94                    # ^~hex4 FCALL
+	fe0741f8                     # POP_LR
+	c0035fd6                     # RETURN
+
+:hex4
+	000c4092                     # AND_X0_X0_0xF                   ; isolate nibble
+	00c00091                     # ADD_X0_X0_48                    ; convert to ascii
+	1fe400f1                     # CMP_X0_TO_57                    ; valid digit?
+	4c000054                     # SKIP_INST_GT                    ; yes
+	^~hex1 14                    # ^~hex1 FBRANCH
+	001c0091                     # ADD_X0_X0_7                     ; use alpha range
+:hex1
+	20140038                     # STR_BYTE_W0_[X1]_1              ; store result
+	c0035fd6                     # RETURN
+
+
+; Preserve_Other function
+; Receives List in X0
+; Updates the list in place; does not modify registers
+; Uses X0 for I, X1 for I->TEXT
+:Preserve_Other
+	e00f1ff8                     # PUSH_X0                         ; Protect X0
+	e10f1ff8                     # PUSH_X1                         ; Protect X1
+	e20f1ff8                     # PUSH_X2                         ; Protect X2
+	e30f1ff8                     # PUSH_X3                         ; Protect X3
+:Preserve_Other_Loop
+	010c40f9                     # LDR_X1_[X0,24]                  ; I->EXPRESSION
+	3f0000f1                     # CMP_X1_TO_0                     ; IF NULL == I->EXPRESSION
+	40000054                     # SKIP_INST_EQ                    ; Otherwise next
+	^~Preserve_Other_Next 14     # ^~Preserve_Other_Next FBRANCH
+
+	; Needs preserving
+	010840f9                     # LDR_X1_[X0,16]                  ; I->TEXT
+	010c00f9                     # STR_X1_[X0,24]                  ; I->EXPRESSION = I->TEXT
+
+:Preserve_Other_Next
+	000040f9                     # LDR_X0_[X0]                     ; I = I->NEXT
+	1f0000f1                     # CMP_X0_TO_0                     ; IF NULL == I
+	40000054                     # SKIP_INST_EQ                    ; Otherwise keep looping
+	^~Preserve_Other_Loop 17     # ^~Preserve_Other_Loop RBRANCH
+
+	e30741f8                     # POP_X3                          ; Restore X3
+	e20741f8                     # POP_X2                          ; Restore X2
+	e10741f8                     # POP_X1                          ; Restore X1
+	e00741f8                     # POP_X0                          ; Restore X0
+	c0035fd6                     # RETURN
+
+
+; Print_Hex function
+; Receives list in X0
+; walks the list and prints the I->EXPRESSION for all nodes followed by newline
+; Uses X1 for I
+:Print_Hex
+	e10f1ff8                     # PUSH_X1                         ; Protect X1
+	e20f1ff8                     # PUSH_X2                         ; Protect X2
+	fe0f1ff8                     # PUSH_LR
+	e1030daa                     # SET_X1_FROM_X13                 ; I = Head
+:Print_Hex_Loop
+	200440f9                     # LDR_X0_[X1,8]                   ; I->TYPE
+	1f0400f1                     # CMP_X0_TO_1                     ; IF MACRO == I->TYPE
+	41000054                     # SKIP_INST_NE                    ; Skip
+	^~Print_Hex_Next 14          # ^~Print_Hex_Next FBRANCH
+
+	200c40f9                     # LDR_X0_[X1,24]                  ; Using EXPRESSION
+	^~File_Print 94              # ^~File_Print FCALL              ; Print it
+	400180d2                     # SET_X0_TO_10                    ; NEWLINE
+	^~fputc 94                   # ^~fputc FCALL                   ; Append it
+
+:Print_Hex_Next
+	210040f9                     # LDR_X1_[X1]                     ; Iterate to next Token
+	3f0000f1                     # CMP_X1_TO_0                     ; Check for NULL
+	40000054                     # SKIP_INST_EQ                    ; Otherwise keep looping
+	^~Print_Hex_Loop 17          # ^~Print_Hex_Loop RBRANCH
+
+	fe0741f8                     # POP_LR
+	e20741f8                     # POP_X2                          ; Restore X2
+	e10741f8                     # POP_X1                          ; Restore X1
+	c0035fd6                     # RETURN
+
+
+; File_Print function
+; Receives CHAR* in X0
+; calls fputc for every non-null char
+:File_Print
+	e10f1ff8                     # PUSH_X1                         ; Protect X1
+	e20f1ff8                     # PUSH_X2                         ; Protect X2
+	fe0f1ff8                     # PUSH_LR
+	e10300aa                     # SET_X1_FROM_X0                  ; Protect S
+	1f0000f1                     # CMP_X0_TO_0                     ; Protect against nulls
+	41000054                     # SKIP_INST_NE                    ; Simply don't try to print them
+	^~File_Print_Done 14         # ^~File_Print_Done FBRANCH
+:File_Print_Loop
+	20004039                     # LDR_BYTE_W0_[X1]                ; Read byte
+	1f0000f1                     # CMP_X0_TO_0                     ; Check for NULL
+	41000054                     # SKIP_INST_NE                    ; Stop at NULL
+	^~File_Print_Done 14         # ^~File_Print_Done FBRANCH
+
+	^~fputc 94                   # ^~fputc FCALL                   ; write it
+	21040091                     # ADD_X1_X1_1                     ; S = S + 1
+	^~File_Print_Loop 17         # ^~File_Print_Loop RBRANCH       ; Keep going
+
+:File_Print_Done
+	fe0741f8                     # POP_LR
+	e20741f8                     # POP_X2                          ; Restore X2
+	e10741f8                     # POP_X1                          ; Restore X1
+	c0035fd6                     # RETURN
+
+
+; fputc function
+; receives CHAR in X0 and FILE* in X14
+; writes char and Returns
+:fputc
+	e10f1ff8                     # PUSH_X1
+	e20f1ff8                     # PUSH_X2
+
+	e00f1ff8                     # PUSH_X0                         ; We are writing x0
+	e1030091                     # SET_X1_FROM_SP                  ; Get stack address
+	e0030eaa                     # SET_X0_FROM_X14                 ; Write to target file
+	080880d2                     # SET_X8_TO_SYS_WRITE             ; the syscall number for write
+	220080d2                     # SET_X2_TO_1                     ; set the size of chars we want
+
+	010000d4                     # SYSCALL                         ; call the Kernel
+
+	e00741f8                     # POP_X0                          ; Restore stack
+	e20741f8                     # POP_X2                          ; Restore X3
+	e10741f8                     # POP_X1
+	c0035fd6                     # RETURN
+
+:ELF_end

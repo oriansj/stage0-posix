@@ -193,7 +193,10 @@
 	-f ../M2-Planet/test/common_x86/functions/execve.c \
 	-f ../M2-Planet/test/common_x86/functions/chdir.c \
 	-f ../M2-Planet/test/common_x86/functions/getcwd.c \
-	-f ../mescc-tools/kaem.c \
+	-f ../mescc-tools/Kaem/kaem.h \
+	-f ../mescc-tools/Kaem/variable.c \
+	-f ../mescc-tools/Kaem/kaem_globals.c \
+	-f ../mescc-tools/Kaem/kaem.c \
 	--debug \
 	-o kaem.M1
 

@@ -62,3 +62,10 @@
 ./hex2-0 hold M0
 # M0 is the architecture specific version of M1 and is by design single
 # architecture only and will be replaced by the C code version of M1
+
+#####################################
+# Phase-4 Build cc_aarch64 from M0  #
+#####################################
+./M0 cc_aarch64.M1 temp1
+./catm hold ELF-aarch64.hex2 temp1
+./hex2-0 hold cc_aarch64

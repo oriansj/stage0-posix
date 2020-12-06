@@ -42,6 +42,10 @@ bin/M0-gas: GAS/M0_AArch64.S | bin
 	as GAS/M0_AArch64.S -o bin/M0.o
 	ld bin/M0.o -o bin/M0-gas
 
+bin/cc_aarch64-gas: GAS/cc_aarch64.S | bin
+	as GAS/cc_aarch64.S -o bin/cc_aarch64.o
+	ld bin/cc_aarch64.o -o bin/cc_aarch64-gas
+
 # make pieces from the GAS pieces
 hex0: hex0-gas
 	./bin/hex0-gas hex0_AArch64.hex0 hex0
@@ -59,14 +63,19 @@ M0: hex2-gas catm-gas
 	./bin/catm-gas hold ELF-aarch64.hex2 M0_AArch64.hex2
 	./bin/hex2-gas hold M0
 
-all: hex0 hex1 catm hex2-0 M0
+cc_aarch64: hex2-gas M0-gas catm-gas
+	./bin/M0-gas cc_aarch64.M1 temp1
+	./bin/catm-gas hold ELF-aarch64.hex2 temp1
+	./bin/hex2-gas hold cc_aarch64
+
+all: hex0 hex1 catm hex2-0 M0 cc_aarch64
 
 clean:
-	rm -f hex0 hex1 catm hex2-0 M0
+	rm -f hex0 hex1 catm hex2-0 M0 cc_aarch64
 	rm -rf bin
 
 test: all
 	sha256sum -c SHA256SUMS
 
 Generate_test_answers: all
-	sha256sum hex0 hex1 catm hex2-0 M0 >| SHA256SUMS
+	sha256sum hex0 hex1 catm hex2-0 M0 cc_aarch64 >| SHA256SUMS

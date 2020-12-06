@@ -1,6 +1,7 @@
 # Mes --- Maxwell Equations of Software
 # Copyright © 2017 Jeremiah Orians
 # Copyright © 2017 Jan Nieuwenhuizen <janneke@gnu.org>
+# Copyright © 2020 Sanne Wouda
 #
 # This file is part of Mes.
 #
@@ -30,6 +31,9 @@ Generate-x86-answers:
 Generate-amd64-answers:
 	sha256sum bin/* >| amd64.answers
 
+Generate-aarch64-answers:
+	sha256sum bin/* >| aarch64.answers
+
 .PHONEY: clean
 clean:
 	git clean -xdf
@@ -41,6 +45,10 @@ test-x86:
 test-amd64:
 	cd AMD64 && ../bootstrap-seeds/POSIX/x86/kaem-optional-seed
 	sha256sum -c amd64.answers
+
+test-aarch64:
+	cd AARCH64 && $(KAEM)
+	sha256sum -c aarch64.answers
 
 ###  dist
 .PHONY: dist

@@ -1,0 +1,47 @@
+### ELF-aarch64.hex2: ARMv8 AArch64 ELF header in hex2
+### if you wish to use this header, you need to add :ELF_end to the end of your
+### M1 or hex2 files.
+:ELF_base
+
+7F 45 4C 46                    # e_ident[EI_MAG0-3] ELF's magic number
+
+02                             # e_ident[EI_CLASS] Indicating 64 bit
+01                             # e_ident[EI_DATA] Indicating little endianness
+01                             # e_ident[EI_VERSION] Indicating original elf
+
+03                                        # e_ident[EI_OSABI] Set at 3 because FreeBSD is strict
+00                                        # e_ident[EI_ABIVERSION] Set at 0 because none cares
+
+00 00 00 00 00 00 00           # e_ident[EI_PAD]
+02 00                          # e_type Indicating Executable
+B7 00                          # e_machine Indicating AArch64
+01 00 00 00                    # e_version Indicating original elf
+
+&ELF_text 00 00 00 00          # e_entry Address of the entry point
+%ELF_program_headers>ELF_base 00 00 00 00 # e_phoff Address of program header table
+%ELF_section_headers>ELF_base 00 00 00 00 # e_shoff Address of section header table
+
+00 00 00 00                    # e_flags
+40 00                          # e_ehsize Indicating our 64 Byte header
+
+38 00                          # e_phentsize size of a program header table
+01 00                          # e_phnum number of entries in program table
+
+40 00                          # e_shentsize size of a section header table
+05 00                          # e_shnum number of entries in section table
+
+02 00                          # e_shstrndx index of the section names
+
+:ELF_program_headers
+:ELF_program_header__text
+01 00 00 00                   # ph_type: PT-LOAD = 1
+07 00 00 00                   # ph_flags: PF-X|PF-W|PF-R = 7
+00 00 00 00 00 00 00 00                   # ph_offset
+&ELF_base 00 00 00 00                     # ph_vaddr
+&ELF_base 00 00 00 00                     # ph_physaddr
+%ELF_end>ELF_base 00 00 00 00             # ph_filesz
+%ELF_end>ELF_base 00 00 00 00             # ph_memsz
+01 00 00 00 00 00 00 00                   # ph_align
+
+
+:ELF_text

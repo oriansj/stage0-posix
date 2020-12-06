@@ -75,14 +75,22 @@ cc_aarch64: hex2-gas M0-gas catm-gas
 	./bin/catm-gas hold ELF-aarch64.hex2 temp1
 	./bin/hex2-gas hold cc_aarch64
 
-all: hex0 hex1 catm hex2-0 M0 cc_aarch64 kaem-0
+M2: hex2-gas M0-gas cc_aarch64-gas catm-gas
+	./bin/catm-gas hold ../M2-Planet/test/common_aarch64/functions/file.c ../M2-Planet/test/common_aarch64/functions/malloc.c ../M2-Planet/test/common_aarch64/functions/fixup.c ../M2-Planet/functions/calloc.c ../M2-Planet/test/common_aarch64/functions/exit.c ../M2-Planet/functions/match.c ../M2-Planet/functions/in_set.c ../M2-Planet/functions/numerate_number.c ../M2-Planet/functions/file_print.c ../M2-Planet/functions/number_pack.c ../M2-Planet/functions/string.c ../M2-Planet/functions/require.c ../M2-Planet/cc.h ../M2-Planet/cc_globals.c ../M2-Planet/cc_reader.c ../M2-Planet/cc_strings.c ../M2-Planet/cc_types.c ../M2-Planet/cc_core.c ../M2-Planet/cc.c
+	./bin/cc_aarch64-gas hold M2.M1
+	./bin/catm-gas hold aarch64_defs.M1 libc-core.M1 M2.M1
+	./bin/M0-gas hold temp1
+	./bin/catm-gas hold ELF-aarch64.hex2 temp1
+	./bin/hex2-gas hold M2
+
+all: hex0 hex1 catm hex2-0 M0 cc_aarch64 kaem-0 M2
 
 clean:
-	rm -f hex0 hex1 catm hex2-0 M0 cc_aarch64 kaem-0
+	rm -f hex0 hex1 catm hex2-0 M0 cc_aarch64 kaem-0 M2
 	rm -rf bin
 
 test: all
 	sha256sum -c SHA256SUMS
 
 Generate_test_answers: all
-	sha256sum hex0 hex1 catm hex2-0 M0 cc_aarch64 kaem-0 >| SHA256SUMS
+	sha256sum hex0 hex1 catm hex2-0 M0 cc_aarch64 kaem-0 M2 >| SHA256SUMS

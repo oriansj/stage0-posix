@@ -1,0 +1,851 @@
+## Copyright (C) 2017 Jeremiah Orians
+## Copyright (C) 2020 Sanne Wouda
+## This file is part of stage0.
+##
+## stage0 is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## stage0 is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with stage0.  If not, see <http://www.gnu.org/licenses/>.
+
+DEFINE NULL64 0000000000000000
+DEFINE NULL8 00
+
+DEFINE PUSH_X0 e00f1ff8
+DEFINE PUSH_X1 e10f1ff8
+DEFINE PUSH_LR fe0f1ff8
+
+DEFINE POP_X0 e00741f8
+DEFINE POP_X1 e10741f8
+DEFINE POP_LR fe0741f8
+
+DEFINE BLR_X16 00023fd6
+DEFINE BR_X16 00021fd6
+DEFINE RETURN c0035fd6
+
+DEFINE CBNZ_X0_PAST_BR a00000b5
+
+DEFINE CBZ_X7_PAST_INST 470000b4
+
+DEFINE CMP_X0_TO_0   1f0000f1
+DEFINE CMP_X0_TO_9   1f2400f1
+DEFINE CMP_X0_TO_10  1f2800f1
+DEFINE CMP_X0_TO_13  1f3400f1
+DEFINE CMP_X0_TO_32  1f8000f1
+DEFINE CMP_X0_TO_33  1f8400f1
+DEFINE CMP_X0_TO_35  1f8c00f1
+DEFINE CMP_X0_TO_36  1f9000f1
+DEFINE CMP_X0_TO_37  1f9400f1
+DEFINE CMP_X0_TO_38  1f9800f1
+DEFINE CMP_X0_TO_48  1fc000f1
+DEFINE CMP_X0_TO_58  1fe800f1
+DEFINE CMP_X0_TO_59  1fec00f1
+DEFINE CMP_X0_TO_62  1ff800f1
+DEFINE CMP_X0_TO_64  1f0001f1
+DEFINE CMP_X0_TO_65  1f0401f1
+DEFINE CMP_X0_TO_71  1f1c01f1
+DEFINE CMP_X0_TO_94  1f7801f1
+DEFINE CMP_X0_TO_97  1f8401f1
+DEFINE CMP_X0_TO_103 1f9c01f1
+DEFINE CMP_X0_TO_126 1ff801f1
+DEFINE CMP_X0_TO_MINUS_4 1f1000b1
+DEFINE CMP_X1_TO_0   3f0000f1
+DEFINE CMP_X1_TO_62  3ff800f1
+DEFINE CMP_X3_TO_0   7f0000f1
+DEFINE CMP_X5_TO_0   bf0000f1
+DEFINE CMP_X15_TO_0 ff0100f1
+
+DEFINE TST_X1_7 23140038
+
+DEFINE CMP_X0_X1  1f0001eb
+
+DEFINE SET_X0_FROM_X9 e00309aa
+DEFINE SET_X0_FROM_X10 e0030aaa
+DEFINE SET_X0_FROM_X12 e0030caa
+DEFINE SET_X1_FROM_X12 e1030caa
+DEFINE SET_X2_FROM_X0 e20300aa
+DEFINE SET_X2_FROM_X6 e20306aa
+DEFINE SET_X3_FROM_X0 e30300aa
+DEFINE SET_X5_FROM_X11 e5030baa
+DEFINE SET_X6_FROM_X13 e6030daa
+DEFINE SET_X9_FROM_X0 e90300aa
+DEFINE SET_X10_FROM_X0 ea0300aa
+DEFINE SET_X11_FROM_X0 eb0300aa
+DEFINE SET_X12_FROM_X0 ec0300aa
+DEFINE SET_X12_FROM_X1 ec0301aa
+DEFINE SET_X14_FROM_X0 ee0300aa
+
+DEFINE SET_X0_TO_0 000080d2
+DEFINE SET_X0_TO_1 200080d2
+DEFINE SET_X0_TO_MINUS_1 00008092
+DEFINE SET_X0_TO_MINUS_4 60008092
+DEFINE SET_X1_TO_0 010080d2
+DEFINE SET_X2_TO_0 020080d2
+DEFINE SET_X2_TO_1 220080d2
+DEFINE SET_X2_TO_2 420080d2
+DEFINE SET_X2_TO_3 620080d2
+DEFINE SET_X2_TO_4 820080d2
+DEFINE SET_X2_TO_577 224880d2
+DEFINE SET_X3_TO_0 030080d2
+DEFINE SET_X3_TO_448 033880d2
+DEFINE SET_X7_TO_0 070080d2
+DEFINE SET_X11_TO_0 0b0080d2
+DEFINE SET_X13_TO_0 0d0080d2
+DEFINE SET_X13_TO_0x00600000 0d0ca0d2
+DEFINE SET_X14_TO_0 0e0080d2
+DEFINE SET_X15_TO_0 0f0080d2
+DEFINE SET_X15_TO_MINUS_1 0f008092
+DEFINE SET_X0_TO_FCNTL_H_AT_FDCWD 600c8092
+
+DEFINE SKIP_INST_EQ 40000054
+DEFINE SKIP_INST_GE 4a000054
+DEFINE SKIP_INST_LT 4b000054
+DEFINE SKIP_INST_NE 41000054
+DEFINE SKIP_INST_LE 4d000054
+
+DEFINE SKIP_32_DATA 02000014
+
+DEFINE LOAD_W0_AHEAD 40000098
+DEFINE LOAD_W1_AHEAD 41000018
+DEFINE LOAD_W4_AHEAD 44000018
+DEFINE LOAD_W16_AHEAD 50000018
+
+DEFINE LDR_X0_[X5,8] a00440f9
+DEFINE LDR_X1_[SP,16] e10b40f9
+DEFINE LDR_X1_[SP,24] e10f40f9
+DEFINE LDR_X3_[X5,16] a30840f9
+DEFINE LDR_BYTE_W0_[X0] 00004039
+DEFINE LDR_BYTE_W0_[X3]_1 60144038
+DEFINE LDR_BYTE_W1_[X4]_1 81144038
+DEFINE LDR_BYTE_W3_[X4] 83004039
+DEFINE STR_BYTE_W0_[X1] 20000039
+DEFINE STR_BYTE_W0_[X1]_1 20140038
+DEFINE STR_BYTE_W3_[X1]_1 23140038
+DEFINE STR_BYTE_W0_[X4,1]_WB 801c0038
+DEFINE STR_X0_[X1] 200000f9
+DEFINE STR_X11_[X0] 0b0000f9
+DEFINE STR_X12_[X0,16] 0c0800f9
+DEFINE STR_X13_[X0,8] 0d0400f9
+DEFINE STR_X13_[X0] 0d0000f9
+
+DEFINE DEREF_X0 000040f9
+DEFINE DEREF_X5 a50040f9
+
+DEFINE ADD_X0_X0_12MB 00007091
+DEFINE ADD_X0_X0_X14_LSL_4 00100e8b
+DEFINE ADD_X0_X1_X0_LSL_3 200c008b
+DEFINE ASR_X0_X0_2 00fc4293
+DEFINE ADD_X12_X12_24 8c610091
+
+DEFINE ADD_X13_X13_1 ad050091
+DEFINE ADD_X13_2 ad090091
+DEFINE ADD_X13_3 ad0d0091
+
+DEFINE SUB_X0_X0_X2 000002cb
+DEFINE SUB_X0_X0_X13 00000dcb
+
+DEFINE SUB_X0_X0_48 00c000d1
+DEFINE SUB_X0_X0_55 00dc00d1
+DEFINE SUB_X0_X0_87 005c01d1
+
+DEFINE NOT_X7_X7 e70327aa
+DEFINE NOT_X15_X15 ef032faa
+
+DEFINE SET_X8_TO_SYS_BRK c81a80d2
+DEFINE SET_X8_TO_SYS_EXIT a80b80d2
+DEFINE SET_X8_TO_SYS_LSEEK c80780d2
+DEFINE SET_X8_TO_SYS_OPENAT 080780d2
+DEFINE SET_X8_TO_SYS_READ e80780d2
+DEFINE SET_X8_TO_SYS_WRITE 080880d2
+DEFINE SYSCALL 010000d4
+
+DEFINE FCALL 94
+DEFINE RCALL 97
+DEFINE FBRANCH 14
+DEFINE RBRANCH 17
+
+    # Register usage:
+    # X0, X1, X2, X3 => Temps
+    # X15 => Flag
+    # X14 => High bits
+    # X13 => IP
+    # X12 => MALLOC
+    # X11 => HEAD
+
+    # Struct format: (size 24)
+    # NEXT => 0
+    # TARGET => 8
+    # NAME => 16
+
+:ELF_text
+
+# Where the ELF Header is going to hit
+# Simply jump to _start
+# Our main function
+:_start
+    SET_X0_TO_0                   # Get current pointer
+    ^~malloc FCALL                # Get current HEAP
+    SET_X12_FROM_X0               # Setup MALLOC
+    ADD_X0_X0_12MB                # Create space for temp [12MB]
+    ^~malloc FCALL                # Give ourselves 81920 bytes to work with
+
+    LDR_X1_[SP,16]                # Get the actual input name
+    SET_X0_TO_FCNTL_H_AT_FDCWD    # AT_FDCWD, relative to current working directory
+    SET_X2_TO_0                   # Prepare file as read only
+    SET_X8_TO_SYS_OPENAT          # The syscall number for openat(), aarch64 has no open()
+    SYSCALL                       # Open file!
+    SET_X9_FROM_X0                # Preserve the file pointer we were given
+
+    LDR_X1_[SP,24]                # Get the output name
+    SET_X0_TO_FCNTL_H_AT_FDCWD    # AT_FDCWD, relative to current working directory
+    SET_X2_TO_577                 # Prepare file as O_WRONLY|O_CREAT|O_TRUNC
+    SET_X3_TO_448                 # Prepare file as RWX for owner only (700 in octal)
+    SET_X8_TO_SYS_OPENAT          # The syscall number for openat(), aarch64 has no open()
+    SYSCALL                       # Open file!
+    CMP_X0_TO_0                   # Check for missing output
+    SKIP_INST_LE                  # Have real output
+    ^~_start_out FBRANCH
+    SET_X0_TO_1                   # Use stdout
+
+:_start_out
+    SET_X10_FROM_X0               # Preserve the file pointer we were given
+
+    ^~ClearScratch FCALL          # Zero scratch
+    SET_X15_TO_MINUS_1            # Our flag for byte processing
+    SET_X14_TO_0                  # temp storage for the sum
+    SET_X13_TO_0x00600000         # Our starting IP
+    SET_X11_TO_0                  # HEAD = NULL
+    ^~First_pass FCALL            # Process it
+
+                                  # rewind input file
+    SET_X0_FROM_X9                # Using our input file
+    SET_X1_TO_0                   # Offset
+    SET_X2_TO_0                   # Whence SEEK_SET
+    SET_X8_TO_SYS_LSEEK           # lseek
+    SYSCALL
+
+    SET_X15_TO_MINUS_1            # Our flag for byte processing
+    SET_X14_TO_0                  # temp storage for the sum
+    SET_X13_TO_0x00600000         # Our starting IP
+    ^~Second_pass FCALL           # Process it
+
+                                  # program completed Successfully
+    SET_X0_TO_0                   # All is well
+    SET_X8_TO_SYS_EXIT            # put the exit syscall number in x8
+    SYSCALL
+
+
+:First_pass
+    PUSH_LR                       # push lr
+:First_pass_loop
+    ^~Read_byte FCALL
+
+    # Deal with EOF
+    CMP_X0_TO_MINUS_4
+    SKIP_INST_NE
+    ^~First_pass_done FBRANCH
+
+    # Check for :
+    CMP_X0_TO_58
+    SKIP_INST_EQ
+    ^~First_pass_0 FBRANCH
+
+    # Deal with label
+    SET_X0_FROM_X12               # ENTRY
+    ADD_X12_X12_24                #^~ CALLOC
+    STR_X12_[X0,16]               # ENTRY->NAME = TOKEN
+    STR_X13_[X0,8]                # ENTRY->TARGET = IP
+    STR_X11_[X0]                  # ENTRY->NEXT = HEAD
+    SET_X11_FROM_X0               # HEAD = ENTRY
+    SET_X1_FROM_X12               # Write Starting after struct
+    ^~consume_token FCALL         # Collect whole string
+    SET_X12_FROM_X1               # Update HEAP
+    ^~First_pass_loop RBRANCH
+
+:First_pass_0
+    # Check for !
+    CMP_X0_TO_33
+    SKIP_INST_NE
+    ^~First_pass_pointer FBRANCH
+
+    # Check for @
+    CMP_X0_TO_64
+    SKIP_INST_NE
+    ^~First_pass_pointer FBRANCH
+
+    # Check for $
+    CMP_X0_TO_36
+    SKIP_INST_NE
+    ^~First_pass_pointer FBRANCH
+
+    # Check for %
+    CMP_X0_TO_37
+    SKIP_INST_NE
+    ^~First_pass_pointer FBRANCH
+
+    # Check for &
+    CMP_X0_TO_38
+    SKIP_INST_NE
+    ^~First_pass_pointer FBRANCH
+
+    # Check for ~
+    CMP_X0_TO_126
+    SKIP_INST_NE
+    ^~First_pass_pointer FBRANCH
+
+    # Deal with everything else
+    ^~hex FCALL                   # Process our char
+
+    # Deal with EOF
+    CMP_X0_TO_MINUS_4
+    SKIP_INST_NE
+    ^~First_pass_done FBRANCH
+
+    # deal with -1 values
+    CMP_X0_TO_0
+    SKIP_INST_GE
+    ^~First_pass_loop RBRANCH
+
+    # deal with toggle
+    CMP_X15_TO_0
+    SKIP_INST_NE
+    ^~First_pass_1 FBRANCH
+    ADD_X13_X13_1                 # Increment IP
+
+:First_pass_1
+    NOT_X15_X15
+    ^~First_pass_loop RBRANCH
+
+:First_pass_pointer
+    # Deal with Pointer to label
+    ^~Update_Pointer FCALL        # Increment IP
+    LOAD_W1_AHEAD                 # Using scratch
+    SKIP_32_DATA
+    &scratch
+    ^~consume_token FCALL         # Read token
+    ^~ClearScratch FCALL          # Throw away token
+    CMP_X0_TO_62                  # check for '>'
+    SKIP_INST_EQ                  # Loop again
+    ^~First_pass_loop RBRANCH
+
+    # Deal with %label>label case
+    LOAD_W1_AHEAD                 # Write to scratch
+    SKIP_32_DATA
+    &scratch
+    ^~consume_token FCALL         # get token
+    ^~ClearScratch FCALL          # Clean up after ourselves
+    ^~First_pass_loop RBRANCH     # Loop again
+
+:First_pass_done
+    POP_LR                        # pop lr
+    RETURN
+
+:Update_Pointer
+    # Check for !
+    CMP_X0_TO_33
+    SKIP_INST_NE
+    ^~Update_Pointer_1 FBRANCH
+
+    # Check for @
+    CMP_X0_TO_64
+    SKIP_INST_NE
+    ^~Update_Pointer_2 FBRANCH
+
+    # Check for $
+    CMP_X0_TO_36
+    SKIP_INST_NE
+    ^~Update_Pointer_2 FBRANCH
+
+    # Check for ~
+    CMP_X0_TO_126
+    SKIP_INST_NE
+    ^~Update_Pointer_3 FBRANCH
+
+    # Check for %
+    CMP_X0_TO_37
+    SKIP_INST_NE
+    ^~Update_Pointer_4 FBRANCH
+
+    # Check for &
+    CMP_X0_TO_38
+    SKIP_INST_NE
+    ^~Update_Pointer_4 FBRANCH
+
+    # deal with bad input
+    ^~fail FBRANCH
+
+:Update_Pointer_4
+    ADD_X13_X13_1                 # Increment IP
+:Update_Pointer_3
+    ADD_X13_X13_1                 # Increment IP
+:Update_Pointer_2
+    ADD_X13_X13_1                 # Increment IP
+:Update_Pointer_1
+    ADD_X13_X13_1                 # Increment IP
+    RETURN
+
+
+:Second_pass
+    PUSH_LR                       # push lr
+
+    # x7 marks whether we need to do a word-aligned pointer
+:Second_pass_loop
+    SET_X7_TO_0
+:Second_pass_align
+    ^~Read_byte FCALL
+
+    # Deal with EOF
+    CMP_X0_TO_MINUS_4
+    SKIP_INST_NE
+    ^~Second_pass_done FBRANCH
+
+    # Deal with ^
+    CMP_X0_TO_94
+    SKIP_INST_NE
+    ^~Second_pass_align_0 FBRANCH
+
+    # Simply drop the label
+    CMP_X0_TO_58
+    SKIP_INST_EQ
+    ^~Second_pass_0 FBRANCH
+
+    LOAD_W1_AHEAD                 # Using scratch
+    SKIP_32_DATA
+    &scratch
+    ^~consume_token FCALL         # Read token
+    ^~ClearScratch FCALL          # Throw away token
+
+    ^~Second_pass_loop RBRANCH
+
+:Second_pass_align_0
+    NOT_X7_X7                     # toggle alignment
+    ^~Second_pass_align RBRANCH
+
+:Second_pass_0
+    # Deal with % pointer
+    CMP_X0_TO_37
+    SKIP_INST_NE
+    ^~StorePointer_rel4 FBRANCH
+
+    # Deal with ~ pointer
+    CMP_X0_TO_126
+    SKIP_INST_NE
+    ^~StorePointer_rel3 FBRANCH
+
+    # Deal with @ pointer
+    CMP_X0_TO_64
+    SKIP_INST_NE
+    ^~StorePointer_rel2 FBRANCH
+
+    # Deal with ! pointer
+    CMP_X0_TO_33
+    SKIP_INST_NE
+    ^~StorePointer_rel1 FBRANCH
+
+    # Deal with & pointer
+    CMP_X0_TO_38
+    SKIP_INST_NE
+    ^~StorePointer_abs4 FBRANCH
+
+    # Deal with $ pointer
+    CMP_X0_TO_36
+    SKIP_INST_NE
+    ^~StorePointer_abs2 FBRANCH
+
+    # Deal with everything else
+    ^~hex FCALL                   # Process our char
+
+    # Deal with EOF
+    CMP_X0_TO_MINUS_4
+    SKIP_INST_NE
+    ^~Second_pass_done FBRANCH
+
+    # deal with -1 values
+    CMP_X0_TO_0
+    SKIP_INST_GE
+    ^~Second_pass_loop RBRANCH
+
+    # deal with toggle
+    CMP_X15_TO_0
+    SKIP_INST_NE
+    ^~print FBRANCH
+
+    # process first byte of pair
+    SET_X14_FROM_X0
+    SET_X15_TO_0
+    ^~Second_pass_loop RBRANCH
+
+# process second byte of pair
+:print
+    # update the sum and store in output
+    ADD_X0_X0_X14_LSL_4
+    LOAD_W1_AHEAD
+    SKIP_32_DATA
+    &io
+    STR_BYTE_W0_[X1]
+
+    # flip the toggle
+    NOT_X15_X15
+
+    # Print our first Hex
+    SET_X2_TO_1                   # set the size of chars we want
+    ^~print_chars FCALL
+
+    ADD_X13_X13_1                 # Increment IP
+    ^~Second_pass_loop RBRANCH
+
+:StorePointer_rel4
+    ^~StorePointer FCALL          # Do Common
+    SUB_X0_X0_X2                  # target - ip
+    CBZ_X7_PAST_INST
+    ASR_X0_X0_2
+    LOAD_W1_AHEAD
+    SKIP_32_DATA
+    &io
+    STR_X0_[X1]                   # put value in output
+    SET_X2_TO_4                   # set the size of chars we want
+    ^~print_chars FCALL
+    ^~ClearScratch FCALL          # Clean up after ourselves
+    ^~Second_pass_loop RBRANCH
+
+:StorePointer_rel3
+    ^~StorePointer FCALL          # Do Common
+    SUB_X0_X0_X2                  # target - ip
+    CBZ_X7_PAST_INST
+    ASR_X0_X0_2
+    LOAD_W1_AHEAD
+    SKIP_32_DATA
+    &io
+    STR_X0_[X1]                   # put value in output
+    SET_X2_TO_3                   # set the size of chars we want
+    ^~print_chars FCALL
+    ^~ClearScratch FCALL          # Clean up after ourselves
+    ^~Second_pass_loop RBRANCH
+
+:StorePointer_rel2
+    ^~StorePointer FCALL          # Do Common
+    SUB_X0_X0_X2                  # target - ip
+    CBZ_X7_PAST_INST
+    ASR_X0_X0_2
+    LOAD_W1_AHEAD
+    SKIP_32_DATA
+    &io
+    STR_X0_[X1]                   # put value in output
+    SET_X2_TO_2                   # set the size of chars we want
+    ^~print_chars FCALL
+    ^~ClearScratch FCALL          # Clean up after ourselves
+    ^~Second_pass_loop RBRANCH
+
+:StorePointer_rel1
+    ^~StorePointer FCALL          # Do Common
+    SUB_X0_X0_X2                  # target - ip
+    CBZ_X7_PAST_INST
+    ASR_X0_X0_2
+    LOAD_W1_AHEAD
+    SKIP_32_DATA
+    &io
+    STR_X0_[X1]                   # put value in output
+    SET_X2_TO_1                   # set the size of chars we want
+    ^~print_chars FCALL
+    ^~ClearScratch FCALL          # Clean up after ourselves
+    ^~Second_pass_loop RBRANCH
+
+:StorePointer_abs4
+    ^~StorePointer FCALL          # Do Common
+    LOAD_W1_AHEAD
+    SKIP_32_DATA
+    &io
+    STR_X0_[X1]                   # put value in output
+    SET_X2_TO_4                   # set the size of chars we want
+    ^~print_chars FCALL
+    ^~ClearScratch FCALL          # Clean up after ourselves
+    ^~Second_pass_loop RBRANCH
+
+:StorePointer_abs2
+    ^~StorePointer FCALL          # Do Common
+    LOAD_W1_AHEAD
+    SKIP_32_DATA
+    &io
+    STR_X0_[X1]                   # put value in output
+    SET_X2_TO_2                   # set the size of chars we want
+    ^~print_chars FCALL
+    ^~ClearScratch FCALL          # Clean up after ourselves
+    ^~Second_pass_loop RBRANCH
+
+:Second_pass_done
+    POP_LR                        # pop lr
+    RETURN
+
+:hex
+    # deal with EOF
+    CMP_X0_TO_MINUS_4
+    SKIP_INST_NE
+    ^~EOF FBRANCH
+    # deal with line comments starting with #
+    CMP_X0_TO_35
+    SKIP_INST_NE
+    ^~ascii_comment FBRANCH
+    # deal with line comments starting with ;
+    CMP_X0_TO_59
+    SKIP_INST_NE
+    ^~ascii_comment FBRANCH
+    # deal all ascii less than 0
+    CMP_X0_TO_48
+    SKIP_INST_GE
+    ^~ascii_other FBRANCH
+    # deal with 0-9
+    CMP_X0_TO_58
+    SKIP_INST_GE
+    ^~ascii_num FBRANCH
+    # deal with all ascii less than A
+    CMP_X0_TO_65
+    SKIP_INST_GE
+    ^~ascii_other FBRANCH
+    # deal with A-F
+    CMP_X0_TO_71
+    SKIP_INST_GE
+    ^~ascii_high FBRANCH
+    #deal with all ascii less than a
+    CMP_X0_TO_97
+    SKIP_INST_GE
+    ^~ascii_other FBRANCH
+    #deal with a-f
+    CMP_X0_TO_103
+    SKIP_INST_GE
+    ^~ascii_low FBRANCH
+    # The rest that remains needs to be ignored
+:ascii_other
+    SET_X0_TO_MINUS_1
+    RETURN
+
+:EOF
+    RETURN
+:ascii_num
+    SUB_X0_X0_48
+    RETURN
+:ascii_low
+    SUB_X0_X0_87
+    RETURN
+:ascii_high
+    SUB_X0_X0_55
+    RETURN
+:ascii_comment
+    PUSH_LR                       # push lr
+:ascii_comment_loop
+    ^~Read_byte FCALL
+    CMP_X0_TO_13
+    SKIP_INST_NE
+    ^~ascii_comment_cr FBRANCH
+    CMP_X0_TO_10
+    SKIP_INST_EQ
+    ^~ascii_comment_loop RBRANCH
+:ascii_comment_cr
+    SET_X0_TO_MINUS_1
+    POP_LR                        # pop lr
+    RETURN
+
+
+# Malloc isn't actually required if the program being built fits in the initial memory
+# However, it doesn't take much to add it.
+# Requires a value in X0
+:malloc
+    SET_X8_TO_SYS_BRK             # the Syscall # for SYS_BRK
+    SYSCALL                       # call the Kernel
+    RETURN
+
+
+:Read_byte
+    PUSH_X1
+    # Attempt to read 1 byte from STDIN
+    SET_X0_FROM_X9                # Where are we reading from
+    LOAD_W1_AHEAD                 # Where to put it
+    SKIP_32_DATA
+    &io
+    SET_X2_TO_1                   # set the size of chars we want
+    SET_X8_TO_SYS_READ            # the syscall number for read
+    SYSCALL                       # call the Kernel
+
+    CMP_X0_TO_0                   # check what we got
+    SKIP_INST_NE                  # Got EOF call it done
+    ^~Read_byte_1 FBRANCH
+
+    # load byte
+    LOAD_W0_AHEAD
+    SKIP_32_DATA
+    &io
+    LDR_BYTE_W0_[X0]              # load char, unsigned so zero-extended already
+    POP_X1
+    RETURN
+
+    # Deal with EOF
+:Read_byte_1
+    SET_X0_TO_MINUS_4             # Put EOF in x0
+    POP_X1
+    RETURN
+
+:print_chars
+    SET_X0_FROM_X10               # Write to target file
+    LOAD_W1_AHEAD                 # What we are writing
+    SKIP_32_DATA
+    &io
+    SET_X8_TO_SYS_WRITE           # the syscall number for write
+    SYSCALL                       # call the Kernel
+    RETURN
+
+# Receives pointer in x1
+# Writes out char and updates x1
+# leaves with x1 8-byte aligned
+:consume_token
+    PUSH_LR                       # push lr
+:consume_token_loop
+    ^~Read_byte RCALL             # Consume_token
+
+    CMP_X0_TO_MINUS_4
+    SKIP_INST_NE
+    ^~consume_token_done FBRANCH
+
+    # Check for \t
+    CMP_X0_TO_9
+    SKIP_INST_NE
+    ^~consume_token_done FBRANCH
+
+    # Check for \n
+    CMP_X0_TO_10
+    SKIP_INST_NE
+    ^~consume_token_done FBRANCH
+
+    # Check for ' '
+    CMP_X0_TO_32
+    SKIP_INST_NE
+    ^~consume_token_done FBRANCH
+
+    # Check for '>'
+    CMP_X0_TO_62
+    SKIP_INST_NE
+    ^~consume_token_done FBRANCH
+
+    # Looks like we are still reading token
+    STR_BYTE_W0_[X1]_1            # store char and update pointer
+    ^~consume_token_loop RBRANCH  # loop until done
+
+:consume_token_done
+    SET_X3_TO_0
+:consume_token_pad
+    STR_BYTE_W3_[X1]_1            # write at least one zero-byte
+    TST_X1_7                      # is x1 8-byte aligned?
+    SKIP_INST_EQ
+    ^~consume_token_pad RBRANCH
+
+    POP_LR                        # pop lr
+    RETURN
+
+# finds label matching pointer in scratch
+#  clobbers  x1, x3, x4, x5
+#  returns address in x0
+:GetTarget
+    SET_X5_FROM_X11               # Grab HEAD
+:GetTarget_loop
+    LOAD_W4_AHEAD                 # Reset scratch
+    SKIP_32_DATA
+    &scratch
+    LDR_X3_[X5,16]                # I->NAME
+:GetTarget_loop_0
+    LDR_BYTE_W0_[X3]_1            # I->NAME[0]
+    LDR_BYTE_W1_[X4]_1            # scratch[0]
+    CMP_X0_X1                     # IF TOKEN == I->NAME
+    SKIP_INST_EQ                  # Oops
+    ^~GetTarget_miss FBRANCH
+
+    CMP_X1_TO_0
+    SKIP_INST_EQ                  # Loop until
+    ^~GetTarget_loop_0 RBRANCH
+    ^~GetTarget_done FBRANCH      # Match
+
+    # Miss
+:GetTarget_miss
+    DEREF_X5                      # I = I->NEXT
+    CMP_X5_TO_0                   # IF NULL == I
+    SKIP_INST_NE                  # Abort hard
+    ^~fail FBRANCH
+
+    ^~GetTarget_loop RBRANCH
+
+:GetTarget_done
+    LDR_X0_[X5,8]                 # Get address
+    RETURN
+
+    # clobbers x3, x4
+:ClearScratch
+    PUSH_X0
+    LOAD_W4_AHEAD                 # Where our table is
+    SKIP_32_DATA
+    &scratch
+    SET_X0_TO_0                   # Using null
+
+:ClearScratch_loop
+    LDR_BYTE_W3_[X4]              # Get current value
+    STR_BYTE_W0_[X4,1]_WB         # Because we want nuoll
+    CMP_X3_TO_0                   # Check if we hit null
+    SKIP_INST_EQ                  # Keep looping
+    ^~ClearScratch_loop RBRANCH
+
+    POP_X0
+    RETURN
+
+
+# returns target in x0, base in x2
+:StorePointer
+    PUSH_LR
+    SET_X6_FROM_X13
+    ^~Update_Pointer RCALL        # Increment IP
+    LOAD_W1_AHEAD                 # Write to scratch
+    SKIP_32_DATA
+    &scratch
+    ^~consume_token RCALL         # get token
+    PUSH_X0                       # Protect base_sep_p
+    ^~GetTarget RCALL             # Get address of pointer
+    ^~ClearScratch RCALL          # Clean up after ourselves
+    SET_X2_FROM_X6                # base = IP
+    POP_X1                        # Restore base_sep_p
+    CMP_X1_TO_62                  # If base_sep_p == '>'
+    SKIP_INST_EQ                  # If not
+    ^~StorePointer_done FBRANCH
+
+    # Deal with %label>label case
+    PUSH_X0                       # We need to preserve main target
+    LOAD_W1_AHEAD                 # Write to scratch
+    SKIP_32_DATA
+    &scratch
+    ^~consume_token RCALL         # get token
+    ^~GetTarget RCALL             # Get address of pointer
+    ^~ClearScratch RCALL          # Clean up after ourselves
+    SET_X2_FROM_X0                # Use our new base
+    POP_X0                        # Restore main target
+
+:StorePointer_done
+    POP_LR                        # pop lr
+    RETURN
+
+
+:fail
+    # Some shit went wrong
+    SET_X0_TO_1                   # All is wrong
+    SET_X8_TO_SYS_EXIT            # put the exit syscall number in eax
+    SYSCALL                       # Call it a good day
+
+:ELF_data
+:io
+    NULL64
+:scratch
+    NULL8
+
+:ELF_end
+:ELF_sym
+:ELF_str

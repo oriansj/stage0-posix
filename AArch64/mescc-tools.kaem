@@ -40,6 +40,15 @@
 # in mescc-tools-seed/AArch64 to allow you various ways to verify correctness
 
 #################################
+# Phase-2 Build hex2 from hex1  #
+#################################
+./hex1 hex2_AArch64.hex1 hex2-0
+# hex2 adds support for long labels and absolute addresses thus allowing it
+# to function as an effective linker for later stages of the bootstrap
+# This is a minimal version which will be used to bootstrap a much more advanced
+# version in a later stage.
+
+#################################
 # Phase-2b Build catm from hex1 #
 #################################
 ./hex1 catm_AArch64.hex1 catm

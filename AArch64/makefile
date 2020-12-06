@@ -34,6 +34,10 @@ bin/catm-gas: GAS/catm_AArch64.S | bin
 	as GAS/catm_AArch64.S -o bin/catm.o
 	ld bin/catm.o -o bin/catm-gas
 
+bin/hex2-gas: GAS/hex2_AArch64.S | bin
+	as GAS/hex2_AArch64.S -o bin/hex2.o
+	ld bin/hex2.o -o bin/hex2-gas
+
 # make pieces from the GAS pieces
 hex0: hex0-gas
 	./bin/hex0-gas hex0_AArch64.hex0 hex0
@@ -44,14 +48,17 @@ hex1: hex0-gas
 catm: hex1-gas
 	./bin/hex1-gas catm_AArch64.hex1 catm
 
-all: hex0 hex1 catm
+hex2-0: hex1-gas
+	./bin/hex1-gas hex2_AArch64.hex1 hex2-0
+
+all: hex0 hex1 catm hex2-0
 
 clean:
-	rm -f hex0 hex1 catm
+	rm -f hex0 hex1 catm hex2-0
 	rm -rf bin
 
 test: all
 	sha256sum -c SHA256SUMS
 
 Generate_test_answers: all
-	sha256sum hex0 hex1 catm >| SHA256SUMS
+	sha256sum hex0 hex1 catm hex2-0 >| SHA256SUMS

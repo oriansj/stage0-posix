@@ -1,0 +1,735 @@
+## Copyright (C) 2017 Jeremiah Orians
+## Copyright (C) 2020 Sanne Wouda
+## This file is part of stage0.
+##
+## stage0 is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## stage0 is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with stage0.  If not, see <http://www.gnu.org/licenses/>.
+
+#:ELF_base
+
+7F 45 4C 46                    # e_ident[EI_MAG0-3] ELF's magic number
+
+02                             # e_ident[EI_CLASS] Indicating 64 bit
+01                             # e_ident[EI_DATA] Indicating little endianness
+01                             # e_ident[EI_VERSION] Indicating original elf
+
+03                             # e_ident[EI_OSABI] Set at 0 because none cares
+00                             # e_ident[EI_ABIVERSION] See above
+
+00 00 00 00 00 00 00           # e_ident[EI_PAD]
+02 00                          # e_type Indicating Executable
+B7 00                          # e_machine Indicating AArch64
+01 00 00 00                    # e_version Indicating original elf
+
+78 00 60 00 00 00 00 00          # e_entry Address of the entry point
+40 00 00 00 00 00 00 00 # e_phoff Address of program header table
+00 00 00 00 00 00 00 00 # e_shoff Address of section header table
+
+00 00 00 00                    # e_flags
+40 00                          # e_ehsize Indicating our 64 Byte header
+
+38 00                          # e_phentsize size of a program header table
+01 00                          # e_phnum number of entries in program table
+
+00 00                          # e_shentsize size of a section header table
+00 00                          # e_shnum number of entries in section table
+
+00 00                          # e_shstrndx index of the section names
+
+#:ELF_program_headers
+#:ELF_program_header__text
+01 00 00 00                   # ph_type: PT-LOAD = 1
+07 00 00 00                   # ph_flags: PF-X|PF-W|PF-R = 7
+00 00 00 00 00 00 00 00                   # ph_offset
+00 00 60 00 00 00 00 00                     # ph_vaddr
+00 00 60 00 00 00 00 00                     # ph_physaddr
+21 07 00 00 00 00 00 00             # ph_filesz
+21 07 00 00 00 00 00 00             # ph_memsz
+01 00 00 00 00 00 00 00                   # ph_align
+
+    # Register usage:
+    # X0, X1, X2, X3 => Temps
+    # X15 => Flag
+    # X14 => High bits
+    # X13 => IP
+    # X12 => MALLOC
+    # X11 => HEAD
+
+    # Struct format: (size 24)
+    # NEXT => 0
+    # TARGET => 8
+    # NAME => 16
+
+#:ELF_text
+
+# Where the ELF Header is going to hit
+# Simply jump to _start
+# Our main function
+#:_start
+    000080d2                    ; SET_X0_TO_0                   # Get current pointer
+    ^~m 94                      ; ^~malloc FCALL                # Get current HEAP
+    ec0300aa                    ; SET_X12_FROM_X0               # Setup MALLOC
+    00007091                    ; ADD_X0_X0_12MB                # Create space for temp [12MB]
+    ^~m 94                      ; ^~malloc FCALL                # Give ourselves 81920 bytes to work with
+
+    e10b40f9                    ; LDR_X1_[SP,16]                # Get the actual input name
+    600c8092                    ; SET_X0_TO_FCNTL_H_AT_FDCWD    # AT_FDCWD, relative to current working directory
+    020080d2                    ; SET_X2_TO_0                   # Prepare file as read only
+    080780d2                    ; SET_X8_TO_SYS_OPENAT          # The syscall number for openat(), aarch64 has no open()
+    010000d4                    ; SYSCALL                       # Open file!
+    e90300aa                    ; SET_X9_FROM_X0                # Preserve the file pointer we were given
+
+    e10f40f9                    ; LDR_X1_[SP,24]                # Get the output name
+    600c8092                    ; SET_X0_TO_FCNTL_H_AT_FDCWD    # AT_FDCWD, relative to current working directory
+    224880d2                    ; SET_X2_TO_577                 # Prepare file as O_WRONLY|O_CREAT|O_TRUNC
+    033880d2                    ; SET_X3_TO_448                 # Prepare file as RWX for owner only (700 in octal)
+    080780d2                    ; SET_X8_TO_SYS_OPENAT          # The syscall number for openat(), aarch64 has no open()
+    010000d4                    ; SYSCALL                       # Open file!
+    1f0000f1                    ; CMP_X0_TO_0                   # Check for missing output
+    4d000054                    ; SKIP_INST_LE                  # Have real output
+    ^~s 14                      ; ^~_start_out FBRANCH
+    200080d2                    ; SET_X0_TO_1                   # Use stdout
+
+:s
+    ea0300aa                    ; SET_X10_FROM_X0               # Preserve the file pointer we were given
+
+    ^~C 94                      ; ^~ClearScratch FCALL          # Zero scratch
+    0f008092                    ; SET_X15_TO_MINUS_1            # Our flag for byte processing
+    0e0080d2                    ; SET_X14_TO_0                  # temp storage for the sum
+    0d0ca0d2                    ; SET_X13_TO_0x00600000         # Our starting IP
+    0b0080d2                    ; SET_X11_TO_0                  # HEAD = NULL
+    ^~F 94                      ; ^~First_pass FCALL            # Process it
+
+    # rewind input file
+    e00309aa                    ; SET_X0_FROM_X9                # Using our input file
+    010080d2                    ; SET_X1_TO_0                   # Offset
+    020080d2                    ; SET_X2_TO_0                   # Whence SEEK_SET
+    c80780d2                    ; SET_X8_TO_SYS_LSEEK           # lseek
+    010000d4                    ; SYSCALL
+
+    0f008092                    ; SET_X15_TO_MINUS_1            # Our flag for byte processing
+    0e0080d2                    ; SET_X14_TO_0                  # temp storage for the sum
+    0d0ca0d2                    ; SET_X13_TO_0x00600000         # Our starting IP
+    ^~S 94                      ; ^~Second_pass FCALL           # Process it
+
+    # program completed Successfully
+    000080d2                    ; SET_X0_TO_0                   # All is well
+    a80b80d2                    ; SET_X8_TO_SYS_EXIT            # put the exit syscall number in x8
+    010000d4                    ; SYSCALL
+
+
+:F ; :First_pass
+    fe0f1ff8                    ; PUSH_LR                       # push lr
+:a ; :First_pass_loop
+    ^~R 94                      ; ^~Read_byte FCALL
+
+    # Deal with EOF
+    1f1000b1                    ; CMP_X0_TO_MINUS_4
+    41000054                    ; SKIP_INST_NE
+    ^~d 14                      ; ^~First_pass_done FBRANCH
+
+    # Check for :
+    1fe800f1                    ; CMP_X0_TO_58
+    40000054                    ; SKIP_INST_EQ
+    ^~b 14                      ; ^~First_pass_0 FBRANCH
+
+    # Deal with label
+    e0030caa                    ; SET_X0_FROM_X12               # ENTRY
+    8c610091                    ; ADD_X12_X12_24                #^~ CALLOC
+    0c0800f9                    ; STR_X12_[X0,16]               # ENTRY->NAME = TOKEN
+    0d0400f9                    ; STR_X13_[X0,8]                # ENTRY->TARGET = IP
+    0b0000f9                    ; STR_X11_[X0]                  # ENTRY->NEXT = HEAD
+    eb0300aa                    ; SET_X11_FROM_X0               # HEAD = ENTRY
+    e1030caa                    ; SET_X1_FROM_X12               # Write Starting after struct
+    ^~J 94                      ; ^~consume_token FCALL         # Collect whole string
+    ec0301aa                    ; SET_X12_FROM_X1               # Update HEAP
+    ^~a 17                      ; ^~First_pass_loop RBRANCH
+
+:b ; :First_pass_0
+    # Check for !
+    1f8400f1                    ; CMP_X0_TO_33
+    41000054                    ; SKIP_INST_NE
+    ^~Z 14                      ; ^~First_pass_pointer FBRANCH
+
+    # Check for @
+    1f0001f1                    ; CMP_X0_TO_64
+    41000054                    ; SKIP_INST_NE
+    ^~Z 14                      ; ^~First_pass_pointer FBRANCH
+
+    # Check for $
+    1f9000f1                    ; CMP_X0_TO_36
+    41000054                    ; SKIP_INST_NE
+    ^~Z 14                      ; ^~First_pass_pointer FBRANCH
+
+    # Check for %
+    1f9400f1                    ; CMP_X0_TO_37
+    41000054                    ; SKIP_INST_NE
+    ^~Z 14                      ; ^~First_pass_pointer FBRANCH
+
+    # Check for &
+    1f9800f1                    ; CMP_X0_TO_38
+    41000054                    ; SKIP_INST_NE
+    ^~Z 14                      ; ^~First_pass_pointer FBRANCH
+
+    # Check for ~
+    1ff801f1                    ; CMP_X0_TO_126
+    41000054                    ; SKIP_INST_NE
+    ^~Z 14                      ; ^~First_pass_pointer FBRANCH
+
+    # Deal with everything else
+    ^~x 94                      ; ^~hex FCALL                   # Process our char
+
+    # Deal with EOF
+    1f1000b1                    ; CMP_X0_TO_MINUS_4
+    41000054                    ; SKIP_INST_NE
+    ^~d 14                      ; ^~First_pass_done FBRANCH
+
+    # deal with -1 values
+    1f0000f1                    ; CMP_X0_TO_0
+    4a000054                    ; SKIP_INST_GE
+    ^~a 17                      ; ^~First_pass_loop RBRANCH
+
+    # deal with toggle
+    ff0100f1                    ; CMP_X15_TO_0
+    41000054                    ; SKIP_INST_NE
+    ^~c 14                      ; ^~First_pass_1 FBRANCH
+    ad050091                    ; ADD_X13_X13_1                 # Increment IP
+
+:c ; :First_pass_1
+    ef032faa                    ; NOT_X15_X15
+    ^~a 17                      ; ^~First_pass_loop RBRANCH
+
+:Z ; :First_pass_pointer
+    # Deal with Pointer to label
+    ^~e 94                      ; ^~Update_Pointer FCALL        # Increment IP
+    41000018                    ; LOAD_W1_AHEAD                 # Using scratch
+    02000014                    ; SKIP_32_DATA
+    &1                          ; &scratch
+    ^~J 94                      ; ^~consume_token FCALL         # Read token
+    ^~C 94                      ; ^~ClearScratch FCALL          # Throw away token
+    1ff800f1                    ; CMP_X0_TO_62                  # check for '>'
+    40000054                    ; SKIP_INST_EQ                  # Loop again
+    ^~a 17                      ; ^~First_pass_loop RBRANCH
+
+    # Deal with %label>label case
+    41000018                    ; LOAD_W1_AHEAD                 # Write to scratch
+    02000014                    ; SKIP_32_DATA
+    &1                          ; &scratch
+    ^~J 94                      ; ^~consume_token FCALL         # get token
+    ^~C 94                      ; ^~ClearScratch FCALL          # Clean up after ourselves
+    ^~a 17                      ; ^~First_pass_loop RBRANCH     # Loop again
+
+:d ; :First_pass_done
+    fe0741f8                    ; POP_LR                        # pop lr
+    c0035fd6                    ; RETURN
+
+:e ; :Update_Pointer
+    # Check for !
+    1f8400f1                    ; CMP_X0_TO_33
+    41000054                    ; SKIP_INST_NE
+    ^~i 14                      ; ^~Update_Pointer_1 FBRANCH
+
+    # Check for @
+    1f0001f1                    ; CMP_X0_TO_64
+    41000054                    ; SKIP_INST_NE
+    ^~h 14                      ; ^~Update_Pointer_2 FBRANCH
+
+    # Check for $
+    1f9000f1                    ; CMP_X0_TO_36
+    41000054                    ; SKIP_INST_NE
+    ^~h 14                      ; ^~Update_Pointer_2 FBRANCH
+
+    # Check for ~
+    1ff801f1                    ; CMP_X0_TO_126
+    41000054                    ; SKIP_INST_NE
+    ^~g 14                      ; ^~Update_Pointer_3 FBRANCH
+
+    # Check for %
+    1f9400f1                    ; CMP_X0_TO_37
+    41000054                    ; SKIP_INST_NE
+    ^~f 14                      ; ^~Update_Pointer_4 FBRANCH
+
+    # Check for &
+    1f9800f1                    ; CMP_X0_TO_38
+    41000054                    ; SKIP_INST_NE
+    ^~f 14                      ; ^~Update_Pointer_4 FBRANCH
+
+    # deal with bad input
+    ^~Y 14                      ; ^~fail FBRANCH
+
+:f ; :Update_Pointer_4
+    ad050091                    ; ADD_X13_X13_1                 # Increment IP
+:g ; :Update_Pointer_3
+    ad050091                    ; ADD_X13_X13_1                 # Increment IP
+:h ; :Update_Pointer_2
+    ad050091                    ; ADD_X13_X13_1                 # Increment IP
+:i ; Update_Pointer_1
+    ad050091                    ; ADD_X13_X13_1                 # Increment IP
+    c0035fd6                    ; RETURN
+
+
+:S ; :Second_pass
+    fe0f1ff8                    ; PUSH_LR                       # push lr
+
+    # x7 marks whether we need to do a word-aligned pointer
+:j ; :Second_pass_loop
+    070080d2                    ; SET_X7_TO_0
+:k ; :Second_pass_align
+    ^~R 94                      ; ^~Read_byte FCALL
+
+    # Deal with EOF
+    1f1000b1                    ; CMP_X0_TO_MINUS_4
+    41000054                    ; SKIP_INST_NE
+    ^~w 14                      ; ^~Second_pass_done FBRANCH
+
+    # Deal with ^
+    1f7801f1                    ; CMP_X0_TO_94
+    41000054                    ; SKIP_INST_NE
+    ^~l 14                      ; ^~Second_pass_align_0 FBRANCH
+
+    # Simply drop the label
+    1fe800f1                    ; CMP_X0_TO_58
+    40000054                    ; SKIP_INST_EQ
+    ^~n 14                      ; ^~Second_pass_0 FBRANCH
+
+    41000018                    ; LOAD_W1_AHEAD                 # Using scratch
+    02000014                    ; SKIP_32_DATA
+    &1                          ; &scratch
+    ^~J 94                      ; ^~consume_token FCALL         # Read token
+    ^~C 94                      ; ^~ClearScratch FCALL          # Throw away token
+
+    ^~j 17                      ; ^~Second_pass_loop RBRANCH
+
+:l ; :Second_pass_align_0
+    e70327aa                    ; NOT_X7_X7                     # toggle alignment
+    ^~k 17                      ; ^~Second_pass_align RBRANCH
+
+:n ; :Second_pass_0
+    # Deal with % pointer
+    1f9400f1                    ; CMP_X0_TO_37
+    41000054                    ; SKIP_INST_NE
+    ^~o 14                      ; ^~StorePointer_rel4 FBRANCH
+
+    # Deal with ~ pointer
+    1ff801f1                    ; CMP_X0_TO_126
+    41000054                    ; SKIP_INST_NE
+    ^~q 14                      ; ^~StorePointer_rel3 FBRANCH
+
+    # Deal with @ pointer
+    1f0001f1                    ; CMP_X0_TO_64
+    41000054                    ; SKIP_INST_NE
+    ^~r 14                      ; ^~StorePointer_rel2 FBRANCH
+
+    # Deal with ! pointer
+    1f8400f1                    ; CMP_X0_TO_33
+    41000054                    ; SKIP_INST_NE
+    ^~t 14                      ; ^~StorePointer_rel1 FBRANCH
+
+    # Deal with & pointer
+    1f9800f1                    ; CMP_X0_TO_38
+    41000054                    ; SKIP_INST_NE
+    ^~u 14                      ; ^~StorePointer_abs4 FBRANCH
+
+    # Deal with $ pointer
+    1f9000f1                    ; CMP_X0_TO_36
+    41000054                    ; SKIP_INST_NE
+    ^~v 14                      ; ^~StorePointer_abs2 FBRANCH
+
+    # Deal with everything else
+    ^~x 94                      ; ^~hex FCALL                   # Process our char
+
+    # Deal with EOF
+    1f1000b1                    ; CMP_X0_TO_MINUS_4
+    41000054                    ; SKIP_INST_NE
+    ^~w 14                      ; ^~Second_pass_done FBRANCH
+
+    # deal with -1 values
+    1f0000f1                    ; CMP_X0_TO_0
+    4a000054                    ; SKIP_INST_GE
+    ^~j 17                      ; ^~Second_pass_loop RBRANCH
+
+    # deal with toggle
+    ff0100f1                    ; CMP_X15_TO_0
+    41000054                    ; SKIP_INST_NE
+    ^~p 14                      ; ^~print FBRANCH
+
+    # process first byte of pair
+    ee0300aa                    ; SET_X14_FROM_X0
+    0f0080d2                    ; SET_X15_TO_0
+    ^~j 17                      ; ^~Second_pass_loop RBRANCH
+
+    # process second byte of pair
+:p ; :print
+    # update the sum and store in output
+    00100e8b                    ; ADD_X0_X0_X14_LSL_4
+    41000018                    ; LOAD_W1_AHEAD
+    02000014                    ; SKIP_32_DATA
+    &0                          ; &io
+    20000039                    ; STR_BYTE_W0_[X1]
+
+    # flip the toggle
+    ef032faa                    ; NOT_X15_X15
+
+    # Print our first Hex
+    220080d2                    ; SET_X2_TO_1                   # set the size of chars we want
+    ^~I 94                      ; ^~print_chars FCALL
+
+    ad050091                    ; ADD_X13_X13_1                 # Increment IP
+    ^~j 17                      ; ^~Second_pass_loop RBRANCH
+
+:o ; :StorePointer_rel4
+    ^~W 94                      ; ^~StorePointer FCALL          # Do Common
+    000002cb                    ; SUB_X0_X0_X2                  # target - ip
+    470000b4                    ; CBZ_X7_PAST_INST
+    00fc4293                    ; ASR_X0_X0_2
+    41000018                    ; LOAD_W1_AHEAD
+    02000014                    ; SKIP_32_DATA
+    &0                          ; &io
+    200000f9                    ; STR_X0_[X1]                   # put value in output
+    820080d2                    ; SET_X2_TO_4                   # set the size of chars we want
+    ^~I 94                      ; ^~print_chars FCALL
+    ^~C 94                      ; ^~ClearScratch FCALL          # Clean up after ourselves
+    ^~j 17                      ; ^~Second_pass_loop RBRANCH
+
+:q ; :StorePointer_rel3
+    ^~W 94                      ; ^~StorePointer FCALL          # Do Common
+    000002cb                    ; SUB_X0_X0_X2                  # target - ip
+    470000b4                    ; CBZ_X7_PAST_INST
+    00fc4293                    ; ASR_X0_X0_2
+    41000018                    ; LOAD_W1_AHEAD
+    02000014                    ; SKIP_32_DATA
+    &0                          ; &io
+    200000f9                    ; STR_X0_[X1]                   # put value in output
+    620080d2                    ; SET_X2_TO_3                   # set the size of chars we want
+    ^~I 94                      ; ^~print_chars FCALL
+    ^~C 94                      ; ^~ClearScratch FCALL          # Clean up after ourselves
+    ^~j 17                      ; ^~Second_pass_loop RBRANCH
+
+:r ; :StorePointer_rel2
+    ^~W 94                      ; ^~StorePointer FCALL          # Do Common
+    000002cb                    ; SUB_X0_X0_X2                  # target - ip
+    470000b4                    ; CBZ_X7_PAST_INST
+    00fc4293                    ; ASR_X0_X0_2
+    41000018                    ; LOAD_W1_AHEAD
+    02000014                    ; SKIP_32_DATA
+    &0                          ; &io
+    200000f9                    ; STR_X0_[X1]                   # put value in output
+    420080d2                    ; SET_X2_TO_2                   # set the size of chars we want
+    ^~I 94                      ; ^~print_chars FCALL
+    ^~C 94                      ; ^~ClearScratch FCALL          # Clean up after ourselves
+    ^~j 17                      ; ^~Second_pass_loop RBRANCH
+
+:t ; :StorePointer_rel1
+    ^~W 94                      ; ^~StorePointer FCALL          # Do Common
+    000002cb                    ; SUB_X0_X0_X2                  # target - ip
+    470000b4                    ; CBZ_X7_PAST_INST
+    00fc4293                    ; ASR_X0_X0_2
+    41000018                    ; LOAD_W1_AHEAD
+    02000014                    ; SKIP_32_DATA
+    &0                          ; &io
+    200000f9                    ; STR_X0_[X1]                   # put value in output
+    220080d2                    ; SET_X2_TO_1                   # set the size of chars we want
+    ^~I 94                      ; ^~print_chars FCALL
+    ^~C 94                      ; ^~ClearScratch FCALL          # Clean up after ourselves
+    ^~j 17                      ; ^~Second_pass_loop RBRANCH
+
+:u ; :StorePointer_abs4
+    ^~W 94                      ; ^~StorePointer FCALL          # Do Common
+    41000018                    ; LOAD_W1_AHEAD
+    02000014                    ; SKIP_32_DATA
+    &0                          ; &io
+    200000f9                    ; STR_X0_[X1]                   # put value in output
+    820080d2                    ; SET_X2_TO_4                   # set the size of chars we want
+    ^~I 94                      ; ^~print_chars FCALL
+    ^~C 94                      ; ^~ClearScratch FCALL          # Clean up after ourselves
+    ^~j 17                      ; ^~Second_pass_loop RBRANCH
+
+:v ; :StorePointer_abs2
+    ^~W 94                      ; ^~StorePointer FCALL          # Do Common
+    41000018                    ; LOAD_W1_AHEAD
+    02000014                    ; SKIP_32_DATA
+    &0                          ; &io
+    200000f9                    ; STR_X0_[X1]                   # put value in output
+    420080d2                    ; SET_X2_TO_2                   # set the size of chars we want
+    ^~I 94                      ; ^~print_chars FCALL
+    ^~C 94                      ; ^~ClearScratch FCALL          # Clean up after ourselves
+    ^~j 17                      ; ^~Second_pass_loop RBRANCH
+
+:w ; :Second_pass_done
+    fe0741f8                    ; POP_LR                        # pop lr
+    c0035fd6                    ; RETURN
+
+:x ; :hex
+    # deal with EOF
+    1f1000b1                    ; CMP_X0_TO_MINUS_4
+    41000054                    ; SKIP_INST_NE
+    ^~z 14                      ; ^~EOF FBRANCH
+    # deal with line comments starting with #
+    1f8c00f1                    ; CMP_X0_TO_35
+    41000054                    ; SKIP_INST_NE
+    ^~E 14                      ; ^~ascii_comment FBRANCH
+    # deal with line comments starting with ;
+    1fec00f1                    ; CMP_X0_TO_59
+    41000054                    ; SKIP_INST_NE
+    ^~E 14                      ; ^~ascii_comment FBRANCH
+    # deal all ascii less than 0
+    1fc000f1                    ; CMP_X0_TO_48
+    4a000054                    ; SKIP_INST_GE
+    ^~y 14                      ; ^~ascii_other FBRANCH
+    # deal with 0-9
+    1fe800f1                    ; CMP_X0_TO_58
+    4a000054                    ; SKIP_INST_GE
+    ^~A 14                      ; ^~ascii_num FBRANCH
+    # deal with all ascii less than A
+    1f0401f1                    ; CMP_X0_TO_65
+    4a000054                    ; SKIP_INST_GE
+    ^~y 14                      ; ^~ascii_other FBRANCH
+    # deal with A-F
+    1f1c01f1                    ; CMP_X0_TO_71
+    4a000054                    ; SKIP_INST_GE
+    ^~D 14                      ; ^~ascii_high FBRANCH
+    #deal with all ascii less than a
+    1f8401f1                    ; CMP_X0_TO_97
+    4a000054                    ; SKIP_INST_GE
+    ^~y 14                      ; ^~ascii_other FBRANCH
+    #deal with a-f
+    1f9c01f1                    ; CMP_X0_TO_103
+    4a000054                    ; SKIP_INST_GE
+    ^~B 14                      ; ^~ascii_low FBRANCH
+    # The rest that remains needs to be ignored
+:y ; :ascii_other
+    00008092                    ; SET_X0_TO_MINUS_1
+    c0035fd6                    ; RETURN
+
+:z ; :EOF
+    c0035fd6                    ; RETURN
+:A ; :ascii_num
+    00c000d1                    ; SUB_X0_X0_48
+    c0035fd6                    ; RETURN
+:B ; :ascii_low
+    005c01d1                    ; SUB_X0_X0_87
+    c0035fd6                    ; RETURN
+:D ; :ascii_high
+    00dc00d1                    ; SUB_X0_X0_55
+    c0035fd6                    ; RETURN
+:E ; :ascii_comment
+    fe0f1ff8                    ; PUSH_LR                       # push lr
+:G ; :ascii_comment_loop
+    ^~R 94                      ; ^~Read_byte FCALL
+    1f3400f1                    ; CMP_X0_TO_13
+    41000054                    ; SKIP_INST_NE
+    ^~H 14                      ; ^~ascii_comment_cr FBRANCH
+    1f2800f1                    ; CMP_X0_TO_10
+    40000054                    ; SKIP_INST_EQ
+    ^~G 17                      ; ^~ascii_comment_loop RBRANCH
+:H ; :ascii_comment_cr
+    00008092                    ; SET_X0_TO_MINUS_1
+    fe0741f8                    ; POP_LR                        # pop lr
+    c0035fd6                    ; RETURN
+
+
+# Malloc isn't actually required if the program being built fits in the initial memory
+# However, it doesn't take much to add it.
+# Requires a value in X0
+:m
+    c81a80d2                    ; SET_X8_TO_SYS_BRK             # the Syscall # for SYS_BRK
+    010000d4                    ; SYSCALL                       # call the Kernel
+    c0035fd6                    ; RETURN
+
+
+:R ; :Read_byte
+    e10f1ff8                    ; PUSH_X1
+    # Attempt to read 1 byte from STDIN
+    e00309aa                    ; SET_X0_FROM_X9                # Where are we reading from
+    41000018                    ; LOAD_W1_AHEAD                 # Where to put it
+    02000014                    ; SKIP_32_DATA
+    &0                          ; &io
+    220080d2                    ; SET_X2_TO_1                   # set the size of chars we want
+    e80780d2                    ; SET_X8_TO_SYS_READ            # the syscall number for read
+    010000d4                    ; SYSCALL                       # call the Kernel
+
+    1f0000f1                    ; CMP_X0_TO_0                   # check what we got
+    41000054                    ; SKIP_INST_NE                  # Got EOF call it done
+    ^~Q 14                      ; ^~Read_byte_1 FBRANCH
+
+    # load byte
+    40000098                    ; LOAD_W0_AHEAD
+    02000014                    ; SKIP_32_DATA
+    &0                          ; &io
+    00004039                    ; LDR_BYTE_W0_[X0]              # load char, unsigned so zero-extended already
+    e10741f8                    ; POP_X1
+    c0035fd6                    ; RETURN
+
+    # Deal with EOF
+:Q ; :Read_byte_1
+    60008092                    ; SET_X0_TO_MINUS_4             # Put EOF in x0
+    e10741f8                    ; POP_X1
+    c0035fd6                    ; RETURN
+
+:I ; :print_chars
+    e0030aaa                    ; SET_X0_FROM_X10               # Write to target file
+    41000018                    ; LOAD_W1_AHEAD                 # What we are writing
+    02000014                    ; SKIP_32_DATA
+    &0                          ; &io
+    080880d2                    ; SET_X8_TO_SYS_WRITE           # the syscall number for write
+    010000d4                    ; SYSCALL                       # call the Kernel
+    c0035fd6                    ; RETURN
+
+# Receives pointer in x1
+# Writes out char and updates x1
+# leaves with x1 8-byte aligned
+:J ; :consume_token
+    fe0f1ff8                    ; PUSH_LR                       # push lr
+:K ; :consume_token_loop
+    ^~R 97                      ; ^~Read_byte RCALL             # Consume_token
+
+    1f1000b1                    ; CMP_X0_TO_MINUS_4
+    41000054                    ; SKIP_INST_NE
+    ^~L 14                      ; ^~consume_token_done FBRANCH
+
+    # Check for \t
+    1f2400f1                    ; CMP_X0_TO_9
+    41000054                    ; SKIP_INST_NE
+    ^~L 14                      ; ^~consume_token_done FBRANCH
+
+    # Check for \n
+    1f2800f1                    ; CMP_X0_TO_10
+    41000054                    ; SKIP_INST_NE
+    ^~L 14                      ; ^~consume_token_done FBRANCH
+
+    # Check for ' '
+    1f8000f1                    ; CMP_X0_TO_32
+    41000054                    ; SKIP_INST_NE
+    ^~L 14                      ; ^~consume_token_done FBRANCH
+
+    # Check for '>'
+    1ff800f1                    ; CMP_X0_TO_62
+    41000054                    ; SKIP_INST_NE
+    ^~L 14                      ; ^~consume_token_done FBRANCH
+
+    # Looks like we are still reading token
+    20140038                    ; STR_BYTE_W0_[X1]_1            # store char and update pointer
+    ^~K 17                      ; ^~consume_token_loop RBRANCH  # loop until done
+
+:L ; :consume_token_done
+    030080d2                    ; SET_X3_TO_0
+:M ; :consume_token_pad
+    23140038                    ; STR_BYTE_W3_[X1]_1            # write at least one zero-byte
+    23140038                    ; TST_X1_7                      # is x1 8-byte aligned?
+    40000054                    ; SKIP_INST_EQ
+    ^~M 17                      ; ^~consume_token_pad RBRANCH
+
+    fe0741f8                    ; POP_LR                        # pop lr
+    c0035fd6                    ; RETURN
+
+# finds label matching pointer in scratch
+#  clobbers  x1, x3, x4, x5
+#  returns address in x0
+:N ; :GetTarget
+    e5030baa                    ; SET_X5_FROM_X11               # Grab HEAD
+:O ; :GetTarget_loop
+    44000018                    ; LOAD_W4_AHEAD                 # Reset scratch
+    02000014                    ; SKIP_32_DATA
+    &1                          ; &scratch
+    a30840f9                    ; LDR_X3_[X5,16]                # I->NAME
+:P ; :GetTarget_loop_0
+    60144038                    ; LDR_BYTE_W0_[X3]_1            # I->NAME[0]
+    81144038                    ; LDR_BYTE_W1_[X4]_1            # scratch[0]
+    1f0001eb                    ; CMP_X0_X1                     # IF TOKEN == I->NAME
+    40000054                    ; SKIP_INST_EQ                  # Oops
+    ^~T 14                      ; ^~GetTarget_miss FBRANCH
+
+    3f0000f1                    ; CMP_X1_TO_0
+    40000054                    ; SKIP_INST_EQ                  # Loop until
+    ^~P 17                      ; ^~GetTarget_loop_0 RBRANCH
+    ^~U 14                      ; ^~GetTarget_done FBRANCH      # Match
+
+    # Miss
+:T ; :GetTarget_miss
+    a50040f9                    ; DEREF_X5                      # I = I->NEXT
+    bf0000f1                    ; CMP_X5_TO_0                   # IF NULL == I
+    41000054                    ; SKIP_INST_NE                  # Abort hard
+    ^~Y 14                      ; ^~fail FBRANCH
+
+    ^~O 17                      ; ^~GetTarget_loop RBRANCH
+
+:U ; GetTarget_done
+    a00440f9                    ; LDR_X0_[X5,8]                 # Get address
+    c0035fd6                    ; RETURN
+
+# clobbers x3, x4
+:C ; ClearScratch
+    e00f1ff8                    ; PUSH_X0
+    44000018                    ; LOAD_W4_AHEAD                 # Where our table is
+    02000014                    ; SKIP_32_DATA
+    &1                          ; &scratch
+    000080d2                    ; SET_X0_TO_0                   # Using null
+
+:V ; :ClearScratch_loop
+    83004039                    ; LDR_BYTE_W3_[X4]              # Get current value
+    801c0038                    ; STR_BYTE_W0_[X4,1]_WB         # Because we want nuoll
+    7f0000f1                    ; CMP_X3_TO_0                   # Check if we hit null
+    40000054                    ; SKIP_INST_EQ                  # Keep looping
+    ^~V 17                      ; ^~ClearScratch_loop RBRANCH
+
+    e00741f8                    ; POP_X0
+    c0035fd6                    ; RETURN
+
+
+# returns target in x0, base in x2
+:W ; :StorePointer
+    fe0f1ff8                    ; PUSH_LR
+    e6030daa                    ; SET_X6_FROM_X13
+    ^~e 97                      ; ^~Update_Pointer RCALL        # Increment IP
+    41000018                    ; LOAD_W1_AHEAD                 # Write to scratch
+    02000014                    ; SKIP_32_DATA
+    &1                          ; &scratch
+    ^~J 97                      ; ^~consume_token RCALL         # get token
+    e00f1ff8                    ; PUSH_X0                       # Protect base_sep_p
+    ^~N 97                      ; ^~GetTarget RCALL             # Get address of pointer
+    ^~C 97                      ; ^~ClearScratch RCALL          # Clean up after ourselves
+    e20306aa                    ; SET_X2_FROM_X6                # base = IP
+    e10741f8                    ; POP_X1                        # Restore base_sep_p
+    3ff800f1                    ; CMP_X1_TO_62                  # If base_sep_p == '>'
+    40000054                    ; SKIP_INST_EQ                  # If not
+    ^~X 14                      ; ^~StorePointer_done FBRANCH
+
+    # Deal with %label>label case
+    e00f1ff8                    ; PUSH_X0                       # We need to preserve main target
+    41000018                    ; LOAD_W1_AHEAD                 # Write to scratch
+    02000014                    ; SKIP_32_DATA
+    &1                          ; &scratch
+    ^~J 97                      ; ^~consume_token RCALL         # get token
+    ^~N 97                      ; ^~GetTarget RCALL             # Get address of pointer
+    ^~C 97                      ; ^~ClearScratch RCALL          # Clean up after ourselves
+    e20300aa                    ; SET_X2_FROM_X0                # Use our new base
+    e00741f8                    ; POP_X0                        # Restore main target
+
+:X ; :StorePointer_done
+    fe0741f8                    ; POP_LR                        # pop lr
+    c0035fd6                    ; RETURN
+
+
+:Y ; fail
+    # Some shit went wrong
+    200080d2                    ; SET_X0_TO_1                   # All is wrong
+    a80b80d2                    ; SET_X8_TO_SYS_EXIT            # put the exit syscall number in eax
+    010000d4                    ; SYSCALL                       # Call it a good day
+
+#:ELF_data
+:0
+    0000000000000000            ; NULL64
+:1
+    00                          ; NULL8
+
+#:ELF_end

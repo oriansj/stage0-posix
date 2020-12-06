@@ -41,6 +41,16 @@ hex2-hex1: hex1_AArch64.hex2 | bin
 hex0-hex1: ../hex1_AArch64.hex0 | bin
 	hex2 -f ../hex1_AArch64.hex0 -o ../../bin/hex0-hex1
 
+M1-hex2-0: hex2_AArch64.M1 | bin
+	M1 -f hex2_AArch64.M1 --little-endian --architecture aarch64 -o hold
+	hex2 -f elf.hex2 -f hold --base-address 0x600000 --little-endian --architecture aarch64 -o ../../bin/M1-hex2-0
+
+hex2-hex2-0: hex2_AArch64.hex2 | bin
+	hex2 -f hex2_AArch64.hex2 --base-address 0x600000 --little-endian --architecture aarch64 -o ../../bin/hex2-hex2-0
+
+hex1-hex2-0: ../hex2_AArch64.hex1 | bin
+	hex2 -f ../hex2_AArch64.hex1 --base-address 0x600000 --little-endian --architecture aarch64 -o ../../bin/hex1-hex2-0
+
 M1-catm: catm_AArch64.M1 | bin
 	M1 -f catm_AArch64.M1 --little-endian --architecture aarch64 -o hold
 	hex2 -f elf.hex2 -f hold --base-address 0x600000 --little-endian --architecture aarch64 -o ../../bin/M1-catm
@@ -53,6 +63,7 @@ hex1-catm: ../catm_AArch64.hex1 | bin
 
 all: M1-hex0 hex2-hex0 hex0-hex0 \
 		M1-hex1 hex2-hex1 hex0-hex1 \
+		M1-hex2-0 hex2-hex2-0 hex1-hex2-0 \
 		M1-catm hex2-catm hex1-catm
 
 test: all
@@ -62,11 +73,13 @@ clean:
 	rm -f hold \
 		../../bin/hex0-hex0 ../../bin/hex2-hex0 ../../bin/M1-hex0 \
 		../../bin/hex0-hex1 ../../bin/hex2-hex1 ../../bin/M1-hex1 \
+		../../bin/hex1-hex2-0 ../../bin/hex2-hex2-0 ../../bin/M1-hex2-0 \
 		../../bin/hex1-catm ../../bin/hex2-catm ../../bin/M1-catm
 
 Generate_test_answers: all
 	sha256sum \
 		../../bin/*-hex0 \
 		../../bin/*-hex1 \
+		../../bin/*-hex2-0 \
 		../../bin/*-catm \
 		>| SHA256SUMS

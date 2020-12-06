@@ -68,11 +68,22 @@ M1-M0: M0_AArch64.M1 | bin
 hex2-M0: ../M0_AArch64.hex2 | bin
 	hex2 -f elf.hex2 -f ../M0_AArch64.hex2 --base-address 0x600000 --little-endian --architecture aarch64 -o ../../bin/hex2-M0
 
+M1-kaem-0: kaem-minimal.M1 | bin
+	M1 -f kaem-minimal.M1 --little-endian --architecture aarch64 -o hold
+	hex2 -f elf.hex2 -f hold --base-address 0x600000 --little-endian --architecture aarch64 -o ../../bin/M1-kaem-0
+
+hex2-kaem-0: kaem-minimal.hex2 | bin
+	hex2 -f kaem-minimal.hex2 --base-address 0x600000 --little-endian --architecture aarch64 -o ../../bin/hex2-kaem-0
+
+hex0-kaem-0: ../kaem-minimal.hex0 | bin
+	hex2 -f ../kaem-minimal.hex0 -o ../../bin/hex0-kaem-0
+
 all: M1-hex0 hex2-hex0 hex0-hex0 \
 		M1-hex1 hex2-hex1 hex0-hex1 \
 		M1-hex2-0 hex2-hex2-0 hex1-hex2-0 \
 		M1-catm hex2-catm hex1-catm \
-		M1-M0 hex2-M0
+		M1-M0 hex2-M0 \
+		M1-kaem-0 hex2-kaem-0 hex0-kaem-0
 
 test: all
 	sha256sum -c SHA256SUMS
@@ -83,7 +94,8 @@ clean:
 		../../bin/hex0-hex1 ../../bin/hex2-hex1 ../../bin/M1-hex1 \
 		../../bin/hex1-hex2-0 ../../bin/hex2-hex2-0 ../../bin/M1-hex2-0 \
 		../../bin/hex1-catm ../../bin/hex2-catm ../../bin/M1-catm \
-		../../bin/hex2-M0 ../../bin/M1-M0
+		../../bin/hex2-M0 ../../bin/M1-M0 \
+		../../bin/M1-kaem-0 ../../bin/hex2-kaem-0 ../../bin/hex0-kaem-0
 
 Generate_test_answers: all
 	sha256sum \
@@ -92,4 +104,5 @@ Generate_test_answers: all
 		../../bin/*-hex2-0 \
 		../../bin/*-catm \
 		../../bin/*-M0 \
+		../../bin/*-kaem-0 \
 		>| SHA256SUMS

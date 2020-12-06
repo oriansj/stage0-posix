@@ -1,0 +1,569 @@
+# Copyright (C) 2020 Jeremiah Orians
+# Copyright (C) 2020 Sanne Wouda
+# This file is part of stage0.
+#
+# stage0 is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# stage0 is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with stage0.  If not, see <http://www.gnu.org/licenses/>.
+
+DEFINE NULL64 0000000000000000
+
+DEFINE PUSH_X0  e00f1ff8
+DEFINE PUSH_X1  e10f1ff8
+DEFINE PUSH_X2  e20f1ff8
+DEFINE PUSH_LR  fe0f1ff8
+
+DEFINE POP_X0 e00741f8
+DEFINE POP_X1 e10741f8
+DEFINE POP_X2 e20741f8
+DEFINE POP_LR fe0741f8
+
+DEFINE RETURN c0035fd6
+
+DEFINE CMP_X2_X1 5f0001eb
+DEFINE CMP_X1_X2  3f0002eb
+
+DEFINE CMP_X0_TO_0   1f0000f1
+DEFINE CMP_X0_TO_9   1f2400f1
+DEFINE CMP_X0_TO_10  1f2800f1
+DEFINE CMP_X0_TO_32  1f8000f1
+DEFINE CMP_X0_TO_34  1f8800f1
+DEFINE CMP_X0_TO_35  1f8c00f1
+DEFINE CMP_X0_TO_92  1f7001f1
+DEFINE CMP_X0_TO_MINUS_4 1f1000b1
+DEFINE CMP_X1_TO_0   3f0000f1
+
+DEFINE SET_X0_TO_0 000080d2
+DEFINE SET_X0_TO_1 200080d2
+DEFINE SET_X0_TO_10 400180d2
+DEFINE SET_X0_TO_17 200280d2
+DEFINE SET_X0_TO_32 000480d2
+DEFINE SET_X0_TO_MINUS_4 60008092
+DEFINE SET_X1_TO_0 010080d2
+DEFINE SET_X1_TO_1 210080d2
+DEFINE SET_X2_TO_0 020080d2
+DEFINE SET_X2_TO_1 220080d2
+DEFINE SET_X3_TO_0 030080d2
+DEFINE SET_X3_TO_4  830080d2
+DEFINE SET_X0_TO_FCNTL_H_AT_FDCWD 600c8092
+
+DEFINE SET_X0_FROM_X1 e00301aa
+DEFINE SET_X1_FROM_X0 e10300aa
+DEFINE SET_X1_FROM_SP e1030091
+DEFINE SET_X2_FROM_X0 e20300aa
+DEFINE SET_X2_FROM_X1 e20301aa
+
+DEFINE SKIP_INST_EQ 40000054
+DEFINE SKIP_INST_NE 41000054
+DEFINE SKIP_INST_GT 4c000054
+DEFINE SKIP_INST_GE 4a000054
+
+
+DEFINE SKIP_32_DATA 02000014
+
+DEFINE LOAD_W0_AHEAD 40000098
+DEFINE LOAD_W1_AHEAD 41000018
+DEFINE LOAD_W2_AHEAD 42000018
+DEFINE LOAD_W9_AHEAD 49000018
+
+DEFINE LDR_X0_[X1]           200040f9
+DEFINE LDR_X0_[X9]           200140f9
+DEFINE LDR_X0_[X9,24]           200d40f9
+DEFINE LDR_X1_[X9]           210140f9
+DEFINE LDR_X2_[X9]           220140f9
+
+DEFINE LDR_X1_[SP,16] e10b40f9
+
+DEFINE STR_X0_[X2]           400000f9
+DEFINE STR_X0_[X9]           200100f9
+DEFINE STR_X0_[X9,24]        200d00f9
+DEFINE STR_X2_[X9]           220100f9
+
+DEFINE LDR_BYTE_W0_[X1]      20004039
+DEFINE STR_BYTE_W0_[X2]      40000039
+
+DEFINE ADD_X1_X1_1   21040091
+DEFINE ADD_X1_X1_8   21200091
+DEFINE ADD_X2_X2_1   42040091
+DEFINE ADD_X2_X2_8   42200091
+
+DEFINE ADD_X2_SP_24   e2630091
+DEFINE ADD_X2_SP_32   e2830091
+
+DEFINE ADD_X0_X0_X1  0000018b
+
+DEFINE AND_X0_X0_0xFF 001c4092
+
+
+DEFINE SET_X8_TO_SYS_BRK c81a80d2
+DEFINE SET_X8_TO_SYS_OPENAT 080780d2
+DEFINE SET_X8_TO_SYS_CLONE 881b80d2
+DEFINE SET_X8_TO_SYS_EXECVE a81b80d2
+DEFINE SET_X8_TO_SYS_WAITID e80b80d2
+DEFINE SET_X8_TO_SYS_EXIT a80b80d2
+DEFINE SET_X8_TO_SYS_READ e80780d2
+DEFINE SET_X8_TO_SYS_WRITE 080880d2
+DEFINE SYSCALL 010000d4
+
+DEFINE FCALL 94
+
+DEFINE FBRANCH 14
+DEFINE RBRANCH 17
+
+:ELF_text
+
+# Where the ELF Header is going to hit
+# Simply jump to _start
+# Our main function
+:_start
+    LDR_X1_[SP,16]              # Get the actual input name
+    ADD_X2_SP_32                # Get envp (hopefullY)
+    CMP_X1_TO_0                 # Check for missing output
+    SKIP_INST_EQ                # Have real input
+    ^~_start_out FBRANCH
+    ADD_X2_SP_24                # Nope, envp is here!
+    LOAD_W1_AHEAD               # Use "kaem.run"
+    SKIP_32_DATA
+    &default_file
+
+:_start_out
+    LOAD_W9_AHEAD
+    SKIP_32_DATA
+    &envp
+    STR_X2_[X9]                 # Protect envp
+
+    SET_X0_TO_FCNTL_H_AT_FDCWD  # AT_FDCWD, relative to current working directory
+    SET_X2_TO_0                 # prepare read_only
+    SET_X8_TO_SYS_OPENAT        # the syscall number for openat()
+    SYSCALL                     # Now open that damn file
+
+    CMP_X0_TO_0                 # IF NULL We couldn't open the file
+    SKIP_INST_GT                # Abort hard
+    ^~Exit_Failure FBRANCH
+    LOAD_W9_AHEAD               # Set input pointer
+    SKIP_32_DATA
+    &script
+    STR_X0_[X9]
+
+    SET_X8_TO_SYS_BRK           # the Syscall # for SYS_BRK
+    SET_X0_TO_0                 # Get current brk
+    SYSCALL                     # Let the kernel do the work
+    LOAD_W9_AHEAD               # Set our malloc pointer
+    SKIP_32_DATA
+    &MALLOC
+    STR_X0_[X9]
+
+    # Where the main work gets done
+    # Using X1 for tokens and X2 for tokens[i]
+:main_loop
+    LOAD_W9_AHEAD               # Using 256 char* of space
+    SKIP_32_DATA
+    &max_args
+    LDR_X0_[X9]
+    ^~malloc FCALL              # get it
+    SET_X1_FROM_X0              # set tokens
+
+    SET_X2_FROM_X1              # I = 0
+    SET_X0_TO_0                 # Using 0
+    LOAD_W9_AHEAD               # status = 0
+    SKIP_32_DATA
+    &info
+    STR_X0_[X9,24]
+    LOAD_W9_AHEAD               # command_done = 0
+    SKIP_32_DATA
+    &command_done
+    STR_X0_[X9]
+
+    # Using X0 for result and X1 for tokens[i]
+:collect_command
+    ^~collect_token FCALL       # Get another token
+    CMP_X0_TO_0                 # if NULL == result
+    SKIP_INST_NE                # It is a comment, don't store
+    ^~collect_command_comment FBRANCH
+
+    STR_X0_[X2]                 # tokens[i] = result
+    ADD_X2_X2_8                 # i = i + 1 (adjusted for char* size)
+
+:collect_command_comment
+    LOAD_W9_AHEAD               # Using command_done
+    SKIP_32_DATA
+    &command_done
+    LDR_X0_[X9]
+    CMP_X0_TO_0                 # IF 0 == command_done
+    SKIP_INST_NE                # keep looping
+    ^~collect_command RBRANCH
+
+    # Deal with line comments
+    CMP_X2_X1                   # if 0 < i
+    SKIP_INST_NE                # It was a comment
+    ^~main_loop RBRANCH
+
+:collect_command_run
+    ^~print_command FCALL       # print the command
+    LDR_X0_[X1]                 # program = tokens[0]
+    CMP_X0_TO_0                 # IF NULL == program
+    SKIP_INST_NE                # Some shit went down, abort
+    ^~Exit_Failure FBRANCH
+
+    PUSH_X1                     # Protect Tokens
+    SET_X0_TO_17                # flags = SIGCHILD
+    SET_X1_TO_0                 # parent_tid
+    SET_X2_TO_0                 # tls
+    SET_X3_TO_0                 # child_tid
+    SET_X8_TO_SYS_CLONE         # FORKing (SYS_clone)
+    SYSCALL                     # int f = clone()
+    POP_X1                      # Restore Tokens
+
+    CMP_X0_TO_0                 # Check fork
+    SKIP_INST_GE                # IF f == -1 abort hard
+    ^~Exit_Failure FBRANCH
+    SKIP_INST_EQ                # IF f == 0 it is child
+    ^~collect_command_parent FBRANCH
+
+    # Deal with child case
+    SET_X8_TO_SYS_EXECVE        # EXECVE
+    LOAD_W9_AHEAD               # third arg = envp
+    SKIP_32_DATA
+    &envp
+    LDR_X2_[X9]
+                                # second arg = tokens, already in x1
+    LDR_X0_[X1]                 # program = tokens[0]
+    SYSCALL                     # execve(program, tokens, envp);
+    ^~Exit_Failure FBRANCH      # return error
+
+:collect_command_parent
+    SET_X1_FROM_X0              # id = f
+    SET_X0_TO_1                 # id_type = P_PID
+    LOAD_W2_AHEAD               # infop
+    SKIP_32_DATA
+    &info
+    SET_X3_TO_4                 #  options = WEXITED
+
+    SET_X8_TO_SYS_WAITID        # WAITID
+    SYSCALL                     # waitid(P_PID, f, &info, 0);
+
+    LOAD_W9_AHEAD               # Using status
+    SKIP_32_DATA
+    &info
+    LDR_X0_[X9,24]
+    CMP_X0_TO_0                 # IF 0 == status
+    SKIP_INST_NE                # Loop forever
+    ^~main_loop RBRANCH
+
+    # Deal with very unhappy case
+    LOAD_W0_AHEAD               # Using "Subprocess error\nABORTING HARD\n"
+    SKIP_32_DATA
+    &hard
+    ^~File_Print FCALL          # Print it
+
+# Exit_Failure function
+# Receives nothing
+# And aborts hard
+# DOES NOT RETURN
+:Exit_Failure
+    SET_X1_TO_1                 # All is wrong
+    SET_X8_TO_SYS_EXIT          # put the exit syscall number in x8
+    SYSCALL                     # Call it a bad day
+
+
+# print_command function
+# Recieves tokens[j] in X1 and tokens[i] in X2
+# Modifies X0
+:print_command
+    PUSH_LR
+    PUSH_X1                     # Protect X1
+    LOAD_W0_AHEAD               # using " +> "
+    SKIP_32_DATA
+    &prefix
+    ^~File_Print FCALL          # print it
+:print_command_loop
+    LDR_X0_[X1]                 # using tokens[j]
+    ^~File_Print FCALL          # print it
+    ADD_X1_X1_8                 # j = j + 1
+    SET_X0_TO_32                # using ' '
+    ^~fputc FCALL               # print it
+    CMP_X1_X2                   # IF j < i
+    SKIP_INST_EQ                # otherwise keep looping
+    ^~print_command_loop RBRANCH
+
+    SET_X0_TO_10                # using '\n'
+    ^~fputc FCALL               # print it
+    POP_X1                      # Restore X1
+    POP_LR
+    RETURN
+
+
+# collect_token function
+# Recieves nothing
+# Overwrites X0
+# Uses X0 as C, X1 as token and X2 as token[i]
+:collect_token
+    PUSH_LR
+    PUSH_X1                     # Protect X1
+    PUSH_X2                     # Protect X2
+    LOAD_W9_AHEAD               # Using max_string
+    SKIP_32_DATA
+    &max_string
+    LDR_X0_[X9]
+    ^~malloc FCALL              # allocate space
+    SET_X1_FROM_X0              # token = malloc(max_string);
+    SET_X2_FROM_X0              # i = 0; set token[i]
+
+:collect_token_loop
+    ^~fgetc FCALL               # c = fgetc(input);
+    CMP_X0_TO_MINUS_4           # if C == EOF
+    SKIP_INST_NE                # We are done
+    ^~Done FBRANCH
+
+    CMP_X0_TO_32                # IF C == ' '
+    SKIP_INST_NE                # Space terminates token
+    ^~collect_token_done FBRANCH
+
+    CMP_X0_TO_9                 # IF C == '\t'
+    SKIP_INST_NE                # tab terminates token
+    ^~collect_token_done FBRANCH
+
+    CMP_X0_TO_10                # IF C == '\n'
+    SKIP_INST_EQ                # otherwise check next
+    ^~collect_token_string FBRANCH
+
+    # It is a newline
+    SET_X0_TO_1                 # Using 1
+    LOAD_W9_AHEAD               # Set command_done = TRUE
+    SKIP_32_DATA
+    &command_done
+    STR_X0_[X9]
+    ^~collect_token_done FBRANCH # Be done
+
+:collect_token_string
+    CMP_X0_TO_34                # IF C == '"'
+    SKIP_INST_EQ                # otherwise check next
+    ^~collect_token_comment FBRANCH
+
+    # It is a RAW STRING
+    ^~collect_string FCALL      # Get the rest of the string
+    ^~collect_token_done FBRANCH # Be done
+
+:collect_token_comment
+    CMP_X0_TO_35                # IF C == '#'
+    SKIP_INST_EQ                # otherwise check next
+    ^~collect_token_escape FBRANCH
+
+    # It is a line comment
+    ^~collect_comment FCALL     # Read it all
+    SET_X0_TO_1                 # Using 1
+    LOAD_W9_AHEAD               # Set command_done = TRUE
+    SKIP_32_DATA
+    &command_done
+    STR_X0_[X9]
+    ^~collect_token_done FBRANCH # Be done
+
+:collect_token_escape
+    CMP_X0_TO_92                # IF C == '\\'
+    SKIP_INST_EQ                # otherwise just store it
+    ^~collect_token_other FBRANCH
+
+    # It is an escape char
+    ^~fgetc FCALL               # Read the char to drop
+    ^~collect_token_done FBRANCH # Be done
+
+:collect_token_other
+    STR_BYTE_W0_[X2]            # token[i] = C
+    ADD_X2_X2_1                 # i = i + 1
+    ^~collect_token_loop RBRANCH # Keep going
+
+:collect_token_done
+    CMP_X1_X2                   # IF i == 0
+    SKIP_INST_EQ                # otherwise return the token
+    ^~collect_token_good FBRANCH
+    SET_X1_TO_0                 # token = NULL
+
+:collect_token_good
+    SET_X0_FROM_X1              # Return token
+    POP_X2                      # Restore X2
+    POP_X1                      # Restore X1
+    POP_LR
+    RETURN
+
+
+# collect_string function
+# Recieves target[index] in X2
+# Modifies X0
+# Uses X0 as C
+:collect_string
+    PUSH_LR
+:collect_string_loop
+    ^~fgetc FCALL               # C = fgetc(input)
+    CMP_X0_TO_MINUS_4           # if C == EOF
+    SKIP_INST_NE                # Something went horriably wrong
+    ^~Exit_Failure RBRANCH
+
+    CMP_X0_TO_34                # IF C == '"'
+    SKIP_INST_NE                # be done
+    ^~collect_string_done FBRANCH
+
+    # deal with inside of string
+    STR_BYTE_W0_[X2]            # target[index] = C
+    ADD_X2_X2_1                 # index = index + 1
+    ^~collect_string_loop RBRANCH # Keep going
+
+:collect_string_done
+    POP_LR
+    RETURN
+
+
+# collect_comment function
+# Recieves nothing
+# Modifies X0
+# uses X0 as Int C
+# Just throws away everything it reads
+:collect_comment
+    PUSH_LR
+:collect_comment_loop
+    ^~fgetc FCALL               # C = fgetc(input)
+    CMP_X0_TO_MINUS_4           # IF C == EOF
+    SKIP_INST_NE                # abort hard
+    ^~Exit_Failure RBRANCH
+
+    CMP_X0_TO_10                # IF C == '\n'
+    SKIP_INST_EQ                # otherwise keep looping
+    ^~collect_comment_loop RBRANCH
+    POP_LR
+    RETURN
+
+
+# Malloc isn't actually required if the program being built fits in the initial memory
+# However, it doesn't take much to add it.
+# Requires [MALLOC] to be initialized and X0 to have the number of desired bytes
+:malloc
+    PUSH_X1                     # Protect X1
+    LOAD_W9_AHEAD
+    SKIP_32_DATA
+    &MALLOC
+    LDR_X1_[X9]                 # Using the current pointer
+    PUSH_X1                     # Save to return later
+    ADD_X0_X0_X1                # Request the number of desired bytes
+    SET_X8_TO_SYS_BRK           # the Syscall # for SYS_BRK
+    SYSCALL                     # call the Kernel
+    STR_X0_[X9]                 # Update pointer
+    POP_X0
+    POP_X1                      # Restore X1
+    RETURN
+
+
+# fgetc function
+# Loads FILE* from [script]
+# Returns -4 (EOF) or char in X0
+:fgetc
+    PUSH_X1                     # Protect X1
+    PUSH_X2                     # Protect X2
+    SET_X0_TO_MINUS_4           # Put EOF in x0
+    PUSH_X0                     # Assume bad (If nothing read, value will remain EOF)
+    SET_X1_FROM_SP              # Get stack address
+    LOAD_W9_AHEAD               # Where are we reading from
+    SKIP_32_DATA
+    &script
+    LDR_X0_[X9]
+    SET_X8_TO_SYS_READ          # the syscall number for read
+    SET_X2_TO_1                 # set the size of chars we want
+
+    SYSCALL                     # call the Kernel
+
+    POP_X0                      # Get either char or EOF
+    CMP_X0_TO_MINUS_4           # Check for EOF
+    SKIP_INST_NE                # Return as is
+    ^~fgetc_done FBRANCH
+    AND_X0_X0_0xFF              # Make it useful
+:fgetc_done
+    POP_X2                      # Restore X2
+    POP_X1                      # Restore X1
+    RETURN
+
+
+# File_Print function
+# Receives CHAR* in X0
+# calls fputc for every non-null char
+:File_Print
+    PUSH_LR
+    PUSH_X1                     # Protect X1
+    PUSH_X2                     # Protect X2
+    SET_X1_FROM_X0              # Protect S
+    CMP_X0_TO_0                 # Protect against nulls
+    SKIP_INST_NE                # Simply don't try to print them
+    ^~File_Print_Done FBRANCH
+:File_Print_Loop
+    LDR_BYTE_W0_[X1]            # Read byte
+    CMP_X0_TO_0                 # Check for NULL
+    SKIP_INST_NE                # Stop at NULL
+    ^~File_Print_Done FBRANCH
+
+    ^~fputc FCALL               # write it
+    ADD_X1_X1_1                 # S = S + 1
+    ^~File_Print_Loop RBRANCH   # Keep going
+
+:File_Print_Done
+    POP_X2                      # Restore X2
+    POP_X1                      # Restore X1
+    POP_LR
+    RETURN
+
+
+# fputc function
+# receives CHAR in X0 and load FILE* from stdout
+# writes char and returns
+:fputc
+    PUSH_X1                     # Protect X1
+    PUSH_X2                     # Protect X2
+
+    PUSH_X0                     # We are writing x0
+    SET_X1_FROM_SP              # Get stack address
+    SET_X0_TO_1                 # Write to target file
+    SET_X8_TO_SYS_WRITE         # the syscall number for write
+    SET_X2_TO_1                 # set the size of chars we want
+    SYSCALL                     # call the Kernel
+    POP_X0                      # Restore stack
+    POP_X2                      # Restore X2
+    POP_X1                      # Restore X1
+    RETURN
+
+
+:Done
+    # program completed Successfully
+    SET_X0_TO_0                 # All is well
+    SET_X8_TO_SYS_EXIT          # put the exit syscall number in x0
+    SYSCALL                     # Call it a good day
+
+:ELF_data
+:envp NULL64
+:script NULL64
+:tokens NULL64
+:command_done NULL64
+:max_args %2048 %0              # 256 * sizeof(char*)
+:max_string %4096 %0            # 4096 * sizeof(char)
+:MALLOC NULL64
+
+:info
+NULL64 NULL64 NULL64 NULL64
+NULL64 NULL64 NULL64 NULL64
+NULL64 NULL64 NULL64 NULL64
+NULL64 NULL64 NULL64 NULL64
+
+:default_file "kaem.run"
+:prefix " +> "
+:hard "Subprocess error
+ABORTING HARD
+"
+
+
+:ELF_end
+:ELF_sym
+:ELF_str

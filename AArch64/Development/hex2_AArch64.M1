@@ -837,7 +837,7 @@ DEFINE RBRANCH 17
 :fail
     # Some shit went wrong
     SET_X0_TO_1                   # All is wrong
-    SET_X8_TO_SYS_EXIT            # put the exit syscall number in eax
+    SET_X8_TO_SYS_EXIT            # put the exit syscall number in x8
     SYSCALL                       # Call it a good day
 
 :ELF_data

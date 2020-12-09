@@ -320,26 +320,26 @@ DEFINE RBRANCH 17
 # Our main function
 :_start
 	LDR_X1_[SP,16]              # Get the actual input name
-    SET_X0_TO_FCNTL_H_AT_FDCWD  # AT_FDCWD, relative to current working directory
+	SET_X0_TO_FCNTL_H_AT_FDCWD  # AT_FDCWD, relative to current working directory
 	SET_X2_TO_0                 # prepare read_only
-    SET_X8_TO_SYS_OPENAT        # The syscall number for openat(), aarch64 has no open()
+	SET_X8_TO_SYS_OPENAT        # The syscall number for openat(), aarch64 has no open()
 	SYSCALL                     # Now open that damn file
 	SET_X15_FROM_X0             # Preserve the file pointer we were given
 
-    LDR_X1_[SP,24]              # Get the output name
-    SET_X0_TO_FCNTL_H_AT_FDCWD  # AT_FDCWD, relative to current working directory
-    SET_X2_TO_577               # Prepare file as O_WRONLY|O_CREAT|O_TRUNC
-    SET_X3_TO_384               # Prepare file as RWX for owner only (600 in octal)
-    SET_X8_TO_SYS_OPENAT        # The syscall number for openat(), aarch64 has no open()
-    SYSCALL                     # Open file!
-    CMP_X0_TO_0                 # Check for missing output
-    SKIP_INST_LE                # Have real output
+	LDR_X1_[SP,24]              # Get the output name
+	SET_X0_TO_FCNTL_H_AT_FDCWD  # AT_FDCWD, relative to current working directory
+	SET_X2_TO_577               # Prepare file as O_WRONLY|O_CREAT|O_TRUNC
+	SET_X3_TO_384               # Prepare file as RWX for owner only (600 in octal)
+	SET_X8_TO_SYS_OPENAT        # The syscall number for openat(), aarch64 has no open()
+	SYSCALL                     # Open file!
+	CMP_X0_TO_0                 # Check for missing output
+	SKIP_INST_LE                # Have real output
 	^~_start_out FBRANCH
-    SET_X0_TO_1                 # Use stdout
+	SET_X0_TO_1                 # Use stdout
 
 :_start_out
 	SET_X14_FROM_X0             # Preserve the file pointer we were given
-    SET_X8_TO_SYS_BRK           # the Syscall # for SYS_BRK
+	SET_X8_TO_SYS_BRK           # the Syscall # for SYS_BRK
 	SET_X0_TO_0                 # Get current brk
 	SYSCALL                     # Let the kernel do the work
 	SET_X12_FROM_X0             # Set our malloc pointer
@@ -356,9 +356,9 @@ DEFINE RBRANCH 17
 	^~Print_Hex FCALL           # Output our results
 
 :Done
-    # program completed Successfully
+	# program completed Successfully
 	SET_X0_TO_0                 # All is well
-    SET_X8_TO_SYS_EXIT          # put the exit syscall number in eax
+	SET_X8_TO_SYS_EXIT          # put the exit syscall number in eax
 	SYSCALL                     # Call it a good day
 
 
@@ -433,7 +433,7 @@ DEFINE RBRANCH 17
 	PUSH_X0                     # Assume bad (If nothing read, value will remain EOF)
 	SET_X1_FROM_SP              # Get stack addresss
 	SET_X0_FROM_X15             # Where are we reading from
-    SET_X8_TO_SYS_READ          # the syscall number for read
+	SET_X8_TO_SYS_READ          # the syscall number for read
 	SET_X2_TO_1                 # set the size of chars we want
 
 	SYSCALL                     # call the Kernel
@@ -450,7 +450,7 @@ DEFINE RBRANCH 17
 :malloc
 	PUSH_X1
 	ADD_X0_X0_X12               # Request the number of desired bytes
-    SET_X8_TO_SYS_BRK           # the Syscall # for SYS_BRK
+	SET_X8_TO_SYS_BRK           # the Syscall # for SYS_BRK
 	SYSCALL                     # call the Kernel
 
 	SET_X1_FROM_X12             #save Return pointer
@@ -491,7 +491,7 @@ DEFINE RBRANCH 17
 	^~fgetc RCALL               # read next char
 	AND_X0_X0_0xFF              # Zero extend it
 	SET_X2_FROM_X0              # Update C
-    CMP_X2_X1                   # See if we hit terminator
+	CMP_X2_X1                   # See if we hit terminator
 	SKIP_INST_EQ                # Otherwise keep looping
 	^~Store_String_Loop RBRANCH
 
@@ -576,9 +576,9 @@ DEFINE RBRANCH 17
 	"#;"
 
 :string_char
-    '22 27 00'
+	'22 27 00'
 
-    '00 00'                         # .p2align 2
+	'00 00'                         # .p2align 2
 
 # Reverse_List function
 # Receives List in X0
@@ -627,7 +627,7 @@ DEFINE RBRANCH 17
 	SKIP_INST_EQ                # Skip the work
 	^~Identify_Macros_Next FBRANCH
 
-    # Deal with MACRO
+	# Deal with MACRO
 	SET_X0_TO_1                 # Using MACRO
 	STR_X0_[X2,8]               # I->TYPE = MACRO
 
@@ -659,9 +659,9 @@ DEFINE RBRANCH 17
 	RETURN
 
 :DEFINE_str
-    "DEFINE"
+	"DEFINE"
 
-    '00'                        # .p2align 2
+	'00'                        # .p2align 2
 
 # match function
 # Receives CHAR* in X0 and CHAR* in X1
@@ -712,7 +712,7 @@ DEFINE RBRANCH 17
 	SKIP_INST_EQ                # Otherwise move on
 	^~Line_Macro_Next FBRANCH
 
-    # Is a macro apply
+	# Is a macro apply
 	LDR_X1_[X0,16]              # I->TEXT
 	LDR_X2_[X0,24]              # I->EXPRESSION
 	LDR_X0_[X0]                 # I->NEXT
@@ -756,7 +756,7 @@ DEFINE RBRANCH 17
 	SKIP_INST_EQ                # Otherwise next
 	^~Set_Expression_Next FBRANCH
 
-    # We have a non-macro match
+	# We have a non-macro match
 	STR_X2_[X3,24]              # I->EXPRESSION = EXP
 
 :Set_Expression_Next
@@ -794,11 +794,11 @@ DEFINE RBRANCH 17
 	LDR_X1_[X2,16]              # I->TEXT
 	LDR_BYTE_W0_[X1]            # I->TEXT[0]
 	CMP_X0_TO_39                # IF '\'' == I->TEXT[0]
-	SKIP_INST_EQ                # Deal with '"'
+	SKIP_INST_EQ                # Deal with '\"'
 	^~Process_String_Raw FBRANCH
 
-    # Deal with '\''
-    ADD_X1_X1_1                 # I->TEXT + 1
+	# Deal with '\''
+	ADD_X1_X1_1                 # I->TEXT + 1
 	STR_X1_[X2,24]              # I->EXPRESSION = I->TEXT + 1
 	^~Process_String_Next FBRANCH # Move on to next
 
@@ -874,19 +874,19 @@ DEFINE RBRANCH 17
 	PUSH_LR
 	SET_X3_FROM_X0              # I = HEAD
 :Eval_Immediates_Loop
-    # Check for MACRO
+	# Check for MACRO
 	LDR_X0_[X3,8]               # I->TYPE
 	CMP_X0_TO_1                 # IF MACRO == I-TYPE
 	SKIP_INST_NE                # Skip to next
 	^~Eval_Immediates_Next FBRANCH
 
-    # Check for NULL EXPRESSION
+	# Check for NULL EXPRESSION
 	LDR_X0_[X3,24]              # I->EXPRESSION
 	CMP_X0_TO_0                 # IF NULL == I->EXPRESSION
 	SKIP_INST_EQ                # Skip to next
 	^~Eval_Immediates_Next FBRANCH
 
-    # Check if number
+	# Check if number
 	LDR_X0_[X3,16]              # I->TEXT
 	LDR_BYTE_W1_[X0]_1          # I->TEXT[0]
 	LDR_BYTE_W2_[X0]            # I->TEXT[1]
@@ -895,7 +895,7 @@ DEFINE RBRANCH 17
 	SKIP_INST_EQ                # Has a value
 	^~Eval_Immediates_value FBRANCH
 
-    # Last chance for Immediate
+	# Last chance for Immediate
 	CMP_X2_TO_48                # If '0' == I->TEXT[1]
 	SKIP_INST_EQ                # Skip to next
 	^~Eval_Immediates_Next FBRANCH
@@ -935,7 +935,7 @@ DEFINE RBRANCH 17
 	SKIP_INST_NE                # Deal with hex input
 	^~numerate_hex FBRANCH
 
-    # Assume decimal input
+	# Assume decimal input
 	SET_X4_TO_0                 # Assume no negation
 	LDR_BYTE_W2_[X1]            # S[0]
 	CMP_X2_TO_45                # IF '-' == S[0]
@@ -1140,7 +1140,7 @@ DEFINE RBRANCH 17
 	SKIP_INST_EQ                # Otherwise next
 	^~Preserve_Other_Next FBRANCH
 
-    # Needs preserving
+	# Needs preserving
 	LDR_X1_[X0,16]              # I->TEXT
 	STR_X1_[X0,24]              # I->EXPRESSION = I->TEXT
 
@@ -1227,7 +1227,7 @@ DEFINE RBRANCH 17
 	PUSH_X0                     # We are writing x0
 	SET_X1_FROM_SP              # Get stack address
 	SET_X0_FROM_X14             # Write to target file
-    SET_X8_TO_SYS_WRITE         # the syscall number for write
+	SET_X8_TO_SYS_WRITE         # the syscall number for write
 	SET_X2_TO_1                 # set the size of chars we want
 
 	SYSCALL                     # call the Kernel

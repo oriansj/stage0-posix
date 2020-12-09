@@ -512,12 +512,12 @@
 	410840f9                     # LDR_X1_[X2,16]                  ; I->TEXT
 	20004039                     # LDR_BYTE_W0_[X1]                ; I->TEXT[0]
 	1f9c00f1                     # CMP_X0_TO_39                    ; IF '\'' == I->TEXT[0]
-	40000054                     # SKIP_INST_EQ                    ; Deal with '"'
+	40000054                     # SKIP_INST_EQ                    ; Deal with '\"'
 	^~Process_String_Raw 14      # ^~Process_String_Raw FBRANCH
 
 	; Deal with '\''
-    21040091                     # ADD_X1_X1_1                     ; I->TEXT + 1
-   	410c00f9                     # STR_X1_[X2,24]                  ; I->EXPRESSION = I->TEXT + 1
+	21040091                     # ADD_X1_X1_1                     ; I->TEXT + 1
+	410c00f9                     # STR_X1_[X2,24]                  ; I->EXPRESSION = I->TEXT + 1
 	^~Process_String_Next 14     # ^~Process_String_Next FBRANCH   ; Move on to next
 
 :Process_String_Raw

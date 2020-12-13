@@ -627,7 +627,7 @@ B7 00                          # e_machine Indicating AArch64
     030080d2                    ; SET_X3_TO_0
 :consume_token_pad
     23140038                    ; STR_BYTE_W3_[X1]_1            # write at least one zero-byte
-    23140038                    ; TST_X1_7                      # is x1 8-byte aligned?
+    3f0840f2                    ; TST_X1_7                      # is x1 8-byte aligned?
     40000054                    ; SKIP_INST_EQ
     ^~consume_token_pad 17      ; ^~consume_token_pad RBRANCH
 

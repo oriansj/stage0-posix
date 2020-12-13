@@ -702,7 +702,7 @@ DEFINE RBRANCH 17
     SKIP_INST_EQ                        # Otherwise
     ^~get_token_comment FBRANCH
 
-                                        # Store String
+    # Store String
     LOAD_W9_AHEAD                       # Send C
     SKIP_32_DATA
     &C
@@ -757,7 +757,7 @@ DEFINE RBRANCH 17
     SKIP_INST_NE                        # jump over
     ^~get_token_comment_block_iter FBRANCH
 
-                                        # Deal with inner loop
+    # Deal with inner loop
     ^~fgetc FCALL                       # get next C
     LOAD_W9_AHEAD                       # Set C
     SKIP_32_DATA
@@ -950,7 +950,7 @@ DEFINE RBRANCH 17
     SKIP_INST_EQ                        # be done
     ^~preserve_keyword_done FBRANCH
 
-                                        # Fix our goto label
+    # Fix our goto label
     ^~fixup_label FCALL                 # Fix the label
     SET_X0_TO_32                        # Return Whitespace
 
@@ -1598,7 +1598,7 @@ DEFINE RBRANCH 17
     ^~collect_arguments_next FBRANCH    # get to next
 
 :collect_arguments_another
-                                        # deal with the case of non-first arguments
+    # deal with the case of non-first arguments
     LOAD_W9_AHEAD                       # Using function
     SKIP_32_DATA
     &function
@@ -1760,7 +1760,7 @@ DEFINE RBRANCH 17
     ^~statement_done FBRANCH            # be done
 
 :statement_do
-    LOAD_W0_AHEAD                       # Using "do
+    LOAD_W0_AHEAD                       # Using "do"
     SKIP_32_DATA
     &do_string
     ^~match FCALL                       # IF global_token->S == "do"
@@ -2334,7 +2334,7 @@ DEFINE RBRANCH 17
 :process_asm_iter
     LDR_X0_[X1,16]                      # global_token->S
     LDR_BYTE_W0_[X0]                    # global_token->S[0]
-    CMP_X0_TO_34                        # IF global_token->S[0] == '"'
+    CMP_X0_TO_34                        # IF global_token->S[0] == '\"'
     SKIP_INST_EQ                        # Otherwise be done
     ^~process_asm_done FBRANCH
 
@@ -3813,14 +3813,14 @@ DEFINE RBRANCH 17
     SKIP_INST_EQ                        # Otherwise adjust
     ^~postfix_expr_array_large FBRANCH
 
-                                        # Deal with loading byte
+    # Deal with loading byte
     LOAD_W2_AHEAD                       # ASSIGN = "DEREF_X0_BYTE\n"
     SKIP_32_DATA
     &postfix_expr_array_string_1
     ^~postfix_expr_array_common FBRANCH # Do the next bit
 
 :postfix_expr_array_large
-                                        # deal with arrays made of things other than chars
+    # deal with arrays made of things other than chars
     LOAD_W0_AHEAD                       # Using "LOAD_W2_AHEAD\nSKIP_32_DATA\n%"
     SKIP_32_DATA
     &postfix_expr_array_string_2
@@ -3868,7 +3868,7 @@ DEFINE RBRANCH 17
     SKIP_INST_EQ                        # Otherwise be done
     ^~postfix_expr_array_done FBRANCH
 
-                                        # Clearing out assign
+    # Clearing out assign
     LOAD_W2_AHEAD                       # ASSIGN = ""
     SKIP_32_DATA
     &postfix_expr_array_string_6
@@ -4170,7 +4170,7 @@ DEFINE RBRANCH 17
     LDR_X0_[X9]
     LDR_X0_[X0,16]                      # global_token->S
     LDR_BYTE_W0_[X0]                    # global_token->S[0]
-    CMP_X0_TO_34                        # Using '"'
+    CMP_X0_TO_34                        # Using '\"'
     SKIP_INST_EQ                        # Otherwise try a variable
     ^~primary_expr_var FBRANCH
 
@@ -4675,7 +4675,7 @@ DEFINE RBRANCH 17
     SKIP_INST_EQ                        # Otherwise just load it's address
     ^~function_load_regular FBRANCH
 
-                                        # Deal with function call
+    # Deal with function call
     SET_X0_FROM_X2                      # Using A->S
     SET_X1_TO_1                         # Using FALSE
     ^~function_call RCALL               # Deal with it
@@ -5290,7 +5290,7 @@ DEFINE RBRANCH 17
     SKIP_INST_NE                        # Deal with hex
     ^~escape_lookup_hex FBRANCH
 
-                                        # Deal with \? escapes
+    # Deal with \? escapes
     SET_X0_TO_10                        # Guess "\n"
     CMP_X1_TO_110                       # If n
     SKIP_INST_NE                        # Be done
@@ -5301,14 +5301,14 @@ DEFINE RBRANCH 17
     SKIP_INST_NE                        # Be done
     ^~escape_lookup_done FBRANCH
 
-    SET_X0_FROM_X1                      # "\\", "'" and '"' all encode as themselves
+    SET_X0_FROM_X1                      # "\\", "'" and '\"' all encode as themselves
     CMP_X1_TO_92                        # If "\\"
     SKIP_INST_NE                        # Be done
     ^~escape_lookup_done FBRANCH
     CMP_X1_TO_39                        # IF "'"
     SKIP_INST_NE                        # Be done
     ^~escape_lookup_done FBRANCH
-    CMP_X1_TO_34                        # IF '"'
+    CMP_X1_TO_34                        # IF '\"'
     SKIP_INST_NE                        # Be done
     ^~escape_lookup_done FBRANCH
 
@@ -5422,7 +5422,7 @@ DEFINE RBRANCH 17
     PUSH_X1                             # Protect X1
     PUSH_X2                             # Protect X2
     SET_X2_FROM_X0                      # Place string in safe place
-    ADD_X2_X2_1                         # increment past the "
+    ADD_X2_X2_1                         # increment past the '\"'
 :weird_reset
     LDR_BYTE_W0_[X2]                    # Load a char
     CMP_X0_TO_0                         # IF NULL == C
@@ -5535,8 +5535,8 @@ DEFINE RBRANCH 17
     ^~collect_regular_string_reset RBRANCH # Keep going
 
 :collect_regular_string_done
-    SET_X0_TO_34                        # Using '"'
-    STR_BYTE_W0_[X2]                    # hold_string[index] = '"'
+    SET_X0_TO_34                        # Using '\"'
+    STR_BYTE_W0_[X2]                    # hold_string[index] = '\"'
     ADD_X2_X2_1                         # Increment it
     SET_X0_TO_10                        # Using "\n"
     STR_BYTE_W0_[X2]                    # hold_string[index] = '\n'
@@ -6072,7 +6072,7 @@ DEFINE RBRANCH 17
     SKIP_INST_NE                        # So deal with that pain
     ^~build_member_array FBRANCH
 
-                                        # Deal with non-array case
+    # Deal with non-array case
     LDR_X0_[X2,8]                       # member_type->SIZE
     STR_X0_[X3,8]                       # I->SIZE = member_type->SIZE
     ^~build_member_done FBRANCH         # Be done
@@ -6292,7 +6292,7 @@ DEFINE RBRANCH 17
     SKIP_INST_LE                        # If it is positive
     ^~numerate_number_positive FBRANCH
 
-                                        # Deal with negative case
+    # Deal with negative case
     SET_X0_TO_45                        # Using "-"
     STR_BYTE_W0_[X5]                    # Write it
     ADD_X5_X5_1                         # increment
@@ -7015,7 +7015,7 @@ LSHIFT_X0_X0_X2
 Missing ]
 "
 :postfix_expr_array_string_6
-'  '
+'00'
 
 :postfix_expr_arrow_string_0  "# looking up offset
 "
@@ -7171,7 +7171,7 @@ SKIP_32_DATA
 "
 	 !#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
 :weird_string_1
-'09 0a 0d 20 00'
+'09 0A 0D 20 00'
 
 :type_name_string_0  "Unknown type "
 :type_name_string_1

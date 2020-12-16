@@ -3643,7 +3643,7 @@ DEFINE RBRANCH 17
     LOAD_W0_AHEAD                       # Using postfix_expr
     SKIP_32_DATA
     &postfix_expr
-    LOAD_W1_AHEAD                       # Using "RSHIFT_X0_X1_X0\n"
+    LOAD_W1_AHEAD                       # Using "ARITH_RSHIFT_X0_X1_X0\n"
     SKIP_32_DATA
     &additive_expr_stub_string_6
     LOAD_W2_AHEAD                       # Using ">>"
@@ -6981,7 +6981,7 @@ MSUB_X0_X0_X2_X1
 "
 :additive_expr_stub_string_5  "LSHIFT_X0_X1_X0
 "
-:additive_expr_stub_string_6  "RSHIFT_X0_X1_X0
+:additive_expr_stub_string_6  "ARITH_RSHIFT_X0_X1_X0
 "
 
 :unary_expr_sizeof_string_0  "ERROR in unary_expr

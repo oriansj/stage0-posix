@@ -2332,7 +2332,7 @@ additive_expr_stub:
     bl general_recursion        // Hit it
 
     adr x0, postfix_expr        // Using postfix_expr
-    adr x1, additive_expr_stub_string_6 // Using "RSHIFT_X0_X1_X0\n"
+    adr x1, additive_expr_stub_string_6 // Using "ARITH_RSHIFT_X0_X1_X0\n"
     adr x2, right_shift_string  // Using ">>"
     adr x3, additive_expr_stub  // And recurse
     bl general_recursion        // Hit it
@@ -4958,7 +4958,7 @@ additive_expr_stub_string_2: .asciz "MUL_X0_X1_X0\n"
 additive_expr_stub_string_3: .asciz "SDIV_X0_X1_X0\n"
 additive_expr_stub_string_4: .asciz "SDIV_X2_X1_X0\nMSUB_X0_X0_X2_X1\n"
 additive_expr_stub_string_5: .asciz "LSHIFT_X0_X1_X0\n"
-additive_expr_stub_string_6: .asciz "RSHIFT_X0_X1_X0\n"
+additive_expr_stub_string_6: .asciz "ARITH_RSHIFT_X0_X1_X0\n"
 
 unary_expr_sizeof_string_0: .asciz "ERROR in unary_expr\nMissing (\n"
 unary_expr_sizeof_string_1: .asciz "ERROR in unary_expr\nMissing )\n"

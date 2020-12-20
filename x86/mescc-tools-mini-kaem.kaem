@@ -116,34 +116,8 @@
 # This is the last stage where the binaries will not have debug info
 # and the last piece built that isn't part of the output binaries
 
-#####################################
-# Phase-7 Build hex2 from C sources #
-#####################################
-./M2 --architecture x86 \
-	-f ../M2-Planet/test/common_x86/functions/exit.c \
-	-f ../M2-Planet/test/common_x86/functions/file.c \
-	-f ../M2-Planet/functions/file_print.c \
-	-f ../M2-Planet/test/common_x86/functions/malloc.c \
-	-f ../M2-Planet/functions/calloc.c \
-	-f ../M2-Planet/functions/match.c \
-	-f ../M2-Planet/functions/require.c \
-	-f ../M2-Planet/functions/in_set.c \
-	-f ../M2-Planet/functions/numerate_number.c \
-	-f ../M2-Planet/test/common_x86/functions/stat.c \
-	-f ../mescc-tools/hex2_linker.c \
-	--debug \
-	-o hex2_linker.M1
-
-./blood-elf-0 -f hex2_linker.M1 -o hex2_linker-footer.M1
-./catm hold x86_defs.M1 libc-core.M1 hex2_linker.M1 hex2_linker-footer.M1
-./M0 hold temp1
-./catm hold ELF-i386-debug.hex2 temp1
-./hex2-0 hold ../bin/hex2
-# This is the last stage where we will be using the handwritten hex2 and instead
-# be using the far more powerful, cross-platform version with a bunch more goodies
-
 ###################################
-# Phase-8 Build M1 from C sources #
+# Phase-7 Build M1 from C sources #
 ###################################
 ./M2 --architecture x86 \
 	-f ../M2-Planet/test/common_x86/functions/exit.c \
@@ -163,13 +137,40 @@
 ./blood-elf-0 -f M1-macro.M1 -o M1-macro-footer.M1
 ./catm hold x86_defs.M1 libc-core.M1 M1-macro.M1 M1-macro-footer.M1
 ./M0 hold temp1
-../bin/hex2 -f ELF-i386-debug.hex2 \
-	-f temp1 \
+./catm hold ELF-i386-debug.hex2 temp1
+./hex2-0 hold ../bin/M1
+
+#####################################
+# Phase-8 Build hex2 from C sources #
+#####################################
+./M2 --architecture x86 \
+	-f ../M2-Planet/test/common_x86/functions/exit.c \
+	-f ../M2-Planet/test/common_x86/functions/file.c \
+	-f ../M2-Planet/functions/file_print.c \
+	-f ../M2-Planet/test/common_x86/functions/malloc.c \
+	-f ../M2-Planet/functions/calloc.c \
+	-f ../M2-Planet/functions/match.c \
+	-f ../M2-Planet/functions/require.c \
+	-f ../M2-Planet/functions/in_set.c \
+	-f ../M2-Planet/functions/numerate_number.c \
+	-f ../M2-Planet/test/common_x86/functions/stat.c \
+	-f ../mescc-tools/hex2_linker.c \
+	--debug \
+	-o hex2_linker.M1
+
+./blood-elf-0 -f hex2_linker.M1 -o hex2_linker-footer.M1
+../bin/M1 -f x86_defs.M1 \
+	-f libc-core.M1 \
+	-f hex2_linker.M1 \
+	-f hex2_linker-footer.M1 \
 	--LittleEndian \
 	--architecture x86 \
-	--BaseAddress 0x8048000 \
-	-o ../bin/M1 \
-	--exec_enable
+	-o temp1
+./catm hold ELF-i386-debug.hex2 temp1
+./hex2-0 hold ../bin/hex2
+# This is the last stage where we will be using the handwritten hex2 and instead
+# be using the far more powerful, cross-platform version with a bunch more goodies
+
 
 # This is the last stage where catm will need to be used and the last stage where
 # M0 is used, as we will being using it's much more powerful and cross-platform
@@ -187,7 +188,7 @@
 	-f ../M2-Planet/functions/match.c \
 	-f ../M2-Planet/functions/in_set.c \
 	-f ../M2-Planet/functions/require.c \
-	-f ../M2-Planet/functions/string.c \
+	-f ../mescc-tools/functions/string.c \
 	-f ../M2-Planet/functions/numerate_number.c \
 	-f ../M2-Planet/test/common_x86/functions/fork.c \
 	-f ../M2-Planet/test/common_x86/functions/execve.c \

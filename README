@@ -121,18 +121,18 @@ used as results. Note that we have been using hex2-0 for the whole time up until
 now. Also note that now all binaries are debuggable, can generate stack traces,
 etc, thanks to blood-elf.
 
-Phase 7: Build hex2 implementation in M2-Planet. This version of hex2 is
+Phase 7: Build M1 implementation in M2-Planet. M1 is a cross-platform version of
+M0, along with being much more powerful and faster.
+
+Note that now we are not using M0; it is replaced with M1.
+
+Phase 8: Build hex2 implementation in M2-Planet. This version of hex2 is
 cross-platform and has a number of outstanding features which are out of scope
 here. This is a useful linker that is used in the next stange of the bootstrap
 process.
 
-Note that now we are not using hex2-0; hex2-0 is replaced with hex2.
-
-Phase 8: Build M1 implementation in M2-Planet. M1 is a cross-platform version of
-M0, along with being much more powerful and faster.
-
-Note that from now we no longer need catm, as M1 has support for multiple
-inputs, and that we no longer use M0; it is replaced with M1.
+Note that from now we no longer need catm, as hex2 and M1 have support for
+multiple inputs; hex2-0 is replaced with hex2.
 
 Phase 9: Build kaem. kaem is what was being used to run kaem.run scripts, and
 is useful for later stages of the bootstrap process outside this repository.

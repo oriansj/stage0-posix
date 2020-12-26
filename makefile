@@ -34,16 +34,16 @@ Generate-amd64-answers:
 Generate-aarch64-answers:
 	sha256sum bin/* >| aarch64.answers
 
-.PHONEY: clean
+.PHONY: clean
 clean:
 	git clean -xdf
 
 test-x86:
-	cd x86 && ../bootstrap-seeds/POSIX/AMD64/kaem-optional-seed
+	cd x86 && ../bootstrap-seeds/POSIX/x86/kaem-optional-seed
 	sha256sum -c x86.answers
 
 test-amd64:
-	cd AMD64 && ../bootstrap-seeds/POSIX/x86/kaem-optional-seed
+	cd AMD64 && ../bootstrap-seeds/POSIX/AMD64/kaem-optional-seed
 	sha256sum -c amd64.answers
 
 test-aarch64:

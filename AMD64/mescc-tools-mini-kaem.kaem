@@ -116,7 +116,7 @@
 # and the last piece built that isn't part of the output binaries
 
 ###################################
-# Phase-8 Build M1 from C sources #
+# Phase-7 Build M1 from C sources #
 ###################################
 ./M2 --architecture amd64 \
 	-f ../M2-Planet/test/common_amd64/functions/exit.c \

@@ -76,7 +76,7 @@ cc_aarch64: hex2-gas M0-gas catm-gas
 	./bin/hex2-gas hold cc_aarch64
 
 M2: hex2-gas M0-gas cc_aarch64-gas catm-gas
-	./bin/catm-gas hold ../M2-Planet/test/common_aarch64/functions/file.c ../M2-Planet/test/common_aarch64/functions/malloc.c ../M2-Planet/test/common_aarch64/functions/fixup.c ../M2-Planet/functions/calloc.c ../M2-Planet/test/common_aarch64/functions/exit.c ../M2-Planet/functions/match.c ../M2-Planet/functions/in_set.c ../M2-Planet/functions/numerate_number.c ../M2-Planet/functions/file_print.c ../M2-Planet/functions/number_pack.c ../M2-Planet/functions/string.c ../M2-Planet/functions/require.c ../M2-Planet/cc.h ../M2-Planet/cc_globals.c ../M2-Planet/cc_reader.c ../M2-Planet/cc_strings.c ../M2-Planet/cc_types.c ../M2-Planet/cc_core.c ../M2-Planet/cc.c
+	./bin/catm-gas hold ../M2-Planet/test/common_aarch64/functions/file.c ../M2-Planet/test/common_aarch64/functions/malloc.c ../M2-Planet/test/common_aarch64/functions/fixup.c ../M2-Planet/functions/calloc.c ../M2-Planet/test/common_aarch64/functions/exit.c ../M2-Planet/functions/match.c ../M2-Planet/functions/in_set.c ../M2-Planet/functions/numerate_number.c ../M2-Planet/functions/file_print.c ../M2-Planet/functions/number_pack.c ../M2-Planet/functions/string.c ../M2-Planet/functions/require.c ../M2-Planet/cc.h ../M2-Planet/cc_globals.c ../M2-Planet/cc_reader.c ../M2-Planet/cc_strings.c ../M2-Planet/cc_types.c ../M2-Planet/cc_core.c ../M2-Planet/cc_macro.c ../M2-Planet/cc.c
 	./bin/cc_aarch64-gas hold M2.M1
 	./bin/catm-gas hold aarch64_defs.M1 libc-core.M1 M2.M1
 	./bin/M0-gas hold temp1

@@ -86,6 +86,7 @@
 	../M2-Planet/cc_strings.c \
 	../M2-Planet/cc_types.c \
 	../M2-Planet/cc_core.c \
+	../M2-Planet/cc_macro.c \
 	../M2-Planet/cc.c
 ./cc_x86 hold M2.M1
 ./catm hold x86_defs.M1 libc-core.M1 M2.M1
@@ -107,6 +108,7 @@
 	-f ../mescc-tools/blood-elf.c \
 	-f ../M2-Planet/functions/require.c \
 	-f ../M2-Planet/functions/in_set.c \
+	--bootstrap-mode \
 	-o blood-elf.M1
 
 ./catm hold x86_defs.M1 libc-core.M1 blood-elf.M1
@@ -131,6 +133,7 @@
 	-f ../M2-Planet/functions/string.c \
 	-f ../M2-Planet/functions/require.c \
 	-f ../mescc-tools/M1-macro.c \
+	--bootstrap-mode \
 	--debug \
 	-o M1-macro.M1
 
@@ -155,6 +158,7 @@
 	-f ../M2-Planet/functions/numerate_number.c \
 	-f ../M2-Planet/test/common_x86/functions/stat.c \
 	-f ../mescc-tools/hex2_linker.c \
+	--bootstrap-mode \
 	--debug \
 	-o hex2_linker.M1
 
@@ -198,6 +202,7 @@
 	-f ../mescc-tools/Kaem/variable.c \
 	-f ../mescc-tools/Kaem/kaem_globals.c \
 	-f ../mescc-tools/Kaem/kaem.c \
+	--bootstrap-mode \
 	--debug \
 	-o kaem.M1
 

@@ -32,6 +32,7 @@
 	-f ../M2-Planet/functions/require.c \
 	-f ../M2-Planet/functions/in_set.c \
 	-f ../mescc-tools/blood-elf.c \
+	--bootstrap-mode \
 	--debug \
 	-o blood-elf.M1
 
@@ -68,6 +69,7 @@
 	-f ../M2-Planet/test/common_x86/functions/uname.c \
 	-f ../M2-Planet/functions/match.c \
 	-f ../mescc-tools/get_machine.c \
+	--bootstrap-mode \
 	--debug \
 	-o get_machine.M1
 
@@ -111,7 +113,9 @@
 	-f ../M2-Planet/cc_strings.c \
 	-f ../M2-Planet/cc_types.c \
 	-f ../M2-Planet/cc_core.c \
+	-f ../M2-Planet/cc_macro.c \
 	-f ../M2-Planet/cc.c \
+	--bootstrap-mode \
 	--debug \
 	-o M2.M1
 

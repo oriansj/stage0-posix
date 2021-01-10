@@ -54,6 +54,8 @@
 	-f ../mes-m2/functions/match.c \
 	-f ../mes-m2/functions/in_set.c \
 	-f ../mes-m2/functions/file_print.c \
+	--bootstrap-mode \
+	--debug \
 	-o mes.M1
 
 ../bin/blood-elf -f mes.M1 -o mes-footer.M1

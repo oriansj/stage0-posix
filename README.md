@@ -1,3 +1,5 @@
+# mescc-tools-seed
+
 This repository contains all the various parts needed to bootstrap the
 following:
  - mescc-tools (https://github.com/oriansj/mescc-tools), containing:
@@ -65,9 +67,7 @@ We hang out on the freenode IRC network in the #bootstrappable channel.
 And a full summary of all of the tools can be found here:
 https://github.com/oriansj/talk-notes/blob/master/bootstrappable.org
 
-|-----------------------------|
-| How does this process work? |
-|-----------------------------|
+## How does this process work?
 
 It is highly recommended that after reading this you go through the kaem.run for
 your architecture and see each of these steps in action. Note that the kaem.run
@@ -80,79 +80,106 @@ kaem.run.
 ALL of these steps have a NASM or GAS version in the NASM/ or GAS/ subdirectory
 of the folder for the architecture.
 
-Phase 0: Rebuild hex0 from the hex0 seed. This is done to ensure that the hex0
-seed is untainted, and that the hex0 seed matches the compiled hex0 source. You
-should check these are identical!
+### Phase 0: Rebuild hex0 from the hex0 seed
 
-Phase 1: Build hex1 from the Phase 0 hex0. hex1 is a more advanced version of
-hex0 with support for single character labels and a single size of relational
-jumps (hex0 has no support for labels or calculated relational jumps).
+This is done to ensure that the hex0 seed is untainted, and that the
+hex0 seed matches the compiled hex0 source. You should check these are
+identical!
 
-Phase 1b: Build catm from Phase 0 hex0. catm is a program removing the need for
-cat or redirection by implementing equivalent functionality; eg
-cat input1 input2 ... inputN > output_file would be replaced by
-catm output_file input1 input2 ... inputN
+### Phase 1: Build hex1 from the Phase 0 hex0
 
-Phase 2: Build hex2-0 from hex1. hex2 is the final version of the hex* series
-adding support for long labels and absolute addresses. This allows it to
-function as a linker for later parts of the bootstrap. However for now we are
-only building a basic version to make the process simpler, hence the -0 on the
-end of the name; as this hex2 only works for the single host architecture it was
-built upon.
+hex1 is a more advanced version of hex0 with support for single
+character labels and a single size of relational jumps (hex0 has no
+support for labels or calculated relational jumps).
 
-Phase 3: Build M0 from Phase 2 hex2-0. M0 is an architecture specific version of
-M1 which will come later. It is simply a temporary binary that avoids the need
-to write a cross-architecture assembler in hex2, as M0 supports just enough
+#### Phase 1b: Build catm from Phase 0 hex0
+
+catm is a program removing the need for cat or redirection by
+implementing equivalent functionality; e.g. `cat input1 input2
+... inputN > output_file` would be replaced by `catm output_file
+input1 input2 ... inputN`
+
+### Phase 2: Build hex2-0 from hex1
+
+hex2 is the final version of the hex* series adding support for long
+labels and absolute addresses. This allows it to function as a linker
+for later parts of the bootstrap. However for now we are only building
+a basic version to make the process simpler, hence the -0 on the end
+of the name; as this hex2 only works for the single host architecture
+it was built upon.
+
+### Phase 3: Build M0 from Phase 2 hex2-0
+
+M0 is an architecture specific version of M1 which will come later. It
+is simply a temporary binary that avoids the need to write a
+cross-architecture assembler in hex2, as M0 supports just enough
 functionality to build the next few stages.
 
-Phase 4: Build cc_* from M0. cc_architecture is a per-architecture C compiler
-written in the same architecture's M0. Eg, there is cc_amd64 for amd64 and
-cc_x86 for x86. It implements only an extremely basic form of C that is used to
+### Phase 4: Build cc_* from M0
+
+cc\_architecture is a per-architecture C compiler written in the same
+architecture's M0. Eg, there is cc\_amd64 for amd64 and cc\_x86 for
+x86. It implements only an extremely basic form of C that is used to
 bootstrap the next phase.
 
-Phase 5: Build M2-Planet from cc_*. M2-Planet is another C compiler that
-implements a slightly larger subset of C. However this is not an easily
-debuggable version and is replaced towards the end.
+### Phase 5: Build M2-Planet from cc_*
 
-Phase 6: Build blood-elf-0 using M2-Planet. blood-elf adds dwarf stubs to a
-M1 program allowing us to create more easily debuggable programs. However, this
-version is not debuggable (as it is built without dwarf stubs) and is indicated
-by such with -0 on the end.
+M2-Planet is another C compiler that implements a slightly larger
+subset of C. However this is not an easily debuggable version and is
+replaced towards the end.
+
+### Phase 6: Build blood-elf-0 using M2-Planet
+
+blood-elf adds dwarf stubs to a M1 program allowing us to create more
+easily debuggable programs. However, this version is not debuggable
+(as it is built without dwarf stubs) and is indicated by such with -0
+on the end.
 
 From here on in, all the remaining phases are not intermediate binaries and are
 used as results. Note that we have been using hex2-0 for the whole time up until
 now. Also note that now all binaries are debuggable, can generate stack traces,
 etc, thanks to blood-elf.
 
-Phase 7: Build M1 implementation in M2-Planet. M1 is a cross-platform version of
-M0, along with being much more powerful and faster.
+### Phase 7: Build M1 implementation in M2-Planet
+
+M1 is a cross-platform version of M0, along with being much more
+powerful and faster.
 
 Note that now we are not using M0; it is replaced with M1.
 
-Phase 8: Build hex2 implementation in M2-Planet. This version of hex2 is
-cross-platform and has a number of outstanding features which are out of scope
-here. This is a useful linker that is used in the next stage of the bootstrap
-process.
+### Phase 8: Build hex2 implementation in M2-Planet
+
+This version of hex2 is cross-platform and has a number of outstanding
+features which are out of scope here. This is a useful linker that is
+used in the next stage of the bootstrap process.
 
 Note that from now we no longer need catm, as hex2 and M1 have support for
 multiple inputs; hex2-0 is replaced with hex2.
 
-Phase 9: Build kaem. kaem is what was being used to run kaem.run scripts, and
-is useful for later stages of the bootstrap process outside this repository.
+### Phase 9: Build kaem
 
-Phase 10: Build blood-elf implementation in M2-Planet. blood-elf was discussed
-earlier and now can be used properly to create debuggable programs with ELF
-headers.
+kaem is what was being used to run kaem.run scripts, and is useful for
+later stages of the bootstrap process outside this repository.
 
-Phase 11: Build get_machine. get_machine finds the architecture of the system it
-is running on, used for architecture dependent scripts used later in the
-bootstrap process.
+### Phase 10: Build blood-elf implementation in M2-Planet
 
-Phase 12: Build M2-Planet from M2-Planet. This is the same M2-Planet as
-discussed earlier, it just is built using itself and so is going to work more
-quickly and reliably.
+blood-elf was discussed earlier and now can be used properly to create
+debuggable programs with ELF headers.
 
-Phase 13: Build Mes-M2 using M2-Planet. Mes-M2 is a re-implementation of Mes
-(https://www.gnu.org/software/mes/) designed to make mes part of the
-bootstrap process. After this is complete, we will be able to bootstrap our way
-up, through MesCC and TinyCC up to GCC.
+### Phase 11: Build get_machine
+
+get_machine finds the architecture of the system it is running on,
+used for architecture dependent scripts used later in the bootstrap
+process.
+
+### Phase 12: Build M2-Planet from M2-Planet
+
+This is the same M2-Planet as discussed earlier, it just is built
+using itself and so is going to work more quickly and reliably.
+
+### Phase 13: Build Mes-M2 using M2-Planet
+
+Mes-M2 is a re-implementation of
+[Mes](https://www.gnu.org/software/mes/) designed to make mes part of
+the bootstrap process. After this is complete, we will be able to
+bootstrap our way up, through MesCC and TinyCC up to GCC.

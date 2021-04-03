@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 Jeremiah Orians
+/* Copyright (C) 2016-2021 Jeremiah Orians
  * This file is part of stage0.
  *
  * stage0 is free software: you can redistribute it and/or modify
@@ -16,30 +16,41 @@
  */
 
 #include <stdlib.h>
-#include <unistd.h>
-#include <stdint.h>
+#include <stdio.h>
 
-int main ()
+int main (int argc, char** argv)
 {
-	char output[3] = {0};
-	/* {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'} */
-	char table[16] = {0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46};
-	uint8_t c;
-	int col = 40;
-	int i = read(0, &c, 1);
-	while( i > 0)
+	if(argc != 2)
 	{
-		output[0] = table[c / 16];
-		output[1] = table[c % 16];
-		write(1, output, 2 );
+		fputs("xeh $filename is the only valid input form\n", stderr);
+		exit(EXIT_FAILURE);
+	}
+
+	FILE* in = fopen(argv[1], "r");
+	if(NULL == in)
+	{
+		fputs("Unable to open file: ", stderr);
+		fputs(argv[1], stderr);
+		fputs(" aborting to prevent problems\n", stderr);
+		exit(EXIT_FAILURE);
+	}
+
+	char* table = "0123456789ABCDEF";
+	int c = fgetc(in);
+	int col = 40;
+	while(EOF != c)
+	{
+		fputc(table[c / 16], stdout);
+		fputc(table[c % 16], stdout);
 		col = col - 2;
 		if(0 == col)
 		{
-		col = 40;
-		write(1, "\n", 1);
+			col = 40;
+			fputc('\n', stdout);
 		}
-		i = read(0, &c, 1);
+		else fputc(' ', stdout);
+		c = fgetc(in);
 	}
-	write(1, "\n", 1);
+	fputc('\n', stdout);
 	exit(EXIT_SUCCESS);
 }

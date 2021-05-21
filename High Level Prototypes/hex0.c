@@ -29,7 +29,20 @@
 #define FALSE 0
 //CONSTANT FALSE 0
 
-int in_set(int c, char* s);
+int in_set(int c, char* s){
+	for(int i=0;;i++)
+	{
+		char a = s[i];
+		if(a == '\0')
+		{
+			return FALSE;
+		}
+		if(a == c)
+		{
+			return TRUE;
+		}
+	}
+}
 
 /* Globals */
 FILE* output;

@@ -29,8 +29,6 @@
 #define max_args 256
 //CONSTANT max_args 256
 
-void file_print(char* s, FILE* f);
-
 char** tokens;
 int command_done;
 
@@ -130,14 +128,14 @@ main_loop:
 
 	if(0 > i) goto main_loop;
 
-	file_print(" +> ", stdout);
+	fputs(" +> ", stdout);
 	int j;
 	for(j = 0; j < i; j = j + 1)
 	{
-		file_print(tokens[j], stdout);
+		fputs(tokens[j], stdout);
 		fputc(' ', stdout);
 	}
-	file_print("\n", stdout);
+	fputs("\n", stdout);
 
 	char* program = tokens[0];
 	if(NULL == program) exit(EXIT_FAILURE);
@@ -159,7 +157,7 @@ main_loop:
 	if(0 == status) goto main_loop;
 
 	/* Clearly the script hit an issue that should never have happened */
-	file_print("Subprocess error\nABORTING HARD\n", stderr);
+	fputs("Subprocess error\nABORTING HARD\n", stderr);
 	/* stop to prevent damage */
 	exit(EXIT_FAILURE);
 }

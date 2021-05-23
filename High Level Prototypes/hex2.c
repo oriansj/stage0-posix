@@ -34,7 +34,6 @@ char* numerate_number(int a);
 int in_set(int c, char* s);
 int match(char* a, char* b);
 int numerate_string(char *a);
-void file_print(char* s, FILE* f);
 void require(int bool, char* error);
 
 struct entry
@@ -116,9 +115,9 @@ unsigned GetTarget(char* c)
 			return i->target;
 		}
 	}
-	file_print("Target label ", stderr);
-	file_print(c, stderr);
-	file_print(" is not valid\n", stderr);
+	fputs("Target label ", stderr);
+	fputs(c, stderr);
+	fputs(" is not valid\n", stderr);
 	exit(EXIT_FAILURE);
 }
 

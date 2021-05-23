@@ -140,46 +140,64 @@ used as results. Note that we have been using hex2-0 for the whole time up until
 now. Also note that now all binaries are debuggable, can generate stack traces,
 etc, thanks to blood-elf.
 
-### Phase 7: Build M1 implementation in M2-Planet
+### Phase 7: Build M1 (bootstrap) implementation in M2-Planet
 
 M1 is a cross-platform version of M0, along with being much more
 powerful and faster.
 
+We are doing the bootstrap version because M0 doesn't support octal but M2libc
+uses octal in the non-bootstrap stdio.c library.
+
 Note that now we are not using M0; it is replaced with M1.
 
-### Phase 8: Build hex2 implementation in M2-Planet
+### Phase 8: Build hex2 (bootstrap) implementation in M2-Planet
 
 This version of hex2 is cross-platform and has a number of outstanding
 features which are out of scope here. This is a useful linker that is
 used in the next stage of the bootstrap process.
 
+We are doing the bootstrap version because not all architectures implementations
+of hex2-0 support all of the features required by the non-bootstrap version.
+
 Note that from now we no longer need catm, as hex2 and M1 have support for
 multiple inputs; hex2-0 is replaced with hex2.
 
-### Phase 9: Build kaem
+### Phase 9: Rebuild M1 to full speed
+
+This is the final debuggable version of M1 with all of the optimizations and
+features provided by M2libc and M2-Planet to enable significantly faster builds.
+
+### Phase 10: Rebuild hex2 to full speed
+
+This is the final debuggable version of hex2 with all of the optimizations and
+features provided by M2libc and M2-Planet to enable significantly faster builds.
+
+
+### Phase 11: Build kaem
 
 kaem is what was being used to run kaem.run scripts, and is useful for
 later stages of the bootstrap process outside this repository.
 
-### Phase 10: Build blood-elf implementation in M2-Planet
+### Phase 12: Build blood-elf implementation in M2-Planet
 
 blood-elf was discussed earlier and now can be used properly to create
 debuggable programs with ELF headers.
 
-### Phase 11: Build get_machine
+### Phase 13: Build get_machine
 
 get_machine finds the architecture of the system it is running on,
 used for architecture dependent scripts used later in the bootstrap
 process.
 
-### Phase 12: Build M2-Planet from M2-Planet
+### Phase 14: Build M2-Planet from M2-Planet
 
 This is the same M2-Planet as discussed earlier, it just is built
 using itself and so is going to work more quickly and reliably.
 
-### Phase 13: Build Mes-M2 using M2-Planet
+### Phase 15: Build Mes-M2 using M2-Planet
 
-Mes-M2 is a re-implementation of
-[Mes](https://www.gnu.org/software/mes/) designed to make mes part of
-the bootstrap process. After this is complete, we will be able to
-bootstrap our way up, through MesCC and TinyCC up to GCC.
+Mes-M2 is [Mes](https://www.gnu.org/software/mes/) rewritten in M2-Planet's
+subset of C by janneke himself. Which is able to run MesCC directly to build
+TinyCC and bootstrap to GCC. To see all of the steps checkout
+[live-bootstrap] (https://github.com/fosslinux/live-bootstrap)
+Which bootstraps all the way up to GCC 4.9.4

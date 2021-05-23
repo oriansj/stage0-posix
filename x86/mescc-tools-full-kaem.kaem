@@ -19,94 +19,83 @@
 # along with Mes.  If not, see <http://www.gnu.org/licenses/>.
 
 ##################################################
-# Phase-10 Build final blood-elf from C sources  #
+# Phase-12 Build final blood-elf from C sources  #
 ##################################################
 ./M2 --architecture x86 \
-	-f ../M2-Planet/test/common_x86/functions/exit.c \
-	-f ../M2-Planet/test/common_x86/functions/file.c \
-	-f ../M2-Planet/functions/file_print.c \
-	-f ../mescc-tools/functions/numerate_number.c \
-	-f ../M2-Planet/test/common_x86/functions/malloc.c \
-	-f ../M2-Planet/functions/calloc.c \
-	-f ../M2-Planet/functions/match.c \
-	-f ../M2-Planet/functions/require.c \
-	-f ../M2-Planet/functions/in_set.c \
+	-f ../M2libc/sys/types.h \
+	-f ../M2libc/stddef.h \
+	-f ../M2libc/x86/Linux/unistd.h \
+	-f ../M2libc/stdlib.c \
+	-f ../M2libc/x86/Linux/fcntl.h \
+	-f ../M2libc/stdio.c \
+	-f ../M2libc/bootstrappable.c \
 	-f ../mescc-tools/blood-elf.c \
-	--bootstrap-mode \
 	--debug \
 	-o blood-elf.M1
 
 ./blood-elf-0 -f blood-elf.M1 -o blood-elf-footer.M1
-../bin/M1 -f x86_defs.M1 \
-	-f libc-core.M1 \
+../bin/M1 --architecture x86 \
+	--little-endian \
+	-f ../M2libc/x86/x86_defs.M1 \
+	-f ../M2libc/x86/libc-full.M1 \
 	-f blood-elf.M1 \
 	-f blood-elf-footer.M1 \
-	--LittleEndian \
-	--architecture x86 \
 	-o hold
 
-../bin/hex2 -f ELF-i386-debug.hex2 \
+../bin/hex2 --architecture x86 \
+	--little-endian \
+	--base-address 0x8048000 \
+	-f ../M2libc/x86/ELF-x86-debug.hex2 \
 	-f hold \
-	--LittleEndian \
-	--architecture x86 \
-	--BaseAddress 0x8048000 \
-	-o ../bin/blood-elf \
-	--exec_enable
+	-o ../bin/blood-elf
 
 # Now we have our shipping debuggable blood-elf, the rest will be down hill from
 # here as we have ALL of the core pieces of compiling and assembling debuggable
 # programs in a debuggable form with corresponding C source code.
 
 #############################################
-# Phase-11 Build get_machine from C sources #
+# Phase-13 Build get_machine from C sources #
 #############################################
 ./M2 --architecture x86 \
-	-f ../M2-Planet/test/common_x86/functions/exit.c \
-	-f ../M2-Planet/test/common_x86/functions/file.c \
-	-f ../M2-Planet/functions/file_print.c \
-	-f ../M2-Planet/test/common_x86/functions/malloc.c \
-	-f ../M2-Planet/functions/calloc.c \
-	-f ../M2-Planet/test/common_x86/functions/uname.c \
-	-f ../M2-Planet/functions/match.c \
+	-f ../M2libc/sys/types.h \
+	-f ../M2libc/stddef.h \
+	-f ../M2libc/x86/Linux/unistd.h \
+	-f ../M2libc/stdlib.c \
+	-f ../M2libc/x86/Linux/fcntl.h \
+	-f ../M2libc/stdio.c \
+	-f ../M2libc/bootstrappable.c \
 	-f ../mescc-tools/get_machine.c \
-	--bootstrap-mode \
 	--debug \
 	-o get_machine.M1
 
 ../bin/blood-elf -f get_machine.M1 -o get_machine-footer.M1
 
-../bin/M1 -f x86_defs.M1 \
-	-f libc-core.M1 \
+../bin/M1 --architecture x86 \
+	--little-endian \
+	-f ../M2libc/x86/x86_defs.M1 \
+	-f ../M2libc/x86/libc-full.M1 \
 	-f get_machine.M1 \
 	-f get_machine-footer.M1 \
-	--LittleEndian \
-	--architecture x86 \
 	-o hold
 
-../bin/hex2 -f ELF-i386-debug.hex2 \
+../bin/hex2 --architecture x86 \
+	--little-endian \
+	--base-address 0x8048000 \
+	-f ../M2libc/x86/ELF-x86-debug.hex2 \
 	-f hold \
-	--LittleEndian \
-	--architecture x86 \
-	--BaseAddress 0x8048000 \
-	-o ../bin/get_machine \
-	--exec_enable
+	-o ../bin/get_machine
 
 ############################################
-# Phase-12 Build M2-Planet from M2-Planet  #
+# Phase-14 Build M2-Planet from M2-Planet  #
 ############################################
 ./M2 --architecture x86 \
-	-f ../M2-Planet/test/common_x86/functions/file.c \
-	-f ../M2-Planet/test/common_x86/functions/malloc.c \
-	-f ../M2-Planet/functions/calloc.c \
-	-f ../M2-Planet/test/common_x86/functions/exit.c \
-	-f ../M2-Planet/functions/match.c \
-	-f ../M2-Planet/functions/in_set.c \
-	-f ../M2-Planet/functions/numerate_number.c \
-	-f ../M2-Planet/functions/file_print.c \
-	-f ../M2-Planet/functions/number_pack.c \
-	-f ../M2-Planet/functions/string.c \
-	-f ../M2-Planet/functions/require.c \
-	-f ../M2-Planet/functions/fixup.c \
+	-f ../M2libc/sys/types.h \
+	-f ../M2libc/stddef.h \
+	-f ../M2libc/x86/Linux/unistd.h \
+	-f ../M2libc/stdlib.c \
+	-f ../M2libc/x86/Linux/fcntl.h \
+	-f ../M2libc/stdio.c \
+	-f ../M2libc/bootstrappable.c \
 	-f ../M2-Planet/cc.h \
 	-f ../M2-Planet/cc_globals.c \
 	-f ../M2-Planet/cc_reader.c \
@@ -115,27 +104,25 @@
 	-f ../M2-Planet/cc_core.c \
 	-f ../M2-Planet/cc_macro.c \
 	-f ../M2-Planet/cc.c \
-	--bootstrap-mode \
 	--debug \
 	-o M2.M1
 
 ../bin/blood-elf -f M2.M1 -o M2-footer.M1
 
-../bin/M1 -f x86_defs.M1 \
-	-f libc-core.M1 \
+../bin/M1 --architecture x86 \
+	--little-endian \
+	-f ../M2libc/x86/x86_defs.M1 \
+	-f ../M2libc/x86/libc-full.M1 \
 	-f M2.M1 \
 	-f M2-footer.M1 \
-	--LittleEndian \
-	--architecture x86 \
 	-o hold
 
-../bin/hex2 -f ELF-i386-debug.hex2 \
+../bin/hex2 --architecture x86 \
+	--little-endian \
+	--base-address 0x8048000 \
+	-f ../M2libc/x86/ELF-x86-debug.hex2 \
 	-f hold \
-	--LittleEndian \
-	--architecture x86 \
-	--BaseAddress 0x8048000 \
-	-o ../bin/M2-Planet \
-	--exec_enable
+	-o ../bin/M2-Planet
 
 # Congrats you successfully completed the bootstrap of mescc-tools;
 # the resulting binaries that you want are in bin

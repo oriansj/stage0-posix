@@ -123,4 +123,5 @@
 	--little-endian \
 	--base-address 0x00600000 \
 	-f ../M2libc/aarch64/ELF-aarch64-debug.hex2 \
+	-f hold \
 	-o ../bin/M2-Planet

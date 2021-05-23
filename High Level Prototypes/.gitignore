@@ -1,0 +1,5 @@
+# Make sure binaries are never imported
+hex0
+hex1
+hex2
+kaem-minimal

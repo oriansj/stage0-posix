@@ -21,20 +21,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include "../M2libc/bootstrappable.h"
 
 #define max_string 4096
-//CONSTANT max_string 4096
-#define TRUE 1
-//CONSTANT TRUE 1
-#define FALSE 0
-//CONSTANT FALSE 0
-
-/* Imported functions */
-char* numerate_number(int a);
-int in_set(int c, char* s);
-int match(char* a, char* b);
-int numerate_string(char *a);
-void require(int bool, char* error);
 
 struct entry
 {

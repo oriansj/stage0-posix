@@ -21,13 +21,9 @@
 #include <sys/wait.h>
 
 #define FALSE 0
-//CONSTANT FALSE 0
 #define TRUE 1
-//CONSTANT TRUE 1
 #define max_string 4096
-//CONSTANT max_string 4096
 #define max_args 256
-//CONSTANT max_args 256
 
 char** tokens;
 int command_done;

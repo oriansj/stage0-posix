@@ -21,15 +21,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include "../M2libc/bootstrappable.h"
 
 #define max_string 4096
-//CONSTANT max_string 4096
-#define TRUE 1
-//CONSTANT TRUE 1
-#define FALSE 0
-//CONSTANT FALSE 0
-
-int in_set(int c, char* s);
 
 /* Globals */
 FILE* output;

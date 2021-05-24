@@ -63,7 +63,7 @@ Note that this README may not answer all your questions. If you are still left
 wondering things like What is a kaem.run?, see the other repositories readme's
 which might answer some more tool-specific questions.
 
-We hang out on the freenode IRC network in the #bootstrappable channel.
+We hang out on the libera.chat IRC network in the #bootstrappable channel.
 And a full summary of all of the tools can be found here:
 https://github.com/oriansj/talk-notes/blob/master/bootstrappable.org
 

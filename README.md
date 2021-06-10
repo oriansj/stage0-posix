@@ -201,3 +201,41 @@ subset of C by janneke himself. Which is able to run MesCC directly to build
 TinyCC and bootstrap to GCC. To see all of the steps checkout
 [live-bootstrap] (https://github.com/fosslinux/live-bootstrap)
 Which bootstraps all the way up to GCC 4.9.4
+
+### Phase 16: Build sha256sum
+
+sha256sum is used for giving us a cryptographically signed build chain.
+
+### Phase 17: Build untar
+
+untar enables stage0-posix to unpack source tarballs so that git submodules are
+not needed to further extend stage0-posix to achieve GCC+Linux.
+
+### Phase 18: Build ungz
+
+ungz enables the decompressing of .tar.gz tarballs such as Gnu Mes. Thus
+enabling source tarballs on hosts that don't distribute uncompressed tarballs.
+
+### Phase 19: Build catm
+
+catm is a simple tool that provides the functionality of:
+cat file1 file2 ... fileN >| output in environments where pipes and I/O
+redirection doesn't exist. With slightly unique syntax:
+catm output file1 file2 ... fileN
+
+### Phase 20: build primitive cp
+
+This primitive version of cp simply copies the contents of the file but does NOT
+copy the file permissions or any other STAT information.
+
+### Phase 21: build chmod
+
+To fix up the permissions, of any binaries you used the primitive cp command to
+move, chmod is included.
+
+### Phase 22: after.kaem
+
+after.kaem exists for you to replace with anything you want to kick off your
+bootstrap chain.
+
+Enjoy

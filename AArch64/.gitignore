@@ -11,7 +11,7 @@ blood-elf-0
 blood-elf-footer.M1
 blood-elf.M1
 catm
-cc_amd64
+cc_aarch64
 get_machine-footer.M1
 get_machine.M1
 hex0

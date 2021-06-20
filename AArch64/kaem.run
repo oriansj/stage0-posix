@@ -31,14 +31,8 @@
 ./kaem-0 mescc-tools-mini-kaem.kaem
 ../bin/kaem --verbose --strict -f mescc-tools-full-kaem.kaem
 
-############################################
-# Phase 15 Build Mes-M2 from M2-Planet     #
-############################################
-
-../bin/kaem --verbose --strict --file mes-m2.kaem
-
 ######################################################
-# Phase 16-22 Build mescc-tools-extra from M2-Planet #
+# Phase 15-22 Build mescc-tools-extra from M2-Planet #
 ######################################################
 ../bin/kaem --verbose --strict --file mescc-tools-extra.kaem
 

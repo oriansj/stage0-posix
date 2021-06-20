@@ -26,3 +26,5 @@ BASE_ADDRESS="0x00600000"
 BINDIR="../bin"
 cd ../mescc-tools-extra
 ../bin/kaem --verbose --strict --file mescc-tools-extra.kaem
+cd ..
+./bin/sha256sum -c amd64.answers

@@ -8,8 +8,15 @@ following:
   - get_machine
   - hex2
   - kaem
+ - mescc-tools-extra (https://github.com/oriansj/mescc-tools-extra), containing:
+  - catm
+  - cp
+  - chmod
+  - mkdir
+  - ungz
+  - untar
+  - sha256sum
  - M2-Planet (https://github.com/oriansj/M2-Planet)
- - mes-m2 (https://github.com/oriansj/mes-m2).
 
 It bootstraps all these from a single 357 byte seed (which you will find in the
 folder bootstrap-seeds). The ultimate goal is for this to bootstrap all the way
@@ -194,17 +201,13 @@ process.
 This is the same M2-Planet as discussed earlier, it just is built
 using itself and so is going to work more quickly and reliably.
 
-### Phase 15: Build Mes-M2 using M2-Planet
-
-Mes-M2 is [Mes](https://www.gnu.org/software/mes/) rewritten in M2-Planet's
-subset of C by janneke himself. Which is able to run MesCC directly to build
-TinyCC and bootstrap to GCC. To see all of the steps checkout
-[live-bootstrap] (https://github.com/fosslinux/live-bootstrap)
-Which bootstraps all the way up to GCC 4.9.4
-
-### Phase 16: Build sha256sum
+### Phase 15: Build sha256sum
 
 sha256sum is used for giving us a cryptographically signed build chain.
+
+### Phase 16: build mkdir
+
+To eliminate the need to premake directories in live-bootstrap.
 
 ### Phase 17: Build untar
 

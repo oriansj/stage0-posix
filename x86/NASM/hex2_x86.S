@@ -199,7 +199,7 @@ hex:
 	; deal with EOF
 	cmp eax, -4
 	je EOF
-	; deal with line comments starting with ;
+	; deal with line comments starting with #
 	cmp eax, 0x23
 	je ascii_comment
 	; deal with line comments starting with ;

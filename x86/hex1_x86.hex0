@@ -115,7 +115,7 @@ B1 02 00 00                     # ph_memsz
 	E8 A1010000                 # CALLI32 %StoreLabel
 
 #:First_pass_0 ; (0x80480E4)
-	; Check for :
+	; Check for %
 	83F8 25                     # CMPI8_EAX !37
 	0F84 2A000000               # JE32 %First_pass_pointer
 
@@ -152,7 +152,7 @@ B1 02 00 00                     # ph_memsz
 	; deal with EOF
 	83F8 FC                     # CMPI8_EAX !-4
 	0F84 AE000000               # JE32 %EOF
-	; deal with line comments starting with ;
+	; deal with line comments starting with #
 	83F8 23                     # CMPI8_EAX !35
 	0F84 B8000000               # JE32 %ascii_comment
 	; deal with line comments starting with ;

@@ -106,7 +106,7 @@ DEFINE TEST 85C0
 	CALLI32 %StoreLabel
 
 :First_pass_0
-	; Check for :
+	; Check for %
 	CMPI8_EAX !37
 	JE32 %First_pass_pointer
 
@@ -143,7 +143,7 @@ DEFINE TEST 85C0
 	; deal with EOF
 	CMPI8_EAX !-4
 	JE32 %EOF
-	; deal with line comments starting with ;
+	; deal with line comments starting with #
 	CMPI8_EAX !35
 	JE32 %ascii_comment
 	; deal with line comments starting with ;

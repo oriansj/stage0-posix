@@ -270,7 +270,7 @@ DEFINE TEST 85C0
 	; deal with EOF
 	CMPI8_EAX !-4
 	JE32 %EOF
-	; deal with line comments starting with ;
+	; deal with line comments starting with #
 	CMPI8_EAX !0x23
 	JE32 %ascii_comment
 	; deal with line comments starting with ;

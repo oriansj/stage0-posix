@@ -242,7 +242,7 @@
 	; deal with EOF
 	83F8 FC                     ; CMPI8_EAX !-4
 	0F84 %o                     ; JE32 %EOF
-	; deal with line comments starting with ;
+	; deal with line comments starting with #
 	83F8 23                     ; CMPI8_EAX !0x23
 	0F84 %t                     ; JE32 %ascii_comment
 	; deal with line comments starting with ;

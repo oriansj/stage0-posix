@@ -78,7 +78,7 @@ First_pass:
 	pop {r14}
 
 First_pass_0:
-	##  Check for :
+	##  Check for %
 	cmp r0, #0x25
 	beq First_pass_pointer
 

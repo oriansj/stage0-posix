@@ -1,0 +1,534 @@
+## Copyright (C) 2021 Andrius Štikonas
+## Copyright (C) 2021 Ekaitz Zarraga
+## This file is part of stage0.
+##
+## stage0 is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## stage0 is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with stage0.  If not, see <http://www.gnu.org/licenses/>.
+
+## ELF Header
+#:ELF_base
+7F 45 4C 46        ## e_ident[EI_MAG0-3] ELF's magic number
+
+02                 ## e_ident[EI_CLASS] Indicating 64 bit
+01                 ## e_ident[EI_DATA] Indicating little endianness
+01                 ## e_ident[EI_VERSION] Indicating original elf
+
+03                 ## e_ident[EI_OSABI] Set at 3 for Linux
+00                 ## e_ident[EI_ABIVERSION] Ignored for Statically linked executables
+
+00 00 00 00 00 00 00 ## e_ident[EI_PAD]
+02 00              ## e_type Indicating Executable
+F3 00              ## e_machine Indicating RISC-V
+01 00 00 00        ## e_version Indicating original elf
+
+78 00 60 00 00 00 00 00 ## e_entry Address of the entry point (Number of bytes this header is + Base Address) # TODO
+40 00 00 00 00 00 00 00 ## e_phoff Address of program header table
+00 00 00 00 00 00 00 00 ## e_shoff Address of section header table
+
+00 00 00 00        ## e_flags
+40 00              ## e_ehsize Indicating our 64 Byte header
+
+38 00              ## e_phentsize size of a program header table
+01 00              ## e_phnum number of entries in program table
+
+00 00              ## e_shentsize size of a section header table
+00 00              ## e_shnum number of entries in section table
+
+00 00              ## e_shstrndx index of the section names
+
+## Program Header
+#:ELF_program_headers
+01 00 00 00             ## p_type
+07 00 00 00             ## Flags
+00 00 00 00 00 00 00 00 ## p_offset
+
+00 00 60 00 00 00 00 00 ## p_vaddr
+00 00 60 00 00 00 00 00 ## p_physaddr
+
+0E 02 00 00 00 00 00 00 ## p_filesz
+0E 02 00 00 00 00 00 00 ## p_memsz
+
+01 00 00 00 00 00 00 00 ## Required alignment
+
+#:ELF_text
+#:_start
+
+    # Register use:
+    # s2: input fd
+    # s3: output fd
+    # s4: toggle
+    # s5: hold
+    # s6: ip
+
+    # s7-11: return addresses
+    # Can be replaced with stack but for hex1 we have enough spare registers
+
+    03 35 01 00     ;ld a0, 0(sp)                           # Get number of the args
+    83 35 81 00     ;ld a1, 8(sp)                           # Get program name
+    03 36 01 01     ;ld a2, 16(sp)                          # Input file name
+
+    # Initialize globals
+    13 0A F0 FF     ;li s4, -1    (addi x20, x0, -1)        # Toggle
+    93 0A 00 00     ;li s5, 0     (addi x21, x0, 0)         # Hold
+    13 0B 00 00     ;li s6, 0     (addi x22, x0, 0)         # Instruction Pointer
+
+    # Open input file and store FD in s2
+    93 08 80 03     ;li a7, 56    (addi x17, x0, 56)        # sys_openat
+    13 05 C0 F9     ;li a0, -100  (addi x10,D x0, -100)     # AT_FDCWD
+    93 05 06 00     ;mv a1, a2    (addi x11, x12, 0)        # input file
+    13 06 00 00     ;li a2, 0     (addi x12, x0, 0)         # read only
+    73 00 00 00     ;ecall
+    13 09 05 00     ;mv s2, a0    (addi x18, x10, 0)        # Save fd in for later
+
+    # Set default FD for output file to stdout
+    93 09 10 00     ;li s3, 1     (addi x19, x0, 1)
+
+    # If we only have 2 arguments, don't use the third (it's not set)
+    93 02 20 00     ;li t0, 2     (addi x2, x0, 2)
+    03 35 01 00     ;ld a0, 0(sp)                           # Get number of the args
+    # ADBBBBBBCCCC         ABBBBBB CCCCD
+    # 0001001011100   ->   0010010 11100
+    # 0010010 00101 01010 100 11100 1100011
+    63 4E 55 24     ;blt a0, t0, Fail                       # No input file provided 
+                                                            # Jump 151 instructions forward (+604B)
+
+    # ADBBBBBBCCCC         ABBBBBB CCCCD
+    # 0000000100000   ->   0000001 00000
+    # 0000001 00101 01010 000 00000 1100011
+    63 00 55 02     ;beq a0, t0, after_open                 # No output file provided. Use stdout
+                                                            # Jump 8 instructions forward (+32B)
+
+    # Open output file and store the FD in s3
+    93 08 80 03     ;li a7, 56    (addi x17, x0, 0)         # sys_openat
+    13 05 C0 F9     ;li a0, -100  (addi x10, x0, -100)      # AT_FDCWD
+    83 35 81 01     ;ld a1,24(sp)                           # Output file (argument 3)
+    13 06 10 24     ;li a2, 577   (addi x12, x0, 577)       # Mode of the file opening
+    # 577 =     00001101
+    # O_TRUNC   00001000
+    # O_CREAT   00000100
+    # O_WRONLY  00000001
+
+    # Set read, write, execute permission on user, 0700
+    93 06 00 1C     ;li a3, 0700  (addi x13, x0, 0700)
+    73 00 00 00     ;ecall
+    93 09 05 00     ;mv s3, a0    (addi x19, x10, 0)        # Save fd in for later
+
+#:after_open
+    EF 0B C0 02     ;jal s7, First_pass  (jal x23, 44)      # Jump 11 instructions forward (+44B)
+
+    # Rewind input file
+    93 08 E0 03     ;li a7, 62    (addi x17, x0, 62)        # sys_lseek
+    13 05 09 00     ;mv a0, s2    (addi x10, x18, 0)        # Input file descriptor
+
+    93 05 00 00     ;mv a1, zero  (addi x11, x0, 0)         # Set offset to zero
+    13 06 00 00     ;mv a2, zero  (addi x12, x0, 0)         # Set whence to zero
+    73 00 00 00     ;ecall
+
+    # Initialize globals
+    13 0A F0 FF     ;li s4, -1    (addi x20, x0, -1)        # Toggle
+    93 0A 00 00     ;li s5, 0     (addi x21, x0, 0)         # Hold
+    13 0B 00 00     ;li s6, 0     (addi x22, x0, 0)         # Instruction Pointer
+
+    # ADDDDDDDCBBBBBBBBBB     ABBBBBBBBBBCDDDDDDDD
+    # 00000000000001100000 -> 00000110000000000000
+    # 00000110000000000000 10111 1101111
+    EF 0B 00 06     ;jal s7, Second_pass  (jal x23, 92)     # Jump 24 instructions forward (+96B)
+
+    # ADDDDDDDCBBBBBBBBBB     ABBBBBBBBBBCDDDDDDDD
+    # 00000000001000000100 -> 00100000010000000000
+    6F 00 40 20     ;j Done       (jal, x0, 516)            # Jump 129 instructions forward (+516B)
+
+#:First_pass
+    # ADDDDDDDCBBBBBBBBBB     ABBBBBBBBBBCDDDDDDDD
+    # 00000000000101000000 -> 00010100000000000000
+    # 00010100000000000000 11001 1101111
+    EF 0C 00 14     ;jal s9, Read_byte (jal, x25, 320)      # Jump 80 instructions forward (+320B)
+
+    # Deal with EOF
+    93 05 C0 FF     ;li a1, -4      (addi x11, x0, -4)
+    # ADBBBBBBCCCC         ABBBBBB CCCCD
+    # 0000001001100   ->   0000010 01100
+    # 0000010 01011 01010 000 01100 1100011
+    63 06 B5 04     ;beq a0, a1, First_pass_done            # Jump 19 instructions forward (+76B)
+
+    # Check for :
+    ;lb a0, table  (two instructions)
+        17 05 00 00 ;auipc x10, 0                           # end of .text is 129 instructions forward
+        03 05 85 21 ;lb x10, 134*4(x10)
+    93 05 A0 03     ;li a1, 0x3a    (addi x11, x0, 0x3a)
+
+    # ADBBBBBBCCCC         ABBBBBB CCCCD
+    # 0000000000100   ->   0000000 01000
+    # 0000000 01011 01010 001 01000 1100011
+    63 14 B5 00     ;bne a0, a1, First_pass_0               # Jump 2 instructions forward (+8B)
+
+    # ADDDDDDDCBBBBBBBBBB     ABBBBBBBBBBCDDDDDDDD
+    # 00000000000101101100 -> 00010110110000000000
+    # 00010110110000000000 00001 1101111
+    EF 00 C0 16     ;jal StoreLabel   (jal x1, 364)         # Jump 91 instructions forward (+364B)
+
+#:First_pass_0
+    # Check for %
+    93 05 50 02     ;li a1, 0x25  (addi x11, x0, 0x25)
+    # ADBBBBBBCCCC         ABBBBBB CCCCD
+    # 0000000100100   ->   0000001 00100
+    # 0000001 01011 01010 000 00100 1100011
+    63 02 B5 02     ;beq a0, a1, First_pass_pointer         # Jump 9 instructions forward (+36B)
+
+    # Deal with everything else
+    # ADDDDDDDCBBBBBBBBBB     ABBBBBBBBBBCDDDDDDDD
+    # 00000000000010000000 -> 00001000000000000000
+    # 00001000000000000000 11000 1101111
+    6F 0C 00 08     ;jal s8, hex (jal x24, 128)             # Jump 32 instructions forward (+128B)
+
+    # Deal with EOF
+    93 05 C0 FF     ;li a1, -4      (addi x11, x0, -4)
+    63 02 B5 02     ;beq a0, a1, First_pass_done            # Jump 9 instructions forward (+36B)
+
+    # deal with -1 values
+    # ADBBBBBBCCCC         ABBBBBB CCCCD
+    # 1111111001100   ->   1111110 01101
+    # 1111110 00000 01010 100 01101 1100011
+    E3 46 05 FC     ;blt a0, zero, First_pass               # Jump 13 instructions backward (-52B)
+
+    # Deal with toggle
+    # ADBBBBBBCCCC         ABBBBBB CCCCD
+    # 0000000001000   ->   0000000 01000
+    # 0000000 00000 10100 000 01000 1100011
+    63 04 0A 00     ;beqz s4, First_pass_1 (beq x20,x0, 8)  # Jump 2 instructions forward (+8B)
+    13 0B 1B 00     ;addi s6, s6, 1  (addi, x22, x22, 1)    # Increment IP
+
+#:First_pass_1
+    13 4A FA FF     ;not s4, s4   (xori, x20, x20, -1)      # Toggle = !Toggle
+    # ADDDDDDDCBBBBBBBBBB     ABBBBBBBBBBCDDDDDDDD
+    # 11111111111110111100 -> 11111011110111111111
+    # 11111011110111111111 00000 1101111
+    6F F0 DF FB     ;j First_pass (jal, x0, -68)            # Jump 17 instructions backward (-68B)
+
+#:First_pass_pointer
+    # Deal with Pointer to label
+    # ADDDDDDDCBBBBBBBBBB     ABBBBBBBBBBCDDDDDDDD
+    # 00000000000011111000 -> 00001111100000000000
+    # 00001111100000000000 11001 1101111
+    EF 0C 80 0F     ;jal s9, Read_byte  (jal, x25, 248)     # Drop the char
+                                                            # Jump 62 instructions forward (+248B)
+    13 0B 4B 00     ;addi s6, s6, 4  (addi, x22, x22, 4)    # Increment IP
+
+    # ADDDDDDDCBBBBBBBBBB     ABBBBBBBBBBCDDDDDDDD
+    # 11111111111110110000 -> 11111011000111111111
+    # 11111011000111111111 00000 1101111
+    6F F0 1F FB     ;j First_pass (jal, x0, -80)            # Loop again
+                                                            # Jump 20 instructions backward (-80B)
+
+#:First_pass_done
+    67 80 0B 00     ;jr s7 (jalr x0, x23, 0)
+
+#:Second_pass
+    # ADDDDDDDCBBBBBBBBBB     ABBBBBBBBBBCDDDDDDDD
+    # 00000000000011101000 -> 00001110100000000000
+    # 00001110100000000000 11001 1101111
+    EF 0C 80 0E     ;jal s9, Read_byte    (jal, x25, 232)   # Jump 58 instructions forward (+232B)
+
+    # Deal with EOF
+    93 05 C0 FF     ;li a1, -4      (addi x11, x0, -4)
+    # ADBBBBBBCCCC         ABBBBBB CCCCD
+    # 0000001000100   ->   0000010 00100
+    # 0000010 01011 01010 000 00100 1100011
+    63 02 B5 04     ;beq a0, a1, Second_pass_done           # Jump 17 instructions forward (+68B)
+
+    # Drop the label
+    93 05 A0 03     ;li a1, 0x3a    (addi x11, x0, 0x3a)
+    63 16 B5 00     ;bne a0, a1, Second_pass_0              # Jump 3 instructions forward (+12B)
+
+    # ADDDDDDDCBBBBBBBBBB     ABBBBBBBBBBCDDDDDDDD
+    # 00000000000011010100 -> 00001101010000000000
+    # 00001101010000000000 11001 1101111
+    EF 0C 40 0D     ;jal s9, Read_byte    (jal, x25, 212)   # Jump 53 instructions forward (+212B)
+    # ADDDDDDDCBBBBBBBBBB     ABBBBBBBBBBCDDDDDDDD
+    # 11111111111111101000 -> 11111110100111111111
+    # 11111110100111111111 00000 1101111
+    6F F0 9F FE     ;j Second_pass        (jal, x0, -24)    # Jump 6 instructions backward (-24B)
+
+#:Second_pass_0
+    93 05 50 02     ;li a1, 0x25  (addi x11, x0, 0x25)
+    63 16 B5 00     ;bne a0, a1, Second_pass_1
+
+    # ADDDDDDDCBBBBBBBBBB     ABBBBBBBBBBCDDDDDDDD
+    # 00000000000100011000 -> 00010001100000000000
+    # 00010001100000000000 00001 1101111
+    EF 00 80 11     ;jal StorePointer    (jal x1, 280)      # Jump 70 instructions forward (+280B)
+    # ADDDDDDDCBBBBBBBBBB     ABBBBBBBBBBCDDDDDDDD
+    # 11111111111111011000 -> 11111101100111111111
+    # 11111101100111111111 00000 1101111
+    6F F0 9F FD     ;j Second_pass       (jal x0, -40)      # Jump 10 instructions backward (-40B)
+
+#:Second_pass_1
+    # Deal with everything else
+    # ADDDDDDDCBBBBBBBBBB     ABBBBBBBBBBCDDDDDDDD
+    # 00000000000000100100 -> 00000010010000000000
+    # 00000010010000000000 11000 1101111
+    6F 0C 40 02     ;jal s8,hex          (jal x23, 36)      # Process our char
+                                                            # Jump 9 instructions forward (+36B)
+
+    # Deal with EOF
+    93 05 C0 FF     ;li a1, -4      (addi x11, x0, -4)
+    # ADBBBBBBCCCC         ABBBBBB CCCCD
+    # 0000000011000   ->   0000000 11000
+    # 0000000 01011 01010 000 11000 1100011
+    63 0C B5 00     ;beq a0, a1, Second_pass_done           # Jump 6 instructions forward (+24B)
+
+    # deal with -1 values
+    # ADBBBBBBCCCC         ABBBBBB CCCCD
+    # 1111111001000   ->   1111110 01001
+    # 1111110 00000 01010 100 01001 1100011
+    E3 44 05 FC     ;blt a0, zero, Second_pass              # Jump 14 instructions backward (-56B)
+
+    # deal with toggle
+    # ADBBBBBBCCCC         ABBBBBB CCCCD
+    # 0000100101100   ->   0001001 01100
+    # 0001001 00000 10100 000 01100 1100011
+    63 06 0A 12     ;beqz s4, print                         # Jump 75 instructions forward (+300B)
+
+    # process first byte of pair
+    93 0A 05 00     ;mv s5, a0       (addi x21, x10, 0)     # Move byte to hold
+    13 0A 00 00     ;mv s4, zero     (addi x20, x0, 0)      # Flip the toggle
+
+    # ADDDDDDDCBBBBBBBBBB     ABBBBBBBBBBCDDDDDDDD
+    # 11111111111110111000 -> 11111011100111111111
+    # 11111011100111111111 00000 1101111
+    6F F0 9F FB     ;j Second_pass   (jal x0, -72)          # Jump 18 instructions backward (-72B)
+
+#:Second_pass_done:
+    67 80 0B 00     ;jr s7 (jalr x0, x23, 0)
+
+#:hex
+    # Deal with EOF
+    93 05 C0 FF     ;li a1, -4      (addi x11, x0, -4)
+    # ADBBBBBBCCCC         ABBBBBB CCCCD
+    # 0000010010000   ->   0000100 10000
+    # 0000100 01011 01010 000 10000 1100011
+    63 08 B5 08     ;beq a0, a1, EOF  (beq, x10, x11, 144)  # Jump 36 instructions forward (+144B)
+
+    # deal with line comments starting with #
+    93 05 30 02     ;li a1, 0x23    (addi x11, x0, 0x23)
+    # ADBBBBBBCCCC         ABBBBBB CCCCD
+    # 0000001101100   ->   0000011 01100
+    # 0000011 01011 01010 000 01100 1100011
+    63 06 B5 06     ;beq a0, a1, ascii_comment              # a0 eq to '#'
+                                                            # Jump 27 instructions forward (+108B)
+
+    # deal with line comments starting with ;
+    93 05 B0 03     ;li a1, 0x3b    (addi x11, x0, 0x3b)
+    # ADBBBBBBCCCC         ABBBBBB CCCCD
+    # 0000001100100   ->   0000011 00100
+    # 0000011 01011 01010 000 00100 1100011
+    63 02 B5 06     ;beq a0, a1, ascii_comment              # a0 eq to ';'
+                                                            # Jump 25 instructions forward (+100B)
+
+    # deal all ascii less than 0
+    93 05 00 03     ;li a1, 0x30    (addi x11, x0, 0x30)
+    # ADBBBBBBCCCC         ABBBBBB CCCCD
+    # 0000001010100   ->   0000010 10100
+    # 0000010 01011 01010 100 10100 1100011
+    63 4A B5 04     ;blt a0, a1, ascii_other               # Jump 21 instructions forward (+84B)
+
+    # deal with 0-9
+    93 05 A0 03     ;li a1, 0x3a
+    # ADBBBBBBCCCC         ABBBBBB CCCCD
+    # 0000000101000   ->   0000001 01000
+    # 0000001 01011 01010 100 01000 1100011
+    63 44 B5 02     ;blt a0, a1, ascii_num                 # Jump 10 instructions forward (+40B)
+
+    # deal with all ascii less than A
+    93 05 10 04     ;li a1, 0x41
+    # ADBBBBBBCCCC         ABBBBBB CCCCD
+    # 0000001000100   ->   0000010 00100
+    # 0000010 01011 01010 100 00100 1100011
+    63 42 B5 04     ;blt a0, a1, ascii_other               # Jump 17 instructions forward (+68B)
+
+    # deal with A-F
+    93 05 70 04     ;li a1, 0x47
+    # ADBBBBBBCCCC         ABBBBBB CCCCD
+    # 0000000110000   ->   0000001 10000
+    # 0000001 01011 01010 100 10000 1100011
+    63 48 B5 02     ;blt a0, a1, ascii_high                # Jump 12 instructions forward (+48B)
+
+    # deal with all ascii less than a
+    93 05 10 06     ;li a1, 0x61
+    # ADBBBBBBCCCC         ABBBBBB CCCCD
+    # 0000000110000   ->   0000001 10100
+    # 0000001 01011 01010 100 10100 1100011
+    63 4A B5 02     ;blt a0, a1, ascii_other               # Jump 13 instructions forward (+52B)
+
+    # deal with a-f
+    93 05 70 06     ;li a1, 0x67
+    # ADBBBBBBCCCC         ABBBBBB CCCCD
+    # 0000000010100   ->   0000000 10100
+    # 0000000 01011 01010 100 10100 1100011
+    63 4A B5 00     ;blt a0, a1, ascii_low                 # Jump 5 instructions forward (+20B)
+
+    # The rest that remains needs to be ignored
+    # ADDDDDDDCBBBBBBBBBB     ABBBBBBBBBBCDDDDDDDD
+    # 00000000000000101000 -> 00000010100000000000
+    # 00000010100000000000 00000 1101111
+    6F 00 80 02     ;j ascii_other         (jal x0, 40)     # Jump 10 instructions forward (+40B)
+
+#:ascii_num
+    93 05 00 03     ;li a1, 0x30     (addi x11, x0, 0x30)   # '0' -> 0
+    33 05 B5 40     ;sub a0, a0, a1  (sub x10, x10, x11)
+    67 00 0C 00     ;jr s8 (jalr x0, x24, 0)
+#:ascii_low
+    93 05 70 05     ;li a1, 0x57     (addi x11, x0, 0x57)   # 'a' -> 0xA
+    33 05 B5 40     ;sub a0, a0, a1  (sub x10, x10, x11)
+    67 00 0C 00     ;jr s8 (jalr x0, x24, 0)
+#:ascii_high
+    93 05 70 03     ;li a1, 0x37     (addi x11, x0, 0x37)   # 'A' -> 0xA
+    33 05 B5 40     ;sub a0, a0, a1  (sub x10, x10, x11)
+    67 00 0C 00     ;jr s8 (jalr x0, x24, 0)
+#:ascii_other
+    13 05 F0 FF     ;li a0, -1       (addi x10, x0, -1)     # return -1
+    67 00 0C 00     ;jr s8 (jalr x0, x24, 0)
+#:ascii_comment
+    # ADDDDDDDCBBBBBBBBBB     ABBBBBBBBBBCDDDDDDDD
+    # 00000000000000100000 -> 00000010000000000000
+    # 00000010000000000000 11001 1101111
+    EF 0C 00 02     ;jal s9, Read_byte  (jal, x25, 32)      # Jump 8 instructions forward (+32B)
+    93 05 D0 00     ;li a1, 0xd      (addi x11, x0, 0xd)
+    # ADBBBBBBCCCC         ABBBBBB CCCCD
+    # 0000000001100   ->   0000000 01100
+    # 0000000 01011 01010 000 01100 1100011
+    63 06 B5 00     ;beq a0, a1, ascii_comment_cr           # Jump 3 instructions forward (+12B)
+    93 05 A0 00     ;li a1, 0xa
+
+    # ADBBBBBBCCCC         ABBBBBB CCCCD
+    # 1111111101010   ->   1111111 10001
+    # 1111111 01011 01010 001 10001 1100011
+    E3 18 B5 FE     ;bne a0, a1, ascii_comment              # Jump 4 instructions backward (-16B)
+#:ascii_comment_cr
+    13 05 F0 FF     ;li a0, -1   (addi x10, x0, -1)         # return -1
+    67 00 0C 00     ;jr s8 (jalr x0, x24, 0)
+#:EOF
+    67 00 0C 00     ;jr s8 (jalr x0, x24, 0)
+
+#:Read_byte
+    93 08 F0 03     ;li a7, 63    (addi x17, x0, 63)        # sys_read
+    13 05 09 00     ;mv a0, s2    (addi x10, x18, 0)        # File descriptor
+    ;la a1, table   (two instructions)                      # Buffer
+            97 05 00 00         ;(auipc x11, 0)             # end of .text is 50 instructions forward
+            93 85 C5 0D         ;(addi x11, x11, 55*4)
+    13 06 10 00     ;li a2, 1    (addi x12, x0, 1)          # Size of what we want to read
+    73 00 00 00     ;ecall
+
+    # ADBBBBBBCCCC         ABBBBBB CCCCD
+    # 0000000010000   ->   0000000 10000
+    # 0000000 00000 01010 000 10000 1100011
+    63 08 05 00     ;beqz a0, Read_byte_1                   # Jump 4 instructions forward (+16B)
+    ;lbu a0, table  (two instructions)
+            17 05 00 00         ;(auipc x10, 0)             # end of .text is 45 instructions forward
+            03 45 85 0C         ;(lbu x10, x10, 50*4)
+    67 80 0C 00     ;jr s9 (jalr x0, x25, 0)
+
+#:Read_byte_1
+    13 05 C0 FF     ;li a0, -4   (addi x10, x0, -1)         # Put EOF in a0
+    67 80 0C 00     ;jr s9       (jalr x0, x25, 0)
+
+#:Get_table_target
+    EF FC 1F FD     ;jal s9, Read_byte                      # Get single char label
+    13 15 35 00     ;slli a0, a0, 3                         # Each label in table takes 8 bytes to store
+    ;la t0, table   (two instructions)
+        97 02 00 00             ;(auipc x5, 0)              # end of .text is 38 instructions forward
+        93 82 C2 0A             ;(addi x5, x5, 43*4)
+    33 05 55 00     ;add a0, a0, t0                         # Calculate offset
+    67 00 0D 00     ;jr s10 (jalr x0, x26, 0)
+
+#:StoreLabel
+    # ADDDDDDDCBBBBBBBBBB     ABBBBBBBBBBCDDDDDDDD
+    # 11111111111111101000 -> 11111110100111111111
+    # 11111110100111111111 11010 1101111
+    6F FD 9F FE     ;jal s10, Get_table_target              # Jump 6 instructions backward (-24B)
+    23 30 65 01     ;sd s6, (a0)   (sd x22, 0(x10))
+    67 80 00 00     ;ret  (jalr x0, x1, 0)
+
+#:StorePointer
+    13 0B 4B 00     ;addi s6, s6, 4                         # Increment IP
+    # ADDDDDDDCBBBBBBBBBB     ABBBBBBBBBBCDDDDDDDD
+    # 11111111111111011000 -> 11111101100111111111
+    # 11111101100111111111 11010 1101111
+    6F FD 9F FD     ;jal s10, Get_table_target              # Get address of pointer
+                                    ;(jal x26, -40)         # Jump 10 instructions backward (-40B)
+    83 32 05 00     ;ld t0, (a0)  (ld x5, 0(x10))           # Load pointer
+    13 85 02 00     ;mv a0, t0       (addi x10, x5, 0)      # Get pointer
+    33 05 65 41     ;sub a0, a0, s6  (sub x10, x10, x22)    # target - ip
+
+    ;la t0, table   (two instructions)
+        97 02 00 00             ;(auipc x5, 0)              # end of .text is 26 instructions forward
+        93 82 C2 07             ;(addi x5, x5, 31*4)
+    23 B0 A2 00     ;sd a0, (t0)  sd x10, 0(x5)             # put value in output
+    13 06 40 00     ;li a2, 4 (addi x12,x0, 4) # set the size of chars we want
+    # ADDDDDDDCBBBBBBBBBB     ABBBBBBBBBBCDDDDDDDD
+    # 00000000000000110000 -> 00000011000000000000
+    # 00000011000000000000 11011 1101111
+    EF 0D 00 03     ;jal s11, print_chars (jal, x27, 48)    # Jump 12 instructions forward (+48B)
+    67 80 00 00     ;ret  (jalr x0, x1, 0)
+
+#:print
+    # update the sum and store in output
+    93 9A 4A 00     ;slli s5, s5, 4
+    33 05 55 01     ;add a0, a0, s5
+    ;la t0, table   (two instructions)
+        97 02 00 00             ;(auipc x5, 0)             # end of .text is 18 instructions forward
+        93 82 C2 05             ;(addi x5, x5, 23*4)
+    23 80 A2 00     ;sb a0, (t0)
+
+    13 4A FA FF     ;not s4, s4   (xori, x20, x20, -1)     # Toggle = !Toggle
+
+    13 06 10 00     ;li a2, 1     (addi x12, x0, 1)        # length of the string
+
+    # ADDDDDDDCBBBBBBBBBB     ABBBBBBBBBBCDDDDDDDD
+    # 00000000000000001100 -> 00000000110000000000
+    # 00000000110000000000 11011 1101111
+    EF 0D C0 00     ;jal s11, print_chars (jal x27, 12)    # Jump 3 instructions forward (+12B)
+
+    13 0B 1B 00     ;addi s6, s6, 1  (addi, x22, x22, 1)   # Increment IP
+    # ADDDDDDDCBBBBBBBBBB     ABBBBBBBBBBCDDDDDDDD
+    # 11111111111001110100 -> 11100111010111111111
+    # 11100111010111111111 00000 1101111
+    6F F0 5F E7     ;j Second_pass (jal x0, -396)          # Jump 99 instructions backward (-396B)
+
+#:print_chars
+    93 08 00 04     ;li a7, 64    (addi x17, x0, 64)       # sys_write
+    13 85 09 00     ;mv a0, s3    (addi x10, x19, 0)       # file descriptor (stdout)
+    ;la a1, table   (two instructions)                     # string address
+            97 05 00 00          ;(auipc x11, 0)           # end of .text is 8 instructions forward
+            93 85 45 03          ;(addi x11, x11, 13*4)
+
+    73 00 00 00     ;ecall
+    67 80 0D 00     ;jr s11 (jalr x0, x27, 0)
+
+#:Done
+    # Terminate program with 0 return code
+    93 08 D0 05     ;li a7, 93     (addi x17, x0, 93)       # sys_exit
+    13 05 00 00     ;li a0,0       (addi x10, x0, 0)        # Return code 0
+    73 00 00 00     ;ecall
+#:Fail
+    # Terminate program with 1 return code
+    93 08 D0 05     ;li a7, 93     (addi x17, x0, 93)       # sys_exit
+    13 05 10 00     ;li a0, 1      (addi x10, x0, 1)        # Return code 1
+    73 00 00 00     ;ecall
+
+#:ELF_data
+# Our data in memory:
+#:table
+    # Reserve 16 bytes
+    00
+#:ELF_end

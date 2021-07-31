@@ -172,7 +172,7 @@ DEFINE STORE8_al_into_Address_ECX 8801
 
 
 ;; print_command function
-;; Recieves tokens[j] in EBX and tokens[i] in ECX
+;; Receives tokens[j] in EBX and tokens[i] in ECX
 ;; Modifies EAX
 :print_command
 	PUSH_EBX                          ; Protect EBX
@@ -194,7 +194,7 @@ DEFINE STORE8_al_into_Address_ECX 8801
 
 
 ;; collect_token function
-;; Recieves nothing
+;; Receives nothing
 ;; Overwrites EAX
 ;; Uses EAX as C, EBX as token and ECX as token[i]
 :collect_token
@@ -289,7 +289,7 @@ DEFINE STORE8_al_into_Address_ECX 8801
 
 
 ;; collect_comment function
-;; Recieves nothing
+;; Receives nothing
 ;; Modifies EAX
 ;; uses EAX as Int C
 ;; Just throws away everything it reads

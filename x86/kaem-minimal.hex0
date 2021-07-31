@@ -270,7 +270,7 @@
 # :collect_string ; (0x80481D7)
 	E8 4B000000                     # CALL32 %fgetc                     ; C = fgetc(input)
 	83F8 FC                         # CMPI8_EAX !-4                     ; if C == EOF
-	0F84 3BFFFFFF                   # JE32 %Exit_Failure                ; Something went horriably wrong
+	0F84 3BFFFFFF                   # JE32 %Exit_Failure                ; Something went horribly wrong
 
 	83F8 22                         # CMPI8_EAX !34                     ; IF C == '\"'
 	74 07                           # JE8 !collect_string_done          ; be done

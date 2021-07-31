@@ -124,7 +124,7 @@ Exit_Failure:
 
 
 ;; print_command function
-;; Recieves tokens[j] in EBX and tokens[i] in ECX
+;; Receives tokens[j] in EBX and tokens[i] in ECX
 ;; Modifies EAX
 print_command:
 	push ebx                    ; Protect EBX
@@ -146,7 +146,7 @@ print_command_loop:
 
 
 ;; collect_token function
-;; Recieves nothing
+;; Receives nothing
 ;; Overwrites EAX
 ;; Uses EAX as C, EBX as token and ECX as token[i]
 collect_token:
@@ -241,7 +241,7 @@ collect_string_done:
 
 
 ;; collect_comment function
-;; Recieves nothing
+;; Receives nothing
 ;; Modifies EAX
 ;; uses EAX as Int C
 ;; Just throws away everything it reads

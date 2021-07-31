@@ -84,7 +84,7 @@ F3 00              ## e_machine Indicating RISC-V
 
     # Open input file and store FD in s2
     93 08 80 03     ;li a7, 56    (addi x17, x0, 56)        # sys_openat
-    13 05 C0 F9     ;li a0, -100  (addi x10,D x0, -100)     # AT_FDCWD
+    13 05 C0 F9     ;li a0, -100  (addi x10, x0, -100)      # AT_FDCWD
     93 05 06 00     ;mv a1, a2    (addi x11, x12, 0)        # input file
     13 06 00 00     ;li a2, 0     (addi x12, x0, 0)         # read only
     73 00 00 00     ;ecall

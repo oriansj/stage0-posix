@@ -46,7 +46,7 @@ _start:
 
     # If we only have 2 arguments, don't use the third (it's not set)
     li t0, 2
-    ld a0, 0(sp)         # Get number of the args
+    ld a0, 0(sp)                    # Get number of the args
     blt a0, t0, terminate           # No input file provided 
     beq a0, t0, after_file_open     # No output file provided. Use stdout
 

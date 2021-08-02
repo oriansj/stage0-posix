@@ -1,0 +1,534 @@
+## Copyright (C) 2021 Andrius Štikonas
+## This file is part of stage0.
+##
+## stage0 is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## stage0 is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with stage0.  If not, see <http://www.gnu.org/licenses/>.
+
+;; Used to terminate word
+DEFINE NULL  00000000
+
+;; Opcodes
+
+;; RV32I Base Instruction Set
+DEFINE LUI   37000000
+DEFINE AUIPC 17000000
+DEFINE JAL   6F000000
+DEFINE JALR  67000000
+DEFINE BEQ   63000000
+DEFINE BNE   63100000
+DEFINE BLT   63400000
+DEFINE BGE   63500000
+DEFINE BLTU  63600000
+DEFINE BGEU  63700000
+DEFINE LB    03000000
+DEFINE LH    03100000
+DEFINE LW    03200000
+DEFINE LBU   03400000
+DEFINE LHU   03500000
+DEFINE SB    23000000
+DEFINE SH    23100000
+DEFINE SW    23200000
+DEFINE ADDI  13000000
+DEFINE SLTI  13200000
+DEFINE SLTIU 13300000
+DEFINE XORI  13400000
+DEFINE ORI   13600000
+DEFINE ANDI  13700000
+DEFINE SLLI  13100000
+DEFINE SRLI  13500000
+DEFINE SRAI  13500040
+DEFINE ADD   33000000
+DEFINE SUB   33000040
+DEFINE SLL   33100000
+DEFINE SLT   33200000
+DEFINE SLTU  33300000
+DEFINE XOR   33400000
+DEFINE SRL   33500000
+DEFINE SRA   33500040
+DEFINE OR    33600000
+DEFINE AND   33700000
+DEFINE ECALL 73000000
+
+;; RV64I Base Instruction set
+DEFINE LWU   03600000
+DEFINE LD    03300000
+DEFINE SD    23300000
+DEFINE ADDIW 1B000000
+DEFINE SLLI  13100000
+DEFINE SRLI  13500000
+DEFINE SRAI  13500040
+DEFINE ADDW  3B000000
+DEFINE SUBW  3B000040
+DEFINE SLLW  3B100000
+DEFINE SRL   3B500000
+DEFINE SRAW  3B500040
+
+;; Pseudoinstructions
+DEFINE NOP  13000000 # ADDI
+DEFINE MV   13000000 # ADDI
+DEFINE NOT  1340F0FF # XORI, RD, RS, -1
+DEFINE BEQZ 63000000 # BEQ
+DEFINE BNEZ 63100000 # BNE
+DEFINE BLTZ 63400000 # BLT
+
+;; Destination registers
+;; register_number << 7
+DEFINE RD_RA  .80000000
+DEFINE RD_SP  .00010000
+DEFINE RD_GP  .80010000
+DEFINE RD_TP  .00020000
+DEFINE RD_T0  .80020000
+DEFINE RD_T1  .00030000
+DEFINE RD_T2  .80030000
+DEFINE RD_S0  .00040000
+DEFINE RD_S1  .80040000
+DEFINE RD_A0  .00050000
+DEFINE RD_A1  .80050000
+DEFINE RD_A2  .00060000
+DEFINE RD_A3  .80060000
+DEFINE RD_A4  .00070000
+DEFINE RD_A5  .80070000
+DEFINE RD_A6  .00080000
+DEFINE RD_A7  .80080000
+DEFINE RD_S2  .00090000
+DEFINE RD_S3  .80090000
+DEFINE RD_S4  .000A0000
+DEFINE RD_S5  .800A0000
+DEFINE RD_S6  .000B0000
+DEFINE RD_S7  .800B0000
+DEFINE RD_S8  .000C0000
+DEFINE RD_S9  .800C0000
+DEFINE RD_S10 .000D0000
+DEFINE RD_S11 .800D0000
+DEFINE RD_T3  .000E0000
+DEFINE RD_T4  .800E0000
+DEFINE RD_T5  .000F0000
+DEFINE RD_T6  .800F0000
+
+;; First source registers
+;; register_number << 15
+DEFINE RS1_RA  .00800000
+DEFINE RS1_SP  .00000100
+DEFINE RS1_GP  .00800100
+DEFINE RS1_TP  .00000200
+DEFINE RS1_T0  .00800200
+DEFINE RS1_T1  .00000300
+DEFINE RS1_T2  .00800300
+DEFINE RS1_S0  .00000400
+DEFINE RS1_S1  .00800400
+DEFINE RS1_A0  .00000500
+DEFINE RS1_A1  .00800500
+DEFINE RS1_A2  .00000600
+DEFINE RS1_A3  .00800600
+DEFINE RS1_A4  .00000700
+DEFINE RS1_A5  .00800700
+DEFINE RS1_A6  .00000800
+DEFINE RS1_A7  .00800800
+DEFINE RS1_S2  .00000900
+DEFINE RS1_S3  .00800900
+DEFINE RS1_S4  .00000A00
+DEFINE RS1_S5  .00800A00
+DEFINE RS1_S6  .00000B00
+DEFINE RS1_S7  .00800B00
+DEFINE RS1_S8  .00000C00
+DEFINE RS1_S9  .00800C00
+DEFINE RS1_S10 .00000D00
+DEFINE RS1_S11 .00800D00
+DEFINE RS1_T3  .00000E00
+DEFINE RS1_T4  .00800E00
+DEFINE RS1_T5  .00000F00
+DEFINE RS1_T6  .00800F00
+
+;; Second source registers
+;; register_number << 20
+DEFINE RS2_RA  .00001000
+DEFINE RS2_SP  .00002000
+DEFINE RS2_GP  .00003000
+DEFINE RS2_TP  .00004000
+DEFINE RS2_T0  .00005000
+DEFINE RS2_T1  .00006000
+DEFINE RS2_T2  .00007000
+DEFINE RS2_S0  .00008000
+DEFINE RS2_S1  .00009000
+DEFINE RS2_A0  .0000A000
+DEFINE RS2_A1  .0000B000
+DEFINE RS2_A2  .0000C000
+DEFINE RS2_A3  .0000D000
+DEFINE RS2_A4  .0000E000
+DEFINE RS2_A5  .0000F000
+DEFINE RS2_A6  .00000001
+DEFINE RS2_A7  .00001001
+DEFINE RS2_S2  .00002001
+DEFINE RS2_S3  .00003001
+DEFINE RS2_S4  .00004001
+DEFINE RS2_S5  .00005001
+DEFINE RS2_S6  .00006001
+DEFINE RS2_S7  .00007001
+DEFINE RS2_S8  .00008001
+DEFINE RS2_S9  .00009001
+DEFINE RS2_S10 .0000A001
+DEFINE RS2_S11 .0000B001
+DEFINE RS2_T3  .0000C001
+DEFINE RS2_T4  .0000D001
+DEFINE RS2_T5  .0000E001
+DEFINE RS2_T6  .0000F001
+
+; Where the ELF Header is going to hit
+; Simply jump to _start
+; Our main function
+:_start
+
+# Register use:
+# s2: input fd
+# s3: status
+# s4: command_done
+# s6: malloc pointer
+
+    RD_A0 RS1_SP LD                   # Get number of the args
+    RD_A1 RS1_SP !8 LD                # Get program name
+    RD_A2 RS1_SP !16 LD               # Input file name
+
+    RS1_A2 @_start_out BNEZ           # Use input file if specified
+    # Else use kaem.run
+    RD_A2 ~default_file AUIPC         # load address of default_file
+    RD_A2 RS1_A2 !default_file ADDI   # into register a2
+
+:_start_out
+
+    # Open input file and store FD in s2
+    RD_A7 !56 ADDI                    # sys_openat
+    RD_A0 !-100 ADDI                  # AT_FDCWD
+    RD_A1 RS1_A2 MV                   # file name
+    RD_A2 ADDI                        # read only
+    ECALL                             # syscall
+    RS1_A0 @Fail BLTZ                 # Error opening file
+    RD_S2 RS1_A0 MV                   # Save fd in for later
+
+    # Prepare heap memory
+    RD_A7 !214 ADDI                   # sys_brk
+    RD_A0 MV                          # Get current brk
+    ECALL                             # syscall
+    RD_S6 RS1_A0 MV                   # Set our malloc pointer
+
+# Using a1 for tokens and a2 for tokens[i]
+:main_loop
+    RD_A0 !1 ADDI                     # 256 * sizeof(char*)
+    # RD_A0 RS1_A0 11 SLLI            # replace 11 with 11-th register in rs2
+    RD_A0 RS1_A0 RS2_A1 SLLI          # 2048 = 1 << 11
+    RD_RA $malloc JAL                 # allocate space
+    RD_A1 RS1_A0 MV                   # set tokens pointer
+    RD_A2 RS1_A0 MV                   # set tokens[i] pointer (i=0)
+
+    RD_S3 MV                          # status = 0
+    RD_S4 MV                          # command_done = 0
+
+:collect_command
+    RD_RA $collect_token JAL          # Get another token
+    RS1_A0 @collect_command_comment BEQZ # if NULL == result then it is a comment, don't store
+
+    RS1_A2 RS2_A0 SD                  # tokens[i] = result
+    RD_A2 RS1_A2 !8 ADDI              # i = i + 1 (sizeof(char*) = 8)
+
+:collect_command_comment
+    RS1_S4 @collect_command BEQZ      # keep looping if 0 == command_done
+
+    # Deal with line comments
+    RS1_A1 RS2_A2 @main_loop BEQ      # keep looping if comment
+
+    RD_RA $print_command JAL          # print the command
+    RD_A0 RS1_A1 LD                   # program = tokens[0]
+    RS1_A0 @Fail BEQZ                 # Error, no program
+
+    RD_SP RS1_SP !-8 ADDI             # allocate stack
+    RS1_SP RS2_A1 SD                  # protect tokens
+
+    RD_A7 !220 ADDI                   # sys_clone
+    RD_A0 !17 ADDI                    # SIGCHLD flag
+    RD_A1 MV                          # Child uses duplicate of parent's stack
+    ECALL                             # syscall
+
+    RD_A1 RS1_SP LD                   # restore tokens
+    RD_SP RS1_SP !8 ADDI              # deallocate stack
+
+    RS1_A0 @Fail BLTZ                 # if f == -1 no child was created
+    RS1_A0 @collect_command_parent BNEZ # if f == 0 it is child
+
+    # Deal with child case
+    RD_A7 !221 ADDI                   # sys_execve
+    RD_A0 RS1_A1 LD                   # program = tokens[0]
+    ECALL                             # execve(program, tokens)
+    RD_RA $Fail JAL                   # Exit with an error
+
+:collect_command_parent
+    RD_A7 !260 ADDI                   # sys_wait4
+    RD_A2 MV                          # set options = 0
+    RD_A3 MV                          # set *ruseage = NULL
+    ECALL                             # syscall
+
+    # wait4 returns wstatus pointer, from which we can extract child's exit status
+    # Check if child exited
+    RD_A1 RS1_A1 LD                   # Dereference wstatus pointer
+    RD_T0 !0x7f ADDI                  # t0 = 0x7f
+    RD_T0 RS1_A1 RS2_T0 AND           # WTERMSIG(s) ((s) & 0x7f)
+    RD_T0 RS1_T0 NOT                  # WIFEXITED(s) = ! WTERMSIG(s)
+    RS1_T0 @Fail BEQZ                 # Something went wrong, child did not exit
+
+    # Check exit status: WEXITSTATUS(s) (((s) & 0xff00) >> 8)
+    RD_T0 ~0xff00 LUI                 # 0xff00 = 0xffff - 0xff = 2^16 - 2^8
+    RD_T0 RS1_T0 !-256 ADDIW          # t0 = 0xff00
+    RD_T0 RS1_A1 RS2_T0 AND           # (s) & 0xff00
+    #RD_S3 RS1_T0 8 SRLI              # Use S0 as 8th register
+    RD_S3 RS1_T0 RS2_S0 SRLI          # Shift right by 8 to get status
+
+    RS1_S3 @main_loop BEQZ            # Loop if 0 == status
+
+    RD_A0 ~hard AUIPC                 # Get error string
+    RD_A0 RS1_A0 !hard ADDI           # Get error string
+    RD_RA $File_Print JAL             # Print it
+    $Fail JAL                         # Exit with failure
+
+
+# print_command function
+# Receives tokens[j] in a1 and tokens[i] in a2
+# Modifies a0
+:print_command
+    RD_SP RS1_SP !-24 ADDI            # allocate stack
+    RS1_SP RS2_RA SD                  # protect ra
+    RS1_SP RS2_A1 @8 SD               # protect a1
+    RS1_SP RS2_A2 @16 SD              # protect a2
+
+    RD_A0 ~prefix AUIPC               # Get prefix " +> "
+    RD_A0 RS1_A0 !prefix ADDI         # Get prefix " +> "
+    RD_RA $File_Print JAL             # print it
+
+:print_command_loop
+    RD_A0 RS1_A1 LD                   # get tokens[j]
+    RD_RA $File_Print JAL             # print it
+    RD_A1 RS1_A1 !8 ADDI              # j = j + 1
+    RD_A0 !32 ADDI                    # a0 = ' '
+    RD_RA $fputc JAL                  # print it
+    RS1_A1 RS2_A2 @print_command_loop BNE # continue if j < i, otherwise keep looping
+
+    RD_A0 !10 ADDI                    # a0 = '\n'
+    RD_RA $fputc JAL                  # print it
+
+    RD_RA RS1_SP LD                   # restore ra
+    RD_A1 RS1_SP !8 LD                # restore a1
+    RD_A2 RS1_SP !16 LD               # restore a2
+    RD_SP RS1_SP !24 ADDI             # deallocate stack
+    RS1_RA JALR                       # return
+
+
+# collect_token function
+# Receives nothing
+# Overwrites a0
+# Uses a0 as c, a1 as token and a2 as token[i]
+:collect_token
+    RD_SP RS1_SP !-24 ADDI            # allocate stack
+    RS1_SP RS2_RA SD                  # protect ra
+    RS1_SP RS2_A1 @8 SD               # protect a1
+    RS1_SP RS2_A2 @16 SD              # protect a2
+
+    RD_A0 ~4096 LUI                   # 4096 * sizeof(char)
+
+    RD_RA $malloc JAL                 # allocate space
+    RD_A1 RS1_A0 MV                   # token = malloc(max_string)
+    RD_A2 RS1_A0 MV                   # i = 0; set token[i]
+
+:collect_token_loop
+    RD_RA $fgetc JAL                  # read character
+    RD_T0 !-4 ADDI                    # if character == EOF
+    RS1_A1 RS2_T0 @Done BEQ           # We are done
+
+    RD_T0 !32 ADDI                    # if c == ' '
+    RS1_A0 RS2_T0 @collect_token_done BEQ # Space terminates token
+
+    RD_T0 !9 ADDI                     # if c == '\t'
+    RS1_A0 RS2_T0 @collect_token_done BEQ    # Tab terminates token
+
+    RD_T0 !10 ADDI                    # continue if c == '\n'
+    RS1_A0 RS2_T0 @collect_token_comment BNE # otherwise check next
+
+    # newline
+    RD_S4 !1 ADDI                     # command_done = true
+    $collect_token_done JAL           # We are done with current command
+
+:collect_token_comment
+    RD_T0 !35 ADDI                    # if c == '#'
+    RS1_A0 RS2_T0 @collect_token_escape BNE # otherwise check next
+
+    # It is a line comment
+    RD_RA $collect_comment JAL        # Read whole comment
+    RD_S4 !1 ADDI                     # command_done = true
+    RD_RA $collect_token_done JAL     # Done
+
+:collect_token_escape
+    RD_T0 !92 ADDI                # if c == '\'
+    RS1_A0 RS2_T0 @collect_token_other BNE # otherwise just store it
+
+    # Escape character
+    RD_RA $fgetc JAL                  # Read the char to drop
+    RD_RA $collect_token_done JAL     # We are done
+
+:collect_token_other
+    RS1_A2 RS2_A0 SB                  # token[i] = c
+    RD_A2 RS1_A2 !1 ADDI              # i = i + 1
+    $collect_token_loop JAL           # Read another character
+
+:collect_token_done
+    RS1_A1 RS2_A2 @collect_token_good BNE # return the token unless
+    RD_A1 MV                          # i == 0, then token = NULL
+
+:collect_token_good
+    RD_A0 RS1_A1 MV                   # Return token
+    RD_RA RS1_SP LD                   # Restore ra
+    RD_A1 RS1_SP !8 LD                # Restore a1
+    RD_A2 RS1_SP !16 LD               # Restore a2
+    RD_SP RS1_SP !24 ADDI             # Deallocate stack
+    RS1_RA JALR                       # return
+
+
+# collect_comment function
+# Receives nothing
+# Modifies a0
+# uses a0 as c
+# Just throws away everything it reads
+:collect_comment
+    RD_SP RS1_SP !-8 ADDI             # allocate stack
+    RS1_SP RS2_RA SD                  # protect ra
+
+    RD_RA $fgetc JAL                  # c = fgetc(input)
+    RD_T0 !-4 ADDI                    # if c == EOF
+    RS1_A0 RS2_T0 @Fail BEQ           # Abort
+
+    RD_T0 !10 ADDI                    # if c == '\n'
+    RS1_A0 RS2_T0 @collect_comment BNE # loop
+
+    RD_RA RS1_SP LD                   # restore ra
+    RD_SP RS1_SP !8 ADDI              # deallocate stack
+    RS1_RA JALR                       # return
+
+
+# fgetc function
+# Loads FILE* from s2
+# Returns -4 (EOF) or char in a0
+:fgetc
+    RD_SP RS1_SP !-24 ADDI            # allocate stack
+    RS1_SP RS2_A1 @8 SD               # protect a1
+    RS1_SP RS2_A2 @16 SD              # protect a2
+
+    RD_A7 !63 ADDI                    # sys_read
+    RD_A1 RS1_SP MV                   # Get stack address
+    RD_A0 RS1_S2 MV                   # read from input file
+    RD_A2 !1 ADDI                     # read 1 character
+    ECALL                             # syscall
+
+    RS1_A0 @fgetc_done  BNEZ          # Check if nothing was read
+
+:fgetc_fail
+    RD_T0 !-4 ADDI                    # Use -4 as EOF
+    RS1_A1 RS2_T0 SB                  # Put EOF in a0
+
+:fgetc_done
+    RD_A0 RS1_A1 LB                   # return char in a0
+    RD_A1 RS1_SP !8 LD                # restore a1
+    RD_A2 RS1_SP !16 LD               # restore a2
+    RD_SP RS1_SP !24 ADDI             # deallocate stack
+    RS1_RA JALR                       # return
+
+
+# Malloc isn't actually required if the program being built fits in the initial memory
+# However, it doesn't take much to add it.
+# Requires MALLOC pointer to be initialized and a0 to have the number of desired bytes
+
+:malloc
+    RD_SP RS1_SP !-8 ADDI             # allocate stack
+    RS1_SP RS2_A1 SD                  # protect a1
+
+    RD_A1 RS1_S6 MV                   # Store the current pointer
+    RD_A0 RS1_A0 RS2_S6 ADD           # Request the number of desired bytes
+    RD_A7 !214 ADDI                   # sys_brk
+    ECALL                             # syscall
+    RD_S6 RS1_A0 MV                   # Set our malloc pointer
+    RD_A0 RS1_A1 MV                   # Return the pointer
+
+    RD_A1 RS1_SP LD                   # restore a1
+    RD_SP RS1_SP !8 ADDI              # deallocate stack
+    RS1_RA JALR                       # return
+
+
+# File_Print function
+# Receives CHAR* in EAX
+# calls fputc for every non-null char
+:File_Print
+    RD_SP RS1_SP !-24 ADDI            # allocate stack
+    RS1_SP RS2_RA SD                  # protect ra
+    RS1_SP RS2_A1 @8 SD               # protect a1
+    RS1_SP RS2_A2 @16 SD              # protect a2
+    RD_A1 RS1_A0 MV                   # protect a0
+
+    RS1_A0 @File_Print_Done BEQZ      # Protect against nulls
+
+:File_Print_Loop
+    RD_A0 RS1_A1 LBU                  # Read byte
+    RS1_A0 @File_Print_Done BEQZ      # Stop at NULL
+
+    RD_RA $fputc JAL                  # print it
+    RD_A1 RS1_A1 !1 ADDI              # S = S + 1
+    $File_Print_Loop JAL              # Keep printing
+
+:File_Print_Done
+    RD_RA RS1_SP LD                   # restore ra
+    RD_A1 RS1_SP !8 LD                # restore a1
+    RD_A2 RS1_SP !16 LD               # restore a2
+    RD_SP RS1_SP !24 ADDI             # deallocate stack
+    RS1_RA JALR                       # return
+
+
+# fputc function
+# receives CHAR in a0 and load FILE* from stdout
+# writes char and returns
+:fputc
+    RD_SP RS1_SP !-24 ADDI            # allocate stack
+    RS1_SP RS2_A0 SD                  # protect a0
+    RS1_SP RS2_A1 @8 SD               # protect a1
+    RS1_SP RS2_A2 @16 SD              # protect a2
+
+    RD_A7 !64 ADDI                    # sys_write
+    RD_A0 !1 ADDI                     # write to stdout
+    RD_A1 RS1_SP MV                   # Get stack address
+    RD_A2 !1 ADDI                     # write 1 character
+    ECALL                             # syscall
+
+    RD_A0 RS1_SP LD                   # restore a0
+    RD_A1 RS1_SP !8 LD                # restore a1
+    RD_A2 RS1_SP !16 LD               # restore a2
+    RD_SP RS1_SP !24 ADDI             # deallocate stack
+    RS1_RA JALR                       # return
+
+:Done
+    # Terminate program with 0 return code
+    RD_A7 !93 ADDI                    # sys_exit
+    RD_A0 MV                          # Return code 0
+    ECALL                             # syscall
+
+:Fail
+    # Terminate program with 0 return code
+    RD_A7 !93 ADDI                    # sys_exit
+    RD_A0 !1 ADDI                     # Return code 1
+    ECALL                             # syscall
+# PROGRAM END
+
+:default_file "kaem.run"
+:prefix " +> "
+:hard "Subprocess error\nABORTING HARD\n"

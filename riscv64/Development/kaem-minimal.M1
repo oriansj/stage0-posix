@@ -194,8 +194,6 @@ DEFINE RS2_T6  .0000F001
 # s4: command_done
 # s6: malloc pointer
 
-    RD_A0 RS1_SP LD                   # Get number of the args
-    RD_A1 RS1_SP !8 LD                # Get program name
     RD_A2 RS1_SP !16 LD               # Input file name
 
     RS1_A2 @_start_out BNEZ           # Use input file if specified
@@ -523,7 +521,7 @@ DEFINE RS2_T6  .0000F001
     ECALL                             # syscall
 
 :Fail
-    # Terminate program with 0 return code
+    # Terminate program with 1 return code
     RD_A7 !93 ADDI                    # sys_exit
     RD_A0 !1 ADDI                     # Return code 1
     ECALL                             # syscall

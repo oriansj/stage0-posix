@@ -23,8 +23,6 @@
 .text
 .global _start
 _start:
-    ld a0, 0(sp)                      # Get number of the args
-    ld a1, 8(sp)                      # Get program name
     ld a2, 16(sp)                     # Input file name
 
     bnez a2, _start_out               # Use input file if specified
@@ -343,7 +341,7 @@ Done:
     ecall                             # syscall
 
 Fail:
-    # Terminate program with 0 return code
+    # Terminate program with 1 return code
     li a7, 93                         # sys_exit
     li a0, 1                          # Return code 1
     ecall

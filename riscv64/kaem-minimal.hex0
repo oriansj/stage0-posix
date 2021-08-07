@@ -68,8 +68,6 @@ F3 00              ## e_machine Indicating RISC-V
 # s4: command_done
 # s6: malloc pointer
 
-    03 35 01 00     # RD_A0 RS1_SP LD                   ; Get number of the args
-    83 35 81 00     # RD_A1 RS1_SP !8 LD                ; Get program name
     03 36 01 01     # RD_A2 RS1_SP !16 LD               ; Input file name
 
     63 16 06 00     # RS1_A2 @_start_out BNEZ           ; Use input file if specified
@@ -80,7 +78,7 @@ F3 00              ## e_machine Indicating RISC-V
     13 06 46 30     # RD_A2 RS1_A2 !default_file ADDI   ; into register a2
                     # +772B
 
-# :_start_out ; (0x0600090)
+# :_start_out ; (0x0600088)
 
     # Open input file and store FD in s2
     93 08 80 03     # RD_A7 !56 ADDI                    ; sys_openat
@@ -99,7 +97,7 @@ F3 00              ## e_machine Indicating RISC-V
     13 0B 05 00     # RD_S6 RS1_A0 MV                   ; Set our malloc pointer
 
 # Using a1 for tokens and a2 for tokens[i]
-# :main_loop ; (0x06000BC)
+# :main_loop ; (0x06000B4)
     13 05 10 00     # RD_A0 !1 ADDI                     ; 256 * sizeof(char*)
     # RD_A0 RS1_A0 11 SLLI # replace 11 with 11-th register in rs2
     13 15 B5 00     # RD_A0 RS1_A0 RS2_A1 SLLI          ; 2048 = 1 << 11
@@ -111,7 +109,7 @@ F3 00              ## e_machine Indicating RISC-V
     93 09 00 00     # RD_S3 MV                          ; status = 0
     13 0A 00 00     # RD_S4 MV                          ; command_done = 0
 
-# :collect_command ; (0x06000D8)
+# :collect_command ; (0x06000D0)
     EF 00 40 0F     # RD_RA $collect_token JAL          ; Get another token
                     # +244B
     63 06 05 00     # RS1_A0 @collect_command_comment BEQZ ; if NULL == result then it is a comment, don't store
@@ -120,7 +118,7 @@ F3 00              ## e_machine Indicating RISC-V
     23 30 A6 00     # RS1_A2 RS2_A0 SD                  ; tokens[i] = result
     13 06 86 00     # RD_A2 RS1_A2 !8 ADDI              ; i = i + 1 (sizeof(char*) = 8)
 
-# :collect_command_comment ; (0x06000E8)
+# :collect_command_comment ; (0x06000E0)
     E3 08 0A FE     # RS1_S4 @collect_command BEQZ      ; keep looping if 0 == command_done
                     # -16B
 
@@ -157,7 +155,7 @@ F3 00              ## e_machine Indicating RISC-V
     EF 00 00 25     # RD_RA $Fail JAL                   ; Exit with an error
                     # +592B
 
-# :collect_command_parent ; (0x0600134)
+# :collect_command_parent ; (0x060012C)
     93 08 40 10     # RD_A7 !260 ADDI                   ; sys_wait4
     13 06 00 00     # RD_A2 MV                          ; set options = 0
     93 06 00 00     # RD_A3 MV                          ; set *ruseage = NULL
@@ -194,7 +192,7 @@ F3 00              ## e_machine Indicating RISC-V
 # print_command function
 # Receives tokens[j] in a1 and tokens[i] in a2
 # Modifies a0
-# :print_command ; (0x060017C)
+# :print_command ; (0x0600174)
     13 01 81 FE     # RD_SP RS1_SP !-24 ADDI            ; allocate stack
     23 30 11 00     # RS1_SP RS2_RA SD                  ; protect ra
     23 34 B1 00     # RS1_SP RS2_A1 @8 SD               ; protect a1
@@ -206,7 +204,7 @@ F3 00              ## e_machine Indicating RISC-V
     EF 00 80 16     # RD_RA $File_Print JAL             ; print it
                     # +360B
 
-# :print_command_loop ; (0x0600198)
+# :print_command_loop ; (0x0600190)
     03 B5 05 00     # RD_A0 RS1_A1 LD                   ; get tokens[j]
     EF 00 00 16     # RD_RA $File_Print JAL             ; print it
                     # +352B
@@ -232,7 +230,7 @@ F3 00              ## e_machine Indicating RISC-V
 # Receives nothing
 # Overwrites a0
 # Uses a0 as c, a1 as token and a2 as token[i]
-# :collect_token ; (0x06001CC)
+# :collect_token ; (0x06001C4)
     13 01 81 FE     # RD_SP RS1_SP !-24 ADDI            ; allocate stack
     23 30 11 00     # RS1_SP RS2_RA SD                  ; protect ra
     23 34 B1 00     # RS1_SP RS2_A1 @8 SD               ; protect a1
@@ -244,7 +242,7 @@ F3 00              ## e_machine Indicating RISC-V
     93 05 05 00     # RD_A1 RS1_A0 MV                   ; token = malloc(max_string)
     13 06 05 00     # RD_A2 RS1_A0 MV                   ; i = 0; set token[i]
 
-# :collect_token_loop ; (0x06001EC)
+# :collect_token_loop ; (0x06001E4)
     EF 00 40 0A     # RD_RA $fgetc JAL                  ; read character
                     # +164B
     
@@ -269,7 +267,7 @@ F3 00              ## e_machine Indicating RISC-V
     6F 00 40 03     # $collect_token_done JAL           ; Done with current command
                     # +52B
 
-# :collect_token_comment ; (0x0600218)
+# :collect_token_comment ; (0x0600210)
     93 02 30 02     # RD_T0 !35 ADDI                    ; if c == '#'
     63 18 55 00     # RS1_A0 RS2_T0 @collect_token_escape BNE ; otherwise check next
                     # +16B
@@ -281,7 +279,7 @@ F3 00              ## e_machine Indicating RISC-V
     EF 00 00 02     # RD_RA $collect_token_done JAL     ; Done
                     # +32B
 
-# :collect_token_escape ; (0x060022C)
+# :collect_token_escape ; (0x0600224)
     93 02 C0 05     # RD_T0 !92 ADDI                    ; if c == '\'
     63 16 55 00     # RS1_A0 RS2_T0 @collect_token_other BNE ; otherwise just store it
                     # +12B
@@ -292,18 +290,18 @@ F3 00              ## e_machine Indicating RISC-V
     EF 00 00 01     # RD_RA $collect_token_done JAL     ; We are done
                     # +16B
 
-# :collect_token_other ; (0x060023C)
+# :collect_token_other ; (0x0600234)
     23 00 A6 00     # RS1_A2 RS2_A0 SB                  ; token[i] = c
     13 06 16 00     # RD_A2 RS1_A2 !1 ADDI              ; i = i + 1
     6F F0 9F FA     # $collect_token_loop JAL           ; Read another character
                     # -88B
 
-# :collect_token_done ; (0x0600248)
+# :collect_token_done ; (0x0600240)
     63 94 C5 00     # RS1_A1 RS2_A2 @collect_token_good BNE ; return the token unless
                     # +8B
     93 05 00 00     # RD_A1 MV                          ; i == 0, then token = NULL
 
-# :collect_token_good ; (0x0600250)
+# :collect_token_good ; (0x0600248)
     13 85 05 00     # RD_A0 RS1_A1 MV                   ; Return token
     83 30 01 00     # RD_RA RS1_SP LD                   ; Restore ra
     83 35 81 00     # RD_A1 RS1_SP !8 LD                ; Restore a1
@@ -317,7 +315,7 @@ F3 00              ## e_machine Indicating RISC-V
 # Modifies a0
 # uses a0 as c
 # Just throws away everything it reads
-# :collect_comment ; (0x0600268)
+# :collect_comment ; (0x0600260)
     13 01 81 FF     # RD_SP RS1_SP !-8 ADDI             ; allocate stack
     23 30 11 00     # RS1_SP RS2_RA SD                  ; protect ra
 
@@ -339,7 +337,7 @@ F3 00              ## e_machine Indicating RISC-V
 # fgetc function
 # Loads FILE* from s2
 # Returns -4 (EOF) or char in a0
-# :fgetc ; (0x0600290)
+# :fgetc ; (0x0600288)
     13 01 81 FE     # RD_SP RS1_SP !-24 ADDI            ; allocate stack
     23 34 B1 00     # RS1_SP RS2_A1 @8 SD               ; protect a1
     23 38 C1 00     # RS1_SP RS2_A2 @16 SD              ; protect a2
@@ -353,11 +351,11 @@ F3 00              ## e_machine Indicating RISC-V
     63 16 05 00     # RS1_A0 @fgetc_done BNEZ           ; Check if nothing was read
                     # +12B
 
-# :fgetc_fail ; (0x06002B4)
+# :fgetc_fail ; (0x06002AC)
     93 02 C0 FF     # RD_T0 !-4 ADDI                    ; Use -4 as EOF
     23 80 55 00     # RS1_A1 RS2_T0 SB                  ; Put EOF in a0
 
-# :fgetc_done ; (0x06002BC)
+# :fgetc_done ; (0x06002B4)
     03 85 05 00     # RD_A0 RS1_A1 LB                   ; return char in a0
     83 35 81 00     # RD_A1 RS1_SP !8 LD                ; restore a1
     03 36 01 01     # RD_A2 RS1_SP !16 LD               ; restore a2
@@ -369,7 +367,7 @@ F3 00              ## e_machine Indicating RISC-V
 # However, it doesn't take much to add it.
 # Requires MALLOC pointer to be initialized and a0 to have the number of desired bytes
 
-# :malloc ; (0x06002D0)
+# :malloc ; (0x06002C8)
     13 01 81 FF     # RD_SP RS1_SP !-8 ADDI             ; allocate stack
     23 30 B1 00     # RS1_SP RS2_A1 SD                  ; protect a1
 
@@ -387,7 +385,7 @@ F3 00              ## e_machine Indicating RISC-V
 # File_Print function
 # Receives CHAR* in EAX
 # calls fputc for every non-null char
-# :File_Print ; (0x06002FC)
+# :File_Print ; (0x06002F4)
     13 01 81 FE     # RD_SP RS1_SP !-24 ADDI            ; allocate stack
     23 30 11 00     # RS1_SP RS2_RA SD                  ; protect ra
     23 34 B1 00     # RS1_SP RS2_A1 @8 SD               ; protect a1
@@ -396,7 +394,7 @@ F3 00              ## e_machine Indicating RISC-V
 
     63 00 05 00     # RS1_A0 @File_Print_Done BEQZ      ; Protect against nulls
 
-# :File_Print_Loop ; (0x0600314)
+# :File_Print_Loop ; (0x060030C)
     03 C5 05 00     # RD_A0 RS1_A1 LBU                  ; Read byte
     63 08 05 00     # RS1_A0 @File_Print_Done BEQZ      ; Stop at NULL
                     # +16B
@@ -407,7 +405,7 @@ F3 00              ## e_machine Indicating RISC-V
     6F F0 1F FF     # $File_Print_Loop JAL              ; Keep printing
                     # -16B
 
-# :File_Print_Done ; (0x0600328)
+# :File_Print_Done ; (0x0600320)
     83 30 01 00     # RD_RA RS1_SP LD                   ; restore ra
     83 35 81 00     # RD_A1 RS1_SP !8 LD                ; restore a1
     03 36 01 01     # RD_A2 RS1_SP !16 LD               ; restore a2
@@ -417,7 +415,7 @@ F3 00              ## e_machine Indicating RISC-V
 # fputc function
 # receives CHAR in a0 and load FILE* from stdout
 # writes char and returns
-# :fputc ; (0x060033C)
+# :fputc ; (0x0600334)
     13 01 81 FE     # RD_SP RS1_SP !-24 ADDI            ; allocate stack
     23 30 A1 00     # RS1_SP RS2_A0 SD                  ; protect a0
     23 34 B1 00     # RS1_SP RS2_A1 @8 SD               ; protect a1
@@ -435,24 +433,24 @@ F3 00              ## e_machine Indicating RISC-V
     13 01 81 01     # RD_SP RS1_SP !24 ADDI             ; deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
-# :Done ; (0x0600374)
+# :Done ; (0x060036C)
     # Terminate program with 0 return code
     93 08 D0 05     # RD_A7 !93 ADDI                    ; sys_exit
     13 05 00 00     # RD_A0 MV                          ; Return code 0
     73 00 00 00     # ECALL                             ; syscall
 
-# :Fail ; (0x0600380)
-    # Terminate program with 0 return code
+# :Fail ; (0x0600378)
+    # Terminate program with 1 return code
     93 08 D0 05     # RD_A7 !93 ADDI                    ; sys_exit
     13 05 10 00     # RD_A0 !1 ADDI                     ; Return code 1
     73 00 00 00     # ECALL                             ; syscall
 # PROGRAM END
 
-# :default_file ; (0x060038C)
+# :default_file ; (0x0600384)
     6B 61 65 6D 2E 72 75 6E 00                          ; kaem.run
-# :prefix ; (0x0600395)
+# :prefix ; (0x060038D)
     20 2B 3E 20 00                                      ; " +> "
-# :hard ; (0x060039A)
+# :hard ; (0x0600392)
     53 75 62 70 72 6F 63 65 73 73 20 65 72 72 6F 72 0A  ; "Subprocess error"
     41 42 4F 52 54 49 4E 47 20 48 41 52 44 0A           ; "ABORTING HARD"
     00

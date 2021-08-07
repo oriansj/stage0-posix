@@ -71,8 +71,6 @@ F3 00              ## e_machine Indicating RISC-V
 # M1 instructions are encoded into RISC-V words rather than individual hex characters.
 # E.g. RD_A0 RS1_SP LD = 00050000 + 00000100 + 03300000 = 03350100
 
-    03 35 01 00     # RD_A0 RS1_SP LD                   ; Get number of the args
-    83 35 81 00     # RD_A1 RS1_SP !8 LD                ; Get program name
     03 36 01 01     # RD_A2 RS1_SP !16 LD               ; Input file name
 
     @_start_out 63 10 06 00   # RS1_A2 @_start_out BNEZ           ; Use input file if specified
@@ -397,7 +395,7 @@ F3 00              ## e_machine Indicating RISC-V
     73 00 00 00     # ECALL                             ; syscall
 
 :Fail
-    # Terminate program with 0 return code
+    # Terminate program with 1 return code
     93 08 D0 05     # RD_A7 !93 ADDI                    ; sys_exit
     13 05 10 00     # RD_A0 !1 ADDI                     ; Return code 1
     73 00 00 00     # ECALL                             ; syscall

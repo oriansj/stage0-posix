@@ -1,0 +1,32 @@
+#! /usr/bin/env bash
+# Copyright © 2021 Andrius Štikonas
+
+# stage0 is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# stage0 is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with stage0.  If not, see <http://www.gnu.org/licenses/>.
+
+# Can also be run by kaem or any other shell of your personal choice
+# To run in kaem simply: kaem --verbose --strict
+
+###########################################################
+# Phase 0 Build kaem and hex0 from bootstrapped binaries  #
+# This phase is run by kaem-optional-seed (kaem-micro)    #
+# hex0-seed hex0_riscv64.hex0 hex0                        #
+# hex0-seed kaem-minimal.hex0 kaem                        #
+# kaem                                                    #
+###########################################################
+
+###########################################################
+# Phase 1 Rebuild kaem-micro                              #
+###########################################################
+
+hex0 kaem-micro.hex0 kaem-micro

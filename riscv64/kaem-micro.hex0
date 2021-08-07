@@ -1,0 +1,156 @@
+## Copyright (C) 2021 Andrius Štikonas
+## This file is part of stage0.
+##
+## stage0 is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## stage0 is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with stage0.  If not, see <http://www.gnu.org/licenses/>.
+
+# This is not a real kaem but instead a small hardcoded script to build
+# and launch kaem-minimal.
+# It first uses hex0-seed to build hex0.
+# Then uses hex0 to build kaem-minimal and starts it.
+
+# It expects hex0_riscv64.hex0 and kaem-minimal.hex0 files to be in the current directory.
+# Path to hex0-seed is assumed to be ../bootstrap-seeds/POSIX/riscv64/hex0-seed
+# However it is the last thing in the binary, so updating it is trivial and
+# does not affect anything else in the file.
+
+# Register use:
+# s1: address to pointer array of program and arguments to be executed
+# s2: have_hex0
+
+## ELF Header
+#:ELF_base
+7F 45 4C 46        ## e_ident[EI_MAG0-3] ELF's magic number
+
+02                 ## e_ident[EI_CLASS] Indicating 64 bit
+01                 ## e_ident[EI_DATA] Indicating little endianness
+01                 ## e_ident[EI_VERSION] Indicating original elf
+
+03                 ## e_ident[EI_OSABI] Set at 3 for Linux
+00                 ## e_ident[EI_ABIVERSION] Ignored for Statically linked executables
+
+00 00 00 00 00 00 00 ## e_ident[EI_PAD]
+02 00              ## e_type Indicating Executable
+F3 00              ## e_machine Indicating RISC-V
+01 00 00 00        ## e_version Indicating original elf
+
+78 00 60 00 00 00 00 00 ## e_entry Address of the entry point (Number of bytes this header is + Base Address) # TODO
+40 00 00 00 00 00 00 00 ## e_phoff Address of program header table
+00 00 00 00 00 00 00 00 ## e_shoff Address of section header table
+
+00 00 00 00        ## e_flags
+40 00              ## e_ehsize Indicating our 64 Byte header
+
+38 00              ## e_phentsize size of a program header table
+01 00              ## e_phnum number of entries in program table
+
+00 00              ## e_shentsize size of a section header table
+00 00              ## e_shnum number of entries in section table
+
+00 00              ## e_shstrndx index of the section names
+
+## Program Header
+#:ELF_program_headers
+01 00 00 00             ## p_type
+07 00 00 00             ## Flags
+00 00 00 00 00 00 00 00 ## p_offset
+
+00 00 60 00 00 00 00 00 ## p_vaddr
+00 00 60 00 00 00 00 00 ## p_physaddr
+
+0E 02 00 00 00 00 00 00 ## p_filesz
+0E 02 00 00 00 00 00 00 ## p_memsz
+
+01 00 00 00 00 00 00 00 ## Required alignment
+
+#:ELF_text
+# :_start ; (0x0600078)
+
+    97 04 00 00     # RD_S1 ~argv_hex0 AUIPC            ; hex0-seed hex0_riscv64.hex0 hex0    
+    93 84 84 05     # RD_S1 RS1_S1 !argv_hex0 ADDI      # +88B
+
+    6F 00 00 01     # $clone JAL                        ; jump to clone
+                    # +16B
+
+# :kaem_minimal ; (0x0600084)
+    97 04 00 00     # RD_S1 ~argv_kaem AUIPC            ; hex0 kaem-minimal.hex0 kaem
+    93 84 C4 06     # RD_S1 RS1_S1 !argv_kaem ADDI
+                    # +108B
+
+    13 49 F9 FF     # RD_S2 RS1_S2 NOT                  ; s2 = !s2
+
+# :clone ; (0x0600090)
+    93 08 C0 0D     # RD_A7 !220 ADDI                   ; sys_clone
+    13 05 10 01     # RD_A0 !17 ADDI                    ; SIGCHLD flag
+    73 00 00 00     # ECALL                             ; syscall
+
+    63 1E 05 00     # RS1_A0 @parent BNEZ               ; if f == 0 it is child
+                    # +28B
+
+    # Deal with child case
+# :execve ; (0x06000a0)
+    03 B5 04 00     # RD_A0 RS1_S1 LD                   ; program
+
+    93 08 D0 0D     # RD_A7 !221 ADDI                   ; sys_execve
+    93 85 04 00     # RD_A1 RS1_S1 MV                   ; argv
+    73 00 00 00     # ECALL                             ; execve(program, argv)
+
+    # Terminate child program (only happens on error)
+    93 08 D0 05     # RD_A7 !93 ADDI                    ; sys_exit
+    73 00 00 00     # ECALL                             ; syscall
+
+# :parent ; (0x06000b8)
+    93 08 40 10     # RD_A7 !260 ADDI                   ; sys_wait4
+    73 00 00 00     # ECALL                             ; syscall
+    E3 02 09 FC     # RS1_S2 @kaem_minimal BEQZ         ; Now build kaem
+                    # -60B
+
+# :start_kaem ; (0x06000c4)
+    97 04 00 00     # RD_S1 ~argv_kaem_minimal AUIPC ; kaem
+    93 84 C4 03     # RD_S1 RS1_S1 !argv_kaem_minimal ADDI
+                    # +60B
+    6F F0 5F FD     # $execve JAL                       ; execve into kaem-minimal
+                    # -44B
+
+# PROGRAM END
+
+# :argv_hex0 ; (0x06000d0)
+    3E 01 60 00 00 00 00 00    # &hex0_seed
+    10 01 60 00 00 00 00 00    # &hex0_source ; (0x06000d8)
+    22 01 60 00 00 00 00 00    # &hex0_out    ; (0x06000e0)
+    00 00 00 00 00 00 00 00
+
+# :argv_kaem ; (0x06000f0)
+    22 01 60 00 00 00 00 00    # &hex0_out
+    27 01 60 00 00 00 00 00    # &kaem_source  ; (0x06000f8)
+# :argv_kaem_minimal ; (0x0600100)
+    39 01 60 00 00 00 00 00    # &kaem_out
+    00 00 00 00 00 00 00 00
+
+# :hex0_source ; (0x0600110)
+    68 65 78 30 5F 72 69 73 63 76 36 34 2E 68 65 78 30 00 ; hex0_riscv64.hex0
+
+# :hex0_out ; (0x0600122)
+    68 65 78 30 00                                        ; hex0
+
+# :kaem_source ; (0x0600127)
+    6B 61 65 6D 2D 6D 69 6E 69 6D 61 6C 2E 68 65 78 30 00 ; kaem-minimal.hex0
+
+# :kaem_out ; (0x0600139)
+    6B 61 65 6D 00                                        ; kaem
+
+# Put this one last to make updating hardcoded path trivial
+# :hex0_seed ; (0x060013e)
+    2E 2E 2F 62 6F 6F 74 73 74 72 61 70 2D 73 65 65 64 73
+    2F 50 4F 53 49 58 2F 72 69 73 63 76 36 34 2F 68 65 78
+    30 2D 73 65 65 64 00                                  ; ../bootstrap-seeds/POSIX/riscv64/hex0-seed

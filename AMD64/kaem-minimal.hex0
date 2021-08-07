@@ -65,7 +65,7 @@
 	01 00 00 00 00 00 00 00 ## Required alignment
 
 # :ELF_text
-# :_start ; (0600078)
+# :_start ; (0x0600078)
 	58                              # POP_RAX                             ; Get the number of arguments
 	5F                              # POP_RDI                             ; Get the program name
 	5F                              # POP_RDI                             ; Get the actual input name

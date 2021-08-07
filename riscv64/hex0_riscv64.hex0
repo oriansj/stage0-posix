@@ -1,0 +1,247 @@
+## Copyright (C) 2021 Ekaitz Zarraga
+## This file is part of stage0.
+##
+## stage0 is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## stage0 is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with stage0.  If not, see <http://www.gnu.org/licenses/>.
+
+
+## ELF Header
+#:ELF_base
+7F 45 4C 46        ## e_ident[EI_MAG0-3] ELF's magic number
+
+02                 ## e_ident[EI_CLASS] Indicating 64 bit
+01                 ## e_ident[EI_DATA] Indicating little endianness
+01                 ## e_ident[EI_VERSION] Indicating original elf
+
+03                 ## e_ident[EI_OSABI] Set at 3 for Linux
+00                 ## e_ident[EI_ABIVERSION] Ignored for Statically linked executables
+
+00 00 00 00 00 00 00 ## e_ident[EI_PAD]
+02 00              ## e_type Indicating Executable
+F3 00              ## e_machine Indicating RISC-V
+01 00 00 00        ## e_version Indicating original elf
+
+78 00 60 00 00 00 00 00 ## e_entry Address of the entry point (Number of bytes this header is + Base Address) # TODO
+40 00 00 00 00 00 00 00 ## e_phoff Address of program header table
+00 00 00 00 00 00 00 00 ## e_shoff Address of section header table
+
+00 00 00 00        ## e_flags
+40 00              ## e_ehsize Indicating our 64 Byte header
+
+38 00              ## e_phentsize size of a program header table
+01 00              ## e_phnum number of entries in program table
+
+00 00              ## e_shentsize size of a section header table
+00 00              ## e_shnum number of entries in section table
+
+00 00              ## e_shstrndx index of the section names
+
+## Program Header
+#:ELF_program_headers
+01 00 00 00             ## p_type
+07 00 00 00             ## Flags
+00 00 00 00 00 00 00 00 ## p_offset
+
+00 00 60 00 00 00 00 00 ## p_vaddr
+00 00 60 00 00 00 00 00 ## p_physaddr
+
+0E 02 00 00 00 00 00 00 ## p_filesz
+0E 02 00 00 00 00 00 00 ## p_memsz
+
+01 00 00 00 00 00 00 00 ## Required alignment
+
+#:ELF_text
+#:_start
+
+    # Register use:
+    # s2: input fd
+    # s3: output fd
+    # s4: toggle
+    # s5: hold
+
+    03 35 01 00    ;ld a0,0(sp)    # Get number of the args
+    83 35 81 00    ;ld a1,8(sp)    # Get program name
+    03 36 01 01    ;ld a2,16(sp)   # Input file name
+
+
+    13 0A 00 00    ;li s4,0     (addi s4,zero,0)    # Toggle
+    93 0A 00 00    ;li s5,0     (addi s5,zero,0)    # Hold
+
+    # Open input file and store FD in s2
+    93 08 80 03    ;li a7,56    (addi a7,zero,56)   # sys_openat
+    13 05 C0 F9    ;li a0,-100  (addi a0,zero,-100) # AT_FDCWD
+    93 05 06 00    ;mv a1,a2    (addi a1,a2,0)      # input file
+    13 06 00 00    ;li a2,0     (addi a2,zero,0)    # read only
+    73 00 00 00    ;ecall
+    13 09 05 00    ;mv s2,a0    (addi s2,a0,0)      # Save fd in for later
+
+    # Set default FD for output file to stdout
+    93 09 10 00    ;li s3,1     (addi s3,zero,1)
+
+    # If we only have 2 arguments, don't use the third (it's not set)
+    93 02 20 00    ;li t0,2     (addi t0,zero,2)
+    03 35 01 00    ;ld a0,0(sp)                   # Get number of the args
+    63 44 55 12    ;blt a0,t0,terminate           # No input file provided -> Terminate
+                                                  # Jump 74 instruction forward (+296B)
+
+    63 00 55 02    ;beq a0,t0,after_file_open     # No output file provided. Use stdout
+                                                   # Jump 8 instructions forward (+32B)
+
+
+#:open_output_file
+    # Open output file and store the FD in s3
+    93 08 80 03    ;li a7,56         (addi a7,zero,0)        # sys_openat
+    13 05 C0 F9    ;li a0,-100       (addi a0,zero,-100)     # AT_FDCWD
+    83 35 81 01    ;ld a1,24(sp)                             # Output file (argument 3)
+    13 06 10 24    ;li a2, 00001101  (addi a2,zero,00001101) # Mode of the file opening
+               # O_TRUNC   00001000
+               # O_CREAT   00000100
+               # O_WRONLY  00000001
+
+    93 06 00 1C    ;li a3, 00700     (addi a3,zero,00700)    # Set read, write, execute permission on user
+                 # S_IRWXU  00700
+
+    73 00 00 00    ;ecall
+    93 09 05 00    ;mv s3, a0   (addi s3,a0,0)      # Save fd in for later
+
+#:after_file_open
+#:next_byte
+    93 08 F0 03    ;li a7,63    (addi a7,zero,63)   # sys_read
+    13 05 09 00    ;mv a0,s2    (addi a0,s2,0)      # File descriptor
+    ;la a1, buffer   (two instructions)             # Buffer
+        97 05 00 00            ;(auipc a1 0)
+        93 85 85 10            ;(addi a1,a1,66*4)
+    13 06 10 00    ;li a2, 1    (addi a2,zero,1)    # Size of what we want to read
+    73 00 00 00    ;ecall
+
+    # If the file ended (0 bytes read) terminate
+    63 06 05 0E    ;beqz a0,terminate (beq a0,zero,terminate) # Jump 59 instructions forward (+239B)
+
+    # Check if it's a comment
+    ;lb a0, buffer  (two instructions)
+        17 05 00 00 ;auipc a0,0
+        03 05 45 0F ;lb a0, 61*4(a0)
+    93 05 30 02    ;li a1, 0x23    (addi a1,zero,0x23)
+    63 08 B5 00    ;beq a0,a1,loop                         # a0 eq to '#'
+    93 05 B0 03    ;li a1, 0x3B    (addi a1,zero,0x3B)
+    63 04 B5 00    ;beq a0,a1,loop                         # a0 eq to ';'
+    6F 00 C0 03    ;j not_comment  (jal zero,60)  # Jump 15 instructions forward (+60B)
+#:loop
+        93 08 F0 03    ;li a7,63   (addi a7,zero,63)       # sys_read
+        13 05 09 00    ;mv a0,s2   (addi a0,s2,0)          # File descriptor
+        ;la a1, buffer   (two instructions)                # Buffer
+            97 05 00 00           ;(auipc a1 0)
+            93 85 05 0D           ;(addi a1,a1,52*4)
+        13 06 10 00    ;li a2,1    (addi a2,zero,1)        # Size of what we want to read
+        73 00 00 00    ;ecall
+
+        # If the file ended (0 bytes read) terminate
+        63 0A 05 0A    ;beqz a0,terminate (beq a0,zero,180) # Jump 45 instructions forward (+180B)
+
+        # Check if read byte is the end of the comment,
+        # in the case it is continue processing
+        ;lb a0, buffer  (two instructions)
+            17 05 00 00 ;auipc a0,0
+            03 05 C5 0B ;lb a0, 47*4(a0)
+        93 02 A0 00    ;li t0,0xA (addi t0,zero,0xA)
+        E3 00 55 FA    ;beq a0,t0,next_byte      # a0 eq to \n
+                                                 # Jump 24 instructions backwards (-96B)
+
+        93 02 D0 00    ;li t0,0xD (addi t0,zero,0xD)
+        E3 0C 55 F8    ;beq a0,t0,next_byte      # a0 eq to \r
+                                                 # Jump 26 instructions backwards (-104B)
+
+    6F F0 DF FC        ;j loop  (jal zero,-52)  # Jump 13 instructions back (-52B)
+#:not_comment
+
+    # Check if it's a hex character:
+    # in the case it's not, ignores and reads next byte
+    ;lb a0,buffer  (two instructions)
+        17 05 00 00 ;auipc a0,0
+        03 05 05 0A ;lb a0, 40*4(a0)
+
+    # Is it between '0' and '9'?
+    93 02 00 03    ;li t0,48            (addi t0,zero,48)     # '0' character
+    63 4A 55 00    ;blt a0, t0, 1f
+    93 02 90 03    ;li t0,57            (addi t0,zero,57)     # '9' character
+    63 C6 A2 00    ;bgt a0,t0,1f        (blt t0,a0,1f)
+    13 05 05 FD    ;addi a0,a0,-48
+    6F 00 00 03    ;j hex_read          (jal zero,48)         # Jump 12 instructions forward (+48B)
+#:1
+    # Is it between 'A' and 'F'?
+    93 02 10 04    ;li t0,65            (addi t0,zero,65)     # 'A' character
+    63 4A 55 00    ;blt a0, t0, 1f
+    93 02 60 04    ;li t0,70            (addi t0,zero,70)     # 'F' character
+    63 C6 A2 00    ;bgt a0,t0,1f        (blt t0,a0,1f)
+    13 05 95 FC    ;addi a0,a0,-55
+    6F 00 80 01    ;j hex_read          (jal zero,24)         # Jump 6 instructions forward (+24B)
+#:1
+    # Is it between 'a' and 'f'?
+    93 02 10 06    ;li t0,97            (addi t0,zero,97)     # 'a' character
+    E3 4A 55 F4    ;blt a0,t0,next_byte                       # Not hex, continue reading
+                                                              # Jump 43 instructions backwards (-172B)
+    93 02 60 06    ;li t0,102           (addi t0,zero,102)    # 'f' character
+    E3 C6 A2 F4    ;bgt a0,t0,next_byte (blt t0,a0,-180)      # Not hex, continue reading
+                                                              # Jump 45 instructions backwards (-180B)
+    13 05 95 FA    ;addi a0,a0,-87
+
+#:hex_read
+    # END check hex -- leaves the half byte in a0
+
+    63 18 0A 00    ;bnez s4,combine (bne s4,zero,combine)    # if toggle != 0 -> combine
+                    # combine is 4 instructions forward (+16B)
+    # Toggle == 0, we need to prepare for later
+    93 0A 05 00    ;mv s5, a0       (addi s5,a0,0)           # Load hold
+    13 0A 10 00    ;li s4, 1        (addi s4,zero,1)         # Set toggle
+    6F F0 9F F3    ;j next_byte     (jal zero,-200)          # Read next byte
+    # Jump 50 instructions backwards (-200B)
+
+#:combine
+    # Combine half bytes
+    93 95 4A 00    ;slli a1,s5,4     # Shift logical left 4 times (a1 = s5 * 16)
+    33 05 B5 00    ;add a0,a0,a1     # Combine two half bytes
+    # Leaves the full byte in a0
+
+    # Values are combined, now we write in the file
+    ;la t0,buffer (two instructions)                  # Load buffer address to t0
+        97 02 00 00             ;(auipc t0 0)
+        93 82 C2 03             ;(addi t0,t0,15*4)
+    23 80 A2 00    ;sb a0,0(t0)                       # Store prepared byte in buffer
+    93 08 00 04    ;li a7,64     (addi a7,zero,64)    # sys_write
+    13 85 09 00    ;mv a0,s3     (addi a0,s3,0)       # file descriptor (stdout)
+    ;la a1,buffer   (two instructions)                # String address (buffer)
+        97 05 00 00             ;(auipc a1 0)
+        93 85 85 02             ;(addi a1,a1,10*4)
+    13 06 10 00    ;li a2,1      (addi a2,zero,1)     # Length of the string
+    73 00 00 00    ;ecall
+
+    # Update globals
+    13 0A 00 00    ;li s4,0      (addi s4,zero,0)     # Clear toggle
+    93 0A 00 00    ;li s5,0      (addi s5,zero,0)     # Clear hold
+
+    6F F0 1F F0     ;j next_byte  (jal zero,-256) # Read next byte
+    # Jump 64 instructions backwards (-256B)
+
+#:terminate
+    # Terminate program with 0 return code
+    93 08 D0 05    ;li a7,93     (addi a7,zero,93)    # sys_exit
+    13 05 00 00    ;li a0,0      (addi a0,zero, 0)    # Return code 0
+    73 00 00 00    ;ecall
+
+
+#:ELF_data
+# Our data in memory:
+#:buffer
+    # Reserve a byte
+    00
+#:ELF_end

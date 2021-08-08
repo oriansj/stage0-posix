@@ -24,8 +24,6 @@
 .text
 .global _start
 _start:
-    ld a0, 0(sp)         # Get number of the args
-    ld a1, 8(sp)         # Get program name
     ld a2, 16(sp)        # Input file name
 
     # Initialize globals

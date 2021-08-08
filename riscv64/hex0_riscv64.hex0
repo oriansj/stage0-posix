@@ -69,8 +69,6 @@ F3 00              ## e_machine Indicating RISC-V
     # s4: toggle
     # s5: hold
 
-    03 35 01 00    ;ld a0,0(sp)    # Get number of the args
-    83 35 81 00    ;ld a1,8(sp)    # Get program name
     03 36 01 01    ;ld a2,16(sp)   # Input file name
 
 

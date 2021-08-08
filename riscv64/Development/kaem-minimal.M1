@@ -14,7 +14,6 @@
 ## You should have received a copy of the GNU General Public License
 ## along with stage0.  If not, see <http://www.gnu.org/licenses/>.
 
-;; Used to terminate word
 DEFINE NULL  00000000
 
 ;; Opcodes

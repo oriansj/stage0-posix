@@ -1,18 +1,18 @@
 ## Copyright (C) 2021 Andrius Štikonas
-## This file is part of stage0.
+## This file is part of M2-Planet.
 ##
-## stage0 is free software: you can redistribute it and/or modify
+## M2-Planet is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
 ## the Free Software Foundation, either version 3 of the License, or
 ## (at your option) any later version.
 ##
-## stage0 is distributed in the hope that it will be useful,
+## M2-Planet is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with stage0.  If not, see <http://www.gnu.org/licenses/>.
+## along with M2-Planet.  If not, see <http://www.gnu.org/licenses/>.
 
 DEFINE NULL  00000000
 DEFINE NULL64 0000000000000000
@@ -182,83 +182,3 @@ DEFINE RS2_T3  .0000C001
 DEFINE RS2_T4  .0000D001
 DEFINE RS2_T5  .0000E001
 DEFINE RS2_T6  .0000F001
-
-; Where the ELF Header is going to hit
-; Simply jump to _start
-; Our main function
-:_start
-
-# This is not a real kaem but instead a small hardcoded script to build
-# and launch kaem-minimal.
-# It first uses hex0-seed to build hex0.
-# Then uses hex0 to build kaem-minimal and starts it.
-
-# It expects hex0_riscv64.hex0 and kaem-minimal.hex0 files to be in the current directory.
-# Path to hex0-seed is assumed to be ../bootstrap-seeds/POSIX/riscv64/hex0-seed
-# However it is the last thing in the binary, so updating it is trivial and
-# does not affect anything else in the file.
-
-# Register use:
-# s1: address to pointer array of program and arguments to be executed
-# s2: have_hex0
-
-    RD_S1 ~argv_hex0 AUIPC            # hex0-seed hex0_riscv64.hex0 hex0
-    RD_S1 RS1_S1 !argv_hex0 ADDI
-    $clone JAL                        # jump to clone
-
-:kaem_minimal
-    RD_S1 ~argv_kaem AUIPC            # hex0 kaem-minimal.hex0 kaem
-    RD_S1 RS1_S1 !argv_kaem ADDI
-
-    RD_S2 RS1_S2 NOT                  # s2 = !s2
-
-:clone
-    RD_A7 !220 ADDI                   # sys_clone
-    RD_A0 !17 ADDI                    # SIGCHLD flag
-    ECALL                             # syscall
-
-    RS1_A0 @parent BNEZ               # if f == 0 it is child
-
-    # Deal with child case
-:execve
-    RD_A0 RS1_S1 LD                   # program
-
-    RD_A7 !221 ADDI                   # sys_execve
-    RD_A1 RS1_S1 MV                   # argv
-    ECALL                             # execve(program, argv)
-
-    # Terminate child program (only happens on error)
-    RD_A7 !93 ADDI                    # sys_exit
-    ECALL                             # exit(1)
-
-:parent
-    RD_A7 !260 ADDI                   # sys_wait4
-    ECALL                             # syscall
-    RS1_S2 @kaem_minimal BEQZ         # Now build kaem
-
-:start_kaem
-    RD_S1 ~argv_kaem_minimal AUIPC    # kaem
-    RD_S1 RS1_S1 !argv_kaem_minimal ADDI
-    $execve JAL                       # execve into kaem-minimal
-
-# PROGRAM END
-
-:argv_hex0
-    &hex0_seed %0
-    &hex0_source %0
-    &hex0_out %0
-    NULL64
-
-:argv_hex0
-    &hex0_out %0
-    &kaem_source %0
-:argv_kaem_minimal
-    &kaem_out %0
-    NULL64
-
-:hex0_source "hex0_riscv64.hex0"
-:hex0_out "hex0"
-:kaem_source "kaem-minimal.hex0"
-:kaem_out "kaem"
-# Put this one last to make updating hardcoded path trivial
-:hex0_seed "../bootstrap-seeds/POSIX/riscv64/hex0-seed"

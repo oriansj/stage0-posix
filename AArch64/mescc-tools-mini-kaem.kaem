@@ -132,7 +132,10 @@
 	-f ../M2libc/aarch64/Linux/fcntl.h \
 	-f ../M2libc/stdio.c \
 	-f ../M2libc/bootstrappable.c \
+	-f ../mescc-tools/hex2.h \
 	-f ../mescc-tools/hex2_linker.c \
+	-f ../mescc-tools/hex2_word.c \
+	-f ../mescc-tools/hex2.c \
 	--debug \
 	-o hex2_linker.M1
 
@@ -197,7 +200,10 @@
 	-f ../M2libc/aarch64/Linux/fcntl.h \
 	-f ../M2libc/stdio.c \
 	-f ../M2libc/bootstrappable.c \
+	-f ../mescc-tools/hex2.h \
 	-f ../mescc-tools/hex2_linker.c \
+	-f ../mescc-tools/hex2_word.c \
+	-f ../mescc-tools/hex2.c \
 	--debug \
 	-o hex2_linker.M1
 

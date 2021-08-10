@@ -215,8 +215,8 @@ collect_token_good:
 
 # collect_comment function
 # Receives nothing
-# Modifies EAX
-# uses EAX as Int C
+# Modifies a0
+# uses a0 as Int C
 # Just throws away everything it reads
 collect_comment:
     addi sp, sp, -8                   # allocate stack
@@ -285,7 +285,7 @@ malloc:
     ret                               # return
 
 # File_Print function
-# Receives CHAR* in EAX
+# Receives CHAR* in a0
 # calls fputc for every non-null char
 File_Print:
     addi sp, sp, -24                  # allocate stack
@@ -338,13 +338,13 @@ Done:
     # Terminate program with 0 return code
     li a7, 93                         # sys_exit
     mv a0, zero                       # Return code 0
-    ecall                             # syscall
+    ecall                             # exit(0)
 
 Fail:
     # Terminate program with 1 return code
     li a7, 93                         # sys_exit
     li a0, 1                          # Return code 1
-    ecall
+    ecall                             # exit(1)
 # PROGRAM END
 
 .data

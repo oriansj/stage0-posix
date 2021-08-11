@@ -249,7 +249,7 @@ DEFINE RS2_T6  .0000F001
     &hex0_out %0
     NULL64
 
-:argv_hex0
+:argv_kaem
     &hex0_out %0
     &kaem_source %0
 :argv_kaem_minimal

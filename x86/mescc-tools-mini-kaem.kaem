@@ -30,7 +30,7 @@
 # Phase-1 Build hex1 from hex0  #
 #################################
 ./hex0 hex1_x86.hex0 hex1
-# hex1 adds support for single character labels and is available in various froms
+# hex1 adds support for single character labels and is available in various forms
 # in mescc-tools/x86_bootstrap to allow you various ways to verify correctness
 
 #################################

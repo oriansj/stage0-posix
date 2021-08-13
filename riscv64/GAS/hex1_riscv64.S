@@ -39,7 +39,8 @@ _start:
     li a0, -100                  # AT_FDCWD
     mv a1, a2                    # input file
     li a2, 0                     # read only
-    ecall
+    ecall                        # syscall
+    bltz a0, Fail                # Error opening file
     mv s2, a0                    # Save fd in for later
 
     # Set default FD for output file to stdout
@@ -102,7 +103,7 @@ First_pass_loop:
     # Check for :
     li t1, 0x3a
     bne a0, t1, First_pass_0
-    jal StoreLabel
+    jal StoreLabel               # Store this label
 
 First_pass_0:
     # Check for !
@@ -137,7 +138,7 @@ Throwaway_token:
 First_pass_done:
     ld ra, 0(sp)                 # restore ra
     addi sp, sp, 8               # deallocate stack
-    ret
+    ret                          # return
 
 Second_pass:
     addi sp, sp, -8              # Allocate stack
@@ -206,26 +207,26 @@ UpdateShiftRegister:
     li t1, 0x7e
     beq a1, t1, UpdateShiftRegister_U
 
-    jal Second_pass_loop         # Continue looping
+    j Second_pass_loop           # Continue looping
 
 UpdateShiftRegister_I:
     # Corresponds to RISC-V I format
     addi a0, a0, 4               # add 4 due to this being 2nd part of AUIPC combo
 
     li t1, 0xfff
-    and t0, a0, t1               # (value & 0xfff)
-    slli s7, t0, 20              # tempword = (value & 0xfff) << 20
+    and t1, a0, t1               # (value & 0xfff)
+    slli s7, t1, 20              # tempword = (value & 0xfff) << 20
     xor s8, s8, s7               # shiftregister = shiftregister ^ tempword
 
-    jal Second_pass_loop
+    j Second_pass_loop           # Continue looping
 
 UpdateShiftRegister_B:
     # Corresponds to RISC-V B format
 
-# tempword = ((value & 0x1e) << 7)            ; imm[4:1]
-#          | ((value & 0x7e0) << (31 - 11))   ; imm[10:5]
-#          | ((value & 0x800) >> 4)           ; imm[11]
-#          | ((value & 0x1000) << (31 - 12))  ; imm[12]
+    # tempword = ((value & 0x1e) << 7)            ; imm[4:1]
+    #          | ((value & 0x7e0) << (31 - 11))   ; imm[10:5]
+    #          | ((value & 0x800) >> 4)           ; imm[11]
+    #          | ((value & 0x1000) << (31 - 12))  ; imm[12]
 
     li t1, 0x1e
     and t1, a0, t1               # value & 0x1e
@@ -238,7 +239,7 @@ UpdateShiftRegister_B:
 
     li t1, 0x800
     and t1, a0, t1               # value & 0x800
-    srli t1, t1, 4               # (value & 0x800) << 4
+    srli t1, t1, 4               # (value & 0x800) >> 4
     or t0, t0, t1                # logical or with the previous expression
 
     li t1, 0x1000
@@ -248,15 +249,15 @@ UpdateShiftRegister_B:
 
     xor s8, s8, s7               # shiftregister = shiftregister ^ tempword
 
-    jal Second_pass_loop
+    j Second_pass_loop           # Continue looping
 
 UpdateShiftRegister_J:
     # Corresponds to RISC-V J format
 
-# tempword = ((value & 0x7fe) << (30 - 10))    ; imm[10:1]
-#          | ((value & 0x800) << (20 - 11))    ; imm[11]
-#          | ((value & 0xff000))               ; imm[19:12]
-#          | ((value & 0x100000) << (31 - 20)) ; imm[20]
+    # tempword = ((value & 0x7fe) << (30 - 10))    ; imm[10:1]
+    #          | ((value & 0x800) << (20 - 11))    ; imm[11]
+    #          | ((value & 0xff000))               ; imm[19:12]
+    #          | ((value & 0x100000) << (31 - 20)) ; imm[20]
 
     li t1, 0x7fe
     and t1, a0, t1               # value & 0x7fe
@@ -278,7 +279,7 @@ UpdateShiftRegister_J:
 
     xor s8, s8, s7               # shiftregister = shiftregister ^ tempword
 
-    jal Second_pass_loop         # Continue looping
+    j Second_pass_loop           # Continue looping
 
 UpdateShiftRegister_U:
     # Corresponds to RISC-V U format
@@ -298,12 +299,12 @@ UpdateShiftRegister_U:
 UpdateShiftRegister_U_small:
     xor s8, s8, s7               # shiftregister = shiftregister ^ tempword
 
-    jal Second_pass_loop         # Continue looping
+    j Second_pass_loop           # Continue looping
 
 Second_pass_done:
     ld ra, 0(sp)                 # restore ra
     addi sp, sp, 8               # Deallocate stack
-    ret
+    ret                          # return
 
 
 # DoByte function
@@ -324,7 +325,7 @@ DoByte:
     # toggle = true
     bnez a1, DoByte_1            # check if we have to write
 
-    # write=true
+    # write = true
     # We calculate (hold * 16) + hex(c) ^ sr_nextb()
     # First, calculate new shiftregister
     li t0, 0xff
@@ -415,7 +416,7 @@ ascii_high:
     sub a6, a0, t1
     j hex_return                 # return
 ascii_other:
-    li a6, -1
+    li a6, -1                    # Return -1
     j hex_return                 # return
 ascii_comment:                   # Read the comment until newline
     jal Read_byte
@@ -443,7 +444,7 @@ Read_byte:
     ecall                        # syscall
 
     beqz a0, Read_byte_1         # Deal with EOF
-    lbu a0, table                # Dereference pointer
+    lbu a0, (a1)                 # Dereference pointer
 
     j Read_byte_done             # return
 
@@ -493,7 +494,7 @@ fputc:
 
     li a7, 64                    # sys_write
     mv a0, s3                    # file descriptor (stdout)
-    la a1, table                 # string address
+    mv a1, t0                    # string address
     li a2, 1                     # length of the string
     ecall                        # syscall
 

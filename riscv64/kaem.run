@@ -25,14 +25,14 @@
 # kaem                                                    #
 ###########################################################
 
-##############################
-# Phase-1 Rebuild kaem-micro #
-##############################
+###############################
+# Phase-0b Rebuild kaem-micro #
+###############################
 ./hex0 kaem-micro.hex0 kaem-micro
 # Not used but build for checksum validation
 
 ################################
-# Phase-2 Build hex1 from hex0 #
+# Phase-1 Build hex1 from hex0 #
 ################################
 ./hex0 hex1_riscv64.hex0 hex1
 # hex1 adds support for single character labels

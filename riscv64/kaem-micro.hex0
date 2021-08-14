@@ -68,8 +68,8 @@ F3 00              ## e_machine Indicating RISC-V
 00 00 60 00 00 00 00 00 ## p_vaddr
 00 00 60 00 00 00 00 00 ## p_physaddr
 
-0E 02 00 00 00 00 00 00 ## p_filesz
-0E 02 00 00 00 00 00 00 ## p_memsz
+69 01 00 00 00 00 00 00 ## p_filesz
+69 01 00 00 00 00 00 00 ## p_memsz
 
 01 00 00 00 00 00 00 00 ## Required alignment
 

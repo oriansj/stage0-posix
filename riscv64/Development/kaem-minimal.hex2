@@ -30,7 +30,7 @@
 F3 00              ## e_machine Indicating RISC-V
 01 00 00 00        ## e_version Indicating original elf
 
-78 00 60 00 00 00 00 00 ## e_entry Address of the entry point (Number of bytes this header is + Base Address) # TODO
+78 00 60 00 00 00 00 00 ## e_entry Address of the entry point (Number of bytes this header is + Base Address)
 40 00 00 00 00 00 00 00 ## e_phoff Address of program header table
 00 00 00 00 00 00 00 00 ## e_shoff Address of section header table
 
@@ -54,8 +54,8 @@ F3 00              ## e_machine Indicating RISC-V
 00 00 60 00 00 00 00 00 ## p_vaddr
 00 00 60 00 00 00 00 00 ## p_physaddr
 
-0E 02 00 00 00 00 00 00 ## p_filesz
-0E 02 00 00 00 00 00 00 ## p_memsz
+B2 03 00 00 00 00 00 00 ## p_filesz
+B2 03 00 00 00 00 00 00 ## p_memsz
 
 01 00 00 00 00 00 00 00 ## Required alignment
 

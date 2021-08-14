@@ -18,16 +18,21 @@
 # To run in kaem simply: kaem --verbose --strict
 
 ###########################################################
-# Phase 0 Build kaem and hex0 from bootstrapped binaries  #
+# Phase-0 Build kaem and hex0 from bootstrapped binaries  #
 # This phase is run by kaem-optional-seed (kaem-micro)    #
 # hex0-seed hex0_riscv64.hex0 hex0                        #
 # hex0      kaem-minimal.hex0 kaem                        #
 # kaem                                                    #
 ###########################################################
 
-###########################################################
-# Phase 1 Rebuild kaem-micro                              #
-###########################################################
-
+##############################
+# Phase-1 Rebuild kaem-micro #
+##############################
+./hex0 kaem-micro.hex0 kaem-micro
 # Not used but build for checksum validation
-hex0 kaem-micro.hex0 kaem-micro
+
+################################
+# Phase-2 Build hex1 from hex0 #
+################################
+./hex0 hex1_riscv64.hex0 hex1
+# hex1 adds support for single character labels

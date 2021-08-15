@@ -43,7 +43,7 @@
 03 00                          # e_machine Indicating x86
 01 00 00 00                    # e_version Indicating original elf
 
-&ELF_text                      # e_entry Address of the entry point
+&_start                        # e_entry Address of the entry point
 %ELF_program_headers>ELF_base  # e_phoff Address of program header table
 00 00 00 00                    # e_shoff Address of section header table
 

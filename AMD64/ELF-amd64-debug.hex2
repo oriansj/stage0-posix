@@ -43,7 +43,7 @@
 3E 00                                     # e_machine Indicating AMD64
 01 00 00 00                               # e_version Indicating original elf
 
-&ELF_text 00 00 00 00                     # e_entry Address of the entry point
+&_start 00 00 00 00                       # e_entry Address of the entry point
 %ELF_program_headers>ELF_base 00 00 00 00 # e_phoff Address of program header table
 %ELF_section_headers>ELF_base 00 00 00 00 # e_shoff Address of section header table
 

@@ -117,7 +117,7 @@ F3 00              ## e_machine Indicating RISC-V
     13 06 0A 00     # RD_A2 RS1_S4 ADDI                 ; number of bytes to write
     73 00 00 00     # ECALL                             ; syscall
 
-    @k 63 46 0A 00  # RS1_S4 RS2_A2 @keep BLT           ; keep looping if buffer was full
+    @k 63 40 CA 00  # RS1_S4 RS2_A2 @keep BLT           ; keep looping if buffer was full
     $c 6F 00 00 00  # $core JAL                         ; otherwise move to next file
 
 :D #:Done

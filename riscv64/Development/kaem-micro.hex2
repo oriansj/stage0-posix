@@ -44,7 +44,7 @@
 F3 00              ## e_machine Indicating RISC-V
 01 00 00 00        ## e_version Indicating original elf
 
-&ELF_text 00 00 00 00 ## e_entry Address of the entry point (Number of bytes this header is + Base Address)
+&_start 00 00 00 00 ## e_entry Address of the entry point (Number of bytes this header is + Base Address)
 %ELF_program_headers>ELF_base 00 00 00 00 ## e_phoff Address of program header table
 00 00 00 00 00 00 00 00 ## e_shoff Address of section header table
 

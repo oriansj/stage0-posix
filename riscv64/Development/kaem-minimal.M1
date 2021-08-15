@@ -345,7 +345,7 @@ DEFINE RS2_T6  .0000F001
 :collect_token_loop
     RD_RA $fgetc JAL                  # read character
     RD_T0 !-4 ADDI                    # if character == EOF
-    RS1_A1 RS2_T0 @Done BEQ           # We are done
+    RS1_A0 RS2_T0 @Done BEQ           # We are done
 
     RD_T0 !32 ADDI                    # if c == ' '
     RS1_A0 RS2_T0 @collect_token_done BEQ # Space terminates token
@@ -528,4 +528,8 @@ DEFINE RS2_T6  .0000F001
 
 :default_file "kaem.run"
 :prefix " +> "
-:hard "Subprocess error\nABORTING HARD\n"
+:hard "Subprocess error
+ABORTING HARD
+"
+
+:ELF_end

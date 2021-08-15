@@ -252,7 +252,7 @@ fgetc:
 
 fgetc_fail:
     li t0, -4                         # Use -4 as EOF
-    sb t0, (a1)                       # Put EOF in a0
+    sb t0, (a1)                       # Store EOF in *a1
 
 fgetc_done:
     lb a0, (a1)                       # return char in a0

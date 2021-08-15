@@ -353,7 +353,7 @@ B2 03 00 00 00 00 00 00 ## p_memsz
 
 # :fgetc_fail ; (0x06002AC)
     93 02 C0 FF     # RD_T0 !-4 ADDI                    ; Use -4 as EOF
-    23 80 55 00     # RS1_A1 RS2_T0 SB                  ; Put EOF in a0
+    23 80 55 00     # RS1_A1 RS2_T0 SB                  ; Store EOF in *a1
 
 # :fgetc_done ; (0x06002B4)
     03 85 05 00     # RD_A0 RS1_A1 LB                   ; return char in a0
@@ -392,7 +392,8 @@ B2 03 00 00 00 00 00 00 ## p_memsz
     23 38 C1 00     # RS1_SP RS2_A2 @16 SD              ; protect a2
     93 05 05 00     # RD_A1 RS1_A0 MV                   ; protect a0
 
-    63 00 05 00     # RS1_A0 @File_Print_Done BEQZ      ; Protect against nulls
+    63 0C 05 00     # RS1_A0 @File_Print_Done BEQZ      ; Protect against nulls
+                    # +24B
 
 # :File_Print_Loop ; (0x060030C)
     03 C5 05 00     # RD_A0 RS1_A1 LBU                  ; Read byte

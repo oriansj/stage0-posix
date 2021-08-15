@@ -1,0 +1,113 @@
+## Copyright (C) 2021 Andrius Štikonas
+## This file is part of stage0.
+##
+## stage0 is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## stage0 is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY# without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with stage0.  If not, see <http://www.gnu.org/licenses/>.
+
+DEFINE ADD   33000000
+DEFINE ADDI  13000000
+DEFINE LD    03300000
+DEFINE JAL   6F000000
+DEFINE ECALL 73000000
+DEFINE BEQ   63000000
+DEFINE BLT   63400000
+DEFINE LUI   37000000
+
+DEFINE RD_SP  .00010000
+DEFINE RD_S1  .80040000
+DEFINE RD_S2  .00090000
+DEFINE RD_S3  .80090000
+DEFINE RD_S4  .000A0000
+DEFINE RD_A0  .00050000
+DEFINE RD_A1  .80050000
+DEFINE RD_A2  .00060000
+DEFINE RD_A3  .80060000
+DEFINE RD_A7  .80080000
+
+DEFINE RS1_SP  .00000100
+DEFINE RS1_S1  .00800400
+DEFINE RS1_S2  .00000900
+DEFINE RS1_S3  .00800900
+DEFINE RS1_S4  .00000A00
+DEFINE RS1_A0  .00000500
+DEFINE RS1_A1  .00800500
+
+DEFINE RS2_A1  .0000B000
+DEFINE RS2_A2  .0000C000
+
+; Where the ELF Header is going to hit
+; Simply jump to _start
+; Our main function
+:_start
+
+# Register use:
+# s1: output file descriptor
+# s2: buffer
+# s3: input file descriptor
+# s4: number of bytes read
+
+# Open output file and store the FD in s1
+    RD_A7 !56 ADDI                    ; sys_openat
+    RD_A0 !-100 ADDI                  ; AT_FDCWD
+    RD_SP RS1_SP !16 ADDI             ; Prepare stack for reading output file
+    RD_A1 RS1_SP LD                   ; Output file (argument 1)
+    RD_A2 !00001101 ADDI              ; Prepare file as O_WRONLY|O_CREAT|O_TRUNC
+    RD_A3 !0600 ADDI                  ; Prepare file as RW for owner only (600 in octal)
+    ECALL                             ; syscall
+    RD_S1 RS1_A0 ADDI                 ; Save fd in for later
+
+    # Prepare heap memory
+    RD_A7 !214 ADDI                   ; sys_brk
+    RD_A0 ADDI                        ; Get current brk
+    ECALL                             ; syscall
+    RD_S2 RS1_A0 ADDI                 ; Set our malloc pointer
+
+    RD_A1 ~0x100000 LUI               ; a1=1MiB
+    RD_A0 RS1_A0 RS2_A1 ADD           ; Allocate 1MiB
+    ECALL                             ; syscall
+
+:core
+    RD_SP RS1_SP !8 ADDI              ; Move stack pointer to next input file
+    RD_A1 RS1_SP LD                   ; Get the input file name
+    RS1_A1 @Done BEQ                  ; This was the last file, we are done
+
+    RD_A7 !56 ADDI                    ; sys_openat
+    RD_A0 !-100 ADDI                  ; AT_FDCWD
+    RD_A2 ADDI                        ; read only
+    ECALL                             ; syscall
+    RD_S3 RS1_A0 ADDI                 ; protect input fd
+
+:keep
+    RD_A7 !63 ADDI                    ; sys_read
+    RD_A0 RS1_S3 ADDI                 ; input fd
+    RD_A1 RS1_S2 ADDI                 ; read into buffer
+    RD_A2 ~0x100000 LUI               ; a2=1MiB
+    ECALL                             ; syscall
+    RD_S4 RS1_A0 ADDI                 ; actual number of bytes read
+
+    RD_A7 !64 ADDI                    ; sys_write
+    RD_A0 RS1_S1 ADDI                 ; output fd
+    RD_A1 RS1_S2 ADDI                 ; write from buffer
+    RD_A2 RS1_S4 ADDI                 ; number of bytes to write
+    ECALL                             ; syscall
+
+    RS1_S4 RS2_A2 @keep BLT           ; keep looping if buffer was full
+    $core JAL                         ; otherwise move to next file
+
+:Done
+    # Terminate program with 0 return code
+    RD_A7 !93 ADDI                    ; sys_exit
+    RD_A0 ADDI                        ; Return code 0
+    ECALL                             ; exit(0)
+    
+:ELF_end

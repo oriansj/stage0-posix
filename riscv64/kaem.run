@@ -36,3 +36,10 @@
 ################################
 ./hex0 hex1_riscv64.hex0 hex1
 # hex1 adds support for single character labels
+
+#################################
+# Phase-1b Build catm from hex1 #
+#################################
+./hex1 catm_riscv64.hex1 catm
+# catm removes the need for cat or shell support for redirection by providing
+# equivalent functionality via catm output_file input1 input2 ... inputN

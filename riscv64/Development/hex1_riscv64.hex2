@@ -15,23 +15,24 @@
 ## along with stage0.  If not, see <http://www.gnu.org/licenses/>.
 
 ## ELF Header
-#:ELF_base
+
+:ELF_base
 7F 45 4C 46        ## e_ident[EI_MAG0-3] ELF's magic number
 
 02                 ## e_ident[EI_CLASS] Indicating 64 bit
 01                 ## e_ident[EI_DATA] Indicating little endianness
 01                 ## e_ident[EI_VERSION] Indicating original elf
 
-03                 ## e_ident[EI_OSABI] Set at 3 for Linux
-00                 ## e_ident[EI_ABIVERSION] Ignored for Statically linked executables
+03                 ## e_ident[EI_OSABI] Set at 3 because FreeBSD is strict
+00                 ## e_ident[EI_ABIVERSION] Set at 0 because none cares
 
 00 00 00 00 00 00 00 ## e_ident[EI_PAD]
 02 00              ## e_type Indicating Executable
 F3 00              ## e_machine Indicating RISC-V
 01 00 00 00        ## e_version Indicating original elf
 
-78 00 60 00 00 00 00 00 ## e_entry Address of the entry point (Number of bytes this header is + Base Address)
-40 00 00 00 00 00 00 00 ## e_phoff Address of program header table
+&ELF_text 00 00 00 00 ## e_entry Address of the entry point (Number of bytes this header is + Base Address)
+%ELF_program_headers>ELF_base 00 00 00 00 ## e_phoff Address of program header table
 00 00 00 00 00 00 00 00 ## e_shoff Address of section header table
 
 00 00 00 00        ## e_flags
@@ -46,21 +47,20 @@ F3 00              ## e_machine Indicating RISC-V
 00 00              ## e_shstrndx index of the section names
 
 ## Program Header
-#:ELF_program_headers
+:ELF_program_headers
 01 00 00 00             ## p_type
-07 00 00 00             ## Flags
+07 00 00 00             ## ph_flags: PF-X|PF-W|PF-R = 7
 00 00 00 00 00 00 00 00 ## p_offset
 
-00 00 60 00 00 00 00 00 ## p_vaddr
-00 00 60 00 00 00 00 00 ## p_physaddr
+&ELF_base 00 00 00 00 ## p_vaddr
+&ELF_base 00 00 00 00 ## p_physaddr
 
-C1 04 00 00 00 00 00 00 ## p_filesz
-C1 04 00 00 00 00 00 00 ## p_memsz
+%ELF_end>ELF_base 00 00 00 00 ## p_filesz
+%ELF_end>ELF_base 00 00 00 00 ## p_memsz
 
 01 00 00 00 00 00 00 00 ## Required alignment
 
-#:ELF_text
-
+:ELF_text
 ; Register use:
 ; s2: input fd
 ; s3: output fd
@@ -575,3 +575,5 @@ C1 04 00 00 00 00 00 00 ## p_memsz
 
 :table
     00
+
+:ELF_end

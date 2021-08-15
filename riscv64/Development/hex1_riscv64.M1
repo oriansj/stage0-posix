@@ -729,3 +729,5 @@ DEFINE RS2_X31 .0000F001
 
 :table
     %0
+
+:ELF_end

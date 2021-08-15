@@ -28,23 +28,24 @@
 # s2: have_hex0
 
 ## ELF Header
-#:ELF_base
+
+:ELF_base
 7F 45 4C 46        ## e_ident[EI_MAG0-3] ELF's magic number
 
 02                 ## e_ident[EI_CLASS] Indicating 64 bit
 01                 ## e_ident[EI_DATA] Indicating little endianness
 01                 ## e_ident[EI_VERSION] Indicating original elf
 
-03                 ## e_ident[EI_OSABI] Set at 3 for Linux
-00                 ## e_ident[EI_ABIVERSION] Ignored for Statically linked executables
+03                 ## e_ident[EI_OSABI] Set at 3 because FreeBSD is strict
+00                 ## e_ident[EI_ABIVERSION] Set at 0 because none cares
 
 00 00 00 00 00 00 00 ## e_ident[EI_PAD]
 02 00              ## e_type Indicating Executable
 F3 00              ## e_machine Indicating RISC-V
 01 00 00 00        ## e_version Indicating original elf
 
-78 00 60 00 00 00 00 00 ## e_entry Address of the entry point (Number of bytes this header is + Base Address)
-40 00 00 00 00 00 00 00 ## e_phoff Address of program header table
+&ELF_text 00 00 00 00 ## e_entry Address of the entry point (Number of bytes this header is + Base Address)
+%ELF_program_headers>ELF_base 00 00 00 00 ## e_phoff Address of program header table
 00 00 00 00 00 00 00 00 ## e_shoff Address of section header table
 
 00 00 00 00        ## e_flags
@@ -59,20 +60,21 @@ F3 00              ## e_machine Indicating RISC-V
 00 00              ## e_shstrndx index of the section names
 
 ## Program Header
-#:ELF_program_headers
+:ELF_program_headers
 01 00 00 00             ## p_type
-07 00 00 00             ## Flags
+07 00 00 00             ## ph_flags: PF-X|PF-W|PF-R = 7
 00 00 00 00 00 00 00 00 ## p_offset
 
-00 00 60 00 00 00 00 00 ## p_vaddr
-00 00 60 00 00 00 00 00 ## p_physaddr
+&ELF_base 00 00 00 00 ## p_vaddr
+&ELF_base 00 00 00 00 ## p_physaddr
 
-69 01 00 00 00 00 00 00 ## p_filesz
-69 01 00 00 00 00 00 00 ## p_memsz
+%ELF_end>ELF_base 00 00 00 00 ## p_filesz
+%ELF_end>ELF_base 00 00 00 00 ## p_memsz
 
 01 00 00 00 00 00 00 00 ## Required alignment
 
-#:ELF_text
+:ELF_text
+
 :_start
 
     ~argv_hex0 97 04 00 00 # RD_S1 ~argv_hex0 AUIPC     ; hex0-seed hex0_riscv64.hex0 hex0
@@ -146,3 +148,5 @@ F3 00              ## e_machine Indicating RISC-V
     2E 2E 2F 62 6F 6F 74 73 74 72 61 70 2D 73 65 65 64 73
     2F 50 4F 53 49 58 2F 72 69 73 63 76 36 34 2F 68 65 78
     30 2D 73 65 65 64 00                                  ; ../bootstrap-seeds/POSIX/riscv64/hex0-seed
+
+:ELF_end

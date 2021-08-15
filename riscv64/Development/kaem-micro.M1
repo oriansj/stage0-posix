@@ -262,3 +262,5 @@ DEFINE RS2_T6  .0000F001
 :kaem_out "kaem"
 # Put this one last to make updating hardcoded path trivial
 :hex0_seed "../bootstrap-seeds/POSIX/riscv64/hex0-seed"
+
+:ELF_end

@@ -62,6 +62,7 @@ F3 00              ## e_machine Indicating RISC-V
 
 :ELF_text
 ; Register use:
+; s1: jump table
 ; s2: input fd
 ; s3: output fd
 ; s4: toggle
@@ -69,6 +70,13 @@ F3 00              ## e_machine Indicating RISC-V
 ; s6: ip
 ; s7: tempword
 ; s8: shiftregister
+; s9: malloc pointer
+; s10: updates
+
+; Struct format: (size 24)
+; next => 0                      ; Next element in linked list
+; target => 8                    ; Target (ip)
+; name => 16                     ; Label name
 
 ; Our main function
 :_start
@@ -78,7 +86,7 @@ F3 00              ## e_machine Indicating RISC-V
     ; Initialize globals
     13 0A F0 FF     # RD_S4 !-1 ADDI                    ; Toggle
     93 0A 00 00     # RD_S5 ADDI                        ; Hold
-    13 0B 00 00     # RD_S6 ADDI                        ; Instruction Pointer
+    37 0B 60 00     # RD_S6 ~0x600000 LUI               ; Instruction Pointer
 
     ; Open input file and store FD in s2
     93 08 80 03     # RD_A7 !56 ADDI                    ; sys_openat
@@ -114,6 +122,18 @@ F3 00              ## e_machine Indicating RISC-V
     93 09 05 00     # RD_S3 RS1_A0 MV                   ; Save fd in for later
 
 :after_open
+    ; Prepare heap memory
+    93 08 60 0D     # RD_A7 !214 ADDI                   ; sys_brk
+    13 05 00 00     # RD_A0 ADDI                        ; Get current brk
+    73 00 00 00     # ECALL                             ; syscall
+    93 0C 05 00     # RD_S9 RS1_A0 ADDI                 ; Set our malloc pointer
+
+    B7 05 10 00     # RD_A1 ~0x100000 LUI
+    33 05 B5 00     # RD_A0 RS1_A0 RS2_A1 ADD           ; Request the 1 MiB
+    93 08 60 0D     # RD_A7 !214 ADDI                   ; sys_brk
+    73 00 00 00     # ECALL                             ; syscall
+
+    $ClearScratch EF 00 00 00 # RD_RA $ClearScratch JAL ; Zero scratch
     $First_pass EF 00 00 00 # RD_RA $First_pass JAL     ; First pass
 
     ; Rewind input file
@@ -126,13 +146,16 @@ F3 00              ## e_machine Indicating RISC-V
     ; Initialize globals
     13 0A F0 FF     # RD_S4 !-1 ADDI                    ; Toggle
     93 0A 00 00     # RD_S5 ADDI                        ; Hold
-    13 0B 00 00     # RD_S6 ADDI                        ; Instruction Pointer
+    37 0B 60 00     # RD_S6 ~0x600000 LUI               ; Instruction Pointer
     93 0B 00 00     # RD_S7 ADDI                        ; tempword
     13 0C 00 00     # RD_S8 ADDI                        ; Shift register
 
     $Second_pass EF 00 00 00 # RD_RA $Second_pass JAL   ; Now do the second pass
 
-    $Done 6F 00 00 00 # $Done JAL                       ; We are done
+    ; Terminate program with 0 return code
+    93 08 D0 05     # RD_A7 !93 ADDI                    ; sys_exit
+    13 05 00 00     # RD_A0 MV                          ; Return code 0
+    73 00 00 00     # ECALL                             ; exit(0)
 
 ; First pass loop to determine addresses of labels
 :First_pass
@@ -148,10 +171,20 @@ F3 00              ## e_machine Indicating RISC-V
 
     ; Check for :
     13 03 A0 03     # RD_T1 !0x3a ADDI
-    @First_pass_0 63 10 65 00 # RS1_A0 RS2_T1 @First_pass_0 BNE
-    $StoreLabel EF 00 00 00 # RD_RA $StoreLabel JAL     ; Store this label
+    @StoreLabel 63 00 65 00 # RS1_A0 RS2_T1 @StoreLabel BEQ ; Store this label
 
-:First_pass_0
+    ; Check for .
+    13 03 E0 02     # RD_T1 !0x2e ADDI
+    @First_pass_UpdateWord 63 00 65 00 # RS1_A0 RS2_T1 @First_pass_UpdateWord BEQ
+
+    ; Check for %
+    13 03 50 02     # RD_T1 !0x25 ADDI
+    @First_pass_pointer 63 00 65 00 # RS1_A0 RS2_T1 @First_pass_pointer BEQ
+
+    ; Check for &
+    13 03 60 02     # RD_T1 !0x26 ADDI
+    @First_pass_pointer 63 00 65 00 # RS1_A0 RS2_T1 @First_pass_pointer BEQ
+
     ; Check for !
     13 03 10 02     # RD_T1 !0x21 ADDI
     @Throwaway_token 63 00 65 00 # RS1_A0 RS2_T1 @Throwaway_token BEQ
@@ -168,7 +201,13 @@ F3 00              ## e_machine Indicating RISC-V
     13 03 E0 07     # RD_T1 !0x7e ADDI
     @Throwaway_token 63 00 65 00 # RS1_A0 RS2_T1 @Throwaway_token BEQ
 
+    ; Check for <
+    13 03 C0 03     # RD_T1 !0x3c ADDI
     93 05 F0 FF     # RD_A1 !-1 ADDI                    ; write = false
+    @PadToAlign 63 00 65 00 # RS1_A0 RS2_T1 @PadToAlign BEQ
+
+    93 05 F0 FF     # RD_A1 !-1 ADDI                    ; write = false
+    13 06 F0 FF     # RD_A2 !-1 ADDI                    ; update = false
     $DoByte EF 00 00 00 # RD_RA $DoByte JAL             ; Deal with everything else
 
     13 03 C0 FF     # RD_T1 !-4 ADDI                    ; Deal with EOF
@@ -177,8 +216,43 @@ F3 00              ## e_machine Indicating RISC-V
     $First_pass_loop 6F 00 00 00 # $First_pass_loop JAL ; Keep looping
 
 :Throwaway_token
+    ~scratch 97 05 00 00 # RD_A1 ~scratch AUIPC
+    !scratch 93 85 05 00 # RD_A1 RS1_A1 !scratch ADDI   ; get scratch
+    $consume_token EF 00 00 00 # RD_RA $consume_token JAL ; Read token
+    $ClearScratch EF 00 00 00 # RD_RA $ClearScratch JAL ; Throw away token
+    $First_pass_loop 6F 00 00 00 # $First_pass_loop JAL ; Loop again
+
+:First_pass_pointer
+    13 0B 4B 00     # RD_S6 RS1_S6 !4 ADDI              ; Update ip
     ; Deal with Pointer to label
-    $Read_byte EF 00 00 00 # RD_RA $Read_byte JAL       ; Drop the char
+    ~scratch 97 05 00 00 # RD_A1 ~scratch AUIPC
+    !scratch 93 85 05 00 # RD_A1 RS1_A1 !scratch ADDI   ; Using scratch
+    $consume_token EF 00 00 00 # RD_RA $consume_token JAL ; Read token
+    $ClearScratch EF 00 00 00 # RD_RA $ClearScratch JAL ; Throw away token
+    13 03 E0 03     # RD_T1 !0x3e ADDI                  ; Check for '>'
+    @First_pass_loop 63 10 65 00 # RS1_A0 RS2_T1 @First_pass_loop BNE ; Loop again
+
+    ; Deal with %label>label case
+    ~scratch 97 05 00 00 # RD_A1 ~scratch AUIPC
+    !scratch 93 85 05 00 # RD_A1 RS1_A1 !scratch ADDI   ; Using scratch
+    $consume_token EF 00 00 00 # RD_RA $consume_token JAL ; Read token
+    $ClearScratch EF 00 00 00 # RD_RA $ClearScratch JAL ; Throw away token
+    $First_pass_loop 6F 00 00 00 # $First_pass_loop JAL ; Loop again
+
+:First_pass_UpdateWord
+    13 0D 00 00     # RD_S10 ADDI                       ; updates = 0
+    93 0B 00 00     # RD_S7 ADDI                        ; tempword = 0
+    93 07 40 00     # RD_A5 !4 ADDI                     ; a5 = 4
+:First_pass_UpdateWord_loop
+    $Read_byte EF 00 00 00 # RD_RA $Read_byte JAL       ; Read another byte into a0
+
+    93 05 F0 FF     # RD_A1 !-1 ADDI                    ; write = false
+    13 06 00 00     # RD_A2 ADDI                        ; update = true
+    $DoByte EF 00 00 00 # RD_RA $DoByte JAL             ; Process byte
+    @First_pass_UpdateWord_loop 63 40 FD 00 # RS1_S10 RS2_A5 @First_pass_UpdateWord_loop BLT ; loop 4 times
+
+    13 0B CB FF     # RD_S6 RS1_S6 !-4 ADDI             ; ip = ip - 4
+
     $First_pass_loop 6F 00 00 00 # $First_pass_loop JAL ; Loop again
 
 :First_pass_done
@@ -201,10 +275,26 @@ F3 00              ## e_machine Indicating RISC-V
     13 03 A0 03     # RD_T1 !0x3a ADDI
     @Second_pass_0 63 10 65 00 # RS1_A0 RS2_T1 @Second_pass_0 BNE
 
-    $Read_byte EF 00 00 00 # RD_RA $Read_byte JAL       ; Read the label
+    ~scratch 97 05 00 00 # RD_A1 ~scratch AUIPC
+    !scratch 93 85 05 00 # RD_A1 RS1_A1 !scratch ADDI   ; Using scratch
+    $consume_token EF 00 00 00 # RD_RA $consume_token JAL ; Read the label
+    $ClearScratch EF 00 00 00 # RD_RA $ClearScratch JAL ; Throw away token
+
     $Second_pass_loop 6F 00 00 00 # $Second_pass_loop JAL ; Continue looping
 
 :Second_pass_0
+    ; Check for .
+    13 03 E0 02     # RD_T1 !0x2e ADDI
+    @Second_pass_UpdateWord 63 00 65 00 # RS1_A0 RS2_T1 @Second_pass_UpdateWord BEQ
+
+    ; Check for %
+    13 03 50 02     # RD_T1 !0x25 ADDI
+    @StorePointer 63 00 65 00 # RS1_A0 RS2_T1 @StorePointer BEQ
+
+    ; Check for &
+    13 03 60 02     # RD_T1 !0x26 ADDI
+    @StorePointer 63 00 65 00 # RS1_A0 RS2_T1 @StorePointer BEQ
+
     ; Check for !
     13 03 10 02     # RD_T1 !0x21 ADDI
     @UpdateShiftRegister 63 00 65 00 # RS1_A0 RS2_T1 @UpdateShiftRegister BEQ
@@ -221,8 +311,14 @@ F3 00              ## e_machine Indicating RISC-V
     13 03 E0 07     # RD_T1 !0x7e ADDI
     @UpdateShiftRegister 63 00 65 00 # RS1_A0 RS2_T1 @UpdateShiftRegister BEQ
 
+    ; Check for <
+    13 03 C0 03     # RD_T1 !0x3c ADDI
+    93 05 00 00     # RD_A1 ADDI                        ; write = true
+    @PadToAlign 63 00 65 00 # RS1_A0 RS2_T1 @PadToAlign BEQ
+
     ; Deal with everything else
-    93 05 00 00     # RD_A1 MV                          ; write = true
+    93 05 00 00     # RD_A1 ADDI                        ; write = true
+    13 06 F0 FF     # RD_A2 !-1 ADDI                    ; update = false
     $DoByte EF 00 00 00 # RD_RA $DoByte JAL             ; Process our char
 
     # Deal with EOF
@@ -231,28 +327,82 @@ F3 00              ## e_machine Indicating RISC-V
 
     $Second_pass_loop 6F 00 00 00 # $Second_pass_loop JAL ; continue looping
 
+:Second_pass_UpdateWord
+    13 0D 00 00     # RD_S10 ADDI                       ; updates = 0
+    93 0B 00 00     # RD_S7 ADDI                        ; tempword = 0
+    93 07 40 00     # RD_A5 !4 ADDI                     ; a5 = 4
+
+:Second_pass_UpdateWord_loop
+    $Read_byte EF 00 00 00 # RD_RA $Read_byte JAL       ; Read another byte into a0
+
+    93 05 F0 FF     # RD_A1 !-1 ADDI                    ; write = false
+    13 06 00 00     # RD_A2 ADDI                        ; update = true
+    $DoByte EF 00 00 00 # RD_RA $DoByte JAL             ; Process our char
+    @Second_pass_UpdateWord_loop 63 40 FD 00 # RS1_S10 RS2_A5 @Second_pass_UpdateWord_loop BLT ; loop 4 times
+
+    13 85 0B 00     # RD_A0 RS1_S7 MV                   ; tempword
+    $UpdateShiftRegister_DOT 6F 00 00 00 # $UpdateShiftRegister_DOT JAL ; UpdateShiftRegister('.', tempword)
+
 :UpdateShiftRegister
-    93 05 05 00     # RD_A1 RS1_A0 MV                   ; Store label prefix
-    $Get_table_target EF 00 00 00 # RD_RA $Get_table_target JAL ; Get target
+    13 06 05 00     # RD_A2 RS1_A0 MV                   ; Store label prefix
+    ~scratch 97 05 00 00 # RD_A1 ~scratch AUIPC
+    !scratch 93 85 05 00 # RD_A1 RS1_A1 !scratch ADDI   ; Get scratch
+    $ClearScratch EF 00 00 00 # RD_RA $ClearScratch JAL ; Clear scratch
+    $consume_token EF 00 00 00 # RD_RA $consume_token JAL ; Read token
+    $GetTarget EF 00 00 00 # RD_RA $GetTarget JAL       ; Get target
     03 35 05 00     # RD_A0 RS1_A0 LD                   ; Dereference pointer
     33 05 65 41     # RD_A0 RS1_A0 RS2_S6 SUB           ; target - ip
 
     ; Check for !
     13 03 10 02     # RD_T1 !0x21 ADDI
-    @UpdateShiftRegister_I 63 80 65 00 # RS1_A1 RS2_T1 @UpdateShiftRegister_I BEQ
+    @UpdateShiftRegister_I 63 00 66 00 # RS1_A2 RS2_T1 @UpdateShiftRegister_I BEQ
 
     ; Check for @
     13 03 00 04     # RD_T1 !0x40 ADDI
-    @UpdateShiftRegister_B 63 80 65 00 # RS1_A1 RS2_T1 @UpdateShiftRegister_B BEQ
+    @UpdateShiftRegister_B 63 00 66 00 # RS1_A2 RS2_T1 @UpdateShiftRegister_B BEQ
 
     ; Check for $
     13 03 40 02     # RD_T1 !0x24 ADDI
-    @UpdateShiftRegister_J 63 80 65 00 # RS1_A1 RS2_T1 @UpdateShiftRegister_J BEQ
+    @UpdateShiftRegister_J 63 00 66 00 # RS1_A2 RS2_T1 @UpdateShiftRegister_J BEQ
 
     ; Check for ~
     13 03 E0 07     # RD_T1 !0x7e ADDI
-    @UpdateShiftRegister_U 63 80 65 00 # RS1_A1 RS2_T1 @UpdateShiftRegister_U BEQ
+    @UpdateShiftRegister_U 63 00 66 00 # RS1_A2 RS2_T1 @UpdateShiftRegister_U BEQ
 
+    $Second_pass_loop 6F 00 00 00 # $Second_pass_loop JAL ; continue looping
+
+:UpdateShiftRegister_DOT
+    ; . before instruction means it has to be added to the final word
+
+    ; swap = (((value >> 24) & 0xff) |
+    ;        ((value << 8) & 0xff0000) |
+    ;        ((value >> 8) & 0xff00) |
+    ;        ((value << 24) & 0xff000000))
+
+    93 53 85 01     # RD_T2 RS1_A0 RS2_X24 SRLI         ; value >> 24
+    13 03 F0 0F     # RD_T1 !0xff ADDI                  ; t1 = 0xff
+    B3 72 73 00     # RD_T0 RS1_T1 RS2_T2 AND           ; (value >> 24) & 0xff
+
+    93 13 85 00     # RD_T2 RS1_A0 RS2_X8 SLLI          ; value << 8
+    37 03 FF 00     # RD_T1 ~0xff0000 LUI               ; t1 = 0xff0000
+    B3 73 73 00     # RD_T2 RS1_T1 RS2_T2 AND           ; (value << 8) & 0xff0000
+    B3 E2 72 00     # RD_T0 RS1_T0 RS2_T2 OR            ; logical or with the previous expression
+
+    93 53 85 00     # RD_T2 RS1_A0 RS2_X8 SRLI          ; value >> 8
+    37 03 01 00     # RD_T1 ~0xff00 LUI                 ; t1 = 0xff00
+    1B 03 03 F0     # RD_T1 RS1_T1 !0xff00 ADDIW        ; t1 = 0xff00
+    B3 73 73 00     # RD_T2 RS1_T1 RS2_T2 AND           ; (value << 8) & 0xff00
+    B3 E2 72 00     # RD_T0 RS1_T0 RS2_T2 OR            ; logical or with the previous expression
+
+    93 13 85 01     # RD_T2 RS1_A0 RS2_X24 SLLI         ; value << 24
+    13 03 F0 0F     # RD_T1 !0xff ADDI
+    13 13 83 01     # RD_T1 RS1_T1 RS2_X24 SLLI         ; t1 = 0xff000000
+    B3 73 73 00     # RD_T2 RS1_T1 RS2_T2 AND           ; (value << 24) & 0xff000000
+    B3 E2 72 00     # RD_T0 RS1_T0 RS2_T2 OR            ; swap
+
+    33 4C 5C 00     # RD_S8 RS1_S8 RS2_T0 XOR           ; shiftregister = shiftregister ^ swap
+
+    13 0B CB FF     # RD_S6 RS1_S6 !-4 ADDI             ; ip = ip - 4
     $Second_pass_loop 6F 00 00 00 # $Second_pass_loop JAL ; continue looping
 
 :UpdateShiftRegister_I
@@ -356,20 +506,160 @@ F3 00              ## e_machine Indicating RISC-V
 
     $Second_pass_loop 6F 00 00 00 # $Second_pass_loop JAL ; continue looping
 
+:StorePointer
+    13 0B 4B 00     # RD_S6 RS1_S6 !4 ADDI              ; update ip
+    13 06 05 00     # RD_A2 RS1_A0 MV                   ; Store label prefix
+
+    ~scratch 97 05 00 00 # RD_A1 ~scratch AUIPC
+    !scratch 93 85 05 00 # RD_A1 RS1_A1 !scratch ADDI   ; Get scratch
+    $ClearScratch EF 00 00 00 # RD_RA $ClearScratch JAL ; clear scratch
+    $consume_token EF 00 00 00 # RD_RA $consume_token JAL ; Read token
+    93 07 05 00     # RD_A5 RS1_A0 MV                   ; save char
+    $GetTarget EF 00 00 00 # RD_RA $GetTarget JAL       ; Get target
+    83 35 05 00     # RD_A1 RS1_A0 LD                   ; Dereference pointer
+
+    ; If char is > then change relative base address to ip
+    13 03 E0 03     # RD_T1 !0x3e ADDI                  ; t1 = 0x3e
+    @StorePointer_1 63 00 F3 00  # RS1_T1 RS2_A5 @StorePointer_1 BEQ
+
+    ; Check for &
+    13 03 60 02     # RD_T1 !0x26 ADDI
+    @StorePointer_0 63 00 66 00 # RS1_A2 RS2_T1 @StorePointer_0 BEQ
+
+    ; Check for %
+    13 03 50 02     # RD_T1 !0x25 ADDI
+    @Fail 63 10 66 00 # RS1_A2 RS2_T1 @Fail BNE
+    B3 85 65 41     # RD_A1 RS1_A1 RS2_S6 SUB           ; displacement = target - ip
+
+:StorePointer_0
+    ; Output pointer
+    93 07 40 00     # RD_A5 !4 ADDI                     ; number of bytes
+:StorePointer_loop
+    13 D3 85 00     # RD_T1 RS1_A1 RS2_X8 SRLI          ; value / 256
+    13 15 83 00     # RD_A0 RS1_T1 RS2_X8 SLLI
+    33 85 A5 40     # RD_A0 RS1_A1 RS2_A0 SUB           ; byte = value % 256
+
+    93 05 03 00     # RD_A1 RS1_T1 MV                   ; value = value / 256
+    $fputc EF 00 00 00 # RD_RA $fputc JAL               ; write value
+    93 87 F7 FF     # RD_A5 RS1_A5 !-1 ADDI             ; decrease number of bytes to write
+    @StorePointer_loop 63 90 07 00 # RS1_A5 @StorePointer_loop BNEZ ; continue looping
+
+    $Second_pass_loop 6F 00 00 00 # $Second_pass_loop JAL ; Continue looping
+
+:StorePointer_1
+    13 86 05 00     # RD_A2 RS1_A1 MV                   ; save target
+    ~scratch 97 05 00 00 # RD_A1 ~scratch AUIPC
+    !scratch 93 85 05 00 # RD_A1 RS1_A1 !scratch ADDI   ; Get scratch
+    $ClearScratch EF 00 00 00 # RD_RA $ClearScratch JAL ; clear scratch
+    $consume_token EF 00 00 00 # RD_RA $consume_token JAL ; consume token
+    $GetTarget EF 00 00 00 # RD_RA $GetTarget JAL       ; Get target
+    83 35 05 00     # RD_A1 RS1_A0 LD                   ; Dereference pointer
+    B3 05 B6 40     # RD_A1 RS1_A2 RS2_A1 SUB           ; displacement = target - ip
+
+    $StorePointer_0 6F 00 00 00 # $StorePointer_0 JAL   ; Continue looping
+
 :Second_pass_done
     83 30 01 00     # RD_RA RS1_SP LD                   ; restore ra
     13 01 81 00     # RD_SP RS1_SP !8 ADDI              ; deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
+; Pad with zeros to align to word size
+;   bool write in a1
+:PadToAlign
+    13 03 10 00     # RD_T1 !1 ADDI                     ; t1 = 1
+    33 75 6B 00     # RD_A0 RS1_S6 RS2_T1 AND           ; ip & 0x1
+    @PadToAlign_1 63 10 65 00 # RS1_A0 RS2_T1 @PadToAlign_1 BNE ; check if ip & 0x1 == 1
+    33 0B 6B 00     # RD_S6 RS1_S6 RS2_T1 ADD           ; ip = ip + 1
+
+    @PadToAlign_1 63 90 05 00 # RS1_A1 @PadToAlign_1 BNEZ ; check if we have to write
+    13 05 00 00     # RD_A0 MV                          ; a0 = 0
+    $fputc EF 00 00 00 # RD_RA $fputc JAL               ; write 0
+
+:PadToAlign_1
+    13 03 20 00     # RD_T1 !2 ADDI                     ; t1 = 2
+    33 75 6B 00     # RD_A0 RS1_S6 RS2_T1 AND           ; ip & 0x1
+    @PadToAlign_2 63 10 65 00 # RS1_A0 RS2_T1 @PadToAlign_2 BNE ; check if ip & 0x2 == 2
+    33 0B 6B 00     # RD_S6 RS1_S6 RS2_T1 ADD           ; ip = ip + 2
+
+    @PadToAlign_2 63 90 05 00 # RS1_A1 @PadToAlign_2 BNEZ ; check if we have to write
+    13 05 00 00     # RD_A0 MV                          ; a0 = 0
+    $fputc EF 00 00 00 # RD_RA $fputc JAL               ; write 0
+    13 05 00 00     # RD_A0 MV                          ; a0 = 0
+    $fputc EF 00 00 00 # RD_RA $fputc JAL               ; write 0
+
+:PadToAlign_2
+    @Second_pass_loop 63 80 05 00 # RS1_A1 @Second_pass_loop BEQZ ; return to Second_pass
+    $First_pass_loop 6F 00 00 00 # $First_pass_loop JAL ; return to First_pass
+
+; Zero scratch area
+:ClearScratch
+    13 01 81 FE     # RD_SP RS1_SP !-24 ADDI            ; Allocate stack
+    23 30 11 00     # RS1_SP RS2_RA SD                  ; protect ra
+    23 34 A1 00     # RS1_SP RS2_A0 @8 SD               ; protect a0
+    23 38 B1 00     # RS1_SP RS2_A1 @16 SD              ; protect a1
+
+    ~scratch 17 05 00 00 # RD_A0 ~scratch AUIPC
+    !scratch 13 05 05 00 # RD_A0 RS1_A0 !scratch ADDI   ; Find where our scratch area is
+
+:ClearScratch_loop
+    83 05 05 00     # RD_A1 RS1_A0 LB                   ; Read current byte: s[i]
+    23 00 05 00     # RS1_A0 SB                         ; Write zero: s[i] = 0
+    13 05 15 00     # RD_A0 RS1_A0 !1 ADDI              ; Increment: i = i + 1
+    @ClearScratch_loop 63 90 05 00 # RS1_A1 @ClearScratch_loop BNEZ ; Keep looping
+
+    83 30 01 00     # RD_RA RS1_SP LD                   ; restore ra
+    03 35 81 00     # RD_A0 RS1_SP !8 LD                ; restore a0
+    83 35 01 01     # RD_A1 RS1_SP !16 LD               ; restore a1
+    13 01 81 01     # RD_SP RS1_SP !24 ADDI             ; Deallocate stack
+    67 80 00 00     # RS1_RA JALR                       ; return
+
+; Receives pointer in a1
+; Writes our token and updates pointer in a1
+:consume_token
+    13 01 81 FF     # RD_SP RS1_SP !-8 ADDI             ; Allocate stack
+    23 30 11 00     # RS1_SP RS2_RA SD                  ; protect ra
+
+:consume_token_0
+    $Read_byte EF 00 00 00 # RD_RA $Read_byte JAL       ; Read byte into a0
+
+    ; Check for \t
+    13 03 90 00     # RD_T1 !0x09 ADDI
+    @consume_token_done 63 00 65 00 # RS1_A0 RS2_T1 @consume_token_done BEQ
+
+    ; Check for \n
+    13 03 A0 00     # RD_T1 !0x0a ADDI
+    @consume_token_done 63 00 65 00 # RS1_A0 RS2_T1 @consume_token_done BEQ
+
+    ; Check for ' '
+    13 03 00 02     # RD_T1 !0x20 ADDI
+    @consume_token_done 63 00 65 00 # RS1_A0 RS2_T1 @consume_token_done BEQ
+
+    ; Check for >
+    13 03 E0 03     # RD_T1 !0x3e ADDI
+    @consume_token_done 63 00 65 00 # RS1_A0 RS2_T1 @consume_token_done BEQ
+
+    23 80 A5 00     # RS1_A1 RS2_A0 SB                  ; Store char
+    93 85 15 00     # RD_A1 RS1_A1 !1 ADDI              ; Point to next spot
+    $consume_token_0 6F 00 00 00 # $consume_token_0 JAL ; Continue looping
+
+:consume_token_done
+    23 B0 05 00     # RS1_A1 SD                         ; Pad with nulls
+    93 85 85 00     # RD_A1 RS1_A1 !8 ADDI              ; Update the pointer
+
+    83 30 01 00     # RD_RA RS1_SP LD                   ; restore ra
+    13 01 81 00     # RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    67 80 00 00     # RS1_RA JALR                       ; return
 
 ; DoByte function
 ; Receives:
 ;   character in a0
 ;   bool write in a1
+;   bool update in a2
 ; Does not return anything
 :DoByte
-    13 01 81 FF     # RD_SP RS1_SP !-8 ADDI             ; Allocate stack
+    13 01 01 FF     # RD_SP RS1_SP !-16 ADDI            ; Allocate stack
     23 30 11 00     # RS1_SP RS2_RA SD                  ; protect ra
+    23 34 01 01     # RS1_SP RS2_A6 @8 SD               ; protect a6
 
     $hex EF 00 00 00 # RD_RA $hex JAL                   ; Process hex, store it in a6
 
@@ -395,6 +685,8 @@ F3 00              ## e_machine Indicating RISC-V
 
 :DoByte_1
     13 0B 1B 00     # RD_S6 RS1_S6 !1 ADDI              ; Increment IP
+    @DoByte_2 63 00 06 00 # RS1_A2 @DoByte_2 BEQZ       ; check if we have to update
+:DoByte_2b
     93 0A 00 00     # RD_S5 MV                          ; hold = 0
     $DoByte_FlipToggle 6F 00 00 00 # $DoByte_FlipToggle JAL ; return
 
@@ -406,8 +698,17 @@ F3 00              ## e_machine Indicating RISC-V
 
 :DoByte_Done
     83 30 01 00     # RD_RA RS1_SP LD                   ; restore ra
-    13 01 81 00     # RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    03 38 81 00     # RD_A6 RS1_SP !8 LD                ; restore a6
+    13 01 01 01     # RD_SP RS1_SP !16 ADDI             ; Deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
+
+:DoByte_2
+    13 93 4A 00     # RD_T1 RS1_S5 RS2_X4 SLLI          ; hold * 16
+    B3 0A 03 01     # RD_S5 RS1_T1 RS2_A6 ADD           ; hold = hold * 16 + hex(c)
+    13 93 8B 00     # RD_T1 RS1_S7 RS2_X8 SLLI          ; tempword << 8
+    B3 4B 53 01     # RD_S7 RS1_T1 RS2_S5 XOR           ; tempword = (tempword << 8) ^ hold
+    13 0D 1D 00     # RD_S10 RS1_S10 !1 ADDI            ; updates = updates + 1
+    $DoByte_2b 6F 00 00 00 # $DoByte_2b JAL
 
 ; Convert ASCII hex characters into binary representation, e.g. 'a' -> 0xA
 ; Receives:
@@ -489,13 +790,14 @@ F3 00              ## e_machine Indicating RISC-V
 
 ; Read byte into a0
 :Read_byte
-    13 01 81 FF     # RD_SP RS1_SP !-8 ADDI             ; Allocate stack
+    13 01 01 FF     # RD_SP RS1_SP !-16 ADDI            ; Allocate stack
     23 30 B1 00     # RS1_SP RS2_A1 SD                  ; protect a1
+    23 34 C1 00     # RS1_SP RS2_A2 @8 SD               ; protect a2
 
     93 08 F0 03     # RD_A7 !63 ADDI                    ; sys_read
     13 05 09 00     # RD_A0 RS1_S2 MV                   ; File descriptor
-    97 05 00 00     # RD_A1 ~table AUIPC                ; Load address of table
-    !table 93 85 05 00 # RD_A1 RS1_A1 !table ADDI       ; into register a1
+    ~io 97 05 00 00 # RD_A1 ~io AUIPC                   ; Buffer
+    !io 93 85 05 00 # RD_A1 RS1_A1 !io ADDI             ; Buffer
     13 06 10 00     # RD_A2 !1 ADDI                     ; Size of what we want to read
     73 00 00 00     # ECALL                             ; syscall
 
@@ -508,20 +810,42 @@ F3 00              ## e_machine Indicating RISC-V
     13 05 C0 FF     # RD_A0 !-4 ADDI                    ; Put EOF in a0
 :Read_byte_done
     83 35 01 00     # RD_A1 RS1_SP LD                   ; restore a1
-    13 01 81 00     # RD_SP RS1_SP !8 ADDI              ; Deallocate stack
+    03 36 81 00     # RD_A2 RS1_SP !8 LD                ; restore a2
+    13 01 01 01     # RD_SP RS1_SP !16 ADDI             ; Deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
-; Reads a byte and calculates table address
+; Find a label matching pointer in scratch
 ; Returns a pointer in a0
-:Get_table_target
+:GetTarget
     13 01 81 FF     # RD_SP RS1_SP !-8 ADDI             ; Allocate stack
     23 30 11 00     # RS1_SP RS2_RA SD                  ; protect ra
 
-    $Read_byte EF 00 00 00 # RD_RA $Read_byte JAL       ; Get single char label
-    13 15 35 00     # RD_A0 RS1_A0 RS2_X3 SLLI          ; Each label in table takes 8 bytes to store
-    97 02 00 00     # RD_T0 ~table AUIPC                ; Load address of table
-    !table 93 82 02 00 # RD_T0 RS1_T0 !table ADDI       ; into register t0
-    33 05 55 00     # RD_A0 RS1_A0 RS2_T0 ADD           ; Calculate offset
+    93 82 04 00     # RD_T0 RS1_S1 MV                   ; grab jump_table
+
+:GetTarget_loop_0
+    ; Compare the strings
+    ~scratch 17 03 00 00 # RD_T1 ~scratch AUIPC
+    !scratch 13 03 03 00 # RD_T1 RS1_T1 !scratch ADDI   ; reset scratch
+    83 B3 02 01     # RD_T2 RS1_T0 !16 LD               ; I->name
+:GetTarget_loop
+    83 CE 03 00     # RD_T4 RS1_T2 LBU                  ; I->name[i]
+    03 4E 03 00     # RD_T3 RS1_T1 LBU                  ; scratch[i]
+    @GetTarget_miss 63 10 DE 01 # RS1_T3 RS2_T4 @GetTarget_miss BNE ; strings don't match
+
+    ; Look at the next char
+    13 03 13 00     # RD_T1 RS1_T1 !1 ADDI
+    93 83 13 00     # RD_T2 RS1_T2 !1 ADDI
+    @GetTarget_loop 63 90 0E 00 # RS1_T4 @GetTarget_loop BNEZ ; Loop until zero (end of string)
+    $GetTarget_done 6F 00 00 00 # $GetTarget_done JAL    ; We have a match
+
+:GetTarget_miss
+    83 B2 02 00     # RD_T0 RS1_T0 LD                   ; I = I->next
+    @Fail 63 80 02 00 # RS1_T0 @Fail BEQZ               ; Abort, no match found
+
+    $GetTarget_loop_0 6F 00 00 00 # $GetTarget_loop_0 JAL ; Try another label
+
+:GetTarget_done
+    13 85 82 00     # RD_A0 RS1_T0 !8 ADDI              ; Get target address
 
     83 30 01 00     # RD_RA RS1_SP LD                   ; restore ra
     13 01 81 00     # RD_SP RS1_SP !8 ADDI              ; deallocate stack
@@ -531,41 +855,45 @@ F3 00              ## e_machine Indicating RISC-V
     13 01 81 FF     # RD_SP RS1_SP !-8 ADDI             ; Allocate stack
     23 30 11 00     # RS1_SP RS2_RA SD                  ; protect ra
 
-    $Get_table_target EF 00 00 00 # RD_RA $Get_table_target JAL
-    23 30 65 01     # RS1_A0 RS2_S6 SD                  ; Store ip into table target
+    13 85 0C 00     # RD_A0 RS1_S9 MV                   ; strict entry
+    93 8C 8C 01     # RD_S9 RS1_S9 !24 ADDI             ; calloc
+    23 34 65 01     # RS1_A0 RS2_S6 @8 SD               ; entry->target = ip
+    23 30 95 00     # RS1_A0 RS2_S1 SD                  ; entry->next = jump_table
+    93 04 05 00     # RD_S1 RS1_A0 MV                   ; jump_table = entry
+    23 38 95 01     # RS1_A0 RS2_S9 @16 SD              ; entry->name = token
+    93 85 0C 00     # RD_A1 RS1_S9 MV                   ; Write after struct
+    $consume_token EF 00 00 00 # RD_RA $consume_token JAL ; Collect string
+    93 8C 05 00     # RD_S9 RS1_A1 MV                   ; update HEAP
 
     83 30 01 00     # RD_RA RS1_SP LD                   ; restore ra
     13 01 81 00     # RD_SP RS1_SP !8 ADDI              ; deallocate stack
-    67 80 00 00     # RS1_RA JALR                       ; return
+    $First_pass_loop 6F 00 00 00 # $First_pass_loop JAL ; return
 
 ; fputc function
 ; Receives CHAR in a0
 ; Writes and returns number of bytes written in a0
 :fputc
-    13 01 01 FF     # RD_SP RS1_SP !-16 ADDI            ; Allocate stack
+    13 01 81 FE     # RD_SP RS1_SP !-24 ADDI            ; Allocate stack
     23 30 11 00     # RS1_SP RS2_RA SD                  ; protect ra
     23 34 B1 00     # RS1_SP RS2_A1 @8 SD               ; protect a1
+    23 38 C1 00     # RS1_SP RS2_A2 @16 SD              ; protect a2
 
-    97 02 00 00     # RD_T0 ~table AUIPC                ; Load address of table
-    !table 93 82 02 00 # RD_T0 RS1_T0 !table ADDI       ; into register t0
-    23 80 A2 00     # RS1_T0 RS2_A0 SB                  ; Store char
+    ~io 97 05 00 00 # RD_A1 ~io AUIPC                   ; Load address of table
+    !io 93 85 05 00 # RD_A1 RS1_A1 !io ADDI             ; into register t0
+    23 80 A5 00     # RS1_A1 RS2_A0 SB                  ; Store char
 
     93 08 00 04     # RD_A7 !64 ADDI                    ; sys_write
     13 85 09 00     # RD_A0 RS1_S3 MV                   ; file descriptor (stdout)
-    93 85 02 00     # RD_A1 RS1_T0 MV                   ; string address
+    93 85 05 00     # RD_A1 RS1_A1 MV                   ; string address
     13 06 10 00     # RD_A2 !1 ADDI                     ; write 1 character
     73 00 00 00     # ECALL                             ; syscall
 
     83 30 01 00     # RD_RA RS1_SP LD                   ; restore ra
     83 35 81 00     # RD_A1 RS1_SP !8 LD                ; restore a1
-    13 01 01 01     # RD_SP RS1_SP !16 ADDI             ; Deallocate stack
+    03 36 01 01     # RD_A2 RS1_SP !16 LD               ; restore a2
+    13 01 81 01     # RD_SP RS1_SP !24 ADDI             ; Deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
-:Done
-    ; Terminate program with 0 return code
-    93 08 D0 05     # RD_A7 !93 ADDI                    ; sys_exit
-    13 05 00 00     # RD_A0 MV                          ; Return code 0
-    73 00 00 00     # ECALL                             ; exit(0)
 :Fail
     ; Terminate program with 1 return code
     93 08 D0 05     # RD_A7 !93 ADDI                    ; sys_exit
@@ -573,7 +901,10 @@ F3 00              ## e_machine Indicating RISC-V
     73 00 00 00     # ECALL                             ; exit(1)
 # PROGRAM END
 
-:table
-    00
+:io
+    00 00 00 00
+
+:scratch
+    00 00 00 00
 
 :ELF_end

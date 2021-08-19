@@ -1,0 +1,1064 @@
+## Copyright (C) 2021 Andrius Štikonas
+## This file is part of stage0.
+##
+## stage0 is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## stage0 is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with stage0.  If not, see <http://www.gnu.org/licenses/>.
+
+;; Opcodes
+
+;; RV32I Base Instruction Set
+DEFINE LUI   37000000
+DEFINE AUIPC 17000000
+DEFINE JAL   6F000000
+DEFINE JALR  67000000
+DEFINE BEQ   63000000
+DEFINE BNE   63100000
+DEFINE BLT   63400000
+DEFINE BGE   63500000
+DEFINE BLTU  63600000
+DEFINE BGEU  63700000
+DEFINE LB    03000000
+DEFINE LH    03100000
+DEFINE LW    03200000
+DEFINE LBU   03400000
+DEFINE LHU   03500000
+DEFINE SB    23000000
+DEFINE SH    23100000
+DEFINE SW    23200000
+DEFINE ADDI  13000000
+DEFINE SLTI  13200000
+DEFINE SLTIU 13300000
+DEFINE XORI  13400000
+DEFINE ORI   13600000
+DEFINE ANDI  13700000
+DEFINE SLLI  13100000
+DEFINE SRLI  13500000
+DEFINE SRAI  13500040
+DEFINE ADD   33000000
+DEFINE SUB   33000040
+DEFINE SLL   33100000
+DEFINE SLT   33200000
+DEFINE SLTU  33300000
+DEFINE XOR   33400000
+DEFINE SRL   33500000
+DEFINE SRA   33500040
+DEFINE OR    33600000
+DEFINE AND   33700000
+DEFINE ECALL 73000000
+
+;; RV64I Base Instruction set
+DEFINE LWU   03600000
+DEFINE LD    03300000
+DEFINE SD    23300000
+DEFINE ADDIW 1B000000
+DEFINE SLLI  13100000
+DEFINE SRLI  13500000
+DEFINE SRAI  13500040
+DEFINE ADDW  3B000000
+DEFINE SUBW  3B000040
+DEFINE SLLW  3B100000
+DEFINE SRL   3B500000
+DEFINE SRAW  3B500040
+
+;; Pseudoinstructions
+DEFINE NOP  13000000 # ADDI
+DEFINE MV   13000000 # ADDI
+DEFINE NOT  1340F0FF # XORI, RD, RS, -1
+DEFINE BEQZ 63000000 # BEQ
+DEFINE BNEZ 63100000 # BNE
+DEFINE BLTZ 63400000 # BLT
+
+;; Destination registers
+;; register_number << 7
+DEFINE RD_RA  .80000000
+DEFINE RD_SP  .00010000
+DEFINE RD_GP  .80010000
+DEFINE RD_TP  .00020000
+DEFINE RD_T0  .80020000
+DEFINE RD_T1  .00030000
+DEFINE RD_T2  .80030000
+DEFINE RD_S0  .00040000
+DEFINE RD_S1  .80040000
+DEFINE RD_A0  .00050000
+DEFINE RD_A1  .80050000
+DEFINE RD_A2  .00060000
+DEFINE RD_A3  .80060000
+DEFINE RD_A4  .00070000
+DEFINE RD_A5  .80070000
+DEFINE RD_A6  .00080000
+DEFINE RD_A7  .80080000
+DEFINE RD_S2  .00090000
+DEFINE RD_S3  .80090000
+DEFINE RD_S4  .000A0000
+DEFINE RD_S5  .800A0000
+DEFINE RD_S6  .000B0000
+DEFINE RD_S7  .800B0000
+DEFINE RD_S8  .000C0000
+DEFINE RD_S9  .800C0000
+DEFINE RD_S10 .000D0000
+DEFINE RD_S11 .800D0000
+DEFINE RD_T3  .000E0000
+DEFINE RD_T4  .800E0000
+DEFINE RD_T5  .000F0000
+DEFINE RD_T6  .800F0000
+
+;; First source registers
+;; register_number << 15
+DEFINE RS1_RA  .00800000
+DEFINE RS1_SP  .00000100
+DEFINE RS1_GP  .00800100
+DEFINE RS1_TP  .00000200
+DEFINE RS1_T0  .00800200
+DEFINE RS1_T1  .00000300
+DEFINE RS1_T2  .00800300
+DEFINE RS1_S0  .00000400
+DEFINE RS1_S1  .00800400
+DEFINE RS1_A0  .00000500
+DEFINE RS1_A1  .00800500
+DEFINE RS1_A2  .00000600
+DEFINE RS1_A3  .00800600
+DEFINE RS1_A4  .00000700
+DEFINE RS1_A5  .00800700
+DEFINE RS1_A6  .00000800
+DEFINE RS1_A7  .00800800
+DEFINE RS1_S2  .00000900
+DEFINE RS1_S3  .00800900
+DEFINE RS1_S4  .00000A00
+DEFINE RS1_S5  .00800A00
+DEFINE RS1_S6  .00000B00
+DEFINE RS1_S7  .00800B00
+DEFINE RS1_S8  .00000C00
+DEFINE RS1_S9  .00800C00
+DEFINE RS1_S10 .00000D00
+DEFINE RS1_S11 .00800D00
+DEFINE RS1_T3  .00000E00
+DEFINE RS1_T4  .00800E00
+DEFINE RS1_T5  .00000F00
+DEFINE RS1_T6  .00800F00
+
+;; Second source registers
+;; register_number << 20
+DEFINE RS2_RA  .00001000
+DEFINE RS2_SP  .00002000
+DEFINE RS2_GP  .00003000
+DEFINE RS2_TP  .00004000
+DEFINE RS2_T0  .00005000
+DEFINE RS2_T1  .00006000
+DEFINE RS2_T2  .00007000
+DEFINE RS2_S0  .00008000
+DEFINE RS2_S1  .00009000
+DEFINE RS2_A0  .0000A000
+DEFINE RS2_A1  .0000B000
+DEFINE RS2_A2  .0000C000
+DEFINE RS2_A3  .0000D000
+DEFINE RS2_A4  .0000E000
+DEFINE RS2_A5  .0000F000
+DEFINE RS2_A6  .00000001
+DEFINE RS2_A7  .00001001
+DEFINE RS2_S2  .00002001
+DEFINE RS2_S3  .00003001
+DEFINE RS2_S4  .00004001
+DEFINE RS2_S5  .00005001
+DEFINE RS2_S6  .00006001
+DEFINE RS2_S7  .00007001
+DEFINE RS2_S8  .00008001
+DEFINE RS2_S9  .00009001
+DEFINE RS2_S10 .0000A001
+DEFINE RS2_S11 .0000B001
+DEFINE RS2_T3  .0000C001
+DEFINE RS2_T4  .0000D001
+DEFINE RS2_T5  .0000E001
+DEFINE RS2_T6  .0000F001
+
+DEFINE RS2_X0  .00000000
+DEFINE RS2_X1  .00001000
+DEFINE RS2_X2  .00002000
+DEFINE RS2_X3  .00003000
+DEFINE RS2_X4  .00004000
+DEFINE RS2_X5  .00005000
+DEFINE RS2_X6  .00006000
+DEFINE RS2_X7  .00007000
+DEFINE RS2_X8  .00008000
+DEFINE RS2_X9  .00009000
+DEFINE RS2_X10 .0000A000
+DEFINE RS2_X11 .0000B000
+DEFINE RS2_X12 .0000C000
+DEFINE RS2_X13 .0000D000
+DEFINE RS2_X14 .0000E000
+DEFINE RS2_X15 .0000F000
+DEFINE RS2_X16 .00000001
+DEFINE RS2_X17 .00001001
+DEFINE RS2_X18 .00002001
+DEFINE RS2_X19 .00003001
+DEFINE RS2_X20 .00004001
+DEFINE RS2_X21 .00005001
+DEFINE RS2_X22 .00006001
+DEFINE RS2_X23 .00007001
+DEFINE RS2_X24 .00008001
+DEFINE RS2_X25 .00009001
+DEFINE RS2_X26 .0000A001
+DEFINE RS2_X27 .0000B001
+DEFINE RS2_X28 .0000C001
+DEFINE RS2_X29 .0000D001
+DEFINE RS2_X30 .0000E001
+DEFINE RS2_X31 .0000F001
+
+; Where the ELF Header is going to hit
+; Simply jump to _start
+; Our main function
+:_start
+
+; Register use:
+; s1: jump table
+; s2: input fd
+; s3: output fd
+; s4: toggle
+; s5: hold
+; s6: ip
+; s7: tempword
+; s8: shiftregister
+; s9: malloc pointer
+; s10: updates
+
+; Struct format: (size 24)
+; next => 0                      ; Next element in linked list
+; target => 8                    ; Target (ip)
+; name => 16                     ; Label name
+
+    RD_A2 RS1_SP !16 LD               ; Input file name
+
+    ; Initialize globals
+    RD_S4 !-1 ADDI                    ; Toggle
+    RD_S5 ADDI                        ; Hold
+    RD_S6 ~0x600000 LUI               ; Instruction Pointer
+
+    ; Open input file and store FD in s2
+    RD_A7 !56 ADDI                    ; sys_openat
+    RD_A0 !-100 ADDI                  ; AT_FDCWD
+    RD_A1 RS1_A2 MV                   ; file name
+    RD_A2 ADDI                        ; read only
+    ECALL                             ; syscall
+    RS1_A0 @Fail BLTZ                 ; Error opening file
+    RD_S2 RS1_A0 MV                   ; Save fd in for later
+
+    ; Set default FD for output file to stdout
+    RD_S3 !1 ADDI
+
+    ; If we only have 2 arguments, don't use the third (it's not set)
+    RD_T0 !2 ADDI
+    RD_A0 RS1_SP LD                   ; Get number of the args
+    RS1_A0 RS2_T0 @Fail BLT           ; No input file provided
+    RS1_A0 RS2_T0 @after_open BEQ     ; No output file provided. Use stdout
+
+    ; Open output file and store the FD in s3
+    RD_A7 !56 ADDI                    ; sys_openat
+    RD_A0 !-100 ADDI                  ; AT_FDCWD
+    RD_A1 RS1_SP !24 LD               ; Output file (argument 3)
+    RD_A2 !00001101 ADDI              ; decimal 577
+    ; O_TRUNC   00001000
+    ; O_CREAT   00000100
+    ; O_WRONLY  00000001
+    ; OCTAL!
+    RD_A3 !00700 ADDI                 ; Set read, write, execute permission on user
+    ; S_IRWXU  00700
+    ; OCTAL!
+    ECALL                             ; syscall
+    RD_S3 RS1_A0 MV                   ; Save fd in for later
+
+:after_open
+    ; Prepare heap memory
+    RD_A7 !214 ADDI                   ; sys_brk
+    RD_A0 ADDI                        ; Get current brk
+    ECALL                             ; syscall
+    RD_S9 RS1_A0 ADDI                 ; Set our malloc pointer
+
+    RD_A1 ~0x100000 LUI
+    RD_A0 RS1_A0 RS2_A1 ADD           ; Request the 1 MiB
+    RD_A7 !214 ADDI                   ; sys_brk
+    ECALL                             ; syscall
+
+    RD_RA $ClearScratch JAL           ; Zero scratch
+    RD_RA $First_pass JAL             ; First pass
+
+    ; Rewind input file
+    RD_A7 !62 ADDI                    ; sys_lseek
+    RD_A0 RS1_S2 MV                   ; Input file descriptor
+    RD_A1 MV                          ; Set offset to zero
+    RD_A2 MV                          ; Set whence to zero
+    ECALL                             ; syscall
+
+    ; Initialize globals
+    RD_S4 !-1 ADDI                    ; Toggle
+    RD_S5 ADDI                        ; Hold
+    RD_S6 ~0x600000 LUI               ; Instruction Pointer
+    RD_S7 ADDI                        ; tempword
+    RD_S8 ADDI                        ; Shift register
+
+    RD_RA $Second_pass JAL            ; Now do the second pass
+
+    ; Terminate program with 0 return code
+    RD_A7 !93 ADDI                    ; sys_exit
+    RD_A0 MV                          ; Return code 0
+    ECALL                             ; exit(0)
+
+; First pass loop to determine addresses of labels
+:First_pass
+    RD_SP RS1_SP !-8 ADDI             ; Allocate stack
+    RS1_SP RS2_RA SD                  ; protect ra
+
+:First_pass_loop
+    RD_RA $Read_byte JAL              ; Get another byte
+
+    ; Deal with EOF
+    RD_T1 !-4 ADDI
+    RS1_A0 RS2_T1 @First_pass_done BEQ
+
+    ; Check for :
+    RD_T1 !0x3a ADDI
+    RS1_A0 RS2_T1 @StoreLabel BEQ     ; Store this label
+
+    ; Check for .
+    RD_T1 !0x2e ADDI
+    RS1_A0 RS2_T1 @First_pass_UpdateWord BEQ
+
+    ; Check for %
+    RD_T1 !0x25 ADDI
+    RS1_A0 RS2_T1 @First_pass_pointer BEQ
+
+    ; Check for &
+    RD_T1 !0x26 ADDI
+    RS1_A0 RS2_T1 @First_pass_pointer BEQ
+
+    ; Check for !
+    RD_T1 !0x21 ADDI
+    RS1_A0 RS2_T1 @Throwaway_token BEQ
+
+    ; Check for @
+    RD_T1 !0x40 ADDI
+    RS1_A0 RS2_T1 @Throwaway_token BEQ
+
+    ; Check for $
+    RD_T1 !0x24 ADDI
+    RS1_A0 RS2_T1 @Throwaway_token BEQ
+
+    ; Check for ~
+    RD_T1 !0x7e ADDI
+    RS1_A0 RS2_T1 @Throwaway_token BEQ
+
+    ; Check for <
+    RD_T1 !0x3c ADDI
+    RD_A1 !-1 ADDI                    ; write = false
+    RS1_A0 RS2_T1 @PadToAlign BEQ
+
+    RD_A1 !-1 ADDI                    ; write = false
+    RD_A2 !-1 ADDI                    ; update = false
+    RD_RA $DoByte JAL                 ; Deal with everything else
+
+    RD_T1 !-4 ADDI                    ; Deal with EOF
+    RS1_A0 RS2_T1 @First_pass_done BEQ
+
+    $First_pass_loop JAL              ; Keep looping
+
+:Throwaway_token
+    RD_A1 ~scratch AUIPC
+    RD_A1 RS1_A1 !scratch ADDI        ; get scratch
+    RD_RA $consume_token JAL          ; Read token
+    RD_RA $ClearScratch JAL           ; Throw away token
+    $First_pass_loop JAL              ; Loop again
+
+:First_pass_pointer
+    RD_S6 RS1_S6 !4 ADDI              ; Update ip
+    ; Deal with Pointer to label
+    RD_A1 ~scratch AUIPC
+    RD_A1 RS1_A1 !scratch ADDI        ; Using scratch
+    RD_RA $consume_token JAL          ; Read token
+    RD_RA $ClearScratch JAL           ; Throw away token
+    RD_T1 !0x3e ADDI                  ; Check for '>'
+    RS1_A0 RS2_T1 @First_pass_loop BNE ; Loop again
+
+    ; Deal with %label>label case
+    RD_A1 ~scratch AUIPC
+    RD_A1 RS1_A1 !scratch ADDI        ; Using scratch
+    RD_RA $consume_token JAL          ; Read token
+    RD_RA $ClearScratch JAL           ; Throw away token
+    $First_pass_loop JAL              ; Loop again
+
+:First_pass_UpdateWord
+    RD_S10 ADDI                       ; updates = 0
+    RD_S7 ADDI                        ; tempword = 0
+    RD_A5 !4 ADDI                     ; a5 = 4
+:First_pass_UpdateWord_loop
+    RD_RA $Read_byte JAL              ; Read another byte into a0
+
+    RD_A1 !-1 ADDI                    ; write = false
+    RD_A2 ADDI                        ; update = true
+    RD_RA $DoByte JAL                 ; Process byte
+    RS1_S10 RS2_A5 @First_pass_UpdateWord_loop BLT ; loop 4 times
+
+    RD_S6 RS1_S6 !-4 ADDI             ; ip = ip - 4
+
+    $First_pass_loop JAL              ; Loop again
+
+:First_pass_done
+    RD_RA RS1_SP LD                   ; restore ra
+    RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    RS1_RA JALR                       ; return
+
+:Second_pass
+    RD_SP RS1_SP !-8 ADDI             ; Allocate stack
+    RS1_SP RS2_RA SD                  ; protect ra
+
+:Second_pass_loop
+    RD_RA $Read_byte JAL              ; Read another byte
+
+    ; Deal with EOF
+    RD_T1 !-4 ADDI                    ; Deal with EOF
+    RS1_A0 RS2_T1 @Second_pass_done BEQ
+
+    ; Drop the label
+    RD_T1 !0x3a ADDI
+    RS1_A0 RS2_T1 @Second_pass_0 BNE
+
+    RD_A1 ~scratch AUIPC
+    RD_A1 RS1_A1 !scratch ADDI        ; Using scratch
+    RD_RA $consume_token JAL          ; Read the label
+    RD_RA $ClearScratch JAL           ; Throw away token
+
+    $Second_pass_loop JAL             ; Continue looping
+
+:Second_pass_0
+    ; Check for '.'
+    RD_T1 !0x2e ADDI
+    RS1_A0 RS2_T1 @Second_pass_UpdateWord BEQ
+
+    ; Check for %
+    RD_T1 !0x25 ADDI
+    RS1_A0 RS2_T1 @StorePointer BEQ
+
+    ; Check for &
+    RD_T1 !0x26 ADDI
+    RS1_A0 RS2_T1 @StorePointer BEQ
+
+    ; Check for !
+    RD_T1 !0x21 ADDI
+    RS1_A0 RS2_T1 @UpdateShiftRegister BEQ
+
+    ; Check for @
+    RD_T1 !0x40 ADDI
+    RS1_A0 RS2_T1 @UpdateShiftRegister BEQ
+
+    ; Check for $
+    RD_T1 !0x24 ADDI
+    RS1_A0 RS2_T1 @UpdateShiftRegister BEQ
+
+    ; Check for ~
+    RD_T1 !0x7e ADDI
+    RS1_A0 RS2_T1 @UpdateShiftRegister BEQ
+
+    ; Check for <
+    RD_T1 !0x3c ADDI
+    RD_A1 ADDI                        ; write = true
+    RS1_A0 RS2_T1 @PadToAlign BEQ
+
+    ; Deal with everything else
+    RD_A1 ADDI                        ; write = true
+    RD_A2 !-1 ADDI                    ; update = false
+    RD_RA $DoByte JAL                 ; Process our char
+
+    # Deal with EOF
+    RD_T1 !-4 ADDI
+    RS1_A0 RS2_T1 @Second_pass_done BEQ ; We are done
+
+    $Second_pass_loop JAL             ; continue looping
+
+:Second_pass_UpdateWord
+    RD_S10 ADDI                       ; updates = 0
+    RD_S7 ADDI                        ; tempword = 0
+    RD_A5 !4 ADDI                     ; a5 = 4
+
+:Second_pass_UpdateWord_loop
+    RD_RA $Read_byte JAL              ; Read another byte into a0
+
+    RD_A1 !-1 ADDI                    ; write = false
+    RD_A2 ADDI                        ; update = true
+    RD_RA $DoByte JAL                 ; Process byte
+    RS1_S10 RS2_A5 @Second_pass_UpdateWord_loop BLT ; loop 4 times
+
+    RD_A0 RS1_S7 MV                   ; tempword
+    $UpdateShiftRegister_DOT JAL      ; UpdateShiftRegister('.', tempword)
+
+:UpdateShiftRegister
+    RD_A2 RS1_A0 MV                   ; Store label prefix
+    RD_A1 ~scratch AUIPC
+    RD_A1 RS1_A1 !scratch ADDI        ; Get scratch
+    RD_RA $ClearScratch JAL           ; Clear scratch
+    RD_RA $consume_token JAL          ; Read token
+    RD_RA $GetTarget JAL              ; Get target
+    RD_A0 RS1_A0 LD                   ; Dereference pointer
+    RD_A0 RS1_A0 RS2_S6 SUB           ; target - ip
+
+    ; Check for !
+    RD_T1 !0x21 ADDI
+    RS1_A2 RS2_T1 @UpdateShiftRegister_I BEQ
+
+    ; Check for @
+    RD_T1 !0x40 ADDI
+    RS1_A2 RS2_T1 @UpdateShiftRegister_B BEQ
+
+    ; Check for $
+    RD_T1 !0x24 ADDI
+    RS1_A2 RS2_T1 @UpdateShiftRegister_J BEQ
+
+    ; Check for ~
+    RD_T1 !0x7e ADDI
+    RS1_A2 RS2_T1 @UpdateShiftRegister_U BEQ
+
+    $Second_pass_loop JAL             ; continue looping
+
+:UpdateShiftRegister_DOT
+    ; . before instruction means it has to be added to the final word
+
+    ; swap = (((value >> 24) & 0xff) |
+    ;        ((value << 8) & 0xff0000) |
+    ;        ((value >> 8) & 0xff00) |
+    ;        ((value << 24) & 0xff000000))
+
+    RD_T2 RS1_A0 RS2_X24 SRLI         ; value >> 24
+    RD_T1 !0xff ADDI                  ; t1 = 0xff
+    RD_T0 RS1_T1 RS2_T2 AND           ; (value >> 24) & 0xff
+
+    RD_T2 RS1_A0 RS2_X8 SLLI          ; value << 8
+    RD_T1 ~0xff0000 LUI               ; t1 = 0xff0000
+    RD_T2 RS1_T1 RS2_T2 AND           ; (value << 8) & 0xff0000
+    RD_T0 RS1_T0 RS2_T2 OR            ; logical or with the previous expression
+
+    RD_T2 RS1_A0 RS2_X8 SRLI          ; value >> 8
+    RD_T1 ~0xff00 LUI                 ; t1 = 0xff00
+    RD_T1 RS1_T1 !0xff00 ADDIW        ; t1 = 0xff00
+    RD_T2 RS1_T1 RS2_T2 AND           ; (value << 8) & 0xff00
+    RD_T0 RS1_T0 RS2_T2 OR            ; logical or with the previous expression
+
+    RD_T2 RS1_A0 RS2_X24 SLLI         ; value << 24
+    RD_T1 !0xff ADDI
+    RD_T1 RS1_T1 RS2_X24 SLLI         ; t1 = 0xff000000
+    RD_T2 RS1_T1 RS2_T2 AND           ; (value << 24) & 0xff000000
+    RD_T0 RS1_T0 RS2_T2 OR            ; swap
+
+    RD_S8 RS1_S8 RS2_T0 XOR           ; shiftregister = shiftregister ^ swap
+
+    RD_S6 RS1_S6 !-4 ADDI             ; ip = ip - 4
+    $Second_pass_loop JAL             ; continue looping
+
+:UpdateShiftRegister_I
+    ; Corresponds to RISC-V I format
+    RD_A0 RS1_A0 !4 ADDI              ; add 4 due to this being 2nd part of AUIPC combo
+
+    RD_T1 ~0xfff LUI                  ; load higher bits
+    RD_T1 RS1_T1 !0xfff ADDIW
+    RD_T1 RS1_A0 RS2_T1 AND           ; (value & 0xfff)
+    RD_S7 RS1_T1 RS2_X20 SLLI         ; tempword = (value & 0xfff) << 20
+    RD_S8 RS1_S8 RS2_S7 XOR           ; shiftregister = shiftregister ^ tempword
+
+    $Second_pass_loop JAL             ; continue looping
+
+:UpdateShiftRegister_B
+    ; Corresponds to RISC-V B format
+
+    ; tempword = ((value & 0x1e) << 7)            ; imm[4:1]
+    ;          | ((value & 0x7e0) << (31 - 11))   ; imm[10:5]
+    ;          | ((value & 0x800) >> 4)           ; imm[11]
+    ;          | ((value & 0x1000) << (31 - 12))  ; imm[12]
+
+    RD_T1 !0x1e ADDI
+    RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x1e
+    RD_T0 RS1_T1 RS2_X7 SLLI          ; tempword = (value & 0x1e) << 7
+
+    RD_T1 !0x7e0 ADDI
+    RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x7e0
+    RD_T1 RS1_T1 RS2_X20 SLLI         ; (value & 0x7e0) << (31 - 11)
+    RD_T0 RS1_T0 RS2_T1 OR            ; logical or with the previous expression
+
+    RD_T1 ~0x800 LUI                  ; load higher bits
+    RD_T1 RS1_T1 !0x800 ADDIW
+    RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x800
+    RD_T1 RS1_T1 RS2_X4 SRLI          ; (value & 0x800) >> 4
+    RD_T0 RS1_T0 RS2_T1 OR            ; logical or with the previous expression
+
+    RD_T1 ~0x1000 LUI                 ; load higher bits
+    RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x1000
+    RD_T1 RS1_T1 RS2_X19 SLLI         ; (value & 0x1000) << (31 - 12)
+    RD_S7 RS1_T0 RS2_T1 OR            ; logical or with the previous expression
+
+    RD_S8 RS1_S8 RS2_S7 XOR           ; shiftregister = shiftregister ^ tempword
+
+    $Second_pass_loop JAL             ; continue looping
+
+:UpdateShiftRegister_J
+    ; Corresponds to RISC-V J format
+
+    ; tempword = ((value & 0x7fe) << (30 - 10))    ; imm[10:1]
+    ;          | ((value & 0x800) << (20 - 11))    ; imm[11]
+    ;          | ((value & 0xff000))               ; imm[19:12]
+    ;          | ((value & 0x100000) << (31 - 20)) ; imm[20]
+
+    RD_T1 !0x7fe ADDI
+    RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x7fe
+    RD_T0 RS1_T1 RS2_X20 SLLI         ; tempword = (value & 0x7fe) << 20
+
+    RD_T1 ~0x800 LUI                  ; load higher bits
+    RD_T1 RS1_T1 !0x800 ADDIW
+    RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x800
+    RD_T1 RS1_T1 RS2_X9 SLLI          ; (value & 0x800) << (20 - 11)
+    RD_T0 RS1_T0 RS2_T1 OR            ; logical or with the previous expression
+
+    RD_T1 ~0xff000 LUI                ; load higher bits
+    RD_T1 RS1_A0 RS2_T1 AND           ; value & 0xff000
+    RD_T0 RS1_T0 RS2_T1 OR            ; logical or with the previous expression
+
+    RD_T1 ~0x100000 LUI               ; load higher bits
+    RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x100000
+    RD_T1 RS1_T1 RS2_X11 SLLI         ; (value & 0x100000) << (31 - 20)
+    RD_S7 RS1_T0 RS2_T1 OR            ; logical or with the previous expression
+
+    RD_S8 RS1_S8 RS2_S7 XOR           ; shiftregister = shiftregister ^ tempword
+
+    $Second_pass_loop JAL             ; continue looping
+
+:UpdateShiftRegister_U
+    ; Corresponds to RISC-V U format
+    ; if value is 0x800 or more we have to add 11-th bit (0x1000) to compensate for signed extension
+
+    RD_T0 ~0x800 LUI                  ; load higher bits
+    RD_T0 RS1_T0 !0x800 ADDIW
+    RD_T1 ~0xfff LUI                  ; load higher bits
+    RD_T1 RS1_T1 !0xfff ADDIW
+
+    ; We are outside 31-bit that ~ can normally load
+    RD_T2 ~0x100000 LUI               ; load 0xfffff000
+    RD_T2 RS1_T2 !-1 ADDIW            ; load 0xfffff000
+    RD_T2 RS1_T2 RS2_X12 SLLI         ; load 0xfffff000
+    RD_T1 RS1_A0 RS2_T1 AND           ; value & 0xfff
+    RD_S7 RS1_A0 RS2_T2 AND           ; value & 0xfffff000
+    RS1_T1 RS2_T0 @UpdateShiftRegister_U_small BLT
+
+    # Deal with sign extension: add 0x1000
+    RD_T0 ~0x1000 LUI                 ; load higher bits
+    RD_S7 RS1_T0 RS2_S7 ADD           ; (value & 0xfffff000) + 0x1000
+
+:UpdateShiftRegister_U_small
+    RD_S8 RS1_S8 RS2_S7 XOR           ; shiftregister = shiftregister ^ tempword
+
+    $Second_pass_loop JAL             ; continue looping
+
+:StorePointer
+    RD_S6 RS1_S6 !4 ADDI              ; update ip
+    RD_A2 RS1_A0 MV                   ; Store label prefix
+
+    RD_A1 ~scratch AUIPC
+    RD_A1 RS1_A1 !scratch ADDI        ; Get scratch
+    RD_RA $ClearScratch JAL           ; clear scratch
+    RD_RA $consume_token JAL          ; Read token
+    RD_A5 RS1_A0 MV                   ; save char
+    RD_RA $GetTarget JAL              ; Get target
+    RD_A1 RS1_A0 LD                   ; Dereference pointer
+
+    ; If char is > then change relative base address to ip
+    RD_T1 !0x3e ADDI                  ; t1 = 0x3e
+    RS1_T1 RS2_A5 @StorePointer_1 BEQ
+
+    ; Check for &
+    RD_T1 !0x26 ADDI
+    RS1_A2 RS2_T1 @StorePointer_0 BEQ
+
+    ; Check for %
+    RD_T1 !0x25 ADDI
+    RS1_A2 RS2_T1 @Fail BNE
+    RD_A1 RS1_A1 RS2_S6 SUB           ; displacement = target - ip
+
+:StorePointer_0
+    ; Output pointer
+    RD_A5 !4 ADDI                     ; number of bytes
+:StorePointer_loop
+    RD_T1 RS1_A1 RS2_X8 SRLI          ; value / 256
+    RD_A0 RS1_T1 RS2_X8 SLLI
+    RD_A0 RS1_A1 RS2_A0 SUB           ; byte = value % 256
+
+    RD_A1 RS1_T1 MV                   ; value = value / 256
+    RD_RA $fputc JAL                  ; write value
+    RD_A5 RS1_A5 !-1 ADDI             ; decrease number of bytes to write
+    RS1_A5 @StorePointer_loop BNEZ    ; continue looping
+
+    $Second_pass_loop JAL             ; Continue looping
+
+:StorePointer_1
+    RD_A2 RS1_A1 MV                   ; save target
+    RD_A1 ~scratch AUIPC
+    RD_A1 RS1_A1 !scratch ADDI        ; Get scratch
+    RD_RA $ClearScratch JAL           ; clear scratch
+    RD_RA $consume_token JAL          ; consume token
+    RD_RA $GetTarget JAL              ; Get target
+    RD_A1 RS1_A0 LD                   ; Dereference pointer
+    RD_A1 RS1_A2 RS2_A1 SUB           ; displacement = target - ip
+
+    $StorePointer_0 JAL               ; Continue looping
+
+:Second_pass_done
+    RD_RA RS1_SP LD                   ; restore ra
+    RD_SP RS1_SP !8 ADDI              ; Deallocate stack
+    RS1_RA JALR                       ; return
+
+; Pad with zeros to align to word size
+;   bool write in a1
+:PadToAlign
+    RD_T1 !1 ADDI                     ; t1 = 1
+    RD_A0 RS1_S6 RS2_T1 AND           ; ip & 0x1
+    RS1_A0 RS2_T1 @PadToAlign_1 BNE   ; check if ip & 0x1 == 1
+    RD_S6 RS1_S6 RS2_T1 ADD           ; ip = ip + 1
+
+    RS1_A1 @PadToAlign_1 BNEZ         ; check if we have to write
+    RD_A0 MV                          ; a0 = 0
+    RD_RA $fputc JAL                  ; write 0
+
+:PadToAlign_1
+    RD_T1 !2 ADDI                     ; t1 = 2
+    RD_A0 RS1_S6 RS2_T1 AND           ; ip & 0x1
+    RS1_A0 RS2_T1 @PadToAlign_2 BNE   ; check if ip & 0x2 == 2
+    RD_S6 RS1_S6 RS2_T1 ADD           ; ip = ip + 2
+
+    RS1_A1 @PadToAlign_2 BNEZ         ; check if we have to write
+    RD_A0 MV                          ; a0 = 0
+    RD_RA $fputc JAL                  ; write 0
+    RD_A0 MV                          ; a0 = 0
+    RD_RA $fputc JAL                  ; write 0
+
+:PadToAlign_2
+    RS1_A1 @Second_pass_loop BEQZ     ; return to Second_pass
+    $First_pass_loop JAL              ; return to First_pass
+
+; Zero scratch area
+:ClearScratch
+    RD_SP RS1_SP !-24 ADDI            ; Allocate stack
+    RS1_SP RS2_RA SD                  ; protect ra
+    RS1_SP RS2_A0 @8 SD               ; protect a0
+    RS1_SP RS2_A1 @16 SD              ; protect a1
+
+    RD_A0 ~scratch AUIPC
+    RD_A0 RS1_A0 !scratch ADDI        ; Find where our scratch area is
+
+:ClearScratch_loop
+    RD_A1 RS1_A0 LB                   ; Read current byte: s[i]
+    RS1_A0 SB                         ; Write zero: s[i] = 0
+    RD_A0 RS1_A0 !1 ADDI              ; Increment: i = i + 1
+    RS1_A1 @ClearScratch_loop BNEZ    ; Keep looping
+
+    RD_RA RS1_SP LD                   ; restore ra
+    RD_A0 RS1_SP !8 LD                ; restore a0
+    RD_A1 RS1_SP !16 LD               ; restore a1
+    RD_SP RS1_SP !24 ADDI             ; Deallocate stack
+    RS1_RA JALR                       ; return
+
+; Receives pointer in a1
+; Writes our token and updates pointer in a1
+:consume_token
+    RD_SP RS1_SP !-8 ADDI             ; Allocate stack
+    RS1_SP RS2_RA SD                  ; protect ra
+
+:consume_token_0
+    RD_RA $Read_byte JAL              ; Read byte into a0
+
+    ; Check for \t
+    RD_T1 !0x09 ADDI
+    RS1_A0 RS2_T1 @consume_token_done BEQ
+
+    ; Check for \n
+    RD_T1 !0x0a ADDI
+    RS1_A0 RS2_T1 @consume_token_done BEQ
+
+    ; Check for ' '
+    RD_T1 !0x20 ADDI
+    RS1_A0 RS2_T1 @consume_token_done BEQ
+
+    ; Check for >
+    RD_T1 !0x3e ADDI
+    RS1_A0 RS2_T1 @consume_token_done BEQ
+
+    RS1_A1 RS2_A0 SB                  ; Store char
+    RD_A1 RS1_A1 !1 ADDI              ; Point to next spot
+    $consume_token_0 JAL              ; Continue looping
+
+:consume_token_done
+    RS1_A1 SD                         ; Pad with nulls
+    RD_A1 RS1_A1 !8 ADDI              ; Update the pointer
+
+    RD_RA RS1_SP LD                   ; restore ra
+    RD_SP RS1_SP !8 ADDI              ; Deallocate stack
+    RS1_RA JALR                       ; return
+
+; DoByte function
+; Receives:
+;   character in a0
+;   bool write in a1
+;   bool update in a2
+; Does not return anything
+:DoByte
+    RD_SP RS1_SP !-16 ADDI            ; Allocate stack
+    RS1_SP RS2_RA SD                  ; protect ra
+    RS1_SP RS2_A6 @8 SD               ; protect a6
+
+    RD_RA $hex JAL                    ; Process hex, store it in a6
+
+    RS1_A6 @DoByte_Done BLTZ          ; Deal with EOF and unrecognized characters
+
+    RS1_S4 @DoByte_NotToggle BNEZ     ; Check if toggle is set
+
+    ; toggle = true
+    RS1_A1 @DoByte_1 BNEZ             ; check if we have to write
+
+    ; write = true
+    ; We calculate (hold * 16) + hex(c) ^ sr_nextb()
+    ; First, calculate new shiftregister
+    RD_T0 !0xff ADDI
+    RD_T0 RS1_S8 RS2_T0 AND           ; sr_nextb = shiftregister & 0xff
+    RD_S8 RS1_S8 RS2_X8 SRLI          ; shiftregister >> 8
+
+    RD_T0 RS1_T0 RS2_A6 XOR           ; hex(c) ^ sr_nextb
+    RD_T1 RS1_S5 RS2_X4 SLLI          ; hold << 4
+    RD_A0 RS1_T0 RS2_T1 ADD           ; (hold << 4) + hex(c) ^ sr_nextb()
+    RD_RA $fputc JAL                  ; print it
+    RS1_A0 @Fail BEQZ                 ; Fail if nothing was written
+
+:DoByte_1
+    RD_S6 RS1_S6 !1 ADDI              ; Increment IP
+    RS1_A2 @DoByte_2 BEQZ             ; check if we have to update
+:DoByte_2b
+    RD_S5 MV                          ; hold = 0
+    $DoByte_FlipToggle JAL            ; return
+
+:DoByte_NotToggle
+    RD_S5 RS1_A6 MV                   ; hold = hex(c)
+
+:DoByte_FlipToggle
+    RD_S4 RS1_S4 NOT                  ; Flip the toggle
+
+:DoByte_Done
+    RD_RA RS1_SP LD                   ; restore ra
+    RD_A6 RS1_SP !8 LD                ; restore a6
+    RD_SP RS1_SP !16 ADDI             ; Deallocate stack
+    RS1_RA JALR                       ; return
+
+:DoByte_2
+    RD_T1 RS1_S5 RS2_X4 SLLI          ; hold * 16
+    RD_S5 RS1_T1 RS2_A6 ADD           ; hold = hold * 16 + hex(c)
+    RD_T1 RS1_S7 RS2_X8 SLLI          ; tempword << 8
+    RD_S7 RS1_T1 RS2_S5 XOR           ; tempword = (tempword << 8) ^ hold
+    RD_S10 RS1_S10 !1 ADDI            ; updates = updates + 1
+    $DoByte_2b JAL
+
+; Convert ASCII hex characters into binary representation, e.g. 'a' -> 0xA
+; Receives:
+;   character in a0
+; Returns:
+;   a6 with character's hex value.
+:hex
+    RD_SP RS1_SP !-16 ADDI            ; Allocate stack
+    RS1_SP RS2_RA SD                  ; protect ra
+    RS1_SP RS2_A1 @8 SD               ; protect a1
+
+    ; Deal with EOF
+    RD_T1 !-4 ADDI
+    RS1_A0 RS2_T1 @hex_return BEQ
+
+    ; deal with line comments starting with #
+    RD_T1 !0x23 ADDI
+    RS1_A0 RS2_T1 @ascii_comment BEQ  ; a0 eq to '#'
+
+    ; deal with line comments starting with ;
+    RD_T1 !0x3b ADDI
+    RS1_A0 RS2_T1 @ascii_comment BEQ  ; a0 eq to ';'
+
+    ; deal all ascii less than 0
+    RD_T1 !0x30 ADDI
+    RS1_A0 RS2_T1 @ascii_other BLT
+
+    ; deal with 0-9
+    RD_T1 !0x3a ADDI
+    RS1_A0 RS2_T1 @ascii_num BLT
+
+    ; deal with all ascii less than A
+    RD_T1 !0x41 ADDI
+    RS1_A0 RS2_T1 @ascii_other BLT
+
+    ; deal with A-F
+    RD_T1 !0x47 ADDI
+    RS1_A0 RS2_T1 @ascii_high BLT
+
+    ; deal with all ascii less than a
+    RD_T1 !0x61 ADDI
+    RS1_A0 RS2_T1 @ascii_other BLT
+
+    ; deal with a-f
+    RD_T1 !0x67 ADDI
+    RS1_A0 RS2_T1 @ascii_low BLT
+
+    ; The rest that remains needs to be ignored
+    $ascii_other JAL
+
+:ascii_num
+    RD_T1 !0x30 ADDI                  ; '0' -> 0
+    RD_A6 RS1_A0 RS2_T1 SUB
+    $hex_return JAL                   ; return
+:ascii_low
+    RD_T1 !0x57 ADDI                  ; 'a' -> 0xA
+    RD_A6 RS1_A0 RS2_T1 SUB
+    $hex_return JAL                   ; return
+:ascii_high
+    RD_T1 !0x37 ADDI                  ; 'A' -> 0xA
+    RD_A6 RS1_A0 RS2_T1 SUB
+    $hex_return JAL                   ; return
+:ascii_other
+    RD_A6 !-1 ADDI                    ; Return -1
+    $hex_return JAL                   ; return
+:ascii_comment                        ; Read the comment until newline
+    RD_RA $Read_byte JAL
+    RD_T1 !0xd ADDI                   ; CR
+    RS1_A0 RS2_T1 @ascii_comment_cr BEQ
+    RD_T1 !0xa ADDI                   ; LF
+    RS1_A0 RS2_T1 @ascii_comment BNE  ; Keep reading comment
+:ascii_comment_cr
+    RD_A6 !-1 ADDI                    ; Return -1
+:hex_return
+    RD_RA RS1_SP LD                   ; restore ra
+    RD_A1 RS1_SP !8 LD                ; restore a1
+    RD_SP RS1_SP !16 ADDI             ; Deallocate stack
+    RS1_RA JALR                       ; return
+
+; Read byte into a0
+:Read_byte
+    RD_SP RS1_SP !-16 ADDI            ; Allocate stack
+    RS1_SP RS2_A1 SD                  ; protect a1
+    RS1_SP RS2_A2 @8 SD               ; protect a2
+
+    RD_A7 !63 ADDI                    ; sys_read
+    RD_A0 RS1_S2 MV                   ; File descriptor
+    RD_A1 ~io AUIPC                   ; Buffer
+    RD_A1 RS1_A1 !io ADDI             ; Buffer
+    RD_A2 !1 ADDI                     ; Size of what we want to read
+    ECALL                             ; syscall
+
+    RS1_A0 @Read_byte_1 BEQZ          ; Deal with EOF
+    RD_A0 RS1_A1 LBU                  ; Dereference pointer
+
+    $Read_byte_done JAL               ; return
+
+:Read_byte_1
+    RD_A0 !-4 ADDI                    ; Put EOF in a0
+:Read_byte_done
+    RD_A1 RS1_SP LD                   ; restore a1
+    RD_A2 RS1_SP !8 LD                ; restore a2
+    RD_SP RS1_SP !16 ADDI             ; Deallocate stack
+    RS1_RA JALR                       ; return
+
+; Find a label matching pointer in scratch
+; Returns a pointer in a0
+:GetTarget
+    RD_SP RS1_SP !-8 ADDI             ; Allocate stack
+    RS1_SP RS2_RA SD                  ; protect ra
+
+    RD_T0 RS1_S1 MV                   ; grab jump_table
+
+:GetTarget_loop_0
+    ; Compare the strings
+    RD_T1 ~scratch AUIPC
+    RD_T1 RS1_T1 !scratch ADDI        ; reset scratch
+    RD_T2 RS1_T0 !16 LD               ; I->name
+:GetTarget_loop
+    RD_T4 RS1_T2 LBU                  ; I->name[i]
+    RD_T3 RS1_T1 LBU                  ; scratch[i]
+    RS1_T3 RS2_T4 @GetTarget_miss BNE ; strings don't match
+
+    ; Look at the next char
+    RD_T1 RS1_T1 !1 ADDI
+    RD_T2 RS1_T2 !1 ADDI
+    RS1_T4 @GetTarget_loop BNEZ       ; Loop until zero (end of string)
+    $GetTarget_done JAL               ; We have a match
+
+:GetTarget_miss
+    RD_T0 RS1_T0 LD                   ; I = I->next
+    RS1_T0 @Fail BEQZ                 ; Abort, no match found
+
+    $GetTarget_loop_0 JAL             ; Try another label
+
+:GetTarget_done
+    RD_A0 RS1_T0 !8 ADDI              ; Get target address
+
+    RD_RA RS1_SP LD                   ; restore ra
+    RD_SP RS1_SP !8 ADDI              ; Deallocate stack
+    RS1_RA JALR                       ; return
+
+:StoreLabel
+    RD_SP RS1_SP !-8 ADDI             ; Allocate stack
+    RS1_SP RS2_RA SD                  ; protect ra
+
+    RD_A0 RS1_S9 MV                   ; strict entry
+    RD_S9 RS1_S9 !24 ADDI             ; calloc
+    RS1_A0 RS2_S6 @8 SD               ; entry->target = ip
+    RS1_A0 RS2_S1 SD                  ; entry->next = jump_table
+    RD_S1 RS1_A0 MV                   ; jump_table = entry
+    RS1_A0 RS2_S9 @16 SD              ; entry->name = token
+    RD_A1 RS1_S9 MV                   ; Write after struct
+    RD_RA $consume_token JAL          ; Collect string
+    RD_S9 RS1_A1 MV                   ; update HEAP
+
+    RD_RA RS1_SP LD                   ; restore ra
+    RD_SP RS1_SP !8 ADDI              ; Deallocate stack
+    $First_pass_loop JAL              ; return
+
+; fputc function
+; Receives CHAR in a0
+; Writes and returns number of bytes written in a0
+:fputc
+    RD_SP RS1_SP !-24 ADDI            ; Allocate stack
+    RS1_SP RS2_RA SD                  ; protect ra
+    RS1_SP RS2_A1 @8 SD               ; protect a1
+    RS1_SP RS2_A2 @16 SD              ; protect a2
+
+    RD_A1 ~io AUIPC
+    RD_A1 RS1_A1 !io ADDI             ; Get buffer
+    RS1_A1 RS2_A0 SB                  ; Store char
+
+    RD_A7 !64 ADDI                    ; sys_write
+    RD_A0 RS1_S3 MV                   ; file descriptor (stdout)
+    RD_A1 RS1_A1 MV                   ; string address
+    RD_A2 !1 ADDI                     ; write 1 character
+    ECALL                             ; syscall
+
+    RD_RA RS1_SP LD                   ; restore ra
+    RD_A1 RS1_SP !8 LD                ; restore a1
+    RD_A2 RS1_SP !16 LD               ; restore a2
+    RD_SP RS1_SP !24 ADDI             ; Deallocate stack
+    RS1_RA JALR                       ; return
+
+:Fail
+    ; Terminate program with 1 return code
+    RD_A7 !93 ADDI                    ; sys_exit
+    RD_A0 !1 ADDI                     ; Return code 1
+    ECALL                             ; exit(1)
+# PROGRAM END
+
+:io
+    %0
+
+:scratch
+    %0
+
+:ELF_end

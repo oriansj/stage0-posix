@@ -43,3 +43,13 @@
 ./hex1 catm_riscv64.hex1 catm
 # catm removes the need for cat or shell support for redirection by providing
 # equivalent functionality via catm output_file input1 input2 ... inputN
+
+################################
+# Phase-2 Build hex2 from hex1 #
+################################
+./hex1 hex2_riscv64.hex1 hex2
+# hex2 adds support for multi character labels, absolute addresses
+# and combining multiple Risc-V words into a single word.
+# This allows it to function as an effective linker for later stages of the
+# bootstrap. This is a minimal version which will be used to bootstrap
+# cross-platform version in a later stage.

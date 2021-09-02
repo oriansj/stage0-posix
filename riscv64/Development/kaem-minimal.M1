@@ -275,13 +275,13 @@ DEFINE RS2_T6  .0000F001
     # wait4 returns wstatus pointer, from which we can extract child's exit status
     # Check if child exited
     RD_A1 RS1_A1 LD                   # Dereference wstatus pointer
-    RD_T0 !0x7f ADDI                  # t0 = 0x7f
+    RD_T0 !0x7F ADDI                  # t0 = 0x7f
     RD_T0 RS1_A1 RS2_T0 AND           # WTERMSIG(s) ((s) & 0x7f)
     RD_T0 RS1_T0 NOT                  # WIFEXITED(s) = ! WTERMSIG(s)
     RS1_T0 @Fail BEQZ                 # Something went wrong, child did not exit
 
     # Check exit status: WEXITSTATUS(s) (((s) & 0xff00) >> 8)
-    RD_T0 ~0xff00 LUI                 # 0xff00 = 0xffff - 0xff = 2^16 - 2^8
+    RD_T0 ~0xFF00 LUI                 # 0xff00 = 0xffff - 0xff = 2^16 - 2^8
     RD_T0 RS1_T0 !-256 ADDIW          # t0 = 0xff00
     RD_T0 RS1_A1 RS2_T0 AND           # (s) & 0xff00
     #RD_S3 RS1_T0 8 SRLI              # Use S0 as 8th register

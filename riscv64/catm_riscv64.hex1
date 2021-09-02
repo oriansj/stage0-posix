@@ -77,8 +77,8 @@ F3 00              ## e_machine Indicating RISC-V
     13 05 C0 F9     # RD_A0 !-100 ADDI                  ; AT_FDCWD
     13 01 01 01     # RD_SP RS1_SP !16 ADDI             ; Prepare stack for reading output file
     83 35 01 00     # RD_A1 RS1_SP LD                   ; Output file (argument 1)
-    13 06 10 24     # RD_A2 !00001101 ADDI              ; Prepare file as O_WRONLY|O_CREAT|O_TRUNC
-    93 06 00 18     # RD_A3 !0600 ADDI                  ; Prepare file as RW for owner only (600 in octal)
+    13 06 10 24     # RD_A2 !577 ADDI                   ; Prepare file as O_WRONLY|O_CREAT|O_TRUNC
+    93 06 00 18     # RD_A3 !384 ADDI                   ; Prepare file as RW for owner only (600 in octal)
     73 00 00 00     # ECALL                             ; syscall
     93 04 05 00     # RD_S1 RS1_A0 ADDI                 ; Save fd in for later
 

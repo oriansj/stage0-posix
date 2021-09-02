@@ -81,8 +81,8 @@ argv_kaem_minimal:
     .quad kaem_out
     .quad 0
 
-hex0_seed: .asciz "../bootstrap-seeds/POSIX/riscv64/hex0-seed"
 hex0_source: .asciz "hex0_riscv64.hex0"
 hex0_out: .asciz "hex0"
 kaem_source: .asciz "kaem-minimal.hex0"
 kaem_out: .asciz "kaem"
+hex0_seed: .asciz "../bootstrap-seeds/POSIX/riscv64/hex0-seed"

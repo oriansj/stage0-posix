@@ -178,7 +178,7 @@ Purge_LineComment:
 
 
 ;; Store_String Function
-;; Receives C in RCX, HEAD in RDX and Input file in R14
+;; Receives C in RCX, HEAD in RDX and Input file in R15
 ;; Uses RBX for terminator, RCX for C and RDX for string
 Store_String:
 	push rbx                    ; Protect RBX
@@ -552,7 +552,7 @@ Eval_Immediates:
 Eval_Immediates_Loop:
 	;; Check for MACRO
 	mov rax, [rdx+8]            ; I->TYPE
-	cmp rax, 1                  ; IF MACRO == I-TYPE
+	cmp rax, 1                  ; IF MACRO == I->TYPE
 	je Eval_Immediates_Next     ; Skip to next
 
 	;; Check for NULL EXPRESSION
@@ -568,7 +568,7 @@ Eval_Immediates_Loop:
 	mov cl, [rax]               ; I->TEXT[1]
 	movzx rcx, cl               ; Extend to use
 	call numerate_string        ; Convert string to INT
-	cmp rax, 0                  ; IF 0 == numerate_number(I->TEXT + 1)
+	cmp rax, 0                  ; IF 0 == numerate_string(I->TEXT + 1)
 	jne Eval_Immediates_value   ; Has a value
 
 	;; Last chance for Immediate
@@ -688,7 +688,7 @@ express_number:
 	cmp rcx, 37                 ; IF '%' == CH
 	jne express_number2         ; Otherwise try @
 
-	mov rax, 9                  ; We need 3bytes
+	mov rax, 9                  ; We need 9 bytes
 	call malloc                 ; Get S pointer
 	xchg rax, rbx               ; Put S and VALUE in place
 	push rbx                    ; Protect S
@@ -699,7 +699,7 @@ express_number2:
 	cmp rcx, 64                 ; IF '@' == CH
 	jne express_number1         ; Othrewise try !
 
-	mov rax, 5                  ; We need 3bytes
+	mov rax, 5                  ; We need 5 bytes
 	call malloc                 ; Get S pointer
 	xchg rax, rbx               ; Put S and VALUE in place
 	push rbx                    ; Protect S
@@ -707,7 +707,7 @@ express_number2:
 	jmp express_number_done     ; done
 
 express_number1:
-	mov rax, 3                  ; We need 3bytes
+	mov rax, 3                  ; We need 3 bytes
 	call malloc                 ; Get S pointer
 	xchg rax, rbx               ; Put S and VALUE in place
 	push rbx                    ; Protect S

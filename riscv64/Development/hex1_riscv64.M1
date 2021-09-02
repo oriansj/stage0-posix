@@ -256,12 +256,12 @@ DEFINE RS2_X31 .0000F001
     RD_A7 !56 ADDI                    ; sys_openat
     RD_A0 !-100 ADDI                  ; AT_FDCWD
     RD_A1 RS1_SP !24 LD               ; Output file (argument 3)
-    RD_A2 !00001101 ADDI              ; decimal 577
+    RD_A2 !577 ADDI                   ; octal 00001101
     ; O_TRUNC   00001000
     ; O_CREAT   00000100
     ; O_WRONLY  00000001
     ; OCTAL!
-    RD_A3 !00700 ADDI                 ; Set read, write, execute permission on user
+    RD_A3 !448 ADDI                   ; Set read, write, execute permission on user
     ; S_IRWXU  00700
     ; OCTAL!
     ECALL                             ; syscall
@@ -301,7 +301,7 @@ DEFINE RS2_X31 .0000F001
     RS1_A0 RS2_T1 @First_pass_done BEQ
 
     ; Check for :
-    RD_T1 !0x3a ADDI
+    RD_T1 !0x3A ADDI
     RS1_A0 RS2_T1 @First_pass_0 BNE
     RD_RA $StoreLabel JAL             ; Store this label
 
@@ -319,7 +319,7 @@ DEFINE RS2_X31 .0000F001
     RS1_A0 RS2_T1 @Throwaway_token BEQ
 
     ; Check for ~
-    RD_T1 !0x7e ADDI
+    RD_T1 !0x7E ADDI
     RS1_A0 RS2_T1 @Throwaway_token BEQ
 
     RD_A1 !-1 ADDI                    ; write = false
@@ -352,7 +352,7 @@ DEFINE RS2_X31 .0000F001
     RS1_A0 RS2_T1 @Second_pass_done BEQ
 
     ; Drop the label
-    RD_T1 !0x3a ADDI
+    RD_T1 !0x3A ADDI
     RS1_A0 RS2_T1 @Second_pass_0 BNE
 
     RD_RA $Read_byte JAL              ; Read the label
@@ -372,7 +372,7 @@ DEFINE RS2_X31 .0000F001
     RS1_A0 RS2_T1 @UpdateShiftRegister BEQ
 
     ; Check for ~
-    RD_T1 !0x7e ADDI
+    RD_T1 !0x7E ADDI
     RS1_A0 RS2_T1 @UpdateShiftRegister BEQ
 
     ; Deal with everything else
@@ -404,7 +404,7 @@ DEFINE RS2_X31 .0000F001
     RS1_A1 RS2_T1 @UpdateShiftRegister_J BEQ
 
     ; Check for ~
-    RD_T1 !0x7e ADDI
+    RD_T1 !0x7E ADDI
     RS1_A1 RS2_T1 @UpdateShiftRegister_U BEQ
 
     $Second_pass_loop JAL             ; continue looping
@@ -413,8 +413,8 @@ DEFINE RS2_X31 .0000F001
     ; Corresponds to RISC-V I format
     RD_A0 RS1_A0 !4 ADDI              ; add 4 due to this being 2nd part of AUIPC combo
 
-    RD_T1 ~0xfff LUI                  ; load higher bits
-    RD_T1 RS1_T1 !0xfff ADDIW
+    RD_T1 ~0xFFF LUI                  ; load higher bits
+    RD_T1 RS1_T1 !0xFFF ADDIW
     RD_T1 RS1_A0 RS2_T1 AND           ; (value & 0xfff)
     RD_S7 RS1_T1 RS2_X20 SLLI         ; tempword = (value & 0xfff) << 20
     RD_S8 RS1_S8 RS2_S7 XOR           ; shiftregister = shiftregister ^ tempword
@@ -429,11 +429,11 @@ DEFINE RS2_X31 .0000F001
     ;          | ((value & 0x800) >> 4)           ; imm[11]
     ;          | ((value & 0x1000) << (31 - 12))  ; imm[12]
 
-    RD_T1 !0x1e ADDI
+    RD_T1 !0x1E ADDI
     RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x1e
     RD_T0 RS1_T1 RS2_X7 SLLI          ; tempword = (value & 0x1e) << 7
 
-    RD_T1 !0x7e0 ADDI
+    RD_T1 !0x7E0 ADDI
     RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x7e0
     RD_T1 RS1_T1 RS2_X20 SLLI         ; (value & 0x7e0) << (31 - 11)
     RD_T0 RS1_T0 RS2_T1 OR            ; logical or with the previous expression
@@ -461,7 +461,7 @@ DEFINE RS2_X31 .0000F001
     ;          | ((value & 0xff000))               ; imm[19:12]
     ;          | ((value & 0x100000) << (31 - 20)) ; imm[20]
 
-    RD_T1 !0x7fe ADDI
+    RD_T1 !0x7FE ADDI
     RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x7fe
     RD_T0 RS1_T1 RS2_X20 SLLI         ; tempword = (value & 0x7fe) << 20
 
@@ -471,7 +471,7 @@ DEFINE RS2_X31 .0000F001
     RD_T1 RS1_T1 RS2_X9 SLLI          ; (value & 0x800) << (20 - 11)
     RD_T0 RS1_T0 RS2_T1 OR            ; logical or with the previous expression
 
-    RD_T1 ~0xff000 LUI                ; load higher bits
+    RD_T1 ~0xFF000 LUI                ; load higher bits
     RD_T1 RS1_A0 RS2_T1 AND           ; value & 0xff000
     RD_T0 RS1_T0 RS2_T1 OR            ; logical or with the previous expression
 
@@ -490,8 +490,8 @@ DEFINE RS2_X31 .0000F001
 
     RD_T0 ~0x800 LUI                  ; load higher bits
     RD_T0 RS1_T0 !0x800 ADDIW
-    RD_T1 ~0xfff LUI                  ; load higher bits
-    RD_T1 RS1_T1 !0xfff ADDIW
+    RD_T1 ~0xFFF LUI                  ; load higher bits
+    RD_T1 RS1_T1 !0xFFF ADDIW
 
     ; We are outside 31-bit that ~ can normally load
     RD_T2 ~0x100000 LUI               ; load 0xfffff000
@@ -537,7 +537,7 @@ DEFINE RS2_X31 .0000F001
     ; write = true
     ; We calculate (hold * 16) + hex(c) ^ sr_nextb()
     ; First, calculate new shiftregister
-    RD_T0 !0xff ADDI
+    RD_T0 !0xFF ADDI
     RD_T0 RS1_S8 RS2_T0 AND           ; sr_nextb = shiftregister & 0xff
     RD_S8 RS1_S8 RS2_X8 SRLI          ; shiftregister >> 8
 
@@ -582,7 +582,7 @@ DEFINE RS2_X31 .0000F001
     RS1_A0 RS2_T1 @ascii_comment BEQ  ; a0 eq to '#'
 
     ; deal with line comments starting with ;
-    RD_T1 !0x3b ADDI
+    RD_T1 !0x3B ADDI
     RS1_A0 RS2_T1 @ascii_comment BEQ  ; a0 eq to ';'
 
     ; deal all ascii less than 0
@@ -590,7 +590,7 @@ DEFINE RS2_X31 .0000F001
     RS1_A0 RS2_T1 @ascii_other BLT
 
     ; deal with 0-9
-    RD_T1 !0x3a ADDI
+    RD_T1 !0x3A ADDI
     RS1_A0 RS2_T1 @ascii_num BLT
 
     ; deal with all ascii less than A
@@ -629,9 +629,9 @@ DEFINE RS2_X31 .0000F001
     $hex_return JAL                   ; return
 :ascii_comment                        ; Read the comment until newline
     RD_RA $Read_byte JAL
-    RD_T1 !0xd ADDI                   ; CR
+    RD_T1 !0xD ADDI                   ; CR
     RS1_A0 RS2_T1 @ascii_comment_cr BEQ
-    RD_T1 !0xa ADDI                   ; LF
+    RD_T1 !0xA ADDI                   ; LF
     RS1_A0 RS2_T1 @ascii_comment BNE  ; Keep reading comment
 :ascii_comment_cr
     RD_A6 !-1 ADDI                    ; Return -1

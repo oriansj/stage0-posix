@@ -61,8 +61,8 @@ DEFINE RS2_A2  .0000C000
     RD_A0 !-100 ADDI                  ; AT_FDCWD
     RD_SP RS1_SP !16 ADDI             ; Prepare stack for reading output file
     RD_A1 RS1_SP LD                   ; Output file (argument 1)
-    RD_A2 !00001101 ADDI              ; Prepare file as O_WRONLY|O_CREAT|O_TRUNC
-    RD_A3 !0600 ADDI                  ; Prepare file as RW for owner only (600 in octal)
+    RD_A2 !577 ADDI                   ; Prepare file as O_WRONLY|O_CREAT|O_TRUNC
+    RD_A3 !384 ADDI                   ; Prepare file as RW for owner only (600 in octal)
     ECALL                             ; syscall
     RD_S1 RS1_A0 ADDI                 ; Save fd in for later
 

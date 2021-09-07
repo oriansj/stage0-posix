@@ -554,20 +554,19 @@ C1 04 00 00 00 00 00 00 ## p_memsz
 
 ; Read byte into a0
 # :Read_byte ; (0x06003EC)
-    13 01 81 FF     # RD_SP RS1_SP !-8 ADDI             ; Allocate stack
-    23 30 B1 00     # RS1_SP RS2_RA SD                  ; protect a1
+    13 01 01 FF     # RD_SP RS1_SP !-16 ADDI            ; Allocate stack
+    23 34 B1 00     # RS1_SP RS2_A1 @8 SD               ; protect a1
 
     93 08 F0 03     # RD_A7 !63 ADDI                    ; sys_read
     13 05 09 00     # RD_A0 RS1_S2 MV                   ; File descriptor
-    97 05 00 00     # RD_A1 ~table AUIPC                ; Load address of table
-    93 85 45 0C     # RD_A1 RS1_A1 !table ADDI          ; into register a1
-                    # +196B
+    93 05 01 00     # RD_A1 RS1_SP MV                   ; Get stack address for buffer
+    13 00 00 00     # NOP                               ; no-op
     13 06 10 00     # RD_A2 !1 ADDI                     ; Size of what we want to read
     73 00 00 00     # ECALL                             ; syscall
 
     63 06 05 00     # RS1_A0 @Read_byte_1 BEQZ          ; Deal with EOF
                     # +12B
-    03 C5 05 00     # RD_A0 RS1_A1 LBU                  ; Dereference pointer
+    03 85 05 00     # RD_A0 RS1_A1 LB                   ; Dereference pointer
 
     6F 00 80 00     # $Read_byte_done JAL               ; return
                     # +8B
@@ -575,8 +574,8 @@ C1 04 00 00 00 00 00 00 ## p_memsz
 # :Read_byte_1 ; (0x0600418)
     13 05 C0 FF     # RD_A0 !-4 ADDI                    ; Put EOF in a0
 # :Read_byte_done ; (0x060041C)
-    83 35 01 00     # RD_A1 RS1_SP LD                   ; restore a1
-    13 01 81 00     # RD_SP RS1_SP !8 ADDI              ; Deallocate stack
+    83 35 81 00     # RD_A1 RS1_SP !8 LD                ; restore a1
+    13 01 01 01     # RD_SP RS1_SP !16 ADDI             ; Deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
 ; Reads a byte and calculates table address
@@ -613,24 +612,22 @@ C1 04 00 00 00 00 00 00 ## p_memsz
 ; Receives CHAR in a0
 ; Writes and returns number of bytes written in a0
 # :fputc ; (0x060046C)
-    13 01 01 FF     # RD_SP RS1_SP !-16 ADDI            ; Allocate stack
-    23 30 11 00     # RS1_SP RS2_RA SD                  ; protect ra
-    23 34 B1 00     # RS1_SP RS2_A1 @8 SD               ; protect a1
-
-    97 02 00 00     # RD_T0 ~table AUIPC                ; Load address of table
-    93 82 82 04     # RD_T0 RS1_T0 !table ADDI          ; into register t0
-                    # +72B
-    23 80 A2 00     # RS1_T0 RS2_A0 SB                  ; Store char
+    13 01 01 FE     # RD_SP RS1_SP !-32 ADDI            ; allocate stack
+    23 30 A1 00     # RS1_SP RS2_A0 SD                  ; protect a0
+    23 34 11 00     # RS1_SP RS2_RA @8 SD               ; protect ra
+    23 38 B1 00     # RS1_SP RS2_A1 @16 SD              ; protect a1
+    23 3C C1 00     # RS1_SP RS2_A2 @24 SD              ; protect a2
 
     93 08 00 04     # RD_A7 !64 ADDI                    ; sys_write
-    13 85 09 00     # RD_A0 RS1_S3 MV                   ; file descriptor (stdout)
-    93 85 02 00     # RD_A1 RS1_T0 MV                   ; string address
+    13 85 09 00     # RD_A0 RS1_S3 MV                   ; write to output
+    93 05 01 00     # RD_A1 RS1_SP MV                   ; Get stack address
     13 06 10 00     # RD_A2 !1 ADDI                     ; write 1 character
     73 00 00 00     # ECALL                             ; syscall
 
-    83 30 01 00     # RD_RA RS1_SP LD                   ; restore ra
-    83 35 81 00     # RD_A1 RS1_SP !8 LD                ; restore a1
-    13 01 01 01     # RD_SP RS1_SP !16 ADDI             ; Deallocate stack
+    83 30 81 00     # RD_RA RS1_SP !8 LD                ; restore ra
+    83 35 01 01     # RD_A1 RS1_SP !16 LD               ; restore a1
+    03 36 81 01     # RD_A2 RS1_SP !24 LD               ; restore a2
+    13 01 01 02     # RD_SP RS1_SP !32 ADDI             ; Deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
 # :Done ; (0x06004A8)

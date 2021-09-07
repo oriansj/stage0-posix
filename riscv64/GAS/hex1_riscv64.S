@@ -434,25 +434,26 @@ hex_return:
 
 # Read byte into a0
 Read_byte:
-    addi sp, sp, -8              # Allocate stack
-    sd a1, 0(sp)                 # protect a1
+    addi sp, sp, -16             # Allocate stack
+    sd a1, 8(sp)                 # protect a1
 
     li a7, 63                    # sys_read
     mv a0, s2                    # File descriptor
-    la a1, table                 # Buffer
+    mv a1, sp                    # Get stack address for buffer
+    nop                          # no operation
     li a2, 1                     # Size of what we want to read
     ecall                        # syscall
 
     beqz a0, Read_byte_1         # Deal with EOF
-    lbu a0, (a1)                 # Dereference pointer
+    lb a0, (a1)                  # Dereference pointer
 
     j Read_byte_done             # return
 
 Read_byte_1:
     li a0, -4                    # Put EOF in a0
 Read_byte_done:
-    ld a1, 0(sp)                 # restore a1
-    addi sp, sp, 8               # Deallocate stack
+    ld a1, 8(sp)                 # restore a1
+    addi sp, sp, 16              # Deallocate stack
     ret                          # return
 
 # Reads a byte and calculates table address
@@ -485,22 +486,22 @@ StoreLabel:
 # Receives CHAR in a0
 # Writes and returns number of bytes written in a0
 fputc:
-    addi sp, sp, -16             # Allocate stack
-    sd ra, 0(sp)                 # protect ra
-    sd a1, 8(sp)                 # protect a1
-
-    la t0, table                 # Get buffer
-    sb a0, (t0)                  # Store char
+    addi sp, sp, -32             # allocate stack
+    sd a0, 0(sp)                 # protect a0
+    sd ra, 8(sp)                 # protect ra
+    sd a1, 16(sp)                # protect a1
+    sd a2, 24(sp)                # protect a2
 
     li a7, 64                    # sys_write
-    mv a0, s3                    # file descriptor (stdout)
-    mv a1, t0                    # string address
-    li a2, 1                     # length of the string
+    mv a0, s3                    # write to output
+    mv a1, sp                    # Get stack address
+    li a2, 1                     # write 1 character
     ecall                        # syscall
 
-    ld ra, 0(sp)                 # restore ra
-    ld a1, 8(sp)                 # restore a1
-    addi sp, sp, 16              # Deallocate stack
+    ld ra, 8(sp)                 # restore ra
+    ld a1, 16(sp)                # restore a1
+    ld a2, 24(sp)                # restore a2
+    addi sp, sp, 32              # deallocate stack
     ret                          # return
 
 Done:

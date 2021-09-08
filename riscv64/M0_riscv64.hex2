@@ -1,0 +1,1584 @@
+## Copyright (C) 2017 Jeremiah Orians
+## Copyright (C) 2021 Andrius Štikonas
+## This file is part of stage0.
+##
+## stage0 is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## stage0 is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with stage0.  If not, see <http://www.gnu.org/licenses/>.
+
+; Where the ELF Header is going to hit
+; Simply jump to _start
+; Our main function
+
+; Register use:
+; s1: malloc pointer
+; s2: input fd
+; s3: output fd
+; s4: struct HEAD
+; s5: protected char
+
+; Struct format: (size 32)
+; NEXT => 0                           ; Next element in linked list
+; TYPE => 8                           ; Token type
+; TEXT => 16
+; EXPRESSION => 24
+
+; Types
+; None => 0
+; MACRO => 1
+; STRING => 2
+
+:_start
+    # RD_A2 RS1_SP !16 LD               ; Input file name
+    .00060000 .00000100 .00000001 03300000
+
+    ; Open input file and store FD in s2
+    # RD_A7 !56 ADDI                    ; sys_openat
+    .80080000 .00008003 13000000
+    # RD_A0 !-100 ADDI                  ; AT_FDCWD
+    .00050000 .0000C0F9 13000000
+    # RD_A1 RS1_A2 MV                   ; file name
+    .80050000 .00000600 13000000
+    # RD_A2 ADDI                        ; read only
+    .00060000 13000000
+    # ECALL                             ; syscall
+    73000000
+    # RS1_A0 @Fail BLTZ                 ; Error opening file
+    .00000500 @Fail 63400000
+    # RD_S2 RS1_A0 MV                   ; Save fd in for later
+    .00090000 .00000500 13000000
+
+    ; Set default FD for output file to stdout
+    # RD_S3 !1 ADDI
+    .80090000 .00001000 13000000
+
+    ; If we only have 2 arguments, don't use the third (it's not set)
+    # RD_T0 !2 ADDI
+    .80020000 .00002000 13000000
+    # RD_A0 RS1_SP LD                   ; Get number of the args
+    .00050000 .00000100 03300000
+    # RS1_A0 RS2_T0 @Fail BLT           ; No input file provided
+    .00000500 .00005000 @Fail 63400000
+    # RS1_A0 RS2_T0 @after_open BEQ     ; No output file provided. Use stdout
+    .00000500 .00005000 @after_open 63000000
+
+    ; Open output file and store the FD in s3
+    # RD_A7 !56 ADDI                    ; sys_openat
+    .80080000 .00008003 13000000
+    # RD_A0 !-100 ADDI                  ; AT_FDCWD
+    .00050000 .0000C0F9 13000000
+    # RD_A1 RS1_SP !24 LD               ; Output file (argument 3)
+    .80050000 .00000100 .00008001 03300000
+    # RD_A2 !577 ADDI                   ; octal 00001101
+    .00060000 .00001024 13000000
+    ; O_TRUNC   00001000
+    ; O_CREAT   00000100
+    ; O_WRONLY  00000001
+    ; OCTAL!
+    # RD_A3 !384 ADDI                   ; Set read and write permission on user
+    .80060000 .00000018 13000000
+    # ECALL                             ; syscall
+    73000000
+    # RD_S3 RS1_A0 MV                   ; Save fd in for later
+    .80090000 .00000500 13000000
+
+:after_open
+    ; Prepare heap memory
+    # RD_A7 !214 ADDI                   ; sys_brk
+    .80080000 .0000600D 13000000
+    # RD_A0 ADDI                        ; Get current brk
+    .00050000 13000000
+    # ECALL                             ; syscall
+    73000000
+    # RD_S1 RS1_A0 MV                   ; Set our malloc pointer
+    .80040000 .00000500 13000000
+
+    # RD_RA $Tokenize_Line JAL          ; Get all lines
+    .80000000 $Tokenize_Line 6F000000
+    # RD_A0 RS1_S4 MV                   ; Prepare for Reverse_List
+    .00050000 .00000A00 13000000
+    # RD_RA $Reverse_List JAL           ; Correct order
+    .80000000 $Reverse_List 6F000000
+    # RD_S4 RS1_A0 MV                   ; Update HEAD
+    .000A0000 .00000500 13000000
+    # RD_RA $Identify_Macros JAL        ; Find the DEFINEs
+    .80000000 $Identify_Macros 6F000000
+    # RD_RA $Line_Macro JAL             ; Apply the DEFINEs
+    .80000000 $Line_Macro 6F000000
+    # RD_RA $Process_String JAL         ; Handle strings
+    .80000000 $Process_String 6F000000
+    # RD_RA $Eval_Immediates JAL        ; Handle numbers
+    .80000000 $Eval_Immediates 6F000000
+    # RD_RA $Preserve_Other JAL         ; Collect the remaining
+    .80000000 $Preserve_Other 6F000000
+    # RD_RA $Print_Hex JAL              ; Output our results
+    .80000000 $Print_Hex 6F000000
+
+    ; Terminate program with 0 return code
+    # RD_A7 !93 ADDI                    ; sys_exit
+    .80080000 .0000D005 13000000
+    # RD_A0 MV                          ; Return code 0
+    .00050000 13000000
+    # ECALL                             ; exit(0)
+    73000000
+
+
+; Tokenize_Line Function
+; Using input file s2 and Head s4
+; Creates a linked list of structs
+; Uses a1 for in_set strings, a2 for Int C and a3 for Struct Token* p
+:Tokenize_Line
+    # RD_SP RS1_SP !-8 ADDI             ; allocate stack
+    .00010000 .00000100 .000080FF 13000000
+    # RS1_SP RS2_RA SD                  ; protect ra
+    .00000100 .00001000 23300000
+
+:restart
+    # RD_RA $fgetc JAL                  ; Read a char
+    .80000000 $fgetc 6F000000
+    # RD_T0 !-4 ADDI                    ; EOF
+    .80020000 .0000C0FF 13000000
+    # RS1_A0 RS2_T0 @done BEQ           ; File is collected
+    .00000500 .00005000 @done 63000000
+
+    # RD_A2 RS1_A0 MV                   ; Protect C
+    .00060000 .00000500 13000000
+
+    # RD_A1 ~comments AUIPC             ; Get pointer to "#;"
+    .80050000 ~comments 17000000
+    # RD_A1 RS1_A1 !comments ADDI       ; Get pointer to "#;"
+    .80050000 .00800500 !comments 13000000
+    # RD_RA $In_Set JAL                 ; Check for comments
+    .80000000 $In_Set 6F000000
+    # RD_T0 !1 ADDI                     ; If comment
+    .80020000 .00001000 13000000
+    # RS1_A0 RS2_T0 @Purge_LineComment BEQ ; try again
+    .00000500 .00005000 @Purge_LineComment 63000000
+
+    # RD_A0 RS1_A2 MV                   ; Put C in place for check
+    .00050000 .00000600 13000000
+    # RD_A1 ~terminators AUIPC          ; Get pointer to "\n\t "
+    .80050000 ~terminators 17000000
+    # RD_A1 RS1_A1 !terminators ADDI    ; Get pointer to "\n\t "
+    .80050000 .00800500 !terminators 13000000
+    # RD_RA $In_Set JAL                 ; Check for terminators
+    .80000000 $In_Set 6F000000
+    # RD_T0 !1 ADDI                     ; If terminator
+    .80020000 .00001000 13000000
+    # RS1_A0 RS2_T0 @restart BEQ        ; try again
+    .00000500 .00005000 @restart 63000000
+
+    # RD_A0 !32 ADDI                    ; malloc struct P
+    .00050000 .00000002 13000000
+    # RD_RA $malloc JAL                 ; Get pointer to P
+    .80000000 $malloc 6F000000
+    # RD_A3 RS1_A0 MV                   ; Protect P
+    .80060000 .00000500 13000000
+    # RS1_A3 RS2_S4 SD                  ; P->NEXT = HEAD
+    .00800600 .00004001 23300000
+    # RD_S4 RS1_A3 MV                   ; HEAD = P
+    .000A0000 .00800600 13000000
+
+    # RD_A0 RS1_A2 MV                   ; Put C in place for check
+    .00050000 .00000600 13000000
+    # RD_A1 ~string_char AUIPC          ; Get pointer to "\"'"
+    .80050000 ~string_char 17000000
+    # RD_A1 RS1_A1 !string_char ADDI    ; Get pointer to "\"'"
+    .80050000 .00800500 !string_char 13000000
+    # RD_RA $In_Set JAL                 ; Check for string char
+    .80000000 $In_Set 6F000000
+    # RD_T0 !1 ADDI                     ; If string char
+    .80020000 .00001000 13000000
+    # RS1_A0 RS2_T0 @Store_String BEQ   ; Get string
+    .00000500 .00005000 @Store_String 63000000
+
+    # RD_RA $Store_Atom JAL             ; Get whole token
+    .80000000 $Store_Atom 6F000000
+    # $restart JAL
+    $restart 6F000000
+
+:done
+    # RD_RA RS1_SP LD                   ; restore ra
+    .80000000 .00000100 03300000
+    # RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    .00010000 .00000100 .00008000 13000000
+    # RS1_RA JALR                       ; return
+    .00800000 67000000
+
+
+; In_Set function
+; Receives char C in a0 and Char* in a1
+; Returns 1 if true, zero if false in a0
+:In_Set
+    # RD_SP RS1_SP !-8 ADDI             ; allocate stack
+    .00010000 .00000100 .000080FF 13000000
+    # RS1_SP RS2_A1 SD                  ; protect a1
+    .00000100 .0000B000 23300000
+
+:In_Set_loop
+    # RD_T0 RS1_A1 LBU                  ; Read char
+    .80020000 .00800500 03400000
+    # RS1_A0 RS2_T0 @In_Set_True BEQ    ; Return true
+    .00000500 .00005000 @In_Set_True 63000000
+    # RS1_T0 @In_Set_False BEQZ         ; Return False if NULL
+    .00800200 @In_Set_False 63000000
+    # RD_A1 RS1_A1 !1 ADDI              ; s = s + 1
+    .80050000 .00800500 .00001000 13000000
+    # $In_Set_loop JAL                  ; Continue looping
+    $In_Set_loop 6F000000
+
+:In_Set_True
+    # RD_A0 !1 ADDI                     ; Set True
+    .00050000 .00001000 13000000
+    # RD_A1 RS1_SP LD                   ; restore a1
+    .80050000 .00000100 03300000
+    # RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    .00010000 .00000100 .00008000 13000000
+    # RS1_RA JALR                       ; return
+    .00800000 67000000
+
+:In_Set_False
+    # RD_A0 MV                          ; Set False
+    .00050000 13000000
+    # RD_A1 RS1_SP LD                   ; restore a1
+    .80050000 .00000100 03300000
+    # RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    .00010000 .00000100 .00008000 13000000
+    # RS1_RA JALR                       ; return
+    .00800000 67000000
+
+
+; Purge_LineComment function
+; Reads chars until LF and jumps to restart
+:Purge_LineComment
+    # RD_RA $fgetc JAL                  ; Get a char
+    .80000000 $fgetc 6F000000
+    # RD_T0 !10 ADDI                    ; While not LF
+    .80020000 .0000A000 13000000
+    # RS1_A0 RS2_T0 @Purge_LineComment BNE ; Keep reading
+    .00000500 .00005000 @Purge_LineComment 63100000
+    # $restart JAL
+    $restart 6F000000
+
+
+; Store_String Function
+; Receives C in a2, HEAD in a3 and Input file in s2
+; Uses a1 for terminator, a2 for C and a3 for string
+:Store_String
+    # RD_SP RS1_SP !-24 ADDI            ; allocate stack
+    .00010000 .00000100 .000080FE 13000000
+    # RS1_SP RS2_A1 SD                  ; protect a1
+    .00000100 .0000B000 23300000
+    # RS1_SP RS2_A2 @8 SD               ; protect a2
+    .00000100 .0000C000 .00040000 23300000
+    # RS1_SP RS2_A3 @16 SD              ; protect a3
+    .00000100 .0000D000 .00080000 23300000
+
+    # RD_A0 !2 ADDI                     ; Using TYPE STRING
+    .00050000 .00002000 13000000
+    # RS1_A3 RS2_A0 @8 SD               ; HEAD->TYPE = STRING
+    .00800600 .0000A000 .00040000 23300000
+    # RD_A0 !256 ADDI                   ; Malloc the string
+    .00050000 .00000010 13000000
+    # RD_RA $malloc JAL                 ; Get pointer to P
+    .80000000 $malloc 6F000000
+    # RS1_A3 RS2_A0 @16 SD              ; HEAD->TEXT = STRING
+    .00800600 .0000A000 .00080000 23300000
+    # RD_A1 RS1_A2 MV                   ; Protect terminator
+    .80050000 .00000600 13000000
+    # RD_A3 RS1_A0 MV                   ; Protect string pointer
+    .80060000 .00000500 13000000
+:Store_String_Loop
+    # RS1_A3 RS2_A2 SB                  ; write byte
+    .00800600 .0000C000 23000000
+    # RD_RA $fgetc JAL                  ; read next char
+    .80000000 $fgetc 6F000000
+    # RD_A2 RS1_A0 MV                   ; Update C
+    .00060000 .00000500 13000000
+    # RD_A3 RS1_A3 !1 ADDI              ; STRING = STRING + 1
+    .80060000 .00800600 .00001000 13000000
+    # RS1_A1 RS2_A2 @Store_String_Loop BNE ; Keep looping unless we hit terminator
+    .00800500 .0000C000 @Store_String_Loop 63100000
+
+    # RD_A1 RS1_SP LD                   ; restore a1
+    .80050000 .00000100 03300000
+    # RD_A2 RS1_SP !8 LD                ; restore a2
+    .00060000 .00000100 .00008000 03300000
+    # RD_A3 RS1_SP !16 LD               ; restore a3
+    .80060000 .00000100 .00000001 03300000
+    # RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    .00010000 .00000100 .00008001 13000000
+    # $restart JAL
+    $restart 6F000000
+
+
+; Store_Atom Function
+; Receives C in a2, HEAD in a3 and Input file in s2
+; Uses a1 for in_set strings, a2 for C and a3 for string
+:Store_Atom
+    # RD_SP RS1_SP !-32 ADDI            ; allocate stack
+    .00010000 .00000100 .000000FE 13000000
+    # RS1_SP RS2_RA SD                  ; protect ra
+    .00000100 .00001000 23300000
+    # RS1_SP RS2_A1 @8 SD               ; protect a1
+    .00000100 .0000B000 .00040000 23300000
+    # RS1_SP RS2_A2 @16 SD              ; protect a2
+    .00000100 .0000C000 .00080000 23300000
+    # RS1_SP RS2_A3 @24 SD              ; protect a3
+    .00000100 .0000D000 .000C0000 23300000
+
+    # RD_A0 !256 ADDI                   ; Malloc the string
+    .00050000 .00000010 13000000
+    # RD_RA $malloc JAL                 ; Get pointer to P
+    .80000000 $malloc 6F000000
+    # RS1_A3 RS2_A0 @16 SD              ; HEAD->TEXT = STRING
+    .00800600 .0000A000 .00080000 23300000
+    # RD_A1 ~terminators AUIPC          ; Get pointer to "\n\t "
+    .80050000 ~terminators 17000000
+    # RD_A1 RS1_A1 !terminators ADDI    ; Get pointer to "\n\t "
+    .80050000 .00800500 !terminators 13000000
+    # RD_A3 RS1_A0 MV                   ; Protect string pointer
+    .80060000 .00000500 13000000
+
+:Store_Atom_loop
+    # RS1_A3 RS2_A2 SB                  ; write byte
+    .00800600 .0000C000 23000000
+    # RD_RA $fgetc JAL                  ; read next char
+    .80000000 $fgetc 6F000000
+    # RD_A2 RS1_A0 MV                   ; Update C
+    .00060000 .00000500 13000000
+    # RD_A3 RS1_A3 !1 ADDI              ; STRING = STRING + 1
+    .80060000 .00800600 .00001000 13000000
+    # RD_RA $In_Set JAL                 ; Check for terminators
+    .80000000 $In_Set 6F000000
+    # RS1_A0 @Store_Atom_loop BEQZ      ; Loop if not "\n\t "
+    .00000500 @Store_Atom_loop 63000000
+
+    # RD_RA RS1_SP LD                   ; restore ra
+    .80000000 .00000100 03300000
+    # RD_A1 RS1_SP !8 LD                ; restore a1
+    .80050000 .00000100 .00008000 03300000
+    # RD_A2 RS1_SP !16 LD               ; restore a2
+    .00060000 .00000100 .00000001 03300000
+    # RD_A3 RS1_SP !24 LD               ; restore a3
+    .80060000 .00000100 .00008001 03300000
+    # RD_SP RS1_SP !32 ADDI             ; deallocate stack
+    .00010000 .00000100 .00000002 13000000
+    # RS1_RA JALR                       ; return
+    .00800000 67000000
+
+
+; Reverse_List function
+; Receives list in a0
+; Returns the list reversed in a0
+:Reverse_List
+    # RD_SP RS1_SP !-16 ADDI            ; allocate stack
+    .00010000 .00000100 .000000FF 13000000
+    # RS1_SP RS2_A1 SD                  ; protect a1
+    .00000100 .0000B000 23300000
+    # RS1_SP RS2_A2 @8 SD               ; protect a2
+    .00000100 .0000C000 .00040000 23300000
+    # RD_A1 RS1_A0 MV                   ; Set HEAD
+    .80050000 .00000500 13000000
+    # RD_A0 MV                          ; ROOT = NULL
+    .00050000 13000000
+:Reverse_List_Loop
+    # RS1_A1 @Reverse_List_Done BEQZ    ; Stop if HEAD == NULL
+    .00800500 @Reverse_List_Done 63000000
+
+    # RD_A2 RS1_A1 LD                   ; NEXT = HEAD->NEXT
+    .00060000 .00800500 03300000
+    # RS1_A1 RS2_A0 SD                  ; HEAD->NEXT = ROOT
+    .00800500 .0000A000 23300000
+    # RD_A0 RS1_A1 MV                   ; ROOT = HEAD
+    .00050000 .00800500 13000000
+    # RD_A1 RS1_A2 MV                   ; HEAD = NEXT
+    .80050000 .00000600 13000000
+    # $Reverse_List_Loop JAL            ; Continue looping
+    $Reverse_List_Loop 6F000000
+
+:Reverse_List_Done
+    # RD_A1 RS1_SP LD                   ; restore a1
+    .80050000 .00000100 03300000
+    # RD_A2 RS1_SP !8 LD                ; restore a2
+    .00060000 .00000100 .00008000 03300000
+    # RD_SP RS1_SP !16 ADDI             ; deallocate stack
+    .00010000 .00000100 .00000001 13000000
+    # RS1_RA JALR                       ; return
+    .00800000 67000000
+
+
+; Identify_Macros function
+; Receives List in a0
+; Updates the list in place; does not modify registers
+; Uses a1 for DEFINE, a2 for I
+:Identify_Macros
+    # RD_SP RS1_SP !-32 ADDI            ; allocate stack
+    .00010000 .00000100 .000000FE 13000000
+    # RS1_SP RS2_RA SD                  ; protect ra
+    .00000100 .00001000 23300000
+    # RS1_SP RS2_A0 @8 SD               ; protect a0
+    .00000100 .0000A000 .00040000 23300000
+    # RS1_SP RS2_A1 @16 SD              ; protect a1
+    .00000100 .0000B000 .00080000 23300000
+    # RS1_SP RS2_A2 @24 SD              ; protect a2
+    .00000100 .0000C000 .000C0000 23300000
+
+    # RD_A1 ~DEFINE_str AUIPC           ; Setup DEFINE string
+    .80050000 ~DEFINE_str 17000000
+    # RD_A1 RS1_A1 !DEFINE_str ADDI     ; Setup DEFINE string
+    .80050000 .00800500 !DEFINE_str 13000000
+    # RD_A2 RS1_A0 MV                   ; I = HEAD
+    .00060000 .00000500 13000000
+
+:Identify_Macros_Loop
+    # RD_A0 RS1_A2 !16 LD               ; I->TEXT
+    .00050000 .00000600 .00000001 03300000
+    # RD_RA $match JAL                  ; IF "DEFINE" == I->TEXT
+    .80000000 $match 6F000000
+    # RS1_A0 @Identify_Macros_Next BNEZ ; Check if we got macro
+    .00000500 @Identify_Macros_Next 63100000
+
+    ; Deal with MACRO
+    # RD_A0 !1 ADDI                     ; a0 = MACRO
+    .00050000 .00001000 13000000
+    # RS1_A2 RS2_A0 @8 SD               ; I->TYPE = MACRO
+    .00000600 .0000A000 .00040000 23300000
+
+    # RD_A0 RS1_A2 LD                   ; I->NEXT
+    .00050000 .00000600 03300000
+    # RD_A0 RS1_A0 !16 LD               ; I->NEXT->TEXT
+    .00050000 .00000500 .00000001 03300000
+    # RS1_A2 RS2_A0 @16 SD              ; I->TEXT = I->NEXT->TEXT
+    .00000600 .0000A000 .00080000 23300000
+
+    # RD_A0 RS1_A2 LD                   ; I->NEXT
+    .00050000 .00000600 03300000
+    # RD_A0 RS1_A0 LD                   ; I->NEXT->NEXT
+    .00050000 .00000500 03300000
+    # RD_A0 RS1_A0 !16 LD               ; I->NEXT->NEXT->TEXT
+    .00050000 .00000500 .00000001 03300000
+    # RS1_A2 RS2_A0 @24 SD              ; I->EXPRESSION = I->NEXT->NEXT->TEXT
+    .00000600 .0000A000 .000C0000 23300000
+
+    # RD_A0 RS1_A2 LD                   ; I->NEXT
+    .00050000 .00000600 03300000
+    # RD_A0 RS1_A0 LD                   ; I->NEXT->NEXT
+    .00050000 .00000500 03300000
+    # RD_A0 RS1_A0 LD                   ; I->NEXT->NEXT->NEXT
+    .00050000 .00000500 03300000
+    # RS1_A2 RS2_A0 SD                  ; I->NEXT = I->NEXT->NEXT->NEXT
+    .00000600 .0000A000 23300000
+
+:Identify_Macros_Next
+    # RD_A2 RS1_A2 LD                   ; I = I->NEXT
+    .00060000 .00000600 03300000
+    # RS1_A2 @Identify_Macros_Loop BNEZ ; Check if we are done
+    .00000600 @Identify_Macros_Loop 63100000
+
+    # RD_RA RS1_SP LD                   ; restore ra
+    .80000000 .00000100 03300000
+    # RD_A0 RS1_SP !8 LD                ; restore a0
+    .00050000 .00000100 .00008000 03300000
+    # RD_A1 RS1_SP !16 LD               ; restore a1
+    .80050000 .00000100 .00000001 03300000
+    # RD_A2 RS1_SP !24 LD               ; restore a2
+    .00060000 .00000100 .00008001 03300000
+    # RD_SP RS1_SP !32 ADDI             ; deallocate stack
+    .00010000 .00000100 .00000002 13000000
+    # RS1_RA JALR                       ; return
+    .00800000 67000000
+
+
+; match function
+; Receives CHAR* in a0 and CHAR* in a1
+; Returns 0 (TRUE) or 1 (FALSE) in a0
+:match
+    # RD_SP RS1_SP !-24 ADDI            ; allocate stack
+    .00010000 .00000100 .000080FE 13000000
+    # RS1_SP RS2_A1 SD                  ; protect a1
+    .00000100 .0000B000 23300000
+    # RS1_SP RS2_A2 @8 SD               ; protect a2
+    .00000100 .0000C000 .00040000 23300000
+    # RS1_SP RS2_A3 @16 SD              ; protect a3
+    .00000100 .0000D000 .00080000 23300000
+
+    # RD_A2 RS1_A0 MV                   ; S1 in place
+    .00060000 .00000500 13000000
+    # RD_A3 RS1_A1 MV                   ; S2 in place
+    .80060000 .00800500 13000000
+
+:match_Loop
+    # RD_A0 RS1_A2 LBU                  ; S1[i]
+    .00050000 .00000600 03400000
+    # RD_A1 RS1_A3 LBU                  ; S2[i]
+    .80050000 .00800600 03400000
+    # RS1_A0 RS2_A1 @match_False BNE    ; Check if they match
+    .00000500 .0000B000 @match_False 63100000
+
+    # RD_A2 RS1_A2 !1 ADDI              ; S1 = S1 + 1
+    .00060000 .00000600 .00001000 13000000
+    # RD_A3 RS1_A3 !1 ADDI              ; S2 = S2 + 1
+    .80060000 .00800600 .00001000 13000000
+    # RS1_A0 @match_Done BEQZ           ; Match if we reached end of string
+    .00000500 @match_Done 63000000
+    # $match_Loop JAL                   ; Otherwise keep looping
+    $match_Loop 6F000000
+
+:match_False
+    # RD_A0 !1 ADDI                     ; Return false
+    .00050000 .00001000 13000000
+:match_Done
+    # RD_A1 RS1_SP LD                   ; restore a1
+    .80050000 .00000100 03300000
+    # RD_A2 RS1_SP !8 LD                ; restore a2
+    .00060000 .00000100 .00008000 03300000
+    # RD_A3 RS1_SP !16 LD               ; restore a3
+    .80060000 .00000100 .00000001 03300000
+    # RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    .00010000 .00000100 .00008001 13000000
+    # RS1_RA JALR                       ; return
+    .00800000 67000000
+
+
+; Line_Macro function
+; Receives List in a0
+; Updates the list in place; does not modify registers
+; Uses a0 for I, a1 for I->TEXT, a2 for I->EXPRESSION
+:Line_Macro
+    # RD_SP RS1_SP !-32 ADDI            ; allocate stack
+    .00010000 .00000100 .000000FE 13000000
+    # RS1_SP RS2_RA SD                  ; protect ra
+    .00000100 .00001000 23300000
+    # RS1_SP RS2_A0 @8 SD               ; protect a0
+    .00000100 .0000A000 .00040000 23300000
+    # RS1_SP RS2_A1 @16 SD              ; protect a1
+    .00000100 .0000B000 .00080000 23300000
+    # RS1_SP RS2_A2 @24 SD              ; protect a2
+    .00000100 .0000C000 .000C0000 23300000
+
+:Line_Macro_Loop
+    # RD_A1 RS1_A0 !8 LD                ; I->TYPE
+    .80050000 .00000500 .00008000 03300000
+    # RD_T0 !1 ADDI                     ; t0 = MACRO
+    .80020000 .00001000 13000000
+    # RS1_A1 RS2_T0 @Line_Macro_Next BNE ; Move on unless I->TYPE == MACRO
+    .00800500 .00005000 @Line_Macro_Next 63100000
+
+    ; Apply macro
+    # RD_A1 RS1_A0 !16 LD               ; I->TEXT
+    .80050000 .00000500 .00000001 03300000
+    # RD_A2 RS1_A0 !24 LD               ; I->EXPRESSION
+    .00060000 .00000500 .00008001 03300000
+    # RD_A0 RS1_A0 LD                   ; I->NEXT
+    .00050000 .00000500 03300000
+    # RD_RA $Set_Expression JAL         ; Apply it
+    .80000000 $Set_Expression 6F000000
+    # $Line_Macro_Loop JAL              ; Move on to next
+    $Line_Macro_Loop 6F000000
+
+:Line_Macro_Next
+    # RD_A0 RS1_A0 LD                   ; I->NEXT
+    .00050000 .00000500 03300000
+    # RS1_A0 @Line_Macro_Loop BNEZ      ; Check if we are done
+    .00000500 @Line_Macro_Loop 63100000
+
+    # RD_RA RS1_SP LD                   ; restore ra
+    .80000000 .00000100 03300000
+    # RD_A0 RS1_SP !8 LD                ; restore a0
+    .00050000 .00000100 .00008000 03300000
+    # RD_A1 RS1_SP !16 LD               ; restore a1
+    .80050000 .00000100 .00000001 03300000
+    # RD_A2 RS1_SP !24 LD               ; restore a2
+    .00060000 .00000100 .00008001 03300000
+    # RD_SP RS1_SP !32 ADDI             ; deallocate stack
+    .00010000 .00000100 .00000002 13000000
+    # RS1_RA JALR                       ; return
+    .00800000 67000000
+
+; Set_Expression function
+; Receives List in a0, CHAR* in a1 and CHAR* in a2
+; Updates the list in place; does not modify registers
+; Uses a1 for C, a2 for EXP and a3 for I
+:Set_Expression
+    # RD_SP RS1_SP !-40 ADDI            ; allocate stack
+    .00010000 .00000100 .000080FD 13000000
+    # RS1_SP RS2_RA SD                  ; protect ra
+    .00000100 .00001000 23300000
+    # RS1_SP RS2_A0 @8 SD               ; protect a0
+    .00000100 .0000A000 .00040000 23300000
+    # RS1_SP RS2_A1 @16 SD              ; protect a1
+    .00000100 .0000B000 .00080000 23300000
+    # RS1_SP RS2_A2 @24 SD              ; protect a2
+    .00000100 .0000C000 .000C0000 23300000
+    # RS1_SP RS2_A3 @32 SD              ; protect a3
+    .00000100 .0000D000 .00000002 23300000
+
+    # RD_A3 RS1_A0 MV                   ; Set I
+    .80060000 .00000500 13000000
+:Set_Expression_Loop
+    # RD_A0 RS1_A3 !8 LD                ; I->TYPE
+    .00050000 .00800600 .00008000 03300000
+    # RD_T0 !1 ADDI                     ; t0 = MACRO
+    .80020000 .00001000 13000000
+    # RS1_A0 RS2_T0 @Set_Expression_Next BEQ ; If MACRO == I->Type then ignore and move on
+    .00000500 .00005000 @Set_Expression_Next 63000000
+
+    # RD_A0 RS1_A3 !16 LD               ; I->TEXT
+    .00050000 .00800600 .00000001 03300000
+    # RD_RA $match JAL                  ; Check for match
+    .80000000 $match 6F000000
+    # RS1_A0 @Set_Expression_Next BNEZ  ; Check next if does not match
+    .00000500 @Set_Expression_Next 63100000
+
+    ; Non-macro match
+    # RS1_A3 RS2_A2 @24 SD              ; I->EXPRESSION = EXP
+    .00800600 .0000C000 .000C0000 23300000
+
+:Set_Expression_Next
+    # RD_A3 RS1_A3 LD                   ; I = I->NEXT
+    .80060000 .00800600 03300000
+    # RS1_A3 @Set_Expression_Loop BNEZ  ; Check if we are done
+    .00800600 @Set_Expression_Loop 63100000
+    # RD_RA RS1_SP LD                   ; restore ra
+    .80000000 .00000100 03300000
+    # RD_A0 RS1_SP !8 LD                ; restore a0
+    .00050000 .00000100 .00008000 03300000
+    # RD_A1 RS1_SP !16 LD               ; restore a1
+    .80050000 .00000100 .00000001 03300000
+    # RD_A2 RS1_SP !24 LD               ; restore a2
+    .00060000 .00000100 .00008001 03300000
+    # RD_A3 RS1_SP !32 LD               ; restore a3
+    .80060000 .00000100 .00000002 03300000
+    # RD_SP RS1_SP !40 ADDI             ; deallocate stack
+    .00010000 .00000100 .00008002 13000000
+    # RS1_RA JALR                       ; return
+    .00800000 67000000
+
+
+; Process_String function
+; Receives List in a0
+; Update the list in place; does not modify registers
+; Uses a1 for I->TEXT, a2 for I and RDX for S
+:Process_String
+    # RD_SP RS1_SP !-40 ADDI            ; allocate stack
+    .00010000 .00000100 .000080FD 13000000
+    # RS1_SP RS2_RA SD                  ; protect ra
+    .00000100 .00001000 23300000
+    # RS1_SP RS2_A0 @8 SD               ; protect a0
+    .00000100 .0000A000 .00040000 23300000
+    # RS1_SP RS2_A1 @16 SD              ; protect a1
+    .00000100 .0000B000 .00080000 23300000
+    # RS1_SP RS2_A2 @24 SD              ; protect a2
+    .00000100 .0000C000 .000C0000 23300000
+    # RS1_SP RS2_A3 @32 SD              ; protect a3
+    .00000100 .0000D000 .00000002 23300000
+
+    # RD_A2 RS1_A0 MV                   ; I = HEAD
+    .00060000 .00000500 13000000
+
+:Process_String_loop
+    # RD_A0 RS1_A2 !8 LD                ; I->TYPE
+    .00050000 .00000600 .00008000 03300000
+    # RD_T0 !2 ADDI                     ; t0 = STRING
+    .80020000 .00002000 13000000
+    # RS1_A0 RS2_T0 @Process_String_Next BNE ; Skip to next
+    .00000500 .00005000 @Process_String_Next 63100000
+
+    # RD_A1 RS1_A2 !16 LD               ; I->TEXT
+    .80050000 .00000600 .00000001 03300000
+    # RD_A0 RS1_A1 LBU                  ; I->TEXT[0]
+    .00050000 .00800500 03400000
+    # RD_T0 !39 ADDI                    ; t0 = \'
+    .80020000 .00007002 13000000
+    # RS1_A0 RS2_T0 @Process_String_Raw BNE ; Deal with '"'
+    .00000500 .00005000 @Process_String_Raw 63100000
+
+    ; Deal with \'
+    # RD_A1 RS1_A1 !1 ADDI              ; I->TEXT + 1
+    .80050000 .00800500 .00001000 13000000
+    # RS1_A2 RS2_A1 @24 SD              ; I->EXPRESSION = I->TEXT + 1
+    .00000600 .0000B000 .000C0000 23300000
+    # $Process_String_Next JAL          ; Move on to next
+    $Process_String_Next 6F000000
+
+:Process_String_Raw
+    # RD_A0 RS1_A1 MV                   ; I->TEXT
+    .00050000 .00800500 13000000
+    # RD_RA $string_length JAL          ; Get length of I->TEXT
+    .80000000 $string_length 6F000000
+    # RD_A0 RS1_A0 RS2_X2 SRLI          ; LENGTH = LENGTH >> 2
+    .00050000 .00000500 .00002000 13500000
+    # RD_A0 RS1_A0 !1 ADDI              ; LENGTH = LENGTH + 1
+    .00050000 .00000500 .00001000 13000000
+    # RD_A0 RS1_A0 RS2_X3 SLLI          ; LENGTH = LENGTH << 3
+    .00050000 .00000500 .00003000 13100000
+    # RD_RA $malloc JAL                 ; Get string
+    .80000000 $malloc 6F000000
+    # RD_A3 RS1_A1 MV                   ; S = I->TEXT
+    .80060000 .00800500 13000000
+    # RD_A3 RS1_A3 !1 ADDI              ; S = S + 1
+    .80060000 .00800600 .00001000 13000000
+    # RS1_A2 RS2_A0 @24 SD              ; I->EXPRESSION = hexify
+    .00000600 .0000A000 .000C0000 23300000
+    # RD_A1 RS1_A0 MV                   ; Put hexify buffer in a1
+    .80050000 .00000500 13000000
+
+:Process_String_Raw_Loop
+    # RD_A0 RS1_A3 LBU                  ; Read 1 character
+    .00050000 .00800600 03400000
+    # RD_A3 RS1_A3 !1 ADDI              ; S = S + 1
+    .80060000 .00800600 .00001000 13000000
+    # RD_S5 RS1_A0 MV                   ; Protect character
+    .800A0000 .00000500 13000000
+    # RD_RA $hex8 JAL                   ; write them all
+    .80000000 $hex8 6F000000
+    # RD_A0 RS1_S5 MV                   ; Restore character
+    .00050000 .00800A00 13000000
+    # RS1_A0 @Process_String_Raw_Loop BNEZ ; Keep looping
+    .00000500 @Process_String_Raw_Loop 63100000
+
+:Process_String_Next
+    # RD_A2 RS1_A2 LD                   ; I = I->NEXT
+    .00060000 .00000600 03300000
+    # RS1_A2 @Process_String_loop BNEZ  ; Check if we are done
+    .00000600 @Process_String_loop 63100000
+
+    # RD_RA RS1_SP LD                   ; restore ra
+    .80000000 .00000100 03300000
+    # RD_A0 RS1_SP !8 LD                ; restore a0
+    .00050000 .00000100 .00008000 03300000
+    # RD_A1 RS1_SP !16 LD               ; restore a1
+    .80050000 .00000100 .00000001 03300000
+    # RD_A2 RS1_SP !24 LD               ; restore a2
+    .00060000 .00000100 .00008001 03300000
+    # RD_A3 RS1_SP !32 LD               ; restore a3
+    .80060000 .00000100 .00000002 03300000
+    # RD_SP RS1_SP !40 ADDI             ; deallocate stack
+    .00010000 .00000100 .00008002 13000000
+    # RS1_RA JALR                       ; return
+    .00800000 67000000
+
+
+; string_length function
+; Receives CHAR* in a0
+; Returns INT in a0
+; Uses a0 for CH, a1 for S and a2 for INDEX
+:string_length
+    # RD_SP RS1_SP !-16 ADDI            ; allocate stack
+    .00010000 .00000100 .000000FF 13000000
+    # RS1_SP RS2_A1 SD                  ; protect a1
+    .00000100 .0000B000 23300000
+    # RS1_SP RS2_A2 @8 SD               ; protect a2
+    .00000100 .0000C000 .00040000 23300000
+
+    # RD_A1 RS1_A0 MV                   ; Set S
+    .80050000 .00000500 13000000
+    # RD_A2 MV                          ; INDEX = 0
+    .00060000 13000000
+
+:string_length_loop
+    # RD_T0 RS1_A1 RS2_A2 ADD           ; S + INDEX
+    .80020000 .00800500 .0000C000 33000000
+    # RD_A0 RS1_T0 LBU                  ; S[INDEX]
+    .00050000 .00800200 03400000
+    # RS1_A0 @string_length_done BEQZ   ; Check if we are done
+    .00000500 @string_length_done 63000000
+
+    # RD_A2 RS1_A2 !1 ADDI              ; INDEX = INDEX + 1
+    .00060000 .00000600 .00001000 13000000
+    # $string_length_loop JAL           ; Keep going
+    $string_length_loop 6F000000
+
+:string_length_done
+    # RD_A0 RS1_A2 MV                   ; return INDEX
+    .00050000 .00000600 13000000
+    # RD_A1 RS1_SP LD                   ; restore a1
+    .80050000 .00000100 03300000
+    # RD_A2 RS1_SP !8 LD                ; restore a2
+    .00060000 .00000100 .00008000 03300000
+    # RD_SP RS1_SP !16 ADDI             ; deallocate stack
+    .00010000 .00000100 .00000001 13000000
+    # RS1_RA JALR                       ; return
+    .00800000 67000000                 ; return
+
+
+; Eval_Immediates function
+; Receives List in a0
+; Updates the list in place; does not modify registers
+; Uses a1 for I->TEXT[0], a2 for I->TEXT[1] and a3 for I
+:Eval_Immediates
+    # RD_SP RS1_SP !-40 ADDI            ; allocate stack
+    .00010000 .00000100 .000080FD 13000000
+    # RS1_SP RS2_RA SD                  ; protect ra
+    .00000100 .00001000 23300000
+    # RS1_SP RS2_A0 @8 SD               ; protect a0
+    .00000100 .0000A000 .00040000 23300000
+    # RS1_SP RS2_A1 @16 SD              ; protect a1
+    .00000100 .0000B000 .00080000 23300000
+    # RS1_SP RS2_A2 @24 SD              ; protect a2
+    .00000100 .0000C000 .000C0000 23300000
+    # RS1_SP RS2_A3 @32 SD              ; protect a3
+    .00000100 .0000D000 .00000002 23300000
+
+    # RD_A3 RS1_A0 MV                   ; I = HEAD
+    .80060000 .00000500 13000000
+
+:Eval_Immediates_Loop
+    ; Check for MACRO
+    # RD_A0 RS1_A3 !8 LD                ; I->TYPE
+    .00050000 .00800600 .00008000 03300000
+    # RD_T0 !1 ADDI                     ; t0 = MACRO
+    .80020000 .00001000 13000000
+    # RS1_A0 RS2_T0 @Eval_Immediates_Next BEQ ; Skip to next if I->TYPE == MACRO
+    .00000500 .00005000 @Eval_Immediates_Next 63000000
+
+    ; Check if number
+    # RD_A0 RS1_A3 !16 LD               ; I->TEXT
+    .00050000 .00800600 .00000001 03300000
+    # RD_A1 RS1_A0 LBU                  ; I->TEXT[0]
+    .80050000 .00000500 03400000
+    # RD_A0 RS1_A0 !1 ADDI              ; I->TEXT + 1
+    .00050000 .00000500 .00001000 13000000
+    # RD_A2 RS1_A0 LBU                  ; I->TEXT[1]
+    .00060000 .00000500 03400000
+    # RD_RA $numerate_string JAL        ; Convert string to INT
+    .80000000 $numerate_string 6F000000
+    # RS1_A0 @Eval_Immediates_value BNEZ ; Has a value IF 0 != numerate_string(I->TEXT + 1)
+    .00000500 @Eval_Immediates_value 63100000
+
+    ; Last chance for Immediate
+    # RD_T0 !48 ADDI                    ; If '0' = I->TEXT[1]
+    .80020000 .00000003 13000000
+    # RS1_A2 RS2_T0 @Eval_Immediates_Next BNE ; Skip to next
+    .00000600 .00005000 @Eval_Immediates_Next 63100000
+
+:Eval_Immediates_value
+    # RD_RA $express_number JAL         ; Convert value to hex string
+    .80000000 $express_number 6F000000
+    # RS1_A3 RS2_A0 @24 SD              ; I->EXPRESSION = express_number(value, I-TEXT[0])
+    .00800600 .0000A000 .000C0000 23300000
+
+:Eval_Immediates_Next
+    # RD_A3 RS1_A3 LD                   ; I = I->NEXT
+    .80060000 .00800600 03300000
+    # RS1_A3 @Eval_Immediates_Loop BNEZ ; Check if we are done
+    .00800600 @Eval_Immediates_Loop 63100000
+
+    # RD_RA RS1_SP LD                   ; restore ra
+    .80000000 .00000100 03300000
+    # RD_A0 RS1_SP !8 LD                ; restore a0
+    .00050000 .00000100 .00008000 03300000
+    # RD_A1 RS1_SP !16 LD               ; restore a1
+    .80050000 .00000100 .00000001 03300000
+    # RD_A2 RS1_SP !24 LD               ; restore a2
+    .00060000 .00000100 .00008001 03300000
+    # RD_A3 RS1_SP !32 LD               ; restore a3
+    .80060000 .00000100 .00000002 03300000
+    # RD_SP RS1_SP !40 ADDI             ; deallocate stack
+    .00010000 .00000100 .00008002 13000000
+    # RS1_RA JALR                       ; return
+    .00800000 67000000
+
+
+; numerate_string function
+; Receives CHAR* in a0
+; Returns value of CHAR* in a0
+; Uses a0 for VALUE, a1 for S, a2 for CH and a3 for NEGATIVE?
+:numerate_string
+    # RD_SP RS1_SP !-24 ADDI            ; allocate stack
+    .00010000 .00000100 .000080FE 13000000
+    # RS1_SP RS2_A1 SD                  ; protect a1
+    .00000100 .0000B000 23300000
+    # RS1_SP RS2_A2 @8 SD               ; protect a2
+    .00000100 .0000C000 .00040000 23300000
+    # RS1_SP RS2_A3 @16 SD              ; protect a3
+    .00000100 .0000D000 .00080000 23300000
+
+    # RD_A1 RS1_A0 MV                   ; put S in correct place
+    .80050000 .00000500 13000000
+    # RD_A0 MV                          ; Initialize to Zero
+    .00050000 13000000
+:numerate_string_loop
+    # RD_T0 RS1_A1 !1 ADDI              ; S + 1
+    .80020000 .00800500 .00001000 13000000
+    # RD_A2 RS1_T0 LBU                  ; S[1]
+    .00060000 .00800200 03400000
+    # RD_T0 !120 ADDI                   ; 'x'
+    .80020000 .00008007 13000000
+    # RS1_A2 RS2_T0 @numerate_hex BEQ   ; Deal with hex_input
+    .00000600 .00005000 @numerate_hex 63000000
+
+    ; Assume decimal input
+    # RD_A3 MV                          ; Assume no negation
+    .80060000 13000000
+    # RD_A2 RS1_A1 LBU                  ; S[0]
+    .00060000 .00800500 03400000
+    # RD_T0 !45 ADDI                    ; '-'
+    .80020000 .0000D002 13000000
+    # RS1_A2 RS2_T0 @numerate_decimal BNE ; Skip negation
+    .00000600 .00005000 @numerate_decimal 63100000
+
+    # RD_A3 !1 ADDI                     ; Set FLAG
+    .80060000 .00001000 13000000
+    # RD_A1 RS1_A1 !1 ADDI              ; S = S + 1
+    .80050000 .00800500 .00001000 13000000
+
+:numerate_decimal
+    # RD_A2 RS1_A1 LBU                  ; S[i]
+    .00060000 .00800500 03400000
+    # RS1_A2 @numerate_decimal_done BEQZ ; We are done if NULL == S[i]
+    .00000600 @numerate_decimal_done 63000000
+
+    ; a0 = a0 * 10 = (a0 << 3) + (a0 << 1)
+    # RD_T0 RS1_A0 RS2_X3 SLLI          ; a0 * 8
+    .80020000 .00000500 .00003000 13100000
+    # RD_T1 RS1_A0 RS2_X1 SLLI          ; a0 * 2
+    .00030000 .00000500 .00001000 13100000
+    # RD_A0 RS1_T0 RS2_T1 ADD           ; VALUE = VALUE * 10
+    .00050000 .00800200 .00006000 33000000
+    # RD_A2 RS1_A2 !-48 ADDI            ; CH = CH - '0'
+    .00060000 .00000600 .000000FD 13000000
+    # RD_T0 !9 ADDI                     ; t0 = 9
+    .80020000 .00009000 13000000
+    # RS1_T0 RS2_A2 @numerate_string_fail BLT ; Check for illegal CH > 9
+    .00800200 .0000C000 @numerate_string_fail 63400000
+    # RS1_A2 @numerate_string_fail BLTZ ; Check for illegal CH < 0
+    .00000600 @numerate_string_fail 63400000
+    # RD_A0 RS1_A0 RS2_A2 ADD           ; VALUE = VALUE + CH
+    .00050000 .00000500 .0000C000 33000000
+    # RD_A1 RS1_A1 !1 ADDI              ; S = S + 1
+    .80050000 .00800500 .00001000 13000000
+    # $numerate_decimal JAL
+    $numerate_decimal 6F000000
+
+:numerate_decimal_done
+    # RD_T0 !1 ADDI                     ; Check for negative FLAG
+    .80020000 .00001000 13000000
+    # RS1_A3 RS2_T0 @numerate_string_done BNE ; Nope
+    .00800600 .00005000 @numerate_string_done 63100000
+
+    # RD_A0 RS2_A0 SUB                  ; VALUE = -VALUE
+    .00050000 .0000A000 33000040
+    # $numerate_string_done JAL         ; Done
+    $numerate_string_done 6F000000
+
+:numerate_hex
+    # RD_A1 RS1_A1 !2 ADDI              ; S = S + 2
+    .80050000 .00800500 .00002000 13000000
+:numerate_hex_loop
+    # RD_A2 RS1_A1 LBU                  ; S[i]
+    .00060000 .00800500 03400000
+    # RS1_A2 @numerate_string_done BEQZ ; We are done if NULL == S[i]
+    .00000600 @numerate_string_done 63000000
+
+    # RD_A0 RS1_A0 RS2_X4 SLLI          ; VALUE = VALUE << 4
+    .00050000 .00000500 .00004000 13100000
+    # RD_A2 RS1_A2 !-48 ADDI            ; CH = CH - '0'
+    .00060000 .00000600 .000000FD 13000000
+    # RD_T0 !10 ADDI                    ; t0 = 10
+    .80020000 .0000A000 13000000
+    # RS1_A2 RS2_T0 @numerate_hex_digit BLT ; Check if we are dealing with number or letter
+    .00000600 .00005000 @numerate_hex_digit 63400000
+    # RD_A2 RS1_A2 !-7 ADDI             ; Push A-F into range
+    .00060000 .00000600 .000090FF 13000000
+
+:numerate_hex_digit
+    # RD_T0 !15 ADDI                    ; t0 = 15
+    .80020000 .0000F000 13000000
+    # RS1_T0 RS2_A2 @numerate_string_fail BLT ; Check for CH > 'F'
+    .00800200 .0000C000 @numerate_string_fail 63400000
+    # RS1_A2 @numerate_string_fail BLTZ ; Check for CH < 0
+    .00000600 @numerate_string_fail 63400000
+    # RD_A0 RS1_A0 RS2_A2 ADD           ; VALUE = VALUE + CH
+    .00050000 .00000500 .0000C000 33000000
+    # RD_A1 RS1_A1 !1 ADDI              ; S = S + 1
+    .80050000 .00800500 .00001000 13000000
+    # $numerate_hex_loop JAL            ; Keep looping
+    $numerate_hex_loop 6F000000
+
+:numerate_string_fail
+    # RD_A0 MV                          ; return ZERO
+    .00050000 13000000
+
+:numerate_string_done
+    # RD_A1 RS1_SP LD                   ; restore a1
+    .80050000 .00000100 03300000
+    # RD_A2 RS1_SP !8 LD                ; restore a2
+    .00060000 .00000100 .00008000 03300000
+    # RD_A3 RS1_SP !16 LD               ; restore a3
+    .80060000 .00000100 .00000001 03300000
+    # RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    .00010000 .00000100 .00008001 13000000
+    # RS1_RA JALR                       ; return
+    .00800000 67000000
+
+
+; express_number function
+; Receives INT in a0 and CHAR in a1
+; Allocates a string and expresses the value in appropriate RISC-V encoding
+; Returns string in a0
+; Uses a0 for VALUE, a1 for S and a2 for CH
+:express_number
+    # RD_SP RS1_SP !-32 ADDI            ; allocate stack
+    .00010000 .00000100 .000000FE 13000000
+    # RS1_SP RS2_RA SD                  ; protect ra
+    .00000100 .00001000 23300000
+    # RS1_SP RS2_A1 @8 SD               ; protect a1
+    .00000100 .0000B000 .00040000 23300000
+    # RS1_SP RS2_A2 @16 SD              ; protect a2
+    .00000100 .0000C000 .00080000 23300000
+    # RS1_SP RS2_A3 @24 SD              ; protect a3
+    .00000100 .0000D000 .000C0000 23300000
+
+    # RD_A2 RS1_A1 MV                   ; Put CH in right place
+    .00060000 .00800500 13000000
+    # RD_S5 RS1_A0 MV                   ; Protect VALUE
+    .800A0000 .00000500 13000000
+
+    # RD_A0 !10 ADDI                    ; We need 10 bytes
+    .00050000 .0000A000 13000000
+    # RD_RA $malloc JAL                 ; Get S pointer
+    .80000000 $malloc 6F000000
+    # RD_A1 RS1_A0 MV                   ; Put S in place
+    .80050000 .00000500 13000000
+    # RD_A0 RS1_S5 MV                   ; Restore VALUE
+    .00050000 .00800A00 13000000
+
+    ; Check for %
+    # RD_T0 !0x25 ADDI
+    .80020000 .00005002 13000000
+    # RS1_A2 RS2_T0 @express_number_const BEQ
+    .00000600 .00005000 @express_number_const 63000000
+
+    # RD_S5 RS1_A1 MV                   ; Protect S
+    .800A0000 .00800500 13000000
+    # RD_T0 !0x2E ADDI                  ; t0 = '.'
+    .80020000 .0000E002 13000000
+    # RS1_A1 RS2_T0 SD                  ; S[0] = '.'
+    .00800500 .00005000 23300000
+    # RD_A1 RS1_A1 !1 ADDI              ; Next byte
+    .80050000 .00800500 .00001000 13000000
+
+    ; Check for !
+    # RD_T0 !0x21 ADDI
+    .80020000 .00001002 13000000
+    # RS1_A2 RS2_T0 @express_number_I BEQ
+    .00000600 .00005000 @express_number_I 63000000
+
+    ; Check for @
+    # RD_T0 !0x40 ADDI
+    .80020000 .00000004 13000000
+    # RS1_A2 RS2_T0 @express_number_S BEQ
+    .00000600 .00005000 @express_number_S 63000000
+
+    ; Check for ~
+    # RD_T0 !0x7E ADDI
+    .80020000 .0000E007 13000000
+    # RS1_A2 RS2_T0 @express_number_U BEQ
+    .00000600 .00005000 @express_number_U 63000000
+
+    # $Fail JAL                         ; Error
+    $Fail 6F000000
+
+:express_number_const
+    ; provides an option for 32-bit immediate constants
+
+    # RD_T0 !2 ADDI
+    .80020000 .00002000 13000000
+    # RD_T0 RS1_T0 RS2_X31 SLLI
+    .80020000 .00800200 .0000F001 13100000
+    # RD_T0 RS1_T0 !-1 ADDI             ; t0 = 0xffffffff
+    .80020000 .00800200 .0000F0FF 13000000
+    # RD_A0 RS1_A0 RS2_T0 AND           ; immediate = value & 0xffffffff
+    .00050000 .00000500 .00005000 33700000
+
+    # RD_S5 RS1_A1 MV                   ; Protect S
+    .800A0000 .00800500 13000000
+    # RD_RA $hex32l JAL                 ; Store 32-bits
+    .80000000 $hex32l 6F000000
+    # $express_number_done JAL          ; done
+    $express_number_done 6F000000
+
+:express_number_I
+    ; Corresponds to RISC-V S format
+    ; (value & 0xfff) << 20
+    # RD_T0 !0xFFF ADDI
+    .80020000 .0000F0FF 13000000
+    # RD_A0 RS1_A0 RS2_T0 AND           ; value & 0xfff
+    .00050000 .00000500 .00005000 33700000
+    # RD_A0 RS1_A0 RS2_X20 SLLI         ; (value & 0xfff) << 20
+    .00050000 .00000500 .00004001 13100000
+    # RD_RA $hex32l JAL                 ; Store 32-bits
+    .80000000 $hex32l 6F000000
+    # $express_number_done JAL          ; done
+    $express_number_done 6F000000
+
+:express_number_S
+    ; Corresponds to RISC-V S format
+    ; ((value & 0x1f) << 7) | ((value & 0xfe0) << (31 - 11))
+    # RD_T0 !0x1F ADDI
+    .80020000 .0000F001 13000000
+    # RD_T1 RS1_A0 RS2_T0 AND           ; value & 0x1f
+    .00030000 .00000500 .00005000 33700000
+    # RD_T1 RS1_T1 RS2_X7 SLLI          ; (value & 0x1f) << 7
+    .00030000 .00000300 .00007000 13100000
+    # RD_T0 !0xFE0 ADDI
+    .80020000 .000000FE 13000000
+    # RD_T0 RS1_A0 RS2_T0 AND           ; value & 0xfe0
+    .80020000 .00000500 .00005000 33700000
+    # RD_T0 RS1_T0 RS2_X20 SLLI         ; (value & 0xfe0) << (31 - 11)
+    .80020000 .00800200 .00004001 13100000
+    # RD_A0 RS1_T0 RS2_T1 OR            ; Combine two parts
+    .00050000 .00800200 .00006000 33600000
+    # RD_RA $hex32l JAL                 ; Store 32-bits
+    .80000000 $hex32l 6F000000
+    # $express_number_done JAL          ; done
+    $express_number_done 6F000000
+
+:express_number_U
+    ; Corresponds to RISC-V U format
+    ; if value is 0x800 or more we have to add 11-th bit (0x1000) to compensate for signed extension
+
+    # RD_T0 ~0x800 LUI                  ; load higher bits
+    .80020000 .00100000 37000000
+    # RD_T0 RS1_T0 !0x800 ADDIW
+    .80020000 .00800200 .00000080 1B000000
+    # RD_T1 ~0xFFF LUI                  ; load higher bits
+    .00030000 .00100000 37000000
+    # RD_T1 RS1_T1 !0xFFF ADDIW
+    .00030000 .00000300 .0000F0FF 1B000000
+    ; We are outside 31-bit that ~ can normally load
+    # RD_T2 ~0x100000 LUI               ; load 0xfffff000
+    .80030000 .00001000 37000000
+    # RD_T2 RS1_T2 !-1 ADDIW            ; load 0xfffff000
+    .80030000 .00800300 .0000F0FF 1B000000
+    # RD_T2 RS1_T2 RS2_X12 SLLI         ; load 0xfffff000
+    .80030000 .00800300 .0000C000 13100000
+    # RD_T1 RS1_A0 RS2_T1 AND           ; value & 0xfff
+    .00030000 .00000500 .00006000 33700000
+    # RD_A0 RS1_A0 RS2_T2 AND           ; value & 0xfffff000
+    .00050000 .00000500 .00007000 33700000
+    # RS1_T1 RS2_T0 @express_number_U_small BLT
+    .00000300 .00005000 @express_number_U_small 63400000
+
+    ; Deal with sign extension: add 0x1000
+    # RD_T0 ~0x1000 LUI
+    .80020000 .00100000 37000000
+    # RD_A0 RS1_T0 RS2_A0 ADD           ; (value & 0xfffff000) + 0x1000
+    .00050000 .00800200 .0000A000 33000000
+:express_number_U_small
+    # RD_RA $hex32l JAL                 ; Store 32-bits
+    .80000000 $hex32l 6F000000
+    # $express_number_done JAL          ; done
+    $express_number_done 6F000000
+
+:express_number_done
+    # RD_A0 RS1_S5 MV                   ; Restore S
+    .00050000 .00800A00 13000000
+    # RD_RA RS1_SP LD                   ; restore ra
+    .80000000 .00000100 03300000
+    # RD_A1 RS1_SP !8 LD                ; restore a1
+    .80050000 .00000100 .00008000 03300000
+    # RD_A2 RS1_SP !16 LD               ; restore a2
+    .00060000 .00000100 .00000001 03300000
+    # RD_A3 RS1_SP !24 LD               ; restore a3
+    .80060000 .00000100 .00008001 03300000
+    # RD_SP RS1_SP !32 ADDI             ; deallocate stack
+    .00010000 .00000100 .00000002 13000000
+    # RS1_RA JALR                       ; return
+    .00800000 67000000
+
+
+; HEX to ascii routine
+; Receives INT in a0 and CHAR* in a1
+; Stores ascii of INT in CHAR*
+; Returns only modifying a0
+:hex32l
+    # RD_SP RS1_SP !-16 ADDI            ; allocate stack
+    .00010000 .00000100 .000000FF 13000000
+    # RS1_SP RS2_RA SD                  ; Protect ra
+    .00000100 .00001000 23300000
+    # RS1_SP RS2_A0 @8 SD               ; Protect top 16 bits
+    .00000100 .0000A000 .00040000 23300000
+    # RD_RA $hex16l JAL                 ; Store it
+    .80000000 $hex16l 6F000000
+    # RD_A0 RS1_SP !8 LD                ; do high 16-bits
+    .00050000 .00000100 .00008000 03300000
+    # RD_A0 RS1_A0 RS2_X16 SRLI         ; do bottom 16 bits
+    .00050000 .00000500 .00000001 13500000
+    # RD_RA $hex16l JAL                 ; Store it
+    .80000000 $hex16l 6F000000
+    # RD_RA RS1_SP LD                   ; restore ra
+    .80000000 .00000100 03300000
+    # RD_SP RS1_SP !16 ADDI             ; deallocate stack
+    .00010000 .00000100 .00000001 13000000
+    # RS1_RA JALR                       ; return
+    .00800000 67000000
+
+:hex16l
+    # RD_SP RS1_SP !-16 ADDI            ; allocate stack
+    .00010000 .00000100 .000000FF 13000000
+    # RS1_SP RS2_RA SD                  ; Protect ra
+    .00000100 .00001000 23300000
+    # RS1_SP RS2_A0 @8 SD               ; Protect top byte
+    .00000100 .0000A000 .00040000 23300000
+    # RD_RA $hex8 JAL                   ; Store it
+    .80000000 $hex8 6F000000
+    # RD_A0 RS1_SP !8 LD                ; do high byte
+    .00050000 .00000100 .00008000 03300000
+    # RD_A0 RS1_A0 RS2_X8 SRLI          ; do bottom byte
+    .00050000 .00000500 .00008000 13500000
+    # RD_RA $hex8 JAL                   ; Store it
+    .80000000 $hex8 6F000000
+    # RD_RA RS1_SP LD                   ; restore ra
+    .80000000 .00000100 03300000
+    # RD_SP RS1_SP !16 ADDI             ; deallocate stack
+    .00010000 .00000100 .00000001 13000000
+    # RS1_RA JALR                       ; return
+    .00800000 67000000
+
+:hex8
+    # RD_SP RS1_SP !-16 ADDI            ; allocate stack
+    .00010000 .00000100 .000000FF 13000000
+    # RS1_SP RS2_RA SD                  ; Protect ra
+    .00000100 .00001000 23300000
+    # RS1_SP RS2_A0 @8 SD               ; Protect bottom nibble
+    .00000100 .0000A000 .00040000 23300000
+    # RD_A0 RS1_A0 RS2_X4 SRLI          ; do high nibble first
+    .00050000 .00000500 .00004000 13500000
+    # RD_RA $hex4 JAL                   ; Store it
+    .80000000 $hex4 6F000000
+    # RD_A0 RS1_SP !8 LD                ; do low nibble
+    .00050000 .00000100 .00008000 03300000
+    # RD_RA $hex4 JAL                   ; Store it
+    .80000000 $hex4 6F000000
+    # RD_RA RS1_SP LD                   ; restore ra
+    .80000000 .00000100 03300000
+    # RD_SP RS1_SP !16 ADDI             ; deallocate stack
+    .00010000 .00000100 .00000001 13000000
+    # RS1_RA JALR                       ; return
+    .00800000 67000000
+
+:hex4
+    # RD_T0 !0xF ADDI
+    .80020000 .0000F000 13000000
+    # RD_A0 RS1_A0 RS2_T0 AND           ; isolate nibble
+    .00050000 .00000500 .00005000 33700000
+    # RD_A0 RS1_A0 !0x30 ADDI           ; convert to ascii
+    .00050000 .00000500 .00000003 13000000
+    # RD_T0 !0x39 ADDI                  ; t0 = '9'
+    .80020000 .00009003 13000000
+    # RS1_T0 RS2_A0 @hex1 BGE           ; check if valid digit
+    .00800200 .0000A000 @hex1 63500000
+    # RD_A0 RS1_A0 !7 ADDI              ; use alpha range
+    .00050000 .00000500 .00007000 13000000
+:hex1
+    # RS1_A1 RS2_A0 SB                  ; store result
+    .00800500 .0000A000 23000000
+    # RD_A1 RS1_A1 !1 ADDI              ; next position
+    .80050000 .00800500 .00001000 13000000
+    # RS1_RA JALR                       ; return
+    .00800000 67000000
+
+
+; Preserve_Other function
+; Receives list in a0
+; Update the list in place; does not modify registers
+; Uses a0 for I, a1 for I->TEXT
+:Preserve_Other
+    # RD_SP RS1_SP !-32 ADDI            ; allocate stack
+    .00010000 .00000100 .000000FE 13000000
+    # RS1_SP RS2_A1 SD                  ; protect a1
+    .00000100 .0000B000 23300000
+    # RS1_SP RS2_A2 @8 SD               ; protect a2
+    .00000100 .0000C000 .00040000 23300000
+    # RS1_SP RS2_A3 @16 SD              ; protect a3
+    .00000100 .0000D000 .00080000 23300000
+    # RS1_SP RS2_A4 @24 SD              ; protect a4
+    .00000100 .0000E000 .000C0000 23300000
+:Preserve_Other_Loop
+    # RD_A1 RS1_A0 !24 LD               ; I->EXPRESSION
+    .80050000 .00000500 .00008001 03300000
+    # RS1_A1 @Preserve_Other_Next BNEZ  ; IF NULL == I->EXPRESSION then preserve
+    .00800500 @Preserve_Other_Next 63100000
+
+    # RD_A1 RS1_A0 !16 LD               ; I->TEXT
+    .80050000 .00000500 .00000001 03300000
+    # RS1_A0 RS2_A1 @24 SD              ; I->EXPRESSION = I->TEXT
+    .00000500 .0000B000 .000C0000 23300000
+
+:Preserve_Other_Next
+    # RD_A0 RS1_A0 LD                   ; I = I->NEXT
+    .00050000 .00000500 03300000
+    # RS1_A0 @Preserve_Other_Loop BNEZ  ; Keep looping until I == NULL
+    .00000500 @Preserve_Other_Loop 63100000
+
+    # RD_A1 RS1_SP LD                   ; restore a1
+    .80050000 .00000100 03300000
+    # RD_A2 RS1_SP !8 LD                ; restore a2
+    .00060000 .00000100 .00008000 03300000
+    # RD_A3 RS1_SP !16 LD               ; restore a3
+    .80060000 .00000100 .00000001 03300000
+    # RD_A4 RS1_SP !24 LD               ; restore a4
+    .00070000 .00000100 .00008001 03300000
+    # RD_SP RS1_SP !32 ADDI             ; deallocate stack
+    .00010000 .00000100 .00000002 13000000
+    # RS1_RA JALR                       ; return
+    .00800000 67000000
+
+
+; Print_Hex function
+; Receives list in a0
+; walks the list and prints the I->EXPRESSION for all nodes followed by newline
+; Uses a1 for I
+:Print_Hex
+    # RD_SP RS1_SP !-24 ADDI            ; allocate stack
+    .00010000 .00000100 .000080FE 13000000
+    # RS1_SP RS2_RA SD                  ; protect ra
+    .00000100 .00001000 23300000
+    # RS1_SP RS2_A1 @8 SD               ; protect a1
+    .00000100 .0000B000 .00040000 23300000
+    # RS1_SP RS2_A2 @16 SD              ; protect a2
+    .00000100 .0000C000 .00080000 23300000
+
+    # RD_A1 RS1_S4 MV                   ; I = HEAD
+    .80050000 .00000A00 13000000
+
+:Print_Hex_Loop
+    # RD_A0 RS1_A1 !8 LD                ; I->TYPE
+    .00050000 .00800500 .00008000 03300000
+    # RD_T0 !1 ADDI                     ; t0 = MACRO
+    .80020000 .00001000 13000000
+    # RS1_A0 RS2_T0 @Print_Hex_Next BEQ ; Skip if MACRO = I->TYPE
+    .00000500 .00005000 @Print_Hex_Next 63000000
+
+    # RD_A0 RS1_A1 !24 LD               ; Using EXPRESSION
+    .00050000 .00800500 .00008001 03300000
+    # RD_RA $File_Print JAL             ; Print it
+    .80000000 $File_Print 6F000000
+    # RD_A0 !10 ADDI                    ; \n
+    .00050000 .0000A000 13000000
+    # RD_RA $fputc JAL                  ; Print newline
+    .80000000 $fputc 6F000000
+
+:Print_Hex_Next
+    # RD_A1 RS1_A1 LD                   ; Iterate to next Token
+    .80050000 .00800500 03300000
+    # RS1_A1 @Print_Hex_Loop BNEZ       ; Stop if NULL, otherwise keep looping
+    .00800500 @Print_Hex_Loop 63100000
+
+    # RD_RA RS1_SP LD                   ; restore ra
+    .80000000 .00000100 03300000
+    # RD_A1 RS1_SP !8 LD                ; restore a1
+    .80050000 .00000100 .00008000 03300000
+    # RD_A2 RS1_SP !16 LD               ; restore a2
+    .00060000 .00000100 .00000001 03300000
+    # RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    .00010000 .00000100 .00008001 13000000
+    # RS1_RA JALR                       ; return
+    .00800000 67000000
+
+
+; File_Print function
+; Receives CHAR* in a0
+; calls fputc for every non-null char
+:File_Print
+    # RD_SP RS1_SP !-24 ADDI            ; allocate stack
+    .00010000 .00000100 .000080FE 13000000
+    # RS1_SP RS2_RA SD                  ; protect ra
+    .00000100 .00001000 23300000
+    # RS1_SP RS2_A1 @8 SD               ; protect a1
+    .00000100 .0000B000 .00040000 23300000
+    # RS1_SP RS2_A2 @16 SD              ; protect a2
+    .00000100 .0000C000 .00080000 23300000
+    # RD_A1 RS1_A0 MV                   ; protect a0
+    .80050000 .00000500 13000000
+
+    # RS1_A0 @File_Print_Done BEQZ      ; Protect against nulls
+    .00000500 @File_Print_Done 63000000
+
+:File_Print_Loop
+    # RD_A0 RS1_A1 LBU                  ; Read byte
+    .00050000 .00800500 03400000
+    # RS1_A0 @File_Print_Done BEQZ      ; Stop at NULL
+    .00000500 @File_Print_Done 63000000
+
+    # RD_RA $fputc JAL                  ; print it
+    .80000000 $fputc 6F000000
+    # RD_A1 RS1_A1 !1 ADDI              ; S = S + 1
+    .80050000 .00800500 .00001000 13000000
+    # $File_Print_Loop JAL              ; Keep printing
+    $File_Print_Loop 6F000000
+
+:File_Print_Done
+    # RD_RA RS1_SP LD                   ; restore ra
+    .80000000 .00000100 03300000
+    # RD_A1 RS1_SP !8 LD                ; restore a1
+    .80050000 .00000100 .00008000 03300000
+    # RD_A2 RS1_SP !16 LD               ; restore a2
+    .00060000 .00000100 .00000001 03300000
+    # RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    .00010000 .00000100 .00008001 13000000
+    # RS1_RA JALR                       ; return
+    .00800000 67000000
+
+
+; fgetc function
+; Loads FILE* from s2
+; Returns -4 (EOF) or char in a0
+:fgetc
+    # RD_SP RS1_SP !-32 ADDI            ; allocate stack
+    .00010000 .00000100 .000000FE 13000000
+    # RS1_SP RS2_RA @8 SD               ; protect ra
+    .00000100 .00001000 .00040000 23300000
+    # RS1_SP RS2_A1 @16 SD              ; protect a1
+    .00000100 .0000B000 .00080000 23300000
+    # RS1_SP RS2_A2 @24 SD              ; protect a2
+    .00000100 .0000C000 .000C0000 23300000
+
+    # RD_A7 !63 ADDI                    ; sys_read
+    .80080000 .0000F003 13000000
+    # RD_A1 RS1_SP MV                   ; Get stack address for buffer
+    .80050000 .00000100 13000000
+    # RD_A0 RS1_S2 MV                   ; read from input file
+    .00050000 .00000900 13000000
+    # RD_A2 !1 ADDI                     ; read 1 character
+    .00060000 .00001000 13000000
+    # ECALL                             ; syscall
+    73000000
+
+    # RS1_A0 @fgetc_done BNEZ           ; Check if nothing was read
+    .00000500 @fgetc_done 63100000
+    # RD_A2 !-4 ADDI                    ; Use -4 as EOF
+    .00060000 .0000C0FF 13000000
+    # RS1_A1 RS2_A2 SB                  ; Store EOF in *a1
+    .00800500 .0000C000 23000000
+
+:fgetc_done
+    # RD_A0 RS1_A1 LB                   ; return char in a0
+    .00050000 .00800500 03000000
+    # RD_RA RS1_SP !8 LD                ; restore ra
+    .80000000 .00000100 .00008000 03300000
+    # RD_A1 RS1_SP !16 LD               ; restore a1
+    .80050000 .00000100 .00000001 03300000
+    # RD_A2 RS1_SP !24 LD               ; restore a2
+    .00060000 .00000100 .00008001 03300000
+    # RD_SP RS1_SP !32 ADDI             ; deallocate stack
+    .00010000 .00000100 .00000002 13000000
+    # RS1_RA JALR                       ; return
+    .00800000 67000000
+
+
+; Malloc isn't actually required if the program being built fits in the initial memory
+; However, it doesn't take much to add it.
+; Requires MALLOC pointer to be initialized and a0 to have the number of desired bytes
+:malloc
+    # RD_SP RS1_SP !-16 ADDI            ; allocate stack
+    .00010000 .00000100 .000000FF 13000000
+    # RS1_SP RS2_RA SD                  ; protect ra
+    .00000100 .00001000 23300000
+    # RS1_SP RS2_A1 @8 SD               ; protect a1
+    .00000100 .0000B000 .00040000 23300000
+
+    # RD_A1 RS1_S1 MV                   ; Store the current pointer
+    .80050000 .00800400 13000000
+    # RD_A0 RS1_A0 RS2_S1 ADD           ; Request the number of desired bytes
+    .00050000 .00000500 .00009000 33000000
+    # RD_A7 !214 ADDI                   ; sys_brk
+    .80080000 .0000600D 13000000
+    # ECALL                             ; syscall
+    73000000
+    # RD_S1 RS1_A0 MV                   ; Set our malloc pointer
+    .80040000 .00000500 13000000
+    # RD_A0 RS1_A1 MV                   ; Return the pointer
+    .00050000 .00800500 13000000
+
+    # RD_RA RS1_SP LD                   ; restore ra
+    .80000000 .00000100 03300000
+    # RD_A1 RS1_SP !8 LD                ; restore a1
+    .80050000 .00000100 .00008000 03300000
+    # RD_SP RS1_SP !16 ADDI             ; deallocate stack
+    .00010000 .00000100 .00000001 13000000
+    # RS1_RA JALR                       ; return
+    .00800000 67000000
+
+
+; fputc function
+; receives CHAR in a0 and load FILE* from s3
+; writes char and returns
+:fputc
+    # RD_SP RS1_SP !-32 ADDI            ; allocate stack
+    .00010000 .00000100 .000000FE 13000000
+    # RS1_SP RS2_A0 SD                  ; protect a0
+    .00000100 .0000A000 23300000
+    # RS1_SP RS2_RA @8 SD               ; protect ra
+    .00000100 .00001000 .00040000 23300000
+    # RS1_SP RS2_A1 @16 SD              ; protect a1
+    .00000100 .0000B000 .00080000 23300000
+    # RS1_SP RS2_A2 @24 SD              ; protect a2
+    .00000100 .0000C000 .000C0000 23300000
+
+    # RD_A7 !64 ADDI                    ; sys_write
+    .80080000 .00000004 13000000
+    # RD_A0 RS1_S3 MV                   ; write to output
+    .00050000 .00800900 13000000
+    # RD_A1 RS1_SP MV                   ; Get stack address
+    .80050000 .00000100 13000000
+    # RD_A2 !1 ADDI                     ; write 1 character
+    .00060000 .00001000 13000000
+    # ECALL                             ; syscall
+    73000000
+
+    # RD_A0 RS1_SP LD                   ; restore a0
+    .00050000 .00000100 03300000
+    # RD_RA RS1_SP !8 LD                ; restore ra
+    .80000000 .00000100 .00008000 03300000
+    # RD_A1 RS1_SP !16 LD               ; restore a1
+    .80050000 .00000100 .00000001 03300000
+    # RD_A2 RS1_SP !24 LD               ; restore a2
+    .00060000 .00000100 .00008001 03300000
+    # RD_SP RS1_SP !32 ADDI             ; deallocate stack
+    .00010000 .00000100 .00000002 13000000
+    # RS1_RA JALR                       ; return
+    .00800000 67000000
+
+
+:Fail
+    ; Terminate program with 1 return code
+    # RD_A7 !93 ADDI                    ; sys_exit
+    .80080000 .0000D005 13000000
+    # RD_A0 !1 ADDI                     ; Return code 1
+    .00050000 .00001000 13000000
+    # ECALL                             ; exit(1)
+    73000000
+
+; PROGRAM END
+
+:terminators
+#	"
+#	 "
+0A 09 20 00
+
+:comments
+#	"#;"
+23 3B 00
+
+:string_char
+#	'22 27 00'
+22 27 00
+
+:DEFINE_str
+#	"DEFINE"
+44 45 46 49 4E 45 00
+
+:ELF_end

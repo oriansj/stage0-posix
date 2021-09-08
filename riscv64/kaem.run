@@ -47,9 +47,17 @@
 ################################
 # Phase-2 Build hex2 from hex1 #
 ################################
-./hex1 hex2_riscv64.hex1 hex2
+./hex1 hex2_riscv64.hex1 hex2-0
 # hex2 adds support for multi character labels, absolute addresses
 # and combining multiple Risc-V words into a single word.
 # This allows it to function as an effective linker for later stages of the
 # bootstrap. This is a minimal version which will be used to bootstrap
 # cross-platform version in a later stage.
+
+###############################
+# Phase-3 Build M0 from hex2  #
+###############################
+./catm hold ELF-riscv64.hex2 M0_riscv64.hex2
+./hex2-0 hold M0
+# M0 is the architecture specific version of M1 and is by design single
+# architecture only and will be replaced by the C code version of M1

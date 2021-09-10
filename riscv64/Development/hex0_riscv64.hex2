@@ -1,0 +1,261 @@
+## Copyright (C) 2021 Ekaitz Zarraga
+## Copyright (C) 2021 Andrius Štikonas
+## This file is part of stage0.
+##
+## stage0 is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## stage0 is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with stage0.  If not, see <http://www.gnu.org/licenses/>.
+# Compile this thing with -nostdlib
+
+
+; Register use:
+; s2: input fd
+; s3: output fd
+; s4: toggle
+; s5: hold
+
+; Uses top of the stack as i/o buffer
+
+## ELF Header
+
+:ELF_base
+7F 45 4C 46        ## e_ident[EI_MAG0-3] ELF's magic number
+
+02                 ## e_ident[EI_CLASS] Indicating 64 bit
+01                 ## e_ident[EI_DATA] Indicating little endianness
+01                 ## e_ident[EI_VERSION] Indicating original elf
+
+03                 ## e_ident[EI_OSABI] Set at 3 because FreeBSD is strict
+00                 ## e_ident[EI_ABIVERSION] Set at 0 because none cares
+
+00 00 00 00 00 00 00 ## e_ident[EI_PAD]
+02 00              ## e_type Indicating Executable
+F3 00              ## e_machine Indicating RISC-V
+01 00 00 00        ## e_version Indicating original elf
+
+&_start 00 00 00 00 ## e_entry Address of the entry point (Number of bytes this header is + Base Address)
+%ELF_program_headers>ELF_base 00 00 00 00 ## e_phoff Address of program header table
+00 00 00 00 00 00 00 00 ## e_shoff Address of section header table
+
+00 00 00 00        ## e_flags
+40 00              ## e_ehsize Indicating our 64 Byte header
+
+38 00              ## e_phentsize size of a program header table
+01 00              ## e_phnum number of entries in program table
+
+00 00              ## e_shentsize size of a section header table
+00 00              ## e_shnum number of entries in section table
+
+00 00              ## e_shstrndx index of the section names
+
+## Program Header
+:ELF_program_headers
+01 00 00 00             ## p_type
+07 00 00 00             ## ph_flags: PF-X|PF-W|PF-R = 7
+00 00 00 00 00 00 00 00 ## p_offset
+
+&ELF_base 00 00 00 00 ## p_vaddr
+&ELF_base 00 00 00 00 ## p_physaddr
+
+%ELF_end>ELF_base 00 00 00 00 ## p_filesz
+%ELF_end>ELF_base 00 00 00 00 ## p_memsz
+
+01 00 00 00 00 00 00 00 ## Required alignment
+
+:_start
+    # RD_A2 RS1_SP !16 LD      ; Input file name
+    .00060000 .00000100 .00000001 03300000
+
+    ; Open input file and store FD in s2
+    # RD_A7 !56 ADDI           ; sys_openat
+    .80080000 .00008003 13000000
+    # RD_A0 !-100 ADDI         ; AT_FDCWD
+    .00050000 .0000C0F9 13000000
+    # RD_A1 RS1_A2 MV          ; input file
+    .80050000 .00000600 13000000
+    # RD_A2 MV                 ; read only
+    .00060000 13000000
+    # ECALL
+    73000000
+    # RD_S2 RS1_A0 MV          ; Save fd in for later
+    .00090000 .00000500 13000000
+
+    ; Open output file and store the FD in s3
+    # RD_A0 !-100 ADDI         ; AT_FDCWD
+    .00050000 .0000C0F9 13000000
+    # RD_A1 RS1_SP !24 LD      ; Output file (argument 3)
+    .80050000 .00000100 .00008001 03300000
+    # RD_A2 !577 ADDI          ; octal 00001101
+    .00060000 .00001024 13000000
+    ; O_TRUNC   00001000
+    ; O_CREAT   00000100
+    ; O_WRONLY  00000001
+    ; OCTAL!
+    # RD_A3 !448 ADDI          ; Set read, write, execute permission on user
+    .80060000 .0000001C 13000000
+    ; S_IRWXU  00700
+    ; OCTAL!
+    # ECALL
+    73000000
+    # RD_S3 RS1_A0 MV          ; Save fd in for later
+    .80090000 .00000500 13000000
+
+:next_byte
+    # RD_A7 !63 ADDI           ; sys_read
+    .80080000 .0000F003 13000000
+    # RD_A0 RS1_S2 MV          ; File descriptor
+    .00050000 .00000900 13000000
+    # RD_A1 RS1_SP MV          ; Buffer
+    .80050000 .00000100 13000000
+    # RD_A2 !1 ADDI            ; Size of what we want to read (set for all subsequent syscalls)
+    .00060000 .00001000 13000000
+    # ECALL
+    73000000
+
+    ; If the file ended (0 bytes read) terminate
+    # RS1_A0 @terminate BEQZ
+    .00000500 @terminate 63000000
+
+    ; Check if it's a comment
+    # RD_A0 RS1_SP LB
+    .00050000 .00000100 03000000
+    # RD_T0 !0x23 ADDI
+    .80020000 .00003002 13000000
+    # RS1_A0 RS2_T0 @loop BEQ  ; a0 eq to '#'
+    .00000500 .00005000 @loop 63000000
+    # RD_T0 !0x3B ADDI
+    .80020000 .0000B003 13000000
+    # RS1_A0 RS2_T0 @loop BEQ  ; a0 eq to ';'
+    .00000500 .00005000 @loop 63000000
+    # $not_comment JAL
+    $not_comment 6F000000
+:loop
+        # RD_A0 RS1_S2 MV              ; File descriptor
+        .00050000 .00000900 13000000
+        # ECALL                        ; sys_read
+        73000000
+
+        ; If the file ended (0 bytes read) terminate
+        # RS1_A0 @terminate BEQZ
+        .00000500 @terminate 63000000
+        ; Check if read byte is the end of the comment,
+        ; in the case it is continue processing
+        # RD_A0 RS1_SP LB
+        .00050000 .00000100 03000000
+        # RD_T0 !0xA ADDI
+        .80020000 .0000A000 13000000
+        # RS1_A0 RS2_T0 @next_byte BEQ ; a0 eq to \n
+        .00000500 .00005000 @next_byte 63000000
+        # RD_T0 !0xD ADDI
+        .80020000 .0000D000 13000000
+        # RS1_A0 RS2_T0 @next_byte BEQ ; a0 eq to \r
+        .00000500 .00005000 @next_byte 63000000
+    # $loop JAL
+    $loop 6F000000
+:not_comment
+    ; Check if it's a hex character:
+    ; in the case it's not, ignores and reads next byte
+    # RD_A0 RS1_SP LB
+    .00050000 .00000100 03000000
+
+    ; Is it between '0' and '9'?
+    # RD_T0 !48 ADDI           ; '0' character
+    .80020000 .00000003 13000000
+    # RS1_A0 RS2_T0 @uppercase_alpha BLT
+    .00000500 .00005000 @uppercase_alpha 63400000
+    # RD_T0 !57 ADDI           ; '9' character
+    .80020000 .00009003 13000000
+    # RS1_T0 RS2_A0 @uppercase_alpha BLT
+    .00800200 .0000A000 @uppercase_alpha 63400000
+    # RD_A0 RS1_A0 !-48 ADDI
+    .00050000 .00000500 .000000FD 13000000
+    # $hex_read JAL
+    $hex_read 6F000000
+:uppercase_alpha
+    ; Is it between 'A' and 'F'?
+    # RD_T0 !65 ADDI           ; 'A' character
+    .80020000 .00001004 13000000
+    # RS1_A0 RS2_T0 @lowercase_alpha BLT
+    .00000500 .00005000 @lowercase_alpha 63400000
+    # RD_T0 !70 ADDI           ; 'F' character
+    .80020000 .00006004 13000000
+    # RS1_T0 RS2_A0 @lowercase_alpha BLT
+    .00800200 .0000A000 @lowercase_alpha 63400000
+    # RD_A0 RS1_A0 !-55 ADDI
+    .00050000 .00000500 .000090FC 13000000
+    # $hex_read JAL
+    $hex_read 6F000000
+:lowercase_alpha
+    ; Is it between 'a' and 'f'?
+    # RD_T0 !97 ADDI           ; 'a' character
+    .80020000 .00001006 13000000
+    # RS1_A0 RS2_T0 @next_byte BLT ; Not hex, continue reading
+    .00000500 .00005000 @next_byte 63400000
+    # RD_T0 !102 ADDI          ; 'f' character
+    .80020000 .00006006 13000000
+    # RS1_T0 RS2_A0 @next_byte BLT ; Not hex, continue reading
+    .00800200 .0000A000 @next_byte 63400000
+    # RD_A0 RS1_A0 !-87 ADDI
+    .00050000 .00000500 .000090FA 13000000
+:hex_read
+    ; END check hex -- leaves the half byte in a0
+
+    # RS1_S4 @combine BNEZ     ; if toggle != 0 -> combine
+    .00000A00 @combine 63100000
+    ; Toggle == 0, we need to prepare for later
+    # RD_S5 RS1_A0 MV          ; Load hold
+    .800A0000 .00000500 13000000
+
+    # RD_S4 !1 ADDI              ; Set toggle
+    .000A0000 .00001000 13000000
+    # $next_byte JAL           ; Read next byte
+    $next_byte 6F000000
+
+:combine
+    ; Combine half bytes
+    # RD_A1 RS1_S5 RS2_X4 SLLI ; Shift logical left 4 times
+    .80050000 .00800A00 .00004000 13100000
+    # RD_A0 RS1_A0 RS2_A1 ADD  ; Combine two half bytes
+    .00050000 .00000500 .0000B000 33000000
+    ; Leaves the full byte in a0
+
+    ; Values are combined, now we write in the file
+    # RS1_SP RS2_A0 SB         ; Store prepared byte in buffer
+    .00000100 .0000A000 23000000
+    # RD_A7 !64 ADDI           ; sys_write
+    .80080000 .00000004 13000000
+    # RD_A0 RS1_S3 MV          ; file descriptor (stdout)
+    .00050000 .00800900 13000000
+    # RD_A1 RS1_SP MV          ; string address
+    .80050000 .00000100 13000000
+    # ECALL
+    73000000
+
+    ; Update globals
+    # RD_S4 MV                 ; Clear toggle
+    .000A0000 13000000
+    # RD_S5 MV                 ; Clear hold
+    .800A0000 13000000
+
+    ; Read next byte
+    # $next_byte JAL
+    $next_byte 6F000000
+
+:terminate
+    ; Terminate program with 0 return code
+    # RD_A7 !93 ADDI           ; sys_exit
+    .80080000 .0000D005 13000000
+    # ECALL
+    73000000
+# PROGRAM END
+
+:ELF_end

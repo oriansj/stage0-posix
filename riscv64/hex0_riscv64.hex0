@@ -1,4 +1,5 @@
 ## Copyright (C) 2021 Ekaitz Zarraga
+## Copyright (C) 2021 Andrius Štikonas
 ## This file is part of stage0.
 ##
 ## stage0 is free software: you can redistribute it and/or modify
@@ -14,6 +15,13 @@
 ## You should have received a copy of the GNU General Public License
 ## along with stage0.  If not, see <http://www.gnu.org/licenses/>.
 
+; Register use:
+; s2: input fd
+; s3: output fd
+; s4: toggle
+; s5: hold
+
+; Uses top of the stack as i/o buffer
 
 ## ELF Header
 #:ELF_base
@@ -31,7 +39,7 @@
 F3 00              ## e_machine Indicating RISC-V
 01 00 00 00        ## e_version Indicating original elf
 
-78 00 60 00 00 00 00 00 ## e_entry Address of the entry point (Number of bytes this header is + Base Address) # TODO
+78 00 60 00 00 00 00 00 ## e_entry Address of the entry point (Number of bytes this header is + Base Address)
 40 00 00 00 00 00 00 00 ## e_phoff Address of program header table
 00 00 00 00 00 00 00 00 ## e_shoff Address of section header table
 
@@ -55,191 +63,148 @@ F3 00              ## e_machine Indicating RISC-V
 00 00 60 00 00 00 00 00 ## p_vaddr
 00 00 60 00 00 00 00 00 ## p_physaddr
 
-DD 01 00 00 00 00 00 00 ## p_filesz
-DD 01 00 00 00 00 00 00 ## p_memsz
+88 01 00 00 00 00 00 00 ## p_filesz
+88 01 00 00 00 00 00 00 ## p_memsz
 
 01 00 00 00 00 00 00 00 ## Required alignment
 
-#:ELF_text
-#:_start
+# :_start ; (0x0600078)
+    03 36 01 01    # RD_A2 RS1_SP !16 LD      ; Input file name
 
-    # Register use:
-    # s2: input fd
-    # s3: output fd
-    # s4: toggle
-    # s5: hold
+    ; Open input file and store FD in s2
+    93 08 80 03    # RD_A7 !56 ADDI           ; sys_openat
+    13 05 C0 F9    # RD_A0 !-100 ADDI         ; AT_FDCWD
+    93 05 06 00    # RD_A1 RS1_A2 MV          ; input file
+    13 06 00 00    # RD_A2 MV                 ; read only
+    73 00 00 00    # ECALL
+    13 09 05 00    # RD_S2 RS1_A0 MV          ; Save fd in for later
 
-    03 36 01 01    ;ld a2,16(sp)   # Input file name
+    ; Open output file and store the FD in s3
+    13 05 C0 F9    # RD_A0 !-100 ADDI         ; AT_FDCWD
+    83 35 81 01    # RD_A1 RS1_SP !24 LD      ; Output file (argument 3)
+    13 06 10 24    # RD_A2 !577 ADDI          ; octal 00001101
+    ; O_TRUNC   00001000
+    ; O_CREAT   00000100
+    ; O_WRONLY  00000001
+    ; OCTAL!
 
+    93 06 00 1C    # RD_A3 !448 ADDI          ; Set read, write, execute permission on user
+    ; S_IRWXU  00700
+    ; OCTAL!
 
-    13 0A 00 00    ;li s4,0     (addi s4,zero,0)    # Toggle
-    93 0A 00 00    ;li s5,0     (addi s5,zero,0)    # Hold
+    73 00 00 00    # ECALL
+    93 09 05 00    # RD_S3 RS1_A0 MV          ; Save fd in for later
 
-    # Open input file and store FD in s2
-    93 08 80 03    ;li a7,56    (addi a7,zero,56)   # sys_openat
-    13 05 C0 F9    ;li a0,-100  (addi a0,zero,-100) # AT_FDCWD
-    93 05 06 00    ;mv a1,a2    (addi a1,a2,0)      # input file
-    13 06 00 00    ;li a2,0     (addi a2,zero,0)    # read only
-    73 00 00 00    ;ecall
-    13 09 05 00    ;mv s2,a0    (addi s2,a0,0)      # Save fd in for later
+# :next_byte ; (0x06000AC)
+    93 08 F0 03    # RD_A7 !63 ADDI           ; sys_read
+    13 05 09 00    # RD_A0 RS1_S2 MV          ; File descriptor
+    93 05 01 00    # RD_A1 RS1_SP MV          ; Buffer
+    13 06 10 00    # RD_A2 !1 ADDI            ; Size of what we want to read (set for all subsequent syscalls)
+    73 00 00 00    # ECALL
 
-    # Set default FD for output file to stdout
-    93 09 10 00    ;li s3,1     (addi s3,zero,1)
+    ; If the file ended (0 bytes read) terminate
+    63 00 05 0C    # RS1_A0 @terminate BEQZ
+                   # +192B
 
-    # If we only have 2 arguments, don't use the third (it's not set)
-    93 02 20 00    ;li t0,2     (addi t0,zero,2)
-    03 35 01 00    ;ld a0,0(sp)                   # Get number of the args
-    63 44 55 12    ;blt a0,t0,terminate           # No input file provided -> Terminate
-                                                  # Jump 74 instruction forward (+296B)
+    ; Check if it's a comment
+    03 05 01 00    # RD_A0 RS1_SP LB
+    93 02 30 02    # RD_T0 !0x23 ADDI
+    63 08 55 00    # RS1_A0 RS2_T0 @loop BEQ  ; a0 eq to '#'
+                   # +16B
+    93 02 B0 03    # RD_T0 !0x3B ADDI
+    63 04 55 00    # RS1_A0 RS2_T0 @loop BEQ  ; a0 eq to ';'
+                   # +8B
+    6F 00 80 02    # $not_comment JAL
+                   # +40B
+# :loop ; (0x06000DC)
+        13 05 09 00    # RD_A0 RS1_S2 MV   ; File descriptor
+        73 00 00 00    # ECALL             ; sys_read
 
-    63 00 55 02    ;beq a0,t0,after_file_open     # No output file provided. Use stdout
-                                                   # Jump 8 instructions forward (+32B)
+        ; If the file ended (0 bytes read) terminate
+        63 0E 05 08    # RS1_A0 @terminate BEQZ
+                       # +156B
+        ; Check if read byte is the end of the comment,
+        ; in the case it is continue processing
+        03 05 01 00     # RD_A0 RS1_SP LB
+        93 02 A0 00     # RD_T0 !0xA ADDI
+        E3 0E 55 FA     # RS1_A0 RS2_T0 @next_byte BEQ ; a0 eq to \n
+                        # -68B
+        93 02 D0 00     # RD_T0 !0xD ADDI
+        E3 0A 55 FA     # RS1_A0 RS2_T0 @next_byte BEQ ; a0 eq to \r
+                        # -76B
+    6F F0 1F FE    # $loop JAL
+# :not_comment ; (0x0600100)
+    ; Check if it's a hex character:
+    ; in the case it's not, ignores and reads next byte
+    03 05 01 00    # RD_A0 RS1_SP LB
 
+    ; Is it between '0' and '9'?
+    93 02 00 03    # RD_T0 !48 ADDI           ; '0' character
+    63 4A 55 00    # RS1_A0 RS2_T0 @uppercase_alpha BLT
+                   # +20B
+    93 02 90 03    # RD_T0 !57 ADDI           ; '9' character
+    63 C6 A2 00    # RS1_T0 RS2_A0 @uppercase_alpha BLT
+                   # +12B
+    13 05 05 FD    # RD_A0 RS1_A0 !-48 ADDI
+    6F 00 00 03    # $hex_read JAL
+                   # +48B
+# :uppercase_alpha ; (0x060011C)
+    ; Is it between 'A' and 'F'?
+    93 02 10 04    # RD_T0 !65 ADDI           ; 'A' character
+    63 4A 55 00    # RS1_A0 RS2_T0 @lowercase_alpha BLT
+                   # +20B
+    93 02 60 04    # RD_T0 !70 ADDI           ; 'F' character
+    63 C6 A2 00    # RS1_T0 RS2_A0 @lowercase_alpha BLT
+                   # +12B
+    13 05 95 FC    # RD_A0 RS1_A0 !-55 ADDI
+    6F 00 80 01    # $hex_read JAL
+                   # +24B
+# :lowercase_alpha
+    ; Is it between 'a' and 'f'?
+    93 02 10 06    # RD_T0 !97 ADDI           ; 'a' character
+    E3 4A 55 F6    # RS1_A0 RS2_T0 @next_byte BLT ; Not hex, continue reading
+                   # -140B
+    93 02 60 06    # RD_T0 !102 ADDI          ; 'f' character
+    E3 C6 A2 F6    # RS1_T0 RS2_A0 @next_byte BLT ; Not hex, continue reading
+                   # -148B
+    13 05 95 FA    # RD_A0 RS1_A0 !-87 ADDI
+# :hex_read ; (0x0600148)
+    ; END check hex -- leaves the half byte in a0
 
-#:open_output_file
-    # Open output file and store the FD in s3
-    93 08 80 03    ;li a7,56         (addi a7,zero,0)        # sys_openat
-    13 05 C0 F9    ;li a0,-100       (addi a0,zero,-100)     # AT_FDCWD
-    83 35 81 01    ;ld a1,24(sp)                             # Output file (argument 3)
-    13 06 10 24    ;li a2, 00001101  (addi a2,zero,00001101) # Mode of the file opening
-               # O_TRUNC   00001000
-               # O_CREAT   00000100
-               # O_WRONLY  00000001
+    63 18 0A 00    # RS1_S4 @combine BNEZ     ; if toggle != 0 -> combine
+                   # +16B
+    ; Toggle == 0, we need to prepare for later
+    93 0A 05 00    # RD_S5 RS1_A0 MV          ; Load hold
 
-    93 06 00 1C    ;li a3, 00700     (addi a3,zero,00700)    # Set read, write, execute permission on user
-                 # S_IRWXU  00700
+    13 0A 10 00    # RD_S4 !1 ADDI            ; Set toggle
+    6F F0 9F F5    # $next_byte JAL           ; Read next byte
+                   # -168B
 
-    73 00 00 00    ;ecall
-    93 09 05 00    ;mv s3, a0   (addi s3,a0,0)      # Save fd in for later
+# :combine ; (0x0600158)
+    ; Combine half bytes
+    93 95 4A 00    # RD_A1 RS1_S5 RS2_X4 SLLI ; Shift logical left 4 times
+    33 05 B5 00    # RD_A0 RS1_A0 RS2_A1 ADD  ; Combine two half bytes
+    ; Leaves the full byte in a0
 
-#:after_file_open
-#:next_byte
-    93 08 F0 03    ;li a7,63    (addi a7,zero,63)   # sys_read
-    13 05 09 00    ;mv a0,s2    (addi a0,s2,0)      # File descriptor
-    ;la a1, buffer   (two instructions)             # Buffer
-        97 05 00 00            ;(auipc a1 0)
-        93 85 85 10            ;(addi a1,a1,66*4)
-    13 06 10 00    ;li a2, 1    (addi a2,zero,1)    # Size of what we want to read
-    73 00 00 00    ;ecall
+    ; Values are combined, now we write in the file
+    23 00 A1 00    # RS1_SP RS2_A0 SB         ; Store prepared byte in buffer
+    93 08 00 04    # RD_A7 !64 ADDI           ; sys_write
+    13 85 09 00    # RD_A0 RS1_S3 MV          ; file descriptor (stdout)
+    93 05 01 00    # RD_A1 RS1_SP MV          ; string address
+    73 00 00 00    # ECALL
 
-    # If the file ended (0 bytes read) terminate
-    63 06 05 0E    ;beqz a0,terminate (beq a0,zero,terminate) # Jump 59 instructions forward (+239B)
+    ; Update globals
+    13 0A 00 00    # RD_S4 MV                 ; Clear toggle
+    93 0A 00 00    # RD_S5 MV                 ; Clear hold
 
-    # Check if it's a comment
-    ;lb a0, buffer  (two instructions)
-        17 05 00 00 ;auipc a0,0
-        03 05 45 0F ;lb a0, 61*4(a0)
-    93 05 30 02    ;li a1, 0x23    (addi a1,zero,0x23)
-    63 08 B5 00    ;beq a0,a1,loop                         # a0 eq to '#'
-    93 05 B0 03    ;li a1, 0x3B    (addi a1,zero,0x3B)
-    63 04 B5 00    ;beq a0,a1,loop                         # a0 eq to ';'
-    6F 00 C0 03    ;j not_comment  (jal zero,60)  # Jump 15 instructions forward (+60B)
-#:loop
-        93 08 F0 03    ;li a7,63   (addi a7,zero,63)       # sys_read
-        13 05 09 00    ;mv a0,s2   (addi a0,s2,0)          # File descriptor
-        ;la a1, buffer   (two instructions)                # Buffer
-            97 05 00 00           ;(auipc a1 0)
-            93 85 05 0D           ;(addi a1,a1,52*4)
-        13 06 10 00    ;li a2,1    (addi a2,zero,1)        # Size of what we want to read
-        73 00 00 00    ;ecall
+    ; Read next byte
+    6F F0 1F F3    # $next_byte JAL
+                   # -208B
 
-        # If the file ended (0 bytes read) terminate
-        63 0A 05 0A    ;beqz a0,terminate (beq a0,zero,180) # Jump 45 instructions forward (+180B)
+# :terminate  ; (0x600180)
+    ; Terminate program with 0 return code
+    93 08 D0 05    # RD_A7 !93 ADDI           ; sys_exit
+    73 00 00 00    # ECALL
+# PROGRAM END
 
-        # Check if read byte is the end of the comment,
-        # in the case it is continue processing
-        ;lb a0, buffer  (two instructions)
-            17 05 00 00 ;auipc a0,0
-            03 05 C5 0B ;lb a0, 47*4(a0)
-        93 02 A0 00    ;li t0,0xA (addi t0,zero,0xA)
-        E3 00 55 FA    ;beq a0,t0,next_byte      # a0 eq to \n
-                                                 # Jump 24 instructions backwards (-96B)
-
-        93 02 D0 00    ;li t0,0xD (addi t0,zero,0xD)
-        E3 0C 55 F8    ;beq a0,t0,next_byte      # a0 eq to \r
-                                                 # Jump 26 instructions backwards (-104B)
-
-    6F F0 DF FC        ;j loop  (jal zero,-52)  # Jump 13 instructions back (-52B)
-#:not_comment
-
-    # Check if it's a hex character:
-    # in the case it's not, ignores and reads next byte
-    ;lb a0,buffer  (two instructions)
-        17 05 00 00 ;auipc a0,0
-        03 05 05 0A ;lb a0, 40*4(a0)
-
-    # Is it between '0' and '9'?
-    93 02 00 03    ;li t0,48            (addi t0,zero,48)     # '0' character
-    63 4A 55 00    ;blt a0, t0, 1f
-    93 02 90 03    ;li t0,57            (addi t0,zero,57)     # '9' character
-    63 C6 A2 00    ;bgt a0,t0,1f        (blt t0,a0,1f)
-    13 05 05 FD    ;addi a0,a0,-48
-    6F 00 00 03    ;j hex_read          (jal zero,48)         # Jump 12 instructions forward (+48B)
-#:1
-    # Is it between 'A' and 'F'?
-    93 02 10 04    ;li t0,65            (addi t0,zero,65)     # 'A' character
-    63 4A 55 00    ;blt a0, t0, 1f
-    93 02 60 04    ;li t0,70            (addi t0,zero,70)     # 'F' character
-    63 C6 A2 00    ;bgt a0,t0,1f        (blt t0,a0,1f)
-    13 05 95 FC    ;addi a0,a0,-55
-    6F 00 80 01    ;j hex_read          (jal zero,24)         # Jump 6 instructions forward (+24B)
-#:1
-    # Is it between 'a' and 'f'?
-    93 02 10 06    ;li t0,97            (addi t0,zero,97)     # 'a' character
-    E3 4A 55 F4    ;blt a0,t0,next_byte                       # Not hex, continue reading
-                                                              # Jump 43 instructions backwards (-172B)
-    93 02 60 06    ;li t0,102           (addi t0,zero,102)    # 'f' character
-    E3 C6 A2 F4    ;bgt a0,t0,next_byte (blt t0,a0,-180)      # Not hex, continue reading
-                                                              # Jump 45 instructions backwards (-180B)
-    13 05 95 FA    ;addi a0,a0,-87
-
-#:hex_read
-    # END check hex -- leaves the half byte in a0
-
-    63 18 0A 00    ;bnez s4,combine (bne s4,zero,combine)    # if toggle != 0 -> combine
-                    # combine is 4 instructions forward (+16B)
-    # Toggle == 0, we need to prepare for later
-    93 0A 05 00    ;mv s5, a0       (addi s5,a0,0)           # Load hold
-    13 0A 10 00    ;li s4, 1        (addi s4,zero,1)         # Set toggle
-    6F F0 9F F3    ;j next_byte     (jal zero,-200)          # Read next byte
-    # Jump 50 instructions backwards (-200B)
-
-#:combine
-    # Combine half bytes
-    93 95 4A 00    ;slli a1,s5,4     # Shift logical left 4 times (a1 = s5 * 16)
-    33 05 B5 00    ;add a0,a0,a1     # Combine two half bytes
-    # Leaves the full byte in a0
-
-    # Values are combined, now we write in the file
-    ;la t0,buffer (two instructions)                  # Load buffer address to t0
-        97 02 00 00             ;(auipc t0 0)
-        93 82 C2 03             ;(addi t0,t0,15*4)
-    23 80 A2 00    ;sb a0,0(t0)                       # Store prepared byte in buffer
-    93 08 00 04    ;li a7,64     (addi a7,zero,64)    # sys_write
-    13 85 09 00    ;mv a0,s3     (addi a0,s3,0)       # file descriptor (stdout)
-    ;la a1,buffer   (two instructions)                # String address (buffer)
-        97 05 00 00             ;(auipc a1 0)
-        93 85 85 02             ;(addi a1,a1,10*4)
-    13 06 10 00    ;li a2,1      (addi a2,zero,1)     # Length of the string
-    73 00 00 00    ;ecall
-
-    # Update globals
-    13 0A 00 00    ;li s4,0      (addi s4,zero,0)     # Clear toggle
-    93 0A 00 00    ;li s5,0      (addi s5,zero,0)     # Clear hold
-
-    6F F0 1F F0     ;j next_byte  (jal zero,-256) # Read next byte
-    # Jump 64 instructions backwards (-256B)
-
-#:terminate
-    # Terminate program with 0 return code
-    93 08 D0 05    ;li a7,93     (addi a7,zero,93)    # sys_exit
-    13 05 00 00    ;li a0,0      (addi a0,zero, 0)    # Return code 0
-    73 00 00 00    ;ecall
-
-
-#:ELF_data
-# Our data in memory:
-#:buffer
-    # Reserve a byte
-    00
-#:ELF_end
+# :ELF_end ; (0x600188)

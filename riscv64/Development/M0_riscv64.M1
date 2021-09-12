@@ -731,6 +731,10 @@ DEFINE RS2_X31 .0000F001
     RD_T0 !1 ADDI                     ; t0 = MACRO
     RS1_A0 RS2_T0 @Eval_Immediates_Next BEQ ; Skip to next if I->TYPE == MACRO
 
+    ; Check for NULL EXPRESSION
+    RD_A0 RS1_A3 !24 LD               ; I->EXPRESSION
+    RS1_A0 @Eval_Immediates_Next BNEZ ; Skip to next if NULL == I->EXPRESSION
+
     ; Check if number
     RD_A0 RS1_A3 !16 LD               ; I->TEXT
     RD_A1 RS1_A0 LBU                  ; I->TEXT[0]

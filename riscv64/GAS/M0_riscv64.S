@@ -529,6 +529,10 @@ Eval_Immediates_Loop:
     li t0, 1                          # t0 = MACRO
     beq a0, t0, Eval_Immediates_Next  # Skip to next if I->TYPE == MACRO
 
+    # Check for NULL EXPRESSION
+    ld a0, 24(a3)                     # I->EXPRESSION
+    bnez a0, Eval_Immediates_Next     # Skip to next if NULL == I->EXPRESSION
+
     # Check if number
     ld a0, 16(a3)                     # I->TEXT
     lbu a1, (a0)                      # I->TEXT[0]

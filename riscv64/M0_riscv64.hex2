@@ -842,6 +842,12 @@
     # RS1_A0 RS2_T0 @Eval_Immediates_Next BEQ ; Skip to next if I->TYPE == MACRO
     .00000500 .00005000 @Eval_Immediates_Next 63000000
 
+    ; Check for NULL EXPRESSION
+    # RD_A0 RS1_A3 !24 LD               ; I->EXPRESSION
+    .00050000 .00800600 .00008001 03300000
+    # RS1_A0 @Eval_Immediates_Next BNEZ ; Skip to next if NULL == I->EXPRESSION
+    .00000500 @Eval_Immediates_Next 63100000
+
     ; Check if number
     # RD_A0 RS1_A3 !16 LD               ; I->TEXT
     .00050000 .00800600 .00000001 03300000

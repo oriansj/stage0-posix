@@ -57,6 +57,7 @@ DEFINE JG32 0F8F
 DEFINE JL32 0F8C
 DEFINE JMP32 E9
 DEFINE JNE32 0F85
+DEFINE LEA32_ECX_from_esp 8D0C24
 DEFINE LOAD32_Absolute32_eax A1
 DEFINE LOAD32_Absolute32_ebx 8B1D
 DEFINE LOAD8_Absolute32_al A0
@@ -390,16 +391,15 @@ DEFINE TEST 85C0
 :print
 	; update the sum and store in output
 	ADD32_Absolute32_eax &High
-	STORE8_Absolute32_al &table
+
+	; Print our first Hex
+	LOADI32_EDX %1              ; set the size of chars we want
+	CALL32 %print_chars
 
 	; flip the toggle
 	LOAD32_Absolute32_eax &Flag
 	NOT_EAX
 	STORE32_Absolute32_eax &Flag
-
-	; Print our first Hex
-	LOADI32_EDX %1              ; set the size of chars we want
-	CALL32 %print_chars
 
 	ADDI8_EDI !1                ; Increment IP
 	JMP32 %Second_pass
@@ -425,50 +425,47 @@ DEFINE TEST 85C0
 
 
 :Read_byte
-	; Attempt to read 1 byte from STDIN
-	PUSH_ESI                    ; Protect esi
-	PUSH_EDI                    ; Protect edi
-	PUSH_EBX                    ; Protect ebx
-	PUSH_ECX                    ; Protect ecx
-
-	LOADI32_EDX %1              ; set the size of chars we want
-	LOADI32_ECX &write          ; Where to put it
+	PUSH_EDX                    ; Protect EDX
+	PUSH_ECX                    ; Protect ECX
+	PUSH_EBX                    ; Protect EBX
+	LOADI32_EAX %-4             ; Put EOF in eax
+	PUSH_EAX                    ; Assume bad (If nothing read, value will remain EOF)
+	LEA32_ECX_from_esp          ; Get stack address
 	LOAD32_Absolute32_ebx &Input ; Where are we reading from
 	LOADI32_EAX %3              ; the syscall number for read
+	LOADI32_EDX %1              ; set the size of chars we want
 	INT_80                      ; call the Kernel
-	POP_ECX                     ; Restore ecx
-	POP_EBX                     ; Restore ebx
-	POP_EDI                     ; Restore edi
-	POP_ESI                     ; Restore esi
-
 	TEST                        ; check what we got
+	POP_EAX                     ; Get either char or EOF
 	JE32 %Read_byte_1           ; Got EOF call it done
-
-	; load byte
-	LOAD8_Absolute32_al &write  ; load char
 	MOVZX_al                    ; We have to zero extend it to use it
+	POP_EBX                     ; Restore EBX
+	POP_ECX                     ; Restore ECX
+	POP_EDX                     ; Restore EDX
 	RET
 
 ; Deal with EOF
 :Read_byte_1
-	LOADI32_EAX %-4             ; Put EOF in eax
+	POP_EBX                     ; Restore EBX
+	POP_ECX                     ; Restore ECX
+	POP_EDX                     ; Restore EDX
 	RET
 
+;; receives bytes to write in EAX and number of bytes to write in EDX
 :print_chars
-	PUSH_ESI                    ; Protect esi
-	PUSH_EDI                    ; Protect edi
-	PUSH_EBX                    ; Protect ebx
-	PUSH_ECX                    ; Protect ecx
-
-	LOADI32_ECX &table          ; What we are writing
+	PUSH_EDX                    ; Protect EDX
+	PUSH_ECX                    ; protect ECX
+	PUSH_EBX                    ; protect EBX
+	PUSH_EAX                    ; We are writing eax
+	LEA32_ECX_from_esp          ; Get stack address
 	LOAD32_Absolute32_ebx &Output ; Write to target file
 	LOADI32_EAX %4              ; the syscall number for write
+	;; EDX contains the number of bytes to write
 	INT_80                      ; call the Kernel
-
-	POP_ECX                     ; Restore ecx
-	POP_EBX                     ; Restore ebx
-	POP_EDI                     ; Restore edi
-	POP_ESI                     ; Restore esi
+	POP_EAX                     ; Restore stack
+	POP_EBX                     ; Restore EBX
+	POP_ECX                     ; Restore ECX
+	POP_EDX                     ; Restore EDX
 	RET
 
 ;; Receives pointer in EBX
@@ -602,7 +599,6 @@ DEFINE TEST 85C0
 :StorePointer_rel4
 	CALL32 %StorePointer        ; Do Common
 	SUB_EDX_from_EAX            ; target - ip
-	STORE32_Absolute32_eax &table ; put value in output
 	LOADI32_EDX %4              ; set the size of chars we want
 	CALL32 %print_chars
 	CALL32 %ClearScratch        ; Clean up after ourselves
@@ -611,7 +607,6 @@ DEFINE TEST 85C0
 :StorePointer_rel2
 	CALL32 %StorePointer        ; Do Common
 	SUB_EDX_from_EAX            ; target - ip
-	STORE32_Absolute32_eax &table ; put value in output
 	LOADI32_EDX %2              ; set the size of chars we want
 	CALL32 %print_chars
 	CALL32 %ClearScratch        ; Clean up after ourselves
@@ -620,7 +615,6 @@ DEFINE TEST 85C0
 :StorePointer_rel1
 	CALL32 %StorePointer        ; Do Common
 	SUB_EDX_from_EAX            ; target - ip
-	STORE32_Absolute32_eax &table ; put value in output
 	LOADI32_EDX %1              ; set the size of chars we want
 	CALL32 %print_chars
 	CALL32 %ClearScratch        ; Clean up after ourselves
@@ -628,7 +622,6 @@ DEFINE TEST 85C0
 
 :StorePointer_abs4
 	CALL32 %StorePointer        ; Do Common
-	STORE32_Absolute32_eax &table ; put value in output
 	LOADI32_EDX %4              ; set the size of chars we want
 	CALL32 %print_chars
 	CALL32 %ClearScratch        ; Clean up after ourselves
@@ -636,7 +629,6 @@ DEFINE TEST 85C0
 
 :StorePointer_abs2
 	CALL32 %StorePointer        ; Do Common
-	STORE32_Absolute32_eax &table ; put value in output
 	LOADI32_EDX %2              ; set the size of chars we want
 	CALL32 %print_chars
 	CALL32 %ClearScratch        ; Clean up after ourselves
@@ -648,7 +640,7 @@ DEFINE TEST 85C0
 	LOADI32_EAX %1              ; put the exit syscall number in eax
 	INT_80                      ; Call it a good day
 
-
+:ELF_data
 :High
 	NULL
 :Flag
@@ -656,8 +648,6 @@ DEFINE TEST 85C0
 :Input
 	NULL
 :Output
-	NULL
-:write
 	NULL
 :table
 	NULL

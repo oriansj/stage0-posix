@@ -5,4 +5,5 @@ hex1
 hex2-0
 catm
 M0
-hold
+hold*
+cc_riscv64

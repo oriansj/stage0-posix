@@ -187,7 +187,7 @@ get_token_symbol:
 
 get_token_strings:
 	mov rax, [C]                ; Send C
-	mov rbx, strings            ; Get symbols
+	mov rbx, strings            ; Get strings
 	call In_Set                 ; See if in set
 	cmp rax, 1                  ; IF TRUE
 	jne get_token_comment       ; Otherwise
@@ -398,7 +398,7 @@ preserve_symbol:
 	mov rcx, rax                ; Setup C
 	mov rbx, symbols            ; Concerning ourselves with "<=>.."
 preserve_symbol_loop:
-	call In_Set                 ; Check if alphanumerics
+	call In_Set                 ; Check if symbol
 	cmp rax, 1                  ; IF TRUE
 	jne preserve_symbol_done    ; Otherwise be done
 
@@ -468,7 +468,7 @@ consume_byte:
 
 ;; fixup_label function
 ;; Receives S in RCX
-;; prepends ':' to string and returns registers un changed
+;; prepends ':' to string and returns registers unchanged
 ;; Uses RAX for HOLD, RBX for PREV and RCX for S[0]
 fixup_label:
 	push rax                    ; Protect RAX
@@ -749,7 +749,7 @@ declare_function:
 	jmp declare_function_done   ; Move on
 
 declare_function_full:
-	;; Deal will full function definitions
+	;; Deal with full function definitions
 	mov rax, declare_function_string_0 ; "# Defining function "
 	call emit_out               ; emit it
 
@@ -1099,7 +1099,7 @@ recursive_statement_loop:
 	mov rbx, [rbx+16]           ; global_token->S
 	mov rax, close_curly_brace  ; Using "}"
 	call match                  ; IF global_token->S == "}"
-	cmp rax, 0                  ; Then we are done recuring
+	cmp rax, 0                  ; Then we are done recursing
 	je recursive_statement_cleanup ; and then we clean up
 
 	;; Deal with the recursive calls
@@ -1147,7 +1147,7 @@ recursive_statement_string_1: db "POP_RBX", 9, "# _recursive_statement_locals", 
 ;; Receives nothing
 ;; Returns nothing
 ;; Cleans up function and generates return
-;; Also handles returing expressions
+;; Also handles returning expressions
 return_result:
 	push rbx                    ; Protect RBX
 	push rcx                    ; Protect RCX
@@ -1231,7 +1231,7 @@ collect_local:
 collect_local_fresh:
 	mov rax, [function]         ; Using function
 	mov rax, [rax+32]           ; function->args
-	cmp rax, 0                  ; IF NULL == function->locals
+	cmp rax, 0                  ; IF NULL == function->args
 	jne collect_local_first     ; Otherwise see if first
 
 	mov rax, [function]         ; Using function
@@ -1474,7 +1474,7 @@ process_if_string_6: db ":_END_IF_", 0
 
 
 ;; save_break_frame microfunction
-;; Overwrites RAX abd RBX
+;; Overwrites RAX and RBX
 ;; Saves break frame on stack
 ;; Returns to caller
 save_break_frame:
@@ -1955,7 +1955,7 @@ expression:
 	mov rbx, [current_target]   ; Using current_target
 	mov rbx, [rbx+48]           ; current_target->NAME
 	mov rax, type_char_indirect_name ; Using "char*"
-	call match                  ; Intensional inefficency because I feel like it
+	call match                  ; Intentional inefficiency because I feel like it
 	cmp rax, 0                  ; IF current_target->NAME == "char*"
 	jne expression_int          ; Do char anyway
 
@@ -2648,7 +2648,7 @@ primary_expr_variable_local:
 	mov rbx, [function]         ; Using function
 	mov rbx, [rbx+8]            ; function->locals
 	call sym_lookup             ; sym_lookup(s, function->locals)
-	cmp rax, 0                  ; IF NULL == sym_lookup(s, global_constant_list)
+	cmp rax, 0                  ; IF NULL == sym_lookup(s, function->locals)
 	je primary_expr_variable_arguments ; try arguments next
 
 	;; Deal with local load
@@ -2660,7 +2660,7 @@ primary_expr_variable_arguments:
 	mov rbx, [function]         ; Using function
 	mov rbx, [rbx+32]           ; function->args
 	call sym_lookup             ; sym_lookup(s, function->args)
-	cmp rax, 0                  ; IF NULL == sym_lookup(s, global_constant_list)
+	cmp rax, 0                  ; IF NULL == sym_lookup(s, function->args)
 	je primary_expr_variable_function ; try functions next
 
 	;; Deal with argument load
@@ -3207,7 +3207,7 @@ promote_type:
 	push rbx                    ; Protect RBX
 	push rcx                    ; Protect RCX
 	push rdx                    ; Protect RDX
-	cmp rbx, 0                  ; IF NULL == A
+	cmp rbx, 0                  ; IF NULL == B
 	je promote_type_done        ; Just return A
 
 	mov rcx, rax                ; Put A in place
@@ -3296,7 +3296,7 @@ require_match:
 	cmp rax, 0                  ; we are fine
 	je require_match_good       ; otherwise pain
 
-	;; Deal will bad times
+	;; Deal with bad times
 ;	call line_error             ; Tell user what went wrong
 	mov r14, 2                  ; write to standard error
 	mov rax, rcx                ; using our message
@@ -3313,14 +3313,14 @@ require_match_good:
 
 
 ;; uniqueID Function
-;; Receives char*S in RAX, struct token_list* l in RBX snd char* num in RCX
+;; Receives char *S in RAX, struct token_list* l in RBX and char* num in RCX
 ;; Returns updated struct token_list* L in RAX
 uniqueID:
 	push rbx                    ; Protect RBX
 	push rcx                    ; Protect RCX
 	call emit                   ; emit(s, l)
 	mov rbx, rax                ; Put L in correct place
-	mov rax, underline          ; Usinf "_"
+	mov rax, underline          ; Using "_"
 	call emit                   ; emit("_", l)
 	mov rbx, rax                ; Put L in correct place
 	mov rax, rcx                ; Put num in correct place
@@ -4574,7 +4574,7 @@ debug_list_null:
 	call File_Print             ; Print it
 
 	;; ARGS/DEPTH
-	mov rax, debug_list_string6 ; Using our third string
+	mov rax, debug_list_string6 ; Using our seventh string
 	call File_Print             ; Print it
 	mov rax, [r12+32]           ; Use address of pointer
 	call numerate_number        ; Convert it into string

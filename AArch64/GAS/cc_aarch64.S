@@ -209,7 +209,7 @@ get_token_symbol:
 get_token_strings:
     adr x9, C                   // Send C
     ldr x0, [x9]
-    adr x1, strings             // Get symbols
+    adr x1, strings             // Get strings
     bl In_Set                   // See if in set
     cmp x0, 1                   // IF TRUE
     b.ne get_token_comment      // Otherwise
@@ -437,7 +437,7 @@ preserve_symbol:
     mov x2, x0                  // Setup C
     adr x1, symbols             // Concerning ourselves with "<=>.."
 preserve_symbol_loop:
-    bl In_Set                   // Check if alphanumerics
+    bl In_Set                   // Check if symbol
     cmp x0, 1                   // IF TRUE
     b.ne preserve_symbol_done   // Otherwise be done
 
@@ -514,7 +514,7 @@ consume_byte:
 
 // fixup_label function
 // Receives S in X2
-// prepends ':' to string and returns registers un changed
+// prepends ':' to string and returns registers unchanged
 // Uses X0 for HOLD, X1 for PREV and X2 for S[0]
 fixup_label:
     push x0                     // Protect X0
@@ -823,7 +823,7 @@ declare_function:
     b declare_function_done     // Move on
 
 declare_function_full:
-    // Deal will full function definitions
+    // Deal with full function definitions
     adr x0, declare_function_string_0 // "# Defining function "
     bl emit_out                 // emit it
 
@@ -1202,7 +1202,7 @@ recursive_statement_loop:
     ldr x1, [x1,16]             // global_token->S
     adr x0, close_curly_brace   // Using "}"
     bl match                    // IF global_token->S == "}"
-    cmp x0, 0                   // Then we are done recuring
+    cmp x0, 0                   // Then we are done recursing
     b.eq recursive_statement_cleanup // and then we clean up
 
     // Deal with the recursive calls
@@ -1252,7 +1252,7 @@ recursive_statement_done:
 // Receives nothing
 // Returns nothing
 // Cleans up function and generates return
-// Also handles returing expressions
+// Also handles returning expressions
 return_result:
     push x30
     push x1                     // Protect X1
@@ -1341,7 +1341,7 @@ collect_local_fresh:
     adr x9, function            // Using function
     ldr x0, [x9]
     ldr x0, [x0,32]             // function->args
-    cmp x0, 0                   // IF NULL == function->locals
+    cmp x0, 0                   // IF NULL == function->args
     b.ne collect_local_first    // Otherwise see if first
 
     adr x9, function            // Using function
@@ -1596,7 +1596,7 @@ process_if_done:
     ret
 
 // save_break_frame microfunction
-// Overwrites X0 abd X1
+// Overwrites X0 and X1
 // Saves break frame on stack
 // Returns to caller
 save_break_frame:
@@ -2121,7 +2121,7 @@ expression:
     ldr x1, [x9]
     ldr x1, [x1,48]             // current_target->NAME
     adr x0, type_char_indirect_name // Using "char*"
-    bl match                    // Intensional inefficency because I feel like it
+    bl match                    // Intentional inefficiency because I feel like it
     cmp x0, 0                   // IF current_target->NAME == "char*"
     b.ne expression_int         // Do char anyway
 
@@ -2805,7 +2805,7 @@ primary_expr_variable_local:
     ldr x1, [x9]
     ldr x1, [x1,8]              // function->locals
     bl sym_lookup               // sym_lookup(s, function->locals)
-    cmp x0, 0                   // IF NULL == sym_lookup(s, global_constant_list)
+    cmp x0, 0                   // IF NULL == sym_lookup(s, function->locals)
     b.eq primary_expr_variable_arguments // try arguments next
 
     // Deal with local load
@@ -2818,7 +2818,7 @@ primary_expr_variable_arguments:
     ldr x1, [x9]
     ldr x1, [x1,32]             // function->args
     bl sym_lookup               // sym_lookup(s, function->args)
-    cmp x0, 0                   // IF NULL == sym_lookup(s, global_constant_list)
+    cmp x0, 0                   // IF NULL == sym_lookup(s, function->args)
     b.eq primary_expr_variable_function // try functions next
 
     // Deal with argument load
@@ -3384,7 +3384,7 @@ promote_type:
     push x1                     // Protect X1
     push x2                     // Protect X2
     push x3                     // Protect X3
-    cmp x1, 0                   // IF NULL == A
+    cmp x1, 0                   // IF NULL == B
     b.eq promote_type_done      // Just return A
 
     mov x2, x0                  // Put A in place
@@ -3481,7 +3481,7 @@ require_match:
     cmp x0, 0                   // we are fine
     b.eq require_match_good     // otherwise pain
 
-    // Deal will bad times
+    // Deal with bad times
 //  call line_error             // Tell user what went wrong
     mov x14, 2                  // write to standard error
     mov x0, x2                  // using our message
@@ -3501,7 +3501,7 @@ require_match_good:
 
 
 // uniqueID Function
-// Receives char*S in X0, struct token_list* l in X1 snd char* num in X2
+// Receives char *S in X0, struct token_list* l in X1 and char* num in X2
 // Returns updated struct token_list* L in X0
 uniqueID:
     push x30
@@ -3509,7 +3509,7 @@ uniqueID:
     push x2                     // Protect X2
     bl emit                     // emit(s, l)
     mov x1, x0                  // Put L in correct place
-    adr x0, underline           // Usinf "_"
+    adr x0, underline           // Using "_"
     bl emit                     // emit("_", l)
     mov x1, x0                  // Put L in correct place
     mov x0, x2                  // Put num in correct place
@@ -4650,7 +4650,7 @@ debug_list_null:
     bl File_Print               // Print it
 
     // ARGS/DEPTH
-    adr x0, debug_list_string6  // Using our third string
+    adr x0, debug_list_string6  // Using our seventh string
     bl File_Print               // Print it
     ldr x0, [x12,32]            // Use address of pointer
     bl numerate_number          // Convert it into string

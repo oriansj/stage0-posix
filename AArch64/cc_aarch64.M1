@@ -692,7 +692,7 @@ DEFINE RBRANCH 17
     SKIP_32_DATA
     &C
     LDR_X0_[X9]
-    LOAD_W1_AHEAD                       # Get symbols
+    LOAD_W1_AHEAD                       # Get strings
     SKIP_32_DATA
     &strings
     ^~In_Set FCALL                      # See if in set
@@ -973,7 +973,7 @@ DEFINE RBRANCH 17
     SKIP_32_DATA
     &symbols
 :preserve_symbol_loop
-    ^~In_Set RCALL                      # Check if alphanumerics
+    ^~In_Set RCALL                      # Check if symbol
     CMP_X0_TO_1                         # IF TRUE
     SKIP_INST_EQ                        # Otherwise be done
     ^~preserve_symbol_done FBRANCH
@@ -1059,7 +1059,7 @@ DEFINE RBRANCH 17
 
 # fixup_label function
 # Receives S in X2
-# prepends ':' to string and returns registers un changed
+# prepends ':' to string and returns registers unchanged
 # Uses X0 for HOLD, X1 for PREV and X2 for S[0]
 :fixup_label
     PUSH_X0                             # Protect X0
@@ -1446,7 +1446,7 @@ DEFINE RBRANCH 17
     ^~declare_function_done FBRANCH     # Move on
 
 :declare_function_full
-    # Deal will full function definitions
+    # Deal with full function definitions
     LOAD_W0_AHEAD                       # "# Defining function "
     SKIP_32_DATA
     &declare_function_string_0
@@ -1978,7 +1978,7 @@ DEFINE RBRANCH 17
     SKIP_32_DATA
     &close_curly_brace
     ^~match FCALL                       # IF global_token->S == "}"
-    CMP_X0_TO_0                         # Then we are done recuring
+    CMP_X0_TO_0                         # Then we are done recursing
     SKIP_INST_NE                        # and then we clean up
     ^~recursive_statement_cleanup FBRANCH
 
@@ -2045,7 +2045,7 @@ DEFINE RBRANCH 17
 # Receives nothing
 # Returns nothing
 # Cleans up function and generates return
-# Also handles returing expressions
+# Also handles returning expressions
 :return_result
     PUSH_LR
     PUSH_X1                             # Protect X1
@@ -2164,7 +2164,7 @@ DEFINE RBRANCH 17
     &function
     LDR_X0_[X9]
     LDR_X0_[X0,32]                      # function->args
-    CMP_X0_TO_0                         # IF NULL == function->locals
+    CMP_X0_TO_0                         # IF NULL == function->args
     SKIP_INST_EQ                        # Otherwise see if first
     ^~collect_local_first FBRANCH
 
@@ -2527,7 +2527,7 @@ DEFINE RBRANCH 17
     RETURN
 
 # save_break_frame microfunction
-# Overwrites X0 abd X1
+# Overwrites X0 and X1
 # Saves break frame on stack
 # Returns to caller
 :save_break_frame
@@ -3287,7 +3287,7 @@ DEFINE RBRANCH 17
     LOAD_W0_AHEAD                       # Using "char*"
     SKIP_32_DATA
     &type_char_indirect_name
-    ^~match FCALL                       # Intensional inefficency because I feel like it
+    ^~match FCALL                       # Intentional inefficiency because I feel like it
     CMP_X0_TO_0                         # IF current_target->NAME == "char*"
     SKIP_INST_EQ                        # Do char anyway
     ^~expression_int FBRANCH
@@ -4277,7 +4277,7 @@ DEFINE RBRANCH 17
     LDR_X1_[X9]
     LDR_X1_[X1,8]                       # function->locals
     ^~sym_lookup FCALL                  # sym_lookup(s, function->locals)
-    CMP_X0_TO_0                         # IF NULL == sym_lookup(s, global_constant_list)
+    CMP_X0_TO_0                         # IF NULL == sym_lookup(s, function->locals)
     SKIP_INST_NE                        # try arguments next
     ^~primary_expr_variable_arguments FBRANCH
 
@@ -4293,7 +4293,7 @@ DEFINE RBRANCH 17
     LDR_X1_[X9]
     LDR_X1_[X1,32]                      # function->args
     ^~sym_lookup FCALL                  # sym_lookup(s, function->args)
-    CMP_X0_TO_0                         # IF NULL == sym_lookup(s, global_constant_list)
+    CMP_X0_TO_0                         # IF NULL == sym_lookup(s, function->args)
     SKIP_INST_NE                        # try functions next
     ^~primary_expr_variable_function FBRANCH
 
@@ -5028,7 +5028,7 @@ DEFINE RBRANCH 17
     PUSH_X1                             # Protect X1
     PUSH_X2                             # Protect X2
     PUSH_X3                             # Protect X3
-    CMP_X1_TO_0                         # IF NULL == A
+    CMP_X1_TO_0                         # IF NULL == B
     SKIP_INST_NE                        # Just return A
     ^~promote_type_done FBRANCH
 
@@ -5151,7 +5151,7 @@ DEFINE RBRANCH 17
     SKIP_INST_NE                        # otherwise pain
     ^~require_match_good FBRANCH
 
-    # Deal will bad times
+    # Deal with bad times
 #   call line_error                     # Tell user what went wrong
     SET_X14_TO_2                        # write to standard error
     SET_X0_FROM_X2                      # using our message
@@ -5175,7 +5175,7 @@ DEFINE RBRANCH 17
 
 
 # uniqueID Function
-# Receives char*S in X0, struct token_list* l in X1 snd char* num in X2
+# Receives char *S in X0, struct token_list* l in X1 and char* num in X2
 # Returns updated struct token_list* L in X0
 :uniqueID
     PUSH_LR
@@ -5183,7 +5183,7 @@ DEFINE RBRANCH 17
     PUSH_X2                             # Protect X2
     ^~emit FCALL                        # emit(s, l)
     SET_X1_FROM_X0                      # Put L in correct place
-    LOAD_W0_AHEAD                       # Usinf "_"
+    LOAD_W0_AHEAD                       # Using "_"
     SKIP_32_DATA
     &underline
     ^~emit FCALL                        # emit("_", l)
@@ -6522,7 +6522,7 @@ DEFINE RBRANCH 17
     ^~File_Print RCALL                  # Print it
 
     # ARGS/DEPTH
-    LOAD_W0_AHEAD                       # Using our third string
+    LOAD_W0_AHEAD                       # Using our seventh string
     SKIP_32_DATA
     &debug_list_string6
     ^~File_Print RCALL                  # Print it

@@ -257,7 +257,7 @@ get_token_symbol:
 get_token_strings:
 	ldr r8, C_address
 	ldr r0, [r8]                        @ Send C
-	adr r1, strings                     @ Get symbols
+	adr r1, strings                     @ Get strings
 	push {r14}
 	bl In_Set                           @ See if in set
 	pop {r14}
@@ -523,7 +523,7 @@ preserve_symbol:
 	adr r1, symbols                     @ Concerning ourselves with "<=>.."
 preserve_symbol_loop:
 	push {r14}
-	bl In_Set                           @ Check if alphanumerics
+	bl In_Set                           @ Check if symbol
 	pop {r14}
 	cmp r0, #1                          @ IF TRUE
 	bne preserve_symbol_done            @ Otherwise be done
@@ -941,7 +941,7 @@ declare_function:
 	b declare_function_done             @ Move on
 
 declare_function_full:
-	## Deal will full function definitions
+	## Deal with full function definitions
 	adr r0, declare_function_string_0   @ "# Defining function "
 	push {r14}
 	bl emit_out                         @ emit it
@@ -1427,7 +1427,7 @@ recursive_statement_loop:
 	push {r14}
 	bl match                            @ IF global_token->S == "}"
 	pop {r14}
-	cmp r0, #0                          @ Then we are done recuring
+	cmp r0, #0                          @ Then we are done recursing
 	beq recursive_statement_cleanup     @ and then we clean up
 
 	## Deal with the recursive calls
@@ -1487,7 +1487,7 @@ output_list_address_2: .word output_list
 ## Receives nothing
 ## Returns nothing
 ## Cleans up function and generates return
-## Also handles returing expressions
+## Also handles returning expressions
 return_result:
 	push {r1}                           @ Protect R1
 	push {r2}                           @ Protect R2
@@ -2651,7 +2651,7 @@ expression:
 	ldr r1, [r1, #24]                   @ current_target->NAME
 	ldr r0, type_char_indirect_name_address @ Using "char*"
 	push {r14}
-	bl match                            @ Intensional inefficency because I feel like it
+	bl match                            @ Intentional inefficiency because I feel like it
 	pop {r14}
 	cmp r0, #0                          @ IF current_target->NAME == "char*"
 	bne expression_int                  @ Do char anyway
@@ -3597,7 +3597,7 @@ primary_expr_variable_local:
 	push {r14}
 	bl sym_lookup                       @ sym_lookup(s, function->locals)
 	pop {r14}
-	cmp r0, #0                          @ IF NULL == sym_lookup(s, global_constant_list)
+	cmp r0, #0                          @ IF NULL == sym_lookup(s, function->locals)
 	beq primary_expr_variable_arguments @ try arguments next
 
 	## Deal with local load
@@ -4358,7 +4358,7 @@ promote_type:
 	push {r1}                           @ Protect R1
 	push {r2}                           @ Protect R2
 	push {r3}                           @ Protect R3
-	cmp r1, #0                          @ IF NULL == A
+	cmp r1, #0                          @ IF NULL == B
 	beq promote_type_done               @ Just return A
 
 	mov r2, r0                          @ Put A in place
@@ -4486,7 +4486,7 @@ Output_file_address_3: .word Output_file
 
 
 ## uniqueID Function
-## Receives char*S in R0, struct token_list* l in R1 snd char* num in R2
+## Receives char *S in R0, struct token_list* l in R1 and char* num in R2
 ## Returns updated struct token_list* L in R0
 uniqueID:
 	push {r1}                           @ Protect R1
@@ -5837,7 +5837,7 @@ debug_list_null:
 	pop {r14}
 
 	## ARGS/DEPTH
-	adr r0, debug_list_string6          @ Using our third string
+	adr r0, debug_list_string6          @ Using our seventh string
 	push {r14}
 	bl File_Print                       @ Print it
 	pop {r14}

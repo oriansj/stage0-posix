@@ -1,0 +1,43 @@
+## Copyright (C) 2020 deesix <deesix@tuta.io>
+## Copyright (C) 2020 Sanne Wouda
+## This file is part of stage0.
+##
+## stage0 is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## stage0 is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with stage0.  If not, see <http://www.gnu.org/licenses/>.
+
+:_start
+     RD_FP RS1_SP MV        ; Protect stack pointer
+
+     ; Prepare argv
+     RD_A0 RS1_FP !8 ADDI   ; ARGV_address = FP + 8
+     RD_SP RS1_SP !-8 ADDI
+     RS1_SP RS2_A0 SD       ; Put argv on the stack
+
+     ; Prepare envp
+     RD_A0 RS1_FP MV        ; Address we need to load from
+     RD_A0 RS1_A0 LD        ; Get ARGC
+     RD_A0 RS1_A0 !2 ADDI   ; OFFSET = ARGC + 2
+     RD_A0 RS1_A0 RS2_X3 SLLI ; OFFSET = OFFSET * WORDSIZE
+     RD_A0 RS1_FP RS2_A0 ADD ; ENVP_address = RSP + OFFSET
+     RD_SP RS1_SP !-8 ADDI
+     RS1_SP RS2_A0 SD       ; Put envp on the stack
+
+     ; Stack offset
+     RD_FP RS1_FP !8 ADDI
+
+     ; Call main function
+     RD_RA $FUNCTION_main JAL
+
+     ; Exit to kernel
+     RD_A7 !93 ADDI         ; Syscall for exit
+     ECALL                  ; Exit with code in a0

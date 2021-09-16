@@ -371,7 +371,7 @@ DEFINE ZERO_EXTEND_CL 480FB6C9
 
 :get_token_strings
 	LOAD64_RAX_from_ABS32 &C                    ; Send C
-	LOADI32_RBX &strings                        ; Get symbols
+	LOADI32_RBX &strings                        ; Get strings
 	CALLI32 %In_Set                             ; See if in set
 	CMP_RAX_Immediate8 !1                       ; IF TRUE
 	JNE8 !get_token_comment                     ; Otherwise
@@ -587,7 +587,7 @@ DEFINE ZERO_EXTEND_CL 480FB6C9
 	COPY_RAX_to_RCX                             ; Setup C
 	LOADI32_RBX &symbols                        ; Concerning ourselves with "<=>.."
 :preserve_symbol_loop
-	CALLI32 %In_Set                             ; Check if alphanumerics
+	CALLI32 %In_Set                             ; Check if symbol
 	CMP_RAX_Immediate8 !1                       ; IF TRUE
 	JNE8 !preserve_symbol_done                  ; Otherwise be done
 
@@ -657,7 +657,7 @@ DEFINE ZERO_EXTEND_CL 480FB6C9
 
 ;; fixup_label function
 ;; Receives S in RCX
-;; prepends ':' to string and returns registers un changed
+;; prepends ':' to string and returns registers unchanged
 ;; Uses RAX for HOLD, RBX for PREV and RCX for S[0]
 :fixup_label
 	PUSH_RAX                                    ; Protect RAX
@@ -943,7 +943,7 @@ NULL
 	JMP32 %declare_function_done                ; Move on
 
 :declare_function_full
-	;; Deal will full function definitions
+	;; Deal with full function definitions
 	LOADI32_RAX &declare_function_string_0      ; "# Defining function "
 	CALLI32 %emit_out                           ; emit it
 
@@ -1319,7 +1319,7 @@ Missing ;
 	LOAD64_into_RBX_from_Address_RBX_Immediate8 !16 ; global_token->S
 	LOADI32_RAX &close_curly_brace              ; Using "}"
 	CALLI32 %match                              ; IF global_token->S == "}"
-	CMP_RAX_Immediate8 !0                       ; Then we are done recuring
+	CMP_RAX_Immediate8 !0                       ; Then we are done recursing
 	JE8 !recursive_statement_cleanup            ; and then we clean up
 
 	;; Deal with the recursive calls
@@ -1372,7 +1372,7 @@ Missing ;
 ;; Receives nothing
 ;; Returns nothing
 ;; Cleans up function and generates return
-;; Also handles returing expressions
+;; Also handles returning expressions
 :return_result
 	PUSH_RBX                                    ; Protect RBX
 	PUSH_RCX                                    ; Protect RCX
@@ -1465,7 +1465,7 @@ MISSING ;
 :collect_local_fresh
 	LOAD64_RAX_from_ABS32 &function             ; Using function
 	LOAD64_into_RAX_from_Address_RAX_Immediate8 !32 ; function->args
-	CMP_RAX_Immediate8 !0                       ; IF NULL == function->locals
+	CMP_RAX_Immediate8 !0                       ; IF NULL == function->args
 	JNE8 !collect_local_first                   ; Otherwise see if first
 
 	LOAD64_RAX_from_ABS32 &function             ; Using function
@@ -1751,7 +1751,7 @@ MISSING )
 
 
 ;; save_break_frame microfunction
-;; Overwrites RAX abd RBX
+;; Overwrites RAX and RBX
 ;; Saves break frame on stack
 ;; Returns to caller
 :save_break_frame
@@ -2325,7 +2325,7 @@ Missing ;
 	LOAD64_RBX_from_ABS32 &current_target       ; Using current_target
 	LOAD64_into_RBX_from_Address_RBX_Immediate8 !48 ; current_target->NAME
 	LOADI32_RAX &type_char_indirect_name        ; Using "char*"
-	CALLI32 %match                              ; Intensional inefficency because I feel like it
+	CALLI32 %match                              ; Intentional inefficiency because I feel like it
 	CMP_RAX_Immediate8 !0                       ; IF current_target->NAME == "char*"
 	JNE8 !expression_int                        ; Do char anyway
 
@@ -3155,7 +3155,7 @@ Didn't get )
 	LOAD64_RBX_from_ABS32 &function             ; Using function
 	LOAD64_into_RBX_from_Address_RBX_Immediate8 !8  ; function->locals
 	CALLI32 %sym_lookup                         ; sym_lookup(s, function->locals)
-	CMP_RAX_Immediate8 !0                       ; IF NULL == sym_lookup(s, global_constant_list)
+	CMP_RAX_Immediate8 !0                       ; IF NULL == sym_lookup(s, function->locals)
 	JE8 !primary_expr_variable_arguments        ; try arguments next
 
 	;; Deal with local load
@@ -3167,7 +3167,7 @@ Didn't get )
 	LOAD64_RBX_from_ABS32 &function             ; Using function
 	LOAD64_into_RBX_from_Address_RBX_Immediate8 !32 ; function->args
 	CALLI32 %sym_lookup                         ; sym_lookup(s, function->args)
-	CMP_RAX_Immediate8 !0                       ; IF NULL == sym_lookup(s, global_constant_list)
+	CMP_RAX_Immediate8 !0                       ; IF NULL == sym_lookup(s, function->args)
 	JE8 !primary_expr_variable_function         ; try functions next
 
 	;; Deal with argument load
@@ -3802,7 +3802,7 @@ LOAD_INTEGER
 	PUSH_RBX                                    ; Protect RBX
 	PUSH_RCX                                    ; Protect RCX
 	PUSH_RDX                                    ; Protect RDX
-	CMP_RBX_Immediate8 !0                       ; IF NULL == A
+	CMP_RBX_Immediate8 !0                       ; IF NULL == B
 	JE8 !promote_type_done                      ; Just return A
 
 	COPY_RAX_to_RCX                             ; Put A in place
@@ -3896,7 +3896,7 @@ LOAD_INTEGER
 	CMP_RAX_Immediate8 !0                       ; we are fine
 	JE8 !require_match_good                     ; otherwise pain
 
-	;; Deal will bad times
+	;; Deal with bad times
 ;	CALLI32 %line_error                         ; Tell user what went wrong
 	LOADI32_R14 %2                              ; write to standard error
 	COPY_RCX_to_RAX                             ; using our message
@@ -3913,14 +3913,14 @@ LOAD_INTEGER
 
 
 ;; uniqueID Function
-;; Receives char*S in RAX, struct token_list* l in RBX snd char* num in RCX
+;; Receives char *S in RAX, struct token_list* l in RBX and char* num in RCX
 ;; Returns updated struct token_list* L in RAX
 :uniqueID
 	PUSH_RBX                                    ; Protect RBX
 	PUSH_RCX                                    ; Protect RCX
 	CALLI32 %emit                               ; emit(s, l)
 	COPY_RAX_to_RBX                             ; Put L in correct place
-	LOADI32_RAX &underline                      ; Usinf "_"
+	LOADI32_RAX &underline                      ; Using "_"
 	CALLI32 %emit                               ; emit("_", l)
 	COPY_RAX_to_RBX                             ; Put L in correct place
 	COPY_RCX_to_RAX                             ; Put num in correct place
@@ -5315,7 +5315,7 @@ Missing ;
 	CALLI32 %File_Print                         ; Print it
 
 	;; ARGS/DEPTH
-	LOADI32_RAX &debug_list_string6             ; Using our third string
+	LOADI32_RAX &debug_list_string6             ; Using our seventh string
 	CALLI32 %File_Print                         ; Print it
 	LOAD64_into_RAX_from_Address_R12_Immediate8 !32 ; Use address of pointer
 	CALLI32 %numerate_number                    ; Convert it into string

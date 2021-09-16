@@ -336,7 +336,7 @@ DEFINE SWAP_EAX_EBX 93
 
 :get_token_strings
 	LOAD32_Absolute32_eax &C                    ; Send C
-	LOADI32_EBX &strings                        ; Get symbols
+	LOADI32_EBX &strings                        ; Get strings
 	CALL32 %In_Set                              ; See if in set
 	CMPI8_EAX !1                                ; IF TRUE
 	JNE32 %get_token_comment                    ; Otherwise
@@ -549,7 +549,7 @@ DEFINE SWAP_EAX_EBX 93
 	COPY_EAX_to_ECX                             ; Setup C
 	LOADI32_EBX &symbols                        ; Concerning ourselves with "<=>.."
 :preserve_symbol_loop
-	CALL32 %In_Set                              ; Check if alphanumerics
+	CALL32 %In_Set                              ; Check if symbol
 	CMPI8_EAX !1                                ; IF TRUE
 	JNE32 %preserve_symbol_done                 ; Otherwise be done
 
@@ -619,7 +619,7 @@ DEFINE SWAP_EAX_EBX 93
 
 ;; fixup_label function
 ;; Receives S in ECX
-;; prepends ':' to string and returns registers un changed
+;; prepends ':' to string and returns registers unchanged
 ;; Uses EAX for HOLD, EBX for PREV and ECX for S[0]
 :fixup_label
 	PUSH_EAX                                    ; Protect EAX
@@ -903,7 +903,7 @@ NULL
 	JMP32 %declare_function_done                ; Move on
 
 :declare_function_full
-	;; Deal will full function definitions
+	;; Deal with full function definitions
 	LOADI32_EAX &declare_function_string_0      ; "# Defining function "
 	CALL32 %emit_out                            ; emit it
 
@@ -1262,7 +1262,7 @@ Missing ;
 	LOAD32_EBX_from_EBX_Immediate8 !8           ; global_token->S
 	LOADI32_EAX &close_curly_brace              ; Using "}"
 	CALL32 %match                               ; IF global_token->S == "}"
-	CMPI8_EAX !0                                ; Then we are done recuring
+	CMPI8_EAX !0                                ; Then we are done recursing
 	JE32 %recursive_statement_cleanup           ; and then we clean up
 
 	;; Deal with the recursive calls
@@ -1312,7 +1312,7 @@ Missing ;
 ;; Receives nothing
 ;; Returns nothing
 ;; Cleans up function and generates return
-;; Also handles returing expressions
+;; Also handles returning expressions
 :return_result
 	PUSH_EBX                                    ; Protect EBX
 	PUSH_ECX                                    ; Protect ECX
@@ -1400,7 +1400,7 @@ MISSING ;
 :collect_local_fresh
 	LOAD32_Absolute32_eax &function             ; Using function
 	LOAD32_EAX_from_EAX_Immediate8 !16          ; function->args
-	CMPI8_EAX !0                                ; IF NULL == function->locals
+	CMPI8_EAX !0                                ; IF NULL == function->args
 	JNE32 %collect_local_first                  ; Otherwise see if first
 
 	LOAD32_Absolute32_eax &function             ; Using function
@@ -1658,7 +1658,7 @@ MISSING )
 
 
 ;; save_break_frame microfunction
-;; Overwrites EAX abd EBX
+;; Overwrites EAX and EBX
 ;; Saves break frame on stack
 ;; Returns to caller
 :save_break_frame
@@ -2166,7 +2166,7 @@ Missing ;
 	LOAD32_Absolute32_ebx &current_target       ; Using current_target
 	LOAD32_EBX_from_EBX_Immediate8 !24          ; current_target->NAME
 	LOADI32_EAX &type_char_indirect_name        ; Using "char*"
-	CALL32 %match                               ; Intensional inefficency because I feel like it
+	CALL32 %match                               ; Intentional inefficiency because I feel like it
 	CMPI8_EAX !0                                ; IF current_target->NAME == "char*"
 	JNE32 %expression_int                       ; Do char anyway
 
@@ -2923,7 +2923,7 @@ Didn't get )
 	LOAD32_Absolute32_ebx &function             ; Using function
 	LOAD32_EBX_from_EBX_Immediate8 !4           ; function->locals
 	CALL32 %sym_lookup                          ; sym_lookup(s, function->locals)
-	CMPI8_EAX !0                                ; IF NULL == sym_lookup(s, global_constant_list)
+	CMPI8_EAX !0                                ; IF NULL == sym_lookup(s, function->locals)
 	JE32 %primary_expr_variable_arguments       ; try arguments next
 
 	;; Deal with local load
@@ -3511,7 +3511,7 @@ LOAD_INTEGER
 	PUSH_EBX                                    ; Protect EBX
 	PUSH_ECX                                    ; Protect ECX
 	PUSH_EDX                                    ; Protect EDX
-	CMPI8_EBX !0                                ; IF NULL == A
+	CMPI8_EBX !0                                ; IF NULL == B
 	JE32 %promote_type_done                     ; Just return A
 
 	COPY_EAX_to_ECX                             ; Put A in place
@@ -3620,14 +3620,14 @@ LOAD_INTEGER
 
 
 ;; uniqueID Function
-;; Receives char*S in EAX, struct token_list* l in EBX snd char* num in ECX
+;; Receives char *S in EAX, struct token_list* l in EBX and char* num in ECX
 ;; Returns updated struct token_list* L in EAX
 :uniqueID
 	PUSH_EBX                                    ; Protect EBX
 	PUSH_ECX                                    ; Protect ECX
 	CALL32 %emit                                ; emit(s, l)
 	COPY_EAX_to_EBX                             ; Put L in correct place
-	LOADI32_EAX &underline                      ; Usinf "_"
+	LOADI32_EAX &underline                      ; Using "_"
 	CALL32 %emit                                ; emit("_", l)
 	COPY_EAX_to_EBX                             ; Put L in correct place
 	COPY_ECX_to_EAX                             ; Put num in correct place
@@ -4901,7 +4901,7 @@ Missing ;
 	CALL32 %File_Print                          ; Print it
 
 	;; ARGS/DEPTH
-	LOADI32_EAX &debug_list_string6             ; Using our third string
+	LOADI32_EAX &debug_list_string6             ; Using our seventh string
 	CALL32 %File_Print                          ; Print it
 	LOAD32_EAX_from_EBP_Immediate8 !16          ; Use address of pointer
 	CALL32 %numerate_number                     ; Convert it into string

@@ -184,7 +184,7 @@ get_token_symbol:
 
 get_token_strings:
 	mov eax, [C]                ; Send C
-	mov ebx, strings            ; Get symbols
+	mov ebx, strings            ; Get strings
 	call In_Set                 ; See if in set
 	cmp eax, 1                  ; IF TRUE
 	jne get_token_comment       ; Otherwise
@@ -397,7 +397,7 @@ preserve_symbol:
 	mov ecx, eax                ; Setup C
 	mov ebx, symbols            ; Concerning ourselves with "<=>.."
 preserve_symbol_loop:
-	call In_Set                 ; Check if alphanumerics
+	call In_Set                 ; Check if symbol
 	cmp eax, 1                  ; IF TRUE
 	jne preserve_symbol_done    ; Otherwise be done
 
@@ -467,7 +467,7 @@ consume_byte:
 
 ;; fixup_label function
 ;; Receives S in ECX
-;; prepends ':' to string and returns registers un changed
+;; prepends ':' to string and returns registers unchanged
 ;; Uses EAX for HOLD, EBX for PREV and ECX for S[0]
 fixup_label:
 	push eax                    ; Protect EAX
@@ -749,7 +749,7 @@ declare_function:
 	jmp declare_function_done   ; Move on
 
 declare_function_full:
-	;; Deal will full function definitions
+	;; Deal with full function definitions
 	mov eax, declare_function_string_0 ; "# Defining function "
 	call emit_out               ; emit it
 
@@ -1099,7 +1099,7 @@ recursive_statement_loop:
 	mov ebx, [ebx+8]            ; global_token->S
 	mov eax, close_curly_brace  ; Using "}"
 	call match                  ; IF global_token->S == "}"
-	cmp eax, 0                  ; Then we are done recuring
+	cmp eax, 0                  ; Then we are done recursing
 	je recursive_statement_cleanup ; and then we clean up
 
 	;; Deal with the recursive calls
@@ -1147,7 +1147,7 @@ recursive_statement_string_1: db "POP_RBX", 9, "# _recursive_statement_locals", 
 ;; Receives nothing
 ;; Returns nothing
 ;; Cleans up function and generates return
-;; Also handles returing expressions
+;; Also handles returning expressions
 return_result:
 	push ebx                    ; Protect EBX
 	push ecx                    ; Protect ECX
@@ -1231,7 +1231,7 @@ collect_local:
 collect_local_fresh:
 	mov eax, [function]         ; Using function
 	mov eax, [eax+16]           ; function->args
-	cmp eax, 0                  ; IF NULL == function->locals
+	cmp eax, 0                  ; IF NULL == function->args
 	jne collect_local_first     ; Otherwise see if first
 
 	mov eax, [function]         ; Using function
@@ -1474,7 +1474,7 @@ process_if_string_6: db ":_END_IF_", 0
 
 
 ;; save_break_frame microfunction
-;; Overwrites EAX abd EBX
+;; Overwrites EAX and EBX
 ;; Saves break frame on stack
 ;; Returns to caller
 save_break_frame:
@@ -1955,7 +1955,7 @@ expression:
 	mov ebx, [current_target]   ; Using current_target
 	mov ebx, [ebx+24]           ; current_target->NAME
 	mov eax, type_char_indirect_name ; Using "char*"
-	call match                  ; Intensional inefficency because I feel like it
+	call match                  ; Intentional inefficiency because I feel like it
 	cmp eax, 0                  ; IF current_target->NAME == "char*"
 	jne expression_int          ; Do char anyway
 
@@ -2648,7 +2648,7 @@ primary_expr_variable_local:
 	mov ebx, [function]         ; Using function
 	mov ebx, [ebx+4]            ; function->locals
 	call sym_lookup             ; sym_lookup(s, function->locals)
-	cmp eax, 0                  ; IF NULL == sym_lookup(s, global_constant_list)
+	cmp eax, 0                  ; IF NULL == sym_lookup(s, function->locals)
 	je primary_expr_variable_arguments ; try arguments next
 
 	;; Deal with local load
@@ -2660,7 +2660,7 @@ primary_expr_variable_arguments:
 	mov ebx, [function]         ; Using function
 	mov ebx, [ebx+16]           ; function->args
 	call sym_lookup             ; sym_lookup(s, function->args)
-	cmp eax, 0                  ; IF NULL == sym_lookup(s, global_constant_list)
+	cmp eax, 0                  ; IF NULL == sym_lookup(s, function->args)
 	je primary_expr_variable_function ; try functions next
 
 	;; Deal with argument load
@@ -3209,7 +3209,7 @@ promote_type:
 	push ebx                    ; Protect EBX
 	push ecx                    ; Protect ECX
 	push edx                    ; Protect EDX
-	cmp ebx, 0                  ; IF NULL == A
+	cmp ebx, 0                  ; IF NULL == B
 	je promote_type_done        ; Just return A
 
 	mov ecx, eax                ; Put A in place
@@ -3298,7 +3298,7 @@ require_match:
 	cmp eax, 0                  ; we are fine
 	je require_match_good       ; otherwise pain
 
-	;; Deal will bad times
+	;; Deal with bad times
 ;	call line_error             ; Tell user what went wrong
 	mov eax, 2                  ; Using standard error
 	mov [Output_file], eax      ; write to standard error
@@ -3316,14 +3316,14 @@ require_match_good:
 
 
 ;; uniqueID Function
-;; Receives char*S in EAX, struct token_list* l in EBX snd char* num in ECX
+;; Receives char *S in EAX, struct token_list* l in EBX and char* num in ECX
 ;; Returns updated struct token_list* L in EAX
 uniqueID:
 	push ebx                    ; Protect EBX
 	push ecx                    ; Protect ECX
 	call emit                   ; emit(s, l)
 	mov ebx, eax                ; Put L in correct place
-	mov eax, underline          ; Usinf "_"
+	mov eax, underline          ; Using "_"
 	call emit                   ; emit("_", l)
 	mov ebx, eax                ; Put L in correct place
 	mov eax, ecx                ; Put num in correct place
@@ -4583,7 +4583,7 @@ debug_list_null:
 	call File_Print             ; Print it
 
 	;; ARGS/DEPTH
-	mov eax, debug_list_string6 ; Using our third string
+	mov eax, debug_list_string6 ; Using our seventh string
 	call File_Print             ; Print it
 	mov eax, [ebp+16]           ; Use address of pointer
 	call numerate_number        ; Convert it into string

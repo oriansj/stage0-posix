@@ -294,7 +294,7 @@ UpdateShiftRegister_U:
 
     # Deal with sign extension: add 0x1000
     li t0, 0x1000
-    add s7, t0, s7               # (value & 0xfffff000) + 0x1000
+    addw s7, t0, s7              # (value & 0xfffff000) + 0x1000
 
 UpdateShiftRegister_U_small:
     xor s8, s8, s7               # shiftregister = shiftregister ^ tempword

@@ -731,7 +731,7 @@ express_number_U:
 
     # Deal with sign extension: add 0x1000
     li t0, 0x1000
-    add a0, t0, a0                    # (value & 0xfffff000) + 0x1000
+    addw a0, t0, a0                   # (value & 0xfffff000) + 0x1000
 express_number_U_small:
     jal hex32l                        # Store 32-bits
     j express_number_done             # done

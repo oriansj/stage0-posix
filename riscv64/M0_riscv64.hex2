@@ -1180,8 +1180,8 @@
     ; Deal with sign extension: add 0x1000
     # RD_T0 ~0x1000 LUI
     .80020000 .00100000 37000000
-    # RD_A0 RS1_T0 RS2_A0 ADD           ; (value & 0xfffff000) + 0x1000
-    .00050000 .00800200 .0000A000 33000000
+    # RD_A0 RS1_T0 RS2_A0 ADDW          ; (value & 0xfffff000) + 0x1000
+    .00050000 .00800200 .0000A000 3B000000
 :express_number_U_small
     # RD_RA $hex32l JAL                 ; Store 32-bits
     .80000000 $hex32l 6F000000

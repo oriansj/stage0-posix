@@ -389,7 +389,7 @@ C1 04 00 00 00 00 00 00 ## p_memsz
 
     # Deal with sign extension: add 0x1000
     B7 12 00 00     # RD_T0 ~0x1000 LUI                 ; load higher bits
-    B3 8B 72 01     # RD_S7 RS1_T0 RS2_S7 ADD           ; (value & 0xfffff000) + 0x1000
+    BB 8B 72 01     # RD_S7 RS1_T0 RS2_S7 ADDW          ; (value & 0xfffff000) + 0x1000
 
 # :UpdateShiftRegister_U_small ; (0x06002D4)
     33 4C 7C 01     # RD_S8 RS1_S8 RS2_S7 XOR           ; shiftregister = shiftregister ^ tempword

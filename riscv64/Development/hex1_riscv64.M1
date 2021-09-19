@@ -503,7 +503,7 @@ DEFINE RS2_X31 .0000F001
 
     # Deal with sign extension: add 0x1000
     RD_T0 ~0x1000 LUI                 ; load higher bits
-    RD_S7 RS1_T0 RS2_S7 ADD           ; (value & 0xfffff000) + 0x1000
+    RD_S7 RS1_T0 RS2_S7 ADDW          ; (value & 0xfffff000) + 0x1000
 
 :UpdateShiftRegister_U_small
     RD_S8 RS1_S8 RS2_S7 XOR           ; shiftregister = shiftregister ^ tempword

@@ -940,7 +940,7 @@ DEFINE RS2_X31 .0000F001
 
     ; Deal with sign extension: add 0x1000
     RD_T0 ~0x1000 LUI
-    RD_A0 RS1_T0 RS2_A0 ADD           ; (value & 0xfffff000) + 0x1000
+    RD_A0 RS1_T0 RS2_A0 ADDW          ; (value & 0xfffff000) + 0x1000
 :express_number_U_small
     RD_RA $hex32l JAL                 ; Store 32-bits
     $express_number_done JAL          ; done

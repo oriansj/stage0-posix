@@ -69,7 +69,8 @@ keep:
     mv a2, s4                         # number of bytes to write
     ecall                             # syscall
 
-    blt s4, a2, keep                  # keep looping if buffer was full
+    li a2, 0x100000                   # 1MiB
+    beq s4, a2, keep                  # keep looping if buffer was full
     j core                            # otherwise move to next file
 
 Done:

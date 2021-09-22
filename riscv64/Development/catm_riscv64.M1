@@ -91,7 +91,7 @@ DEFINE RS2_A2  .0000C000
     RD_A7 !63 ADDI                    ; sys_read
     RD_A0 RS1_S3 ADDI                 ; input fd
     RD_A1 RS1_S2 ADDI                 ; read into buffer
-    RD_A2 ~0x100000 LUI               ; a2=1MiB
+    RD_A2 ~0x100000 LUI               ; read 1MiB
     ECALL                             ; syscall
     RD_S4 RS1_A0 ADDI                 ; actual number of bytes read
 
@@ -101,7 +101,8 @@ DEFINE RS2_A2  .0000C000
     RD_A2 RS1_S4 ADDI                 ; number of bytes to write
     ECALL                             ; syscall
 
-    RS1_S4 RS2_A2 @keep BLT           ; keep looping if buffer was full
+    RD_A2 ~0x100000 LUI               ; 1MiB
+    RS1_S4 RS2_A2 @keep BEQ           ; keep looping if buffer was full
     $core JAL                         ; otherwise move to next file
 
 :Done

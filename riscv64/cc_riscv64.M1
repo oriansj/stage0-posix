@@ -1044,7 +1044,7 @@
     RD_A1 ~weird_string_1 AUIPC       ; Use "\t\n\r "
     RD_A1 RS1_A1 !weird_string_1 ADDI
     RD_RA $In_Set JAL                 ; Check for special case
-    RS1_A0 @weird_reset BNEZ          ; Otherwise not in the special case
+    RS1_A0 @weird_reset BEQZ          ; Otherwise not in the special case
 
     ; Deal with possible special case
     RD_A0 RS1_A2 LBU                  ; Load string[1]

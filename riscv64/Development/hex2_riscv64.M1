@@ -809,7 +809,7 @@
     RD_SP RS1_SP !-8 ADDI             ; Allocate stack
     RS1_SP RS2_RA SD                  ; protect ra
 
-    RD_A0 RS1_S9 MV                   ; strict entry
+    RD_A0 RS1_S9 MV                   ; struct entry
     RD_S9 RS1_S9 !24 ADDI             ; calloc
     RS1_A0 RS2_S6 @8 SD               ; entry->target = ip
     RS1_A0 RS2_S1 SD                  ; entry->next = jump_table

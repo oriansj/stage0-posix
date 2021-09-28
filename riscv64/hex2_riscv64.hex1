@@ -854,7 +854,7 @@ FC 07 00 00 00 00 00 00 ## p_memsz
     13 01 81 FF     # RD_SP RS1_SP !-8 ADDI             ; Allocate stack
     23 30 11 00     # RS1_SP RS2_RA SD                  ; protect ra
 
-    13 85 0C 00     # RD_A0 RS1_S9 MV                   ; strict entry
+    13 85 0C 00     # RD_A0 RS1_S9 MV                   ; struct entry
     93 8C 8C 01     # RD_S9 RS1_S9 !24 ADDI             ; calloc
     23 34 65 01     # RS1_A0 RS2_S6 @8 SD               ; entry->target = ip
     23 30 95 00     # RS1_A0 RS2_S1 SD                  ; entry->next = jump_table

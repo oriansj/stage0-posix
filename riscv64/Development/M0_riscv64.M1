@@ -25,6 +25,7 @@
 ; s3: output fd
 ; s4: struct HEAD
 ; s5: protected char
+; s6: scratch
 
 ; Struct format: (size 32)
 ; NEXT => 0                           ; Next element in linked list
@@ -77,6 +78,10 @@
     RD_A0 ADDI                        ; Get current brk
     ECALL                             ; syscall
     RD_S1 RS1_A0 MV                   ; Set our malloc pointer
+
+    RD_A0 !512 ADDI                   ; Allocate scratch
+    RD_RA $malloc JAL                 ; Get S pointer
+    RD_S6 RS1_A0 MV                   ; Save scratch pointer
 
     RD_RA $Tokenize_Line JAL          ; Get all lines
     RD_A0 RS1_S4 MV                   ; Prepare for Reverse_List
@@ -191,11 +196,8 @@
 
     RD_A0 !2 ADDI                     ; Using TYPE STRING
     RS1_A3 RS2_A0 @8 SD               ; HEAD->TYPE = STRING
-    RD_A0 !256 ADDI                   ; Malloc the string
-    RD_RA $malloc JAL                 ; Get pointer to P
-    RS1_A3 RS2_A0 @16 SD              ; HEAD->TEXT = STRING
     RD_A1 RS1_A2 MV                   ; Protect terminator
-    RD_A3 RS1_A0 MV                   ; Protect string pointer
+    RD_A3 RS1_S6 MV                   ; Protect string pointer
 :Store_String_Loop
     RS1_A3 RS2_A2 SB                  ; write byte
     RD_RA $fgetc JAL                  ; read next char
@@ -203,11 +205,71 @@
     RD_A3 RS1_A3 !1 ADDI              ; STRING = STRING + 1
     RS1_A1 RS2_A2 @Store_String_Loop BNE ; Keep looping unless we hit terminator
 
+    RD_A0 RS1_S6 MV                   ; Prepare the string in scratch
+    RD_RA $string_length JAL          ; Calculate length
+    RD_A0 RS1_A0 !1 ADDI              ; Add 1 for 0 terminator
+    RD_RA $malloc JAL                 ; Allocate memory
+    RD_A3 RS1_SP !16 LD               ; restore a3 (HEAD)
+    RS1_A3 RS2_A0 @16 SD              ; HEAD->TEXT = STRING
+    RD_RA $copy_string JAL            ; Copy the string
+
     RD_A1 RS1_SP LD                   ; restore a1
     RD_A2 RS1_SP !8 LD                ; restore a2
-    RD_A3 RS1_SP !16 LD               ; restore a3
     RD_SP RS1_SP !24 ADDI             ; deallocate stack
     $restart JAL
+
+
+; copy_string function
+; Receives target in a0, and scratch s6 for source
+; Uses a0, for target string T, a1 for C, a2 for source string S
+; Returns nothing
+:copy_string
+    RD_SP RS1_SP !-24 ADDI            ; allocate stack
+    RS1_SP RS2_RA SD                  ; protect ra
+    RS1_SP RS2_A1 @8 SD               ; protect a1
+    RS1_SP RS2_A2 @16 SD              ; protect a2
+
+    RD_A2 RS1_S6 MV                   ; Get S
+
+:copy_string_loop
+    RD_A1 RS1_A2 LBU                  ; S[0]
+    RS1_A1 @copy_string_done BEQZ     ; Check if we are done
+
+    RS1_A0 RS2_A1 SB                  ; Copy char
+    RD_A2 RS1_A2 !1 ADDI              ; S = S + 1
+    RD_A0 RS1_A0 !1 ADDI              ; T = T + 1
+    $copy_string_loop JAL             ; Keep going
+
+:copy_string_done
+    RD_RA $ClearScratch JAL           ; Clear scratch
+
+    RD_RA RS1_SP LD                   ; restore ra
+    RD_A1 RS1_SP !8 LD                ; restore a1
+    RD_A2 RS1_SP !16 LD               ; restore a2
+    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RETURN
+
+
+; Zero scratch area
+:ClearScratch
+    RD_SP RS1_SP !-24 ADDI            ; allocate stack
+    RS1_SP RS2_RA SD                  ; protect ra
+    RS1_SP RS2_A0 @8 SD               ; protect a0
+    RS1_SP RS2_A1 @16 SD              ; protect a1
+
+    RD_A0 RS1_S6 MV                   ; Prepare scratch
+
+:ClearScratch_loop
+    RD_A1 RS1_A0 LB                   ; Read current byte: s[i]
+    RS1_A0 SB                         ; Write zero: s[i] = 0
+    RD_A0 RS1_A0 !1 ADDI              ; Increment: i = i + 1
+    RS1_A1 @ClearScratch_loop BNEZ    ; Keep looping
+
+    RD_RA RS1_SP LD                   ; restore ra
+    RD_A0 RS1_SP !8 LD                ; restore a0
+    RD_A1 RS1_SP !16 LD               ; restore a1
+    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RETURN
 
 
 ; Store_Atom Function
@@ -220,12 +282,9 @@
     RS1_SP RS2_A2 @16 SD              ; protect a2
     RS1_SP RS2_A3 @24 SD              ; protect a3
 
-    RD_A0 !256 ADDI                   ; Malloc the string
-    RD_RA $malloc JAL                 ; Get pointer to P
-    RS1_A3 RS2_A0 @16 SD              ; HEAD->TEXT = STRING
     RD_A1 ~terminators AUIPC          ; Get pointer to "\n\t "
     RD_A1 RS1_A1 !terminators ADDI    ; Get pointer to "\n\t "
-    RD_A3 RS1_A0 MV                   ; Protect string pointer
+    RD_A3 RS1_S6 MV                   ; Protect string pointer
 
 :Store_Atom_loop
     RS1_A3 RS2_A2 SB                  ; write byte
@@ -235,10 +294,17 @@
     RD_RA $In_Set JAL                 ; Check for terminators
     RS1_A0 @Store_Atom_loop BEQZ      ; Loop if not "\n\t "
 
+    RD_A0 RS1_S6 MV                   ; Prepare the string in scratch
+    RD_RA $string_length JAL          ; Calculate length
+    RD_A0 RS1_A0 !1 ADDI              ; Add 1 for 0 terminator
+    RD_RA $malloc JAL                 ; Allocate memory
+    RD_A3 RS1_SP !24 LD               ; restore a3 (HEAD)
+    RS1_A3 RS2_A0 @16 SD              ; HEAD->TEXT = STRING
+    RD_RA $copy_string JAL            ; Copy the string
+
     RD_RA RS1_SP LD                   ; restore ra
     RD_A1 RS1_SP !8 LD                ; restore a1
     RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_A3 RS1_SP !24 LD               ; restore a3
     RD_SP RS1_SP !32 ADDI             ; deallocate stack
     RS1_RA JALR                       ; return
 

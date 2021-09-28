@@ -5461,7 +5461,7 @@ RD_A0 RS1_A1 RS2_A0 ADD
 "
 
 :global_load_string_0
-"RD_A0 ~GLOBAL_"RR
+"RD_A0 ~GLOBAL_"
 
 :global_load_string_1
 " AUIPC

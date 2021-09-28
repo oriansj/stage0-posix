@@ -25,6 +25,7 @@
 ; s3: output fd
 ; s4: struct HEAD
 ; s5: protected char
+; s6: scratch
 
 ; Struct format: (size 32)
 ; NEXT => 0                           ; Next element in linked list
@@ -101,6 +102,13 @@
     73000000
     # RD_S1 RS1_A0 MV                   ; Set our malloc pointer
     .80040000 .00000500 13000000
+
+    # RD_A0 !512 ADDI                   ; Allocate scratch
+    .00050000 .00000020 13000000
+    # RD_RA $malloc JAL                 ; Get S pointer
+    .80000000 $malloc 6F000000
+    # RD_S6 RS1_A0 MV                   ; Save scratch pointer
+    .000B0000 .00000500 13000000
 
     # RD_RA $Tokenize_Line JAL          ; Get all lines
     .80000000 $Tokenize_Line 6F000000
@@ -287,16 +295,10 @@
     .00050000 .00002000 13000000
     # RS1_A3 RS2_A0 @8 SD               ; HEAD->TYPE = STRING
     .00800600 .0000A000 .00040000 23300000
-    # RD_A0 !256 ADDI                   ; Malloc the string
-    .00050000 .00000010 13000000
-    # RD_RA $malloc JAL                 ; Get pointer to P
-    .80000000 $malloc 6F000000
-    # RS1_A3 RS2_A0 @16 SD              ; HEAD->TEXT = STRING
-    .00800600 .0000A000 .00080000 23300000
     # RD_A1 RS1_A2 MV                   ; Protect terminator
     .80050000 .00000600 13000000
-    # RD_A3 RS1_A0 MV                   ; Protect string pointer
-    .80060000 .00000500 13000000
+    # RD_A3 RS1_S6 MV                   ; Protect string pointer
+    .80060000 .00000B00 13000000
 :Store_String_Loop
     # RS1_A3 RS2_A2 SB                  ; write byte
     .00800600 .0000C000 23000000
@@ -309,16 +311,112 @@
     # RS1_A1 RS2_A2 @Store_String_Loop BNE ; Keep looping unless we hit terminator
     .00800500 .0000C000 @Store_String_Loop 63100000
 
+    # RD_A0 RS1_S6 MV                   ; Prepare the string in scratch
+    .00050000 .00000B00 13000000
+    # RD_RA $string_length JAL          ; Calculate length
+    .80000000 $string_length 6F000000
+    # RD_A0 RS1_A0 !1 ADDI              ; Add 1 for 0 terminator
+    .00050000 .00000500 .00001000 13000000
+    # RD_RA $malloc JAL                 ; Allocate memory
+    .80000000 $malloc 6F000000
+    # RD_A3 RS1_SP !16 LD               ; restore a3 (HEAD)
+    .80060000 .00000100 .00000001 03300000
+    # RS1_A3 RS2_A0 @16 SD              ; HEAD->TEXT = STRING
+    .00800600 .0000A000 .00080000 23300000
+    # RD_RA $copy_string JAL            ; Copy the string
+    .80000000 $copy_string 6F000000
+
     # RD_A1 RS1_SP LD                   ; restore a1
     .80050000 .00000100 03300000
     # RD_A2 RS1_SP !8 LD                ; restore a2
     .00060000 .00000100 .00008000 03300000
-    # RD_A3 RS1_SP !16 LD               ; restore a3
-    .80060000 .00000100 .00000001 03300000
     # RD_SP RS1_SP !24 ADDI             ; deallocate stack
     .00010000 .00000100 .00008001 13000000
     # $restart JAL
     $restart 6F000000
+
+; copy_string function
+; Receives target in a0, and scratch s6 for source
+; Uses a0, for target string T, a1 for C, a2 for source string S
+; Returns nothing
+:copy_string
+    # RD_SP RS1_SP !-24 ADDI            ; allocate stack
+    .00010000 .00000100 .000080FE 13000000
+    # RS1_SP RS2_RA SD                  ; protect ra
+    .00000100 .00001000 23300000
+    # RS1_SP RS2_A1 @8 SD               ; protect a1
+    .00000100 .0000B000 .00040000 23300000
+    # RS1_SP RS2_A2 @16 SD              ; protect a2
+    .00000100 .0000C000 .00080000 23300000
+
+    # RD_A2 RS1_S6 MV                   ; Get S
+    .00060000 .00000B00 13000000
+
+:copy_string_loop
+    # RD_A1 RS1_A2 LBU                  ; S[0]
+    .80050000 .00000600 03400000
+    # RS1_A1 @copy_string_done BEQZ     ; Check if we are done
+    .00800500 @copy_string_done 63000000
+
+    # RS1_A0 RS2_A1 SB                  ; Copy char
+    .00000500 .0000B000 23000000
+    # RD_A2 RS1_A2 !1 ADDI              ; S = S + 1
+    .00060000 .00000600 .00001000 13000000
+    # RD_A0 RS1_A0 !1 ADDI              ; T = T + 1
+    .00050000 .00000500 .00001000 13000000
+    # $copy_string_loop JAL             ; Keep going
+    $copy_string_loop 6F000000
+
+:copy_string_done
+    # RD_RA $ClearScratch JAL           ; Clear scratch
+    .80000000 $ClearScratch 6F000000
+
+    # RD_RA RS1_SP LD                   ; restore ra
+    .80000000 .00000100 03300000
+    # RD_A1 RS1_SP !8 LD                ; restore a1
+    .80050000 .00000100 .00008000 03300000
+    # RD_A2 RS1_SP !16 LD               ; restore a2
+    .00060000 .00000100 .00000001 03300000
+    # RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    .00010000 .00000100 .00008001 13000000
+    # RETURN
+    67800000
+
+
+; Zero scratch area
+:ClearScratch
+    # RD_SP RS1_SP !-24 ADDI            ; allocate stack
+    .00010000 .00000100 .000080FE 13000000
+    # RS1_SP RS2_RA SD                  ; protect ra
+    .00000100 .00001000 23300000
+    # RS1_SP RS2_A0 @8 SD               ; protect a0
+    .00000100 .0000A000 .00040000 23300000
+    # RS1_SP RS2_A1 @16 SD              ; protect a1
+    .00000100 .0000B000 .00080000 23300000
+
+    # RD_A0 RS1_S6 MV                   ; Prepare scratch
+    .00050000 .00000B00 13000000
+
+:ClearScratch_loop
+    # RD_A1 RS1_A0 LB                   ; Read current byte: s[i]
+    .80050000 .00000500 03000000
+    # RS1_A0 SB                         ; Write zero: s[i] = 0
+    .00000500 23000000
+    # RD_A0 RS1_A0 !1 ADDI              ; Increment: i = i + 1
+    .00050000 .00000500 .00001000 13000000
+    # RS1_A1 @ClearScratch_loop BNEZ    ; Keep looping
+    .00800500 @ClearScratch_loop 63100000
+
+    # RD_RA RS1_SP LD                   ; restore ra
+    .80000000 .00000100 03300000
+    # RD_A0 RS1_SP !8 LD                ; restore a0
+    .00050000 .00000100 .00008000 03300000
+    # RD_A1 RS1_SP !16 LD               ; restore a1
+    .80050000 .00000100 .00000001 03300000
+    # RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    .00010000 .00000100 .00008001 13000000
+    # RETURN
+    67800000
 
 
 ; Store_Atom Function
@@ -336,18 +434,12 @@
     # RS1_SP RS2_A3 @24 SD              ; protect a3
     .00000100 .0000D000 .000C0000 23300000
 
-    # RD_A0 !256 ADDI                   ; Malloc the string
-    .00050000 .00000010 13000000
-    # RD_RA $malloc JAL                 ; Get pointer to P
-    .80000000 $malloc 6F000000
-    # RS1_A3 RS2_A0 @16 SD              ; HEAD->TEXT = STRING
-    .00800600 .0000A000 .00080000 23300000
     # RD_A1 ~terminators AUIPC          ; Get pointer to "\n\t "
     .80050000 ~terminators 17000000
     # RD_A1 RS1_A1 !terminators ADDI    ; Get pointer to "\n\t "
     .80050000 .00800500 !terminators 13000000
-    # RD_A3 RS1_A0 MV                   ; Protect string pointer
-    .80060000 .00000500 13000000
+    # RD_A3 RS1_S6 MV                   ; Protect string pointer
+    .80060000 .00000B00 13000000
 
 :Store_Atom_loop
     # RS1_A3 RS2_A2 SB                  ; write byte
@@ -363,14 +455,27 @@
     # RS1_A0 @Store_Atom_loop BEQZ      ; Loop if not "\n\t "
     .00000500 @Store_Atom_loop 63000000
 
+    # RD_A0 RS1_S6 MV                   ; Prepare the string in scratch
+    .00050000 .00000B00 13000000
+    # RD_RA $string_length JAL          ; Calculate length
+    .80000000 $string_length 6F000000
+    # RD_A0 RS1_A0 !1 ADDI              ; Add 1 for 0 terminator
+    .00050000 .00000500 .00001000 13000000
+    # RD_RA $malloc JAL                 ; Allocate memory
+    .80000000 $malloc 6F000000
+    # RD_A3 RS1_SP !24 LD               ; restore a3
+    .80060000 .00000100 .00008001 03300000
+    # RS1_A3 RS2_A0 @16 SD              ; HEAD->TEXT = STRING
+    .00800600 .0000A000 .00080000 23300000
+    # RD_RA $copy_string JAL            ; Copy the string
+    .80000000 $copy_string 6F000000
+
     # RD_RA RS1_SP LD                   ; restore ra
     .80000000 .00000100 03300000
     # RD_A1 RS1_SP !8 LD                ; restore a1
     .80050000 .00000100 .00008000 03300000
     # RD_A2 RS1_SP !16 LD               ; restore a2
     .00060000 .00000100 .00000001 03300000
-    # RD_A3 RS1_SP !24 LD               ; restore a3
-    .80060000 .00000100 .00008001 03300000
     # RD_SP RS1_SP !32 ADDI             ; deallocate stack
     .00010000 .00000100 .00000002 13000000
     # RS1_RA JALR                       ; return

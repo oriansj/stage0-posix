@@ -25,6 +25,7 @@
 # s3: output fd
 # s4: struct HEAD
 # s5: protected char
+# s6: scratch
 
 # Struct format: (size 32)
 # NEXT => 0                           # Next element in linked list
@@ -80,6 +81,10 @@ after_open:
     mv a0, zero                       # Get current brk
     ecall                             # syscall
     mv s1, a0                         # Set our malloc pointer
+
+    li a0, 512                        # Allocate scratch
+    jal malloc                        # Get S pointer
+    mv s6, a0                         # Save scratch pointer
 
     jal Tokenize_Line                 # Get all lines
     mv a0, s4                         # Prepare for Reverse_List
@@ -191,11 +196,8 @@ Store_String:
 
     li a0, 2                          # Using TYPE STRING
     sd a0, 8(a3)                      # HEAD->TYPE = STRING
-    la a0, 256                        # Malloc the string
-    jal malloc                        # Get pointer to P
-    sd a0, 16(a3)                     # HEAD->TEXT = STRING
     mv a1, a2                         # Protect terminator
-    mv a3, a0                         # Protect string pointer
+    mv a3, s6                         # Protect string pointer
 Store_String_Loop:
     sb a2, 0(a3)                      # write byte
     jal fgetc                         # read next char
@@ -203,11 +205,71 @@ Store_String_Loop:
     addi a3, a3, 1                    # STRING = STRING + 1
     bne a1, a2, Store_String_Loop     # Keep looping unless we hit terminator
 
+    mv a0, s6                         # Prepare the string in scratch
+    jal string_length                 # Calculate length
+    addi a0, a0, 1                    # Add 1 for 0 terminator
+    jal malloc                        # Allocate memory
+    ld a3, 16(sp)                     # restore a3 (HEAD)
+    sd a0, 16(a3)                     # HEAD->TEXT = STRING
+    jal copy_string                   # Copy the string
+
     ld a1, 0(sp)                      # restore a1
     ld a2, 8(sp)                      # restore a2
-    ld a3, 16(sp)                     # restore a3
     addi sp, sp, 24                   # deallocate stack
     j restart
+
+
+# copy_string function
+# Receives target in a0, and scratch s6 for source
+# Uses a0, for target string T, a1 for C, a2 for source string S
+# Returns nothing
+copy_string:
+    addi sp, sp, -24                  # allocate stack
+    sd ra, 0(sp)                      # protect ra
+    sd a1, 8(sp)                      # protect a1
+    sd a2, 16(sp)                     # protect a2
+
+    mv a2, s6                         # Get S
+
+copy_string_loop:
+    lbu a1, (a2)                      # S[0]
+    beqz a1, copy_string_done         # Check if we are done
+
+    sb a1, (a0)                       # Copy char
+    addi a2, a2, 1                    # S = S + 1
+    addi a0, a0, 1                    # T = T + 1
+    j copy_string_loop                # Keep going
+
+copy_string_done:
+    jal ClearScratch                  # Clear scratch
+
+    ld ra, 0(sp)                      # restore ra
+    ld a1, 8(sp)                      # restore a1
+    ld a2, 16(sp)                     # restore a2
+    addi sp, sp, 24                   # deallocate stack
+    ret
+
+
+# Zero scratch area
+ClearScratch:
+    addi sp, sp, -24                  # allocate stack
+    sd ra, 0(sp)                      # protect ra
+    sd a0, 8(sp)                      # protect a0
+    sd a1, 16(sp)                     # protect a1
+
+    mv a0, s6                         # Prepare scratch
+
+ClearScratch_loop:
+    lb a1, (a0)                       # Read current byte: s[i]
+    sb zero, (a0)                     # Write zero: s[i] = 0
+    addi a0, a0, 1                    # Increment: i = i + 1
+    bnez a1, ClearScratch_loop        # Keep looping
+
+    ld ra, 0(sp)                      # restore ra
+    ld a0, 8(sp)                      # restore a0
+    ld a1, 16(sp)                     # restore a1
+    addi sp, sp, 24                   # deallocate stack
+    ret                               # return
 
 
 # Store_Atom Function
@@ -220,11 +282,8 @@ Store_Atom:
     sd a2, 16(sp)                     # protect a2
     sd a3, 24(sp)                     # protect a3
 
-    li a0, 256                        # Malloc the string
-    jal malloc                        # Get pointer to P
-    sd a0, 16(a3)                     # HEAD->TEXT = STRING
     la a1, terminators                # Get pointer to "\n\t "
-    mv a3, a0                         # Protect string pointer
+    mv a3, s6                         # Protect string pointer
 
 Store_Atom_loop:
     sb a2, 0(a3)                      # write byte
@@ -234,10 +293,18 @@ Store_Atom_loop:
     jal In_Set                        # Check for terminators
     beqz a0, Store_Atom_loop          # Loop if not "\n\t "
 
+    mv a0, s6                         # Prepare the string in scratch
+    jal string_length                 # Calculate length
+    addi a0, a0, 1                    # Add 1 for 0 terminator
+    jal malloc                        # Allocate memory
+    ld a3, 24(sp)                     # restore a3 (HEAD)
+    sd a0, 16(a3)                     # HEAD->TEXT = STRING
+    jal copy_string                   # Copy the string
+
+    mv a0, a3                         # Return HEAD
     ld ra, 0(sp)                      # restore ra
     ld a1, 8(sp)                      # restore a1
     ld a2, 16(sp)                     # restore a2
-    ld a3, 24(sp)                     # restore a3
     addi sp, sp, 32                   # deallocate stack
     ret                               # return
 

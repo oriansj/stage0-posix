@@ -328,21 +328,21 @@ UpdateShiftRegister_DOT:
     #        ((value >> 8) & 0xff00) |
     #        ((value << 24) & 0xff000000))
 
-    srli t2, a0, 24              # value >> 24
+    srliw t2, a0, 24             # value >> 24
     li t1, 0xff                  # t1 = 0xff
     and t0, t1, t2               # (value >> 24) & 0xff
 
-    slli t2, a0, 8               # value << 8
+    slliw t2, a0, 8              # value << 8
     li t1, 0xff0000              # t1 = 0xff0000
     and t2, t1, t2               # (value << 8) & 0xff0000
     or t0, t0, t2                # logical or with the previous expression
 
-    srli t2, a0, 8               # value >> 8
+    srliw t2, a0, 8              # value >> 8
     li t1, 0xff00                # t1 = 0xff00
     and t2, t1, t2               # (value >> 8) & 0xff00
     or t0, t0, t2                # logical or with the previous expression
 
-    slli t2, a0, 24              # value << 24
+    slliw t2, a0, 24             # value << 24
     li t1, 0xff000000            # t1 = 0xff000000
     and t2, t1, t2               # (value << 24) & 0xff000000
     or t0, t0, t2                # swap
@@ -354,11 +354,11 @@ UpdateShiftRegister_DOT:
 
 UpdateShiftRegister_I:
     # Corresponds to RISC-V I format
-    addi a0, a0, 4               # add 4 due to this being 2nd part of AUIPC combo
+    addiw a0, a0, 4              # add 4 due to this being 2nd part of AUIPC combo
 
     li t1, 0xfff
     and t1, a0, t1               # (value & 0xfff)
-    slli s7, t1, 20              # tempword = (value & 0xfff) << 20
+    slliw s7, t1, 20             # tempword = (value & 0xfff) << 20
     xor s8, s8, s7               # shiftregister = shiftregister ^ tempword
 
     j Second_pass_loop           # Continue looping
@@ -373,21 +373,21 @@ UpdateShiftRegister_B:
 
     li t1, 0x1e
     and t1, a0, t1               # value & 0x1e
-    slli t0, t1, 7               # tempword = (value & 0x1e) << 7
+    slliw t0, t1, 7              # tempword = (value & 0x1e) << 7
 
     li t1, 0x7e0
     and t1, a0, t1               # value & 0x7e0
-    slli t1, t1, 20              # (value & 0x7e0) << (31 - 11)
+    slliw t1, t1, 20             # (value & 0x7e0) << (31 - 11)
     or t0, t0, t1                # logical or with the previous expression
 
     li t1, 0x800
     and t1, a0, t1               # value & 0x800
-    srli t1, t1, 4               # (value & 0x800) >> 4
+    srliw t1, t1, 4              # (value & 0x800) >> 4
     or t0, t0, t1                # logical or with the previous expression
 
     li t1, 0x1000
     and t1, a0, t1               # value & 0x1000
-    slli t1, t1, 19              # (value & 0x1000) << (31 - 12)
+    slliw t1, t1, 19             # (value & 0x1000) << (31 - 12)
     or s7, t0, t1                # tempword
 
     xor s8, s8, s7               # shiftregister = shiftregister ^ tempword
@@ -404,11 +404,11 @@ UpdateShiftRegister_J:
 
     li t1, 0x7fe
     and t1, a0, t1               # value & 0x7fe
-    slli t0, t1, 20              # tempword = (value & 0x7fe) << 20
+    slliw t0, t1, 20             # tempword = (value & 0x7fe) << 20
 
     li t1, 0x800
     and t1, a0, t1               # value & 0x800
-    slli t1, t1, 9               # (value & 0x800) << (20 - 11)
+    slliw t1, t1, 9              # (value & 0x800) << (20 - 11)
     or t0, t0, t1                # logical or with the previous expression
 
     li t1, 0xff000
@@ -417,7 +417,7 @@ UpdateShiftRegister_J:
 
     li t1, 0x100000
     and t1, a0, t1               # value & 0x100000
-    slli t1, t1, 11              # (value & 0x100000) << (31 - 20)
+    slliw t1, t1, 11             # (value & 0x100000) << (31 - 20)
     or s7, t0, t1                # tempword
 
     xor s8, s8, s7               # shiftregister = shiftregister ^ tempword
@@ -610,7 +610,7 @@ DoByte:
     # First, calculate new shiftregister
     li t0, 0xff
     and t0, s8, t0               # sr_nextb = shiftregister & 0xff
-    srli s8, s8, 8               # shiftregister >> 8
+    srliw s8, s8, 8              # shiftregister >> 8
 
     xor t0, t0, a6               # hex(c) ^ sr_nextb
     slli t1, s5, 4               # hold * 16

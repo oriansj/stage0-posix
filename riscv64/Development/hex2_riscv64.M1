@@ -334,22 +334,22 @@
     ;        ((value >> 8) & 0xff00) |
     ;        ((value << 24) & 0xff000000))
 
-    RD_T2 RS1_A0 RS2_X24 SRLI         ; value >> 24
+    RD_T2 RS1_A0 RS2_X24 SRLIW        ; value >> 24
     RD_T1 !0xFF ADDI                  ; t1 = 0xff
     RD_T0 RS1_T1 RS2_T2 AND           ; (value >> 24) & 0xff
 
-    RD_T2 RS1_A0 RS2_X8 SLLI          ; value << 8
+    RD_T2 RS1_A0 RS2_X8 SLLIW         ; value << 8
     RD_T1 ~0xFF0000 LUI               ; t1 = 0xff0000
     RD_T2 RS1_T1 RS2_T2 AND           ; (value << 8) & 0xff0000
     RD_T0 RS1_T0 RS2_T2 OR            ; logical or with the previous expression
 
-    RD_T2 RS1_A0 RS2_X8 SRLI          ; value >> 8
+    RD_T2 RS1_A0 RS2_X8 SRLIW         ; value >> 8
     RD_T1 ~0xFF00 LUI                 ; t1 = 0xff00
     RD_T1 RS1_T1 !0xFF00 ADDIW        ; t1 = 0xff00
     RD_T2 RS1_T1 RS2_T2 AND           ; (value << 8) & 0xff00
     RD_T0 RS1_T0 RS2_T2 OR            ; logical or with the previous expression
 
-    RD_T2 RS1_A0 RS2_X24 SLLI         ; value << 24
+    RD_T2 RS1_A0 RS2_X24 SLLIW        ; value << 24
     RD_T1 !0xFF ADDI
     RD_T1 RS1_T1 RS2_X24 SLLI         ; t1 = 0xff000000
     RD_T2 RS1_T1 RS2_T2 AND           ; (value << 24) & 0xff000000
@@ -362,12 +362,12 @@
 
 :UpdateShiftRegister_I
     ; Corresponds to RISC-V I format
-    RD_A0 RS1_A0 !4 ADDI              ; add 4 due to this being 2nd part of AUIPC combo
+    RD_A0 RS1_A0 !4 ADDIW             ; add 4 due to this being 2nd part of AUIPC combo
 
     RD_T1 ~0xFFF LUI                  ; load higher bits
     RD_T1 RS1_T1 !0xFFF ADDIW
     RD_T1 RS1_A0 RS2_T1 AND           ; (value & 0xfff)
-    RD_S7 RS1_T1 RS2_X20 SLLI         ; tempword = (value & 0xfff) << 20
+    RD_S7 RS1_T1 RS2_X20 SLLIW        ; tempword = (value & 0xfff) << 20
     RD_S8 RS1_S8 RS2_S7 XOR           ; shiftregister = shiftregister ^ tempword
 
     $Second_pass_loop JAL             ; continue looping
@@ -382,22 +382,22 @@
 
     RD_T1 !0x1E ADDI
     RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x1e
-    RD_T0 RS1_T1 RS2_X7 SLLI          ; tempword = (value & 0x1e) << 7
+    RD_T0 RS1_T1 RS2_X7 SLLIW         ; tempword = (value & 0x1e) << 7
 
     RD_T1 !0x7E0 ADDI
     RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x7e0
-    RD_T1 RS1_T1 RS2_X20 SLLI         ; (value & 0x7e0) << (31 - 11)
+    RD_T1 RS1_T1 RS2_X20 SLLIW        ; (value & 0x7e0) << (31 - 11)
     RD_T0 RS1_T0 RS2_T1 OR            ; logical or with the previous expression
 
     RD_T1 ~0x800 LUI                  ; load higher bits
     RD_T1 RS1_T1 !0x800 ADDIW
     RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x800
-    RD_T1 RS1_T1 RS2_X4 SRLI          ; (value & 0x800) >> 4
+    RD_T1 RS1_T1 RS2_X4 SRLIW         ; (value & 0x800) >> 4
     RD_T0 RS1_T0 RS2_T1 OR            ; logical or with the previous expression
 
     RD_T1 ~0x1000 LUI                 ; load higher bits
     RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x1000
-    RD_T1 RS1_T1 RS2_X19 SLLI         ; (value & 0x1000) << (31 - 12)
+    RD_T1 RS1_T1 RS2_X19 SLLIW        ; (value & 0x1000) << (31 - 12)
     RD_S7 RS1_T0 RS2_T1 OR            ; logical or with the previous expression
 
     RD_S8 RS1_S8 RS2_S7 XOR           ; shiftregister = shiftregister ^ tempword
@@ -414,12 +414,12 @@
 
     RD_T1 !0x7FE ADDI
     RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x7fe
-    RD_T0 RS1_T1 RS2_X20 SLLI         ; tempword = (value & 0x7fe) << 20
+    RD_T0 RS1_T1 RS2_X20 SLLIW        ; tempword = (value & 0x7fe) << 20
 
     RD_T1 ~0x800 LUI                  ; load higher bits
     RD_T1 RS1_T1 !0x800 ADDIW
     RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x800
-    RD_T1 RS1_T1 RS2_X9 SLLI          ; (value & 0x800) << (20 - 11)
+    RD_T1 RS1_T1 RS2_X9 SLLIW         ; (value & 0x800) << (20 - 11)
     RD_T0 RS1_T0 RS2_T1 OR            ; logical or with the previous expression
 
     RD_T1 ~0xFF000 LUI                ; load higher bits
@@ -428,7 +428,7 @@
 
     RD_T1 ~0x100000 LUI               ; load higher bits
     RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x100000
-    RD_T1 RS1_T1 RS2_X11 SLLI         ; (value & 0x100000) << (31 - 20)
+    RD_T1 RS1_T1 RS2_X11 SLLIW        ; (value & 0x100000) << (31 - 20)
     RD_S7 RS1_T0 RS2_T1 OR            ; logical or with the previous expression
 
     RD_S8 RS1_S8 RS2_S7 XOR           ; shiftregister = shiftregister ^ tempword
@@ -630,7 +630,7 @@
     ; First, calculate new shiftregister
     RD_T0 !0xFF ADDI
     RD_T0 RS1_S8 RS2_T0 AND           ; sr_nextb = shiftregister & 0xff
-    RD_S8 RS1_S8 RS2_X8 SRLI          ; shiftregister >> 8
+    RD_S8 RS1_S8 RS2_X8 SRLIW         ; shiftregister >> 8
 
     RD_T0 RS1_T0 RS2_A6 XOR           ; hex(c) ^ sr_nextb
     RD_T1 RS1_S5 RS2_X4 SLLI          ; hold << 4

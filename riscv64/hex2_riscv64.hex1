@@ -379,22 +379,22 @@ FC 07 00 00 00 00 00 00 ## p_memsz
     ;        ((value >> 8) & 0xff00) |
     ;        ((value << 24) & 0xff000000))
 
-    93 53 85 01     # RD_T2 RS1_A0 RS2_X24 SRLI         ; value >> 24
+    9B 53 85 01     # RD_T2 RS1_A0 RS2_X24 SRLIW        ; value >> 24
     13 03 F0 0F     # RD_T1 !0xff ADDI                  ; t1 = 0xff
     B3 72 73 00     # RD_T0 RS1_T1 RS2_T2 AND           ; (value >> 24) & 0xff
 
-    93 13 85 00     # RD_T2 RS1_A0 RS2_X8 SLLI          ; value << 8
+    9B 13 85 00     # RD_T2 RS1_A0 RS2_X8 SLLIW         ; value << 8
     37 03 FF 00     # RD_T1 ~0xff0000 LUI               ; t1 = 0xff0000
     B3 73 73 00     # RD_T2 RS1_T1 RS2_T2 AND           ; (value << 8) & 0xff0000
     B3 E2 72 00     # RD_T0 RS1_T0 RS2_T2 OR            ; logical or with the previous expression
 
-    93 53 85 00     # RD_T2 RS1_A0 RS2_X8 SRLI          ; value >> 8
+    9B 53 85 00     # RD_T2 RS1_A0 RS2_X8 SRLIW         ; value >> 8
     37 03 01 00     # RD_T1 ~0xff00 LUI                 ; t1 = 0xff00
     1B 03 03 F0     # RD_T1 RS1_T1 !0xff00 ADDIW        ; t1 = 0xff00
     B3 73 73 00     # RD_T2 RS1_T1 RS2_T2 AND           ; (value << 8) & 0xff00
     B3 E2 72 00     # RD_T0 RS1_T0 RS2_T2 OR            ; logical or with the previous expression
 
-    93 13 85 01     # RD_T2 RS1_A0 RS2_X24 SLLI         ; value << 24
+    9B 13 85 01     # RD_T2 RS1_A0 RS2_X24 SLLIW        ; value << 24
     13 03 F0 0F     # RD_T1 !0xff ADDI
     13 13 83 01     # RD_T1 RS1_T1 RS2_X24 SLLI         ; t1 = 0xff000000
     B3 73 73 00     # RD_T2 RS1_T1 RS2_T2 AND           ; (value << 24) & 0xff000000
@@ -407,12 +407,12 @@ FC 07 00 00 00 00 00 00 ## p_memsz
 
 :I ;UpdateShiftRegister_I
     ; Corresponds to RISC-V I format
-    13 05 45 00     # RD_A0 RS1_A0 !4 ADDI              ; add 4 due to this being 2nd part of AUIPC combo
+    1B 05 45 00     # RD_A0 RS1_A0 !4 ADDIW             ; add 4 due to this being 2nd part of AUIPC combo
 
     37 13 00 00     # RD_T1 ~0xfff LUI                  ; load higher bits
     1B 03 F3 FF     # RD_T1 RS1_T1 !0xfff ADDIW
     33 73 65 00     # RD_T1 RS1_A0 RS2_T1 AND           ; (value & 0xfff)
-    93 1B 43 01     # RD_S7 RS1_T1 RS2_X20 SLLI         ; tempword = (value & 0xfff) << 20
+    9B 1B 43 01     # RD_S7 RS1_T1 RS2_X20 SLLIW        ; tempword = (value & 0xfff) << 20
     33 4C 7C 01     # RD_S8 RS1_S8 RS2_S7 XOR           ; shiftregister = shiftregister ^ tempword
 
     $5 6F 00 00 00  # $Second_pass_loop JAL             ; continue looping
@@ -427,22 +427,22 @@ FC 07 00 00 00 00 00 00 ## p_memsz
 
     13 03 E0 01     # RD_T1 !0x1e ADDI
     33 73 65 00     # RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x1e
-    93 12 73 00     # RD_T0 RS1_T1 RS2_X7 SLLI          ; tempword = (value & 0x1e) << 7
+    9B 12 73 00     # RD_T0 RS1_T1 RS2_X7 SLLIW         ; tempword = (value & 0x1e) << 7
 
     13 03 00 7E     # RD_T1 !0x7e0 ADDI
     33 73 65 00     # RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x7e0
-    13 13 43 01     # RD_T1 RS1_T1 RS2_X20 SLLI         ; (value & 0x7e0) << (31 - 11)
+    1B 13 43 01     # RD_T1 RS1_T1 RS2_X20 SLLIW        ; (value & 0x7e0) << (31 - 11)
     B3 E2 62 00     # RD_T0 RS1_T0 RS2_T1 OR            ; logical or with the previous expression
 
     37 13 00 00     # RD_T1 ~0x800 LUI                  ; load higher bits
     1B 03 03 80     # RD_T1 RS1_T1 !0x800 ADDIW
     33 73 65 00     # RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x800
-    13 53 43 00     # RD_T1 RS1_T1 RS2_X4 SRLI          ; (value & 0x800) >> 4
+    1B 53 43 00     # RD_T1 RS1_T1 RS2_X4 SRLIW         ; (value & 0x800) >> 4
     B3 E2 62 00     # RD_T0 RS1_T0 RS2_T1 OR            ; logical or with the previous expression
 
     37 13 00 00     # RD_T1 ~0x1000 LUI                 ; load higher bits
     33 73 65 00     # RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x1000
-    13 13 33 01     # RD_T1 RS1_T1 RS2_X19 SLLI         ; (value & 0x1000) << (31 - 12)
+    1B 13 33 01     # RD_T1 RS1_T1 RS2_X19 SLLIW        ; (value & 0x1000) << (31 - 12)
     B3 EB 62 00     # RD_S7 RS1_T0 RS2_T1 OR            ; logical or with the previous expression
 
     33 4C 7C 01     # RD_S8 RS1_S8 RS2_S7 XOR           ; shiftregister = shiftregister ^ tempword
@@ -459,12 +459,12 @@ FC 07 00 00 00 00 00 00 ## p_memsz
 
     13 03 E0 7F     # RD_T1 !0x7fe ADDI
     33 73 65 00     # RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x7fe
-    93 12 43 01     # RD_T0 RS1_T1 RS2_X20 SLLI         ; tempword = (value & 0x7fe) << 20
+    9B 12 43 01     # RD_T0 RS1_T1 RS2_X20 SLLIW        ; tempword = (value & 0x7fe) << 20
 
     37 13 00 00     # RD_T1 ~0x800 LUI                  ; load higher bits
     1B 03 03 80     # RD_T1 RS1_T1 !0x800 ADDIW
     33 73 65 00     # RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x800
-    13 13 93 00     # RD_T1 RS1_T1 RS2_X9 SLLI          ; (value & 0x800) << (20 - 11)
+    1B 13 93 00     # RD_T1 RS1_T1 RS2_X9 SLLIW         ; (value & 0x800) << (20 - 11)
     B3 E2 62 00     # RD_T0 RS1_T0 RS2_T1 OR            ; logical or with the previous expression
 
     37 F3 0F 00     # RD_T1 ~0xff000 LUI                ; load higher bits
@@ -473,7 +473,7 @@ FC 07 00 00 00 00 00 00 ## p_memsz
 
     37 03 10 00     # RD_T1 ~0x100000 LUI               ; load higher bits
     33 73 65 00     # RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x100000
-    13 13 B3 00     # RD_T1 RS1_T1 RS2_X11 SLLI         ; (value & 0x100000) << (31 - 20)
+    1B 13 B3 00     # RD_T1 RS1_T1 RS2_X11 SLLIW        ; (value & 0x100000) << (31 - 20)
     B3 EB 62 00     # RD_S7 RS1_T0 RS2_T1 OR            ; logical or with the previous expression
 
     33 4C 7C 01     # RD_S8 RS1_S8 RS2_S7 XOR           ; shiftregister = shiftregister ^ tempword
@@ -675,7 +675,7 @@ FC 07 00 00 00 00 00 00 ## p_memsz
     ; First, calculate new shiftregister
     93 02 F0 0F     # RD_T0 !0xff ADDI
     B3 72 5C 00     # RD_T0 RS1_S8 RS2_T0 AND           ; sr_nextb = shiftregister & 0xff
-    13 5C 8C 00     # RD_S8 RS1_S8 RS2_X8 SRLI          ; shiftregister >> 8
+    1B 5C 8C 00     # RD_S8 RS1_S8 RS2_X8 SRLIW         ; shiftregister >> 8
 
     B3 C2 02 01     # RD_T0 RS1_T0 RS2_A6 XOR           ; hex(c) ^ sr_nextb
     13 93 4A 00     # RD_T1 RS1_S5 RS2_X4 SLLI          ; hold << 4

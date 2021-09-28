@@ -70,10 +70,22 @@
 ./catm hold1.hex2 ELF-riscv64.hex2 hold.hex2
 ./hex2-0 hold1.hex2 cc_riscv64
 
-##### TESTING #######
-
-./cc_riscv64 hw.c hold.M1
-./catm hold1.M1 riscv64_defs.M1 libc-core.M1 hold.M1
-./M0 hold1.M1 hold.hex2
-./catm hold1.hex2 ELF-riscv64.hex2 hold.hex2
-./hex2-0 hold1.hex2 hw
+###########################################
+# Phase-5 Build M2-Planet from cc_riscv64 #
+###########################################
+./catm hold \
+	../M2libc/riscv64/Linux/bootstrap.c \
+	../M2-Planet/cc.h \
+	../M2libc/bootstrappable.c \
+	../M2-Planet/cc_globals.c \
+	../M2-Planet/cc_reader.c \
+	../M2-Planet/cc_strings.c \
+	../M2-Planet/cc_types.c \
+	../M2-Planet/cc_core.c \
+	../M2-Planet/cc_macro.c \
+	../M2-Planet/cc.c
+./cc_riscv64 hold M2.M1
+./catm hold riscv64_defs.M1 libc-core.M1 M2.M1
+./M0 hold temp1
+./catm hold ELF-riscv64.hex2 temp1
+./hex2-0 hold M2

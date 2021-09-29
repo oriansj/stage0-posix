@@ -2378,7 +2378,7 @@
     RD_A1 RS1_A1 !semicolon ADDI
     RD_RA $require_match JAL          ; Make sure we have it
 
-    RD_A0 ~collect_local_string_3 AUIPC ; Using RD_SP RS1_SP !-8 ADDI\nRS1_SP RS2_A0 SD\t#"
+    RD_A0 ~collect_local_string_3 AUIPC ; Using "RD_SP RS1_SP !-8 ADDI\nRS1_SP RS2_A0 SD\t#"
     RD_A0 RS1_A0 !collect_local_string_3 ADDI
     RD_RA $emit_out JAL               ; emit it
 
@@ -2430,7 +2430,7 @@
 
     RD_RA $expression JAL             ; Recurse to get the IF(...) part
 
-    RD_A0 ~process_if_string_2 AUIPC  ; Using "RS1_A0 @ELSE_"
+    RD_A0 ~process_if_string_2 AUIPC  ; Using "RS1_A0 @8 BNEZ\n$ELSE_"
     RD_A0 RS1_A0 !process_if_string_2 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
@@ -2438,7 +2438,7 @@
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
-    RD_A0 ~process_if_string_2a AUIPC ; Using "BEQZ\n"
+    RD_A0 ~process_if_string_2a AUIPC ; Using " JAL\n"
     RD_A0 RS1_A0 !process_if_string_2a ADDI
     RD_RA $emit_out JAL               ; Emit it
 
@@ -2561,7 +2561,15 @@
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
-    RD_A0 ~process_do_string_7 AUIPC  ; Using "BNEZ\n:DO_END_"
+    RD_A0 ~process_do_string_6a AUIPC ; Using "BEQZ\n$DO_"
+    RD_A0 RS1_A0 !process_do_string_6a ADDI
+    RD_RA $emit_out JAL               ; Emit it
+
+    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
+    RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
+
+    RD_A0 ~process_do_string_7 AUIPC  ; Using " JAL\n:DO_END_"
     RD_A0 RS1_A0 !process_do_string_7 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
@@ -2730,7 +2738,7 @@
 
     RD_RA $expression JAL             ; Get the FOR ( ; ... ; Part
 
-    RD_A0 ~process_for_string_5 AUIPC ; Using "RS1_A0 @FOR_END_"
+    RD_A0 ~process_for_string_5 AUIPC ; Using "RS1_A0 @8 BNEZ\n$FOR_END_"
     RD_A0 RS1_A0 !process_for_string_5 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
@@ -2738,7 +2746,7 @@
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
-    RD_A0 ~process_for_string_6 AUIPC ; Using "BEQZ\n$FOR_THEN_"
+    RD_A0 ~process_for_string_6 AUIPC ; Using " JAL\n$FOR_THEN_"
     RD_A0 RS1_A0 !process_for_string_6 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
@@ -5050,10 +5058,11 @@ MISSING (
 "
 
 :process_if_string_2
-"RS1_A0 @ELSE_"
+"RS1_A0 @8 BNEZ
+$ELSE_"
 
 :process_if_string_2a
-"BEQZ
+" JAL
 "
 
 :process_if_string_3
@@ -5098,10 +5107,14 @@ MISSING ;
 "
 
 :process_do_string_6
-"RS1_A0 @DO_"
+"RS1_A0 @DO_END_"
+
+:process_do_string_6a
+"BEQZ
+$DO_"
 
 :process_do_string_7
-"BNEZ
+" JAL
 :DO_END_"
 
 :process_while_string_0
@@ -5160,10 +5173,11 @@ MISSING ;1
 "
 
 :process_for_string_5
-"RS1_A0 @FOR_END_"
+"RS1_A0 @8 BNEZ
+$FOR_END_"
 
 :process_for_string_6
-"BEQZ
+" JAL
 $FOR_THEN_"
 
 :process_for_string_7

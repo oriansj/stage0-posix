@@ -3178,7 +3178,7 @@
 
     RD_A0 ~additive_expr AUIPC        ; Using additive_expr
     RD_A0 RS1_A0 !additive_expr ADDI
-    RD_A1 ~relational_expr_stub_string_0 AUIPC ; Using "RD_T0 MV\nRS1_A1 RS2_A0 @8 BGE\nRD_T0 !1 ADDI\nRD_A0 RS1_T0 MV\n"
+    RD_A1 ~relational_expr_stub_string_0 AUIPC ; Using "RD_A0 RS1_A1 RS2_A0 SLT\n"
     RD_A1 RS1_A1 !relational_expr_stub_string_0 ADDI
     RD_A2 ~less_than_string AUIPC     ; Using "<"
     RD_A2 RS1_A2 !less_than_string ADDI
@@ -3188,7 +3188,7 @@
 
     RD_A0 ~additive_expr AUIPC        ; Using additive_expr
     RD_A0 RS1_A0 !additive_expr ADDI
-    RD_A1 ~relational_expr_stub_string_1 AUIPC ; Using "RD_T0 MV\nRS1_A0 RS2_A1 @8 BLT\nRD_T0 !1 ADDI\nRD_A0 RS1_T0 MV\n"
+    RD_A1 ~relational_expr_stub_string_1 AUIPC ; Using "RD_A0 RS1_A0 !1 ADDI\nRD_A0 RS1_A1 RS2_A0 SLT\n"
     RD_A1 RS1_A1 !relational_expr_stub_string_1 ADDI
     RD_A2 ~less_than_equal_string AUIPC ; Using "<="
     RD_A2 RS1_A2 !less_than_equal_string ADDI
@@ -3198,7 +3198,7 @@
 
     RD_A0 ~additive_expr AUIPC        ; Using additive_expr
     RD_A0 RS1_A0 !additive_expr ADDI
-    RD_A1 ~relational_expr_stub_string_2 AUIPC ; Using "RD_T0 MV\nRS1_A1 RS2_A0 @8 BLT\nRD_T0 !1 ADDI\nRD_A0 RS1_T0 MV\n"
+    RD_A1 ~relational_expr_stub_string_2 AUIPC ; Using "RD_A0 RS1_A0 !-1 ADDI\nRD_A0 RS1_A0 RS2_A1 SLT\n"
     RD_A1 RS1_A1 !relational_expr_stub_string_2 ADDI
     RD_A2 ~greater_than_equal_string AUIPC ; Using ">="
     RD_A2 RS1_A2 !greater_than_equal_string ADDI
@@ -3208,7 +3208,7 @@
 
     RD_A0 ~additive_expr AUIPC        ; Using additive_expr
     RD_A0 RS1_A0 !additive_expr ADDI
-    RD_A1 ~relational_expr_stub_string_3 AUIPC ; Using "RD_T0 MV\nRS1_A0 RS2_A1 @8 BGE\nRD_T0 !1 ADDI\nRD_A0 RS1_T0 MV\n"
+    RD_A1 ~relational_expr_stub_string_3 AUIPC ; Using "RD_A0 RS1_A0 RS2_A1 SLT\n"
     RD_A1 RS1_A1 !relational_expr_stub_string_3 ADDI
     RD_A2 ~greater_than_string AUIPC  ; Using ">"
     RD_A2 RS1_A2 !greater_than_string ADDI
@@ -3218,7 +3218,7 @@
 
     RD_A0 ~additive_expr AUIPC        ; Using additive_expr
     RD_A0 RS1_A0 !additive_expr ADDI
-    RD_A1 ~relational_expr_stub_string_4 AUIPC ; Using "RD_T0 MV\nRS1_A1 RS2_A0 @8 BNE\nRD_T0 !1 ADDI\nRD_A0 RS1_T0 MV\n"
+    RD_A1 ~relational_expr_stub_string_4 AUIPC ; Using "RD_A0 RS1_A0 RS2_A1 SUB\nRD_A0 RS1_A0 !1 SLTIU\n"
     RD_A1 RS1_A1 !relational_expr_stub_string_4 ADDI
     RD_A2 ~equal_to_string AUIPC      ; Using "=="
     RD_A2 RS1_A2 !equal_to_string ADDI
@@ -3228,7 +3228,7 @@
 
     RD_A0 ~additive_expr AUIPC        ; Using additive_expr
     RD_A0 RS1_A0 !additive_expr ADDI
-    RD_A1 ~relational_expr_stub_string_5 AUIPC ; Using "RD_T0 MV\nRS1_A1 RS2_A0 @8 BEQ\nRD_T0 !1 ADDI\nRD_A0 RS1_T0 MV\n"
+    RD_A1 ~relational_expr_stub_string_5 AUIPC ; Using "RD_A0 RS1_A0 RS2_A1 SUB\nRD_A0 RS2_A0 SLTU\n"
     RD_A1 RS1_A1 !relational_expr_stub_string_5 ADDI
     RD_A2 ~not_equal_string AUIPC     ; Using "!="
     RD_A2 RS1_A2 !not_equal_string ADDI
@@ -5115,6 +5115,11 @@ MISSING ;
 MISSING (
 "
 
+# Here @8 means jump 8 bytes forward, hence we skip one instruction.
+# This slightly abuses M1 encoding since M1 uses @ for S-type instructions
+# but we need B-type instruction. Fortunately, B and S encodings are
+# identical for values up to 2047.
+
 :process_while_string_3
 "RS1_A0 @8 BNEZ
 $END_WHILE_"
@@ -5353,41 +5358,25 @@ RD_A0 RS1_A0 !STRING_"
 :bitwise_expr_stub_string_2  "RD_A0 RS1_A1 RS2_A0 XOR
 "
 
-# Here @8 means jump 8 bytes forward, hence we skip one instruction.
-# This slightly abuses M1 encoding since M1 uses @ for S-type instructions
-# but we need B-type instruction. Fortunately, B and S encodings are
-# identical for values up to 2047.
-:relational_expr_stub_string_0  "RD_T0 MV
-RS1_A1 RS2_A0 @8 BGE
-RD_T0 !1 ADDI
-RD_A0 RS1_T0 MV
+:relational_expr_stub_string_0  "RD_A0 RS1_A1 RS2_A0 SLT
 "
 
-:relational_expr_stub_string_1  "RD_T0 MV
-RS1_A0 RS2_A1 @8 BLT
-RD_T0 !1 ADDI
-RD_A0 RS1_T0 MV
+:relational_expr_stub_string_1  "RD_A0 RS1_A0 !1 ADDI
+RD_A0 RS1_A1 RS2_A0 SLT
 "
-:relational_expr_stub_string_2  "RD_T0 MV
-RS1_A1 RS2_A0 @8 BLT
-RD_T0 !1 ADDI
-RD_A0 RS1_T0 MV
-"
-:relational_expr_stub_string_3  "RD_T0 MV
-RS1_A0 RS2_A1 @8 BGE
-RD_T0 !1 ADDI
-RD_A0 RS1_T0 MV
 
+:relational_expr_stub_string_2  "RD_A0 RS1_A0 !-1 ADDI
+RD_A0 RS1_A0 RS2_A1 SLT
 "
-:relational_expr_stub_string_4  "RD_T0 MV
-RS1_A1 RS2_A0 @8 BNE
-RD_T0 !1 ADDI
-RD_A0 RS1_T0 MV
+
+:relational_expr_stub_string_3  "RD_A0 RS1_A0 RS2_A1 SLT
 "
-:relational_expr_stub_string_5  "RD_T0 MV
-RS1_A1 RS2_A0 @8 BEQ
-RD_T0 !1 ADDI
-RD_A0 RS1_T0 MV
+
+:relational_expr_stub_string_4  "RD_A0 RS1_A0 RS2_A1 SUB
+RD_A0 RS1_A0 !1 SLTIU
+"
+:relational_expr_stub_string_5  "RD_A0 RS1_A0 RS2_A1 SUB
+RD_A0 RS2_A0 SLTU
 "
 
 :additive_expr_stub_string_0  "RD_A0 RS1_A1 RS2_A0 ADD

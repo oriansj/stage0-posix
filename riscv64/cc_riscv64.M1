@@ -2438,7 +2438,7 @@
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
-    RD_A0 ~process_if_string_2a AUIPC ; Using " JAL\n"
+    RD_A0 ~process_if_string_2a AUIPC ; Using "JAL\n"
     RD_A0 RS1_A0 !process_if_string_2a ADDI
     RD_RA $emit_out JAL               ; Emit it
 
@@ -2553,7 +2553,7 @@
     RD_A1 RS1_A1 !semicolon ADDI
     RD_RA $require_match JAL          ; Make sure we have it
 
-    RD_A0 ~process_do_string_6 AUIPC  ; Using "RS1_A0 @"
+    RD_A0 ~process_do_string_6 AUIPC  ; Using "RS1_A0 @DO_END_"
     RD_A0 RS1_A0 !process_do_string_6 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
@@ -2569,7 +2569,7 @@
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
-    RD_A0 ~process_do_string_7 AUIPC  ; Using " JAL\n:DO_END_"
+    RD_A0 ~process_do_string_7 AUIPC  ; Using "JAL\n:DO_END_"
     RD_A0 RS1_A0 !process_do_string_7 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
@@ -2602,7 +2602,7 @@
     RD_RA $numerate_number JAL        ; convert to string
     RD_A2 RS1_A0 MV                   ; put NUMBER_STRING in place
 
-    RD_A0 ~process_while_string_0 AUIPC ; Using "DO_WHILE_"
+    RD_A0 ~process_while_string_0 AUIPC ; Using "END_WHILE_"
     RD_A0 RS1_A0 !process_while_string_0 ADDI
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $set_break_frame JAL        ; Set it and forget it
@@ -2633,7 +2633,7 @@
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
-    RD_A0 ~process_while_string_4 AUIPC ; Using " JAL\n# THEN_while_"
+    RD_A0 ~process_while_string_4 AUIPC ; Using "JAL\n# THEN_while_"
     RD_A0 RS1_A0 !process_while_string_4 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
@@ -2746,7 +2746,7 @@
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
-    RD_A0 ~process_for_string_6 AUIPC ; Using " JAL\n$FOR_THEN_"
+    RD_A0 ~process_for_string_6 AUIPC ; Using "JAL\n$FOR_THEN_"
     RD_A0 RS1_A0 !process_for_string_6 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
@@ -3196,7 +3196,7 @@
 
     RD_A0 ~additive_expr AUIPC        ; Using additive_expr
     RD_A0 RS1_A0 !additive_expr ADDI
-    RD_A1 ~relational_expr_stub_string_1 AUIPC ; Using "RD_A0 RS1_A0 !1 ADDI\nRD_A0 RS1_A1 RS2_A0 SLT\n"
+    RD_A1 ~relational_expr_stub_string_1 AUIPC ; Using "RD_A0 RS1_A0 RS2_A1 SLT\nRD_A0 RS1_A0 !1 XORI\n"
     RD_A1 RS1_A1 !relational_expr_stub_string_1 ADDI
     RD_A2 ~less_than_equal_string AUIPC ; Using "<="
     RD_A2 RS1_A2 !less_than_equal_string ADDI
@@ -3206,7 +3206,7 @@
 
     RD_A0 ~additive_expr AUIPC        ; Using additive_expr
     RD_A0 RS1_A0 !additive_expr ADDI
-    RD_A1 ~relational_expr_stub_string_2 AUIPC ; Using "RD_A0 RS1_A0 !-1 ADDI\nRD_A0 RS1_A0 RS2_A1 SLT\n"
+    RD_A1 ~relational_expr_stub_string_2 AUIPC ; Using "RD_A0 RS1_A1 RS2_A0 SLT\nRD_A0 RS1_A0 !1 XORI\n"
     RD_A1 RS1_A1 !relational_expr_stub_string_2 ADDI
     RD_A2 ~greater_than_equal_string AUIPC ; Using ">="
     RD_A2 RS1_A2 !greater_than_equal_string ADDI
@@ -3283,7 +3283,7 @@
 
     RD_A0 ~postfix_expr AUIPC         ; Using postfix_expr
     RD_A0 RS1_A0 !postfix_expr ADDI
-    RD_A1 ~additive_expr_stub_string_0 AUIPC ; Using "RD_A0 RS1_A1 RS2_A0 ADDW\n"
+    RD_A1 ~additive_expr_stub_string_0 AUIPC ; Using "RD_A0 RS1_A1 RS2_A0 ADD\n"
     RD_A1 RS1_A1 !additive_expr_stub_string_0 ADDI
     RD_A2 ~plus_string AUIPC          ; Using "+"
     RD_A2 RS1_A2 !plus_string ADDI
@@ -3293,7 +3293,7 @@
 
     RD_A0 ~postfix_expr AUIPC         ; Using postfix_expr
     RD_A0 RS1_A0 !postfix_expr ADDI
-    RD_A1 ~additive_expr_stub_string_1 AUIPC ; Using "RD_A0 RS1_A1 RS2_A0 SUBW\n"
+    RD_A1 ~additive_expr_stub_string_1 AUIPC ; Using "RD_A0 RS1_A1 RS2_A0 SUB\n"
     RD_A1 RS1_A1 !additive_expr_stub_string_1 ADDI
     RD_A2 ~minus_string AUIPC         ; Using "-"
     RD_A2 RS1_A2 !minus_string ADDI
@@ -3303,7 +3303,7 @@
 
     RD_A0 ~postfix_expr AUIPC         ; Using postfix_expr
     RD_A0 RS1_A0 !postfix_expr ADDI
-    RD_A1 ~additive_expr_stub_string_2 AUIPC ; Using "RD_A0 RS1_A1 RS2_A0 MULW\n"
+    RD_A1 ~additive_expr_stub_string_2 AUIPC ; Using "RD_A0 RS1_A1 RS2_A0 MUL\n"
     RD_A1 RS1_A1 !additive_expr_stub_string_2 ADDI
     RD_A2 ~multiply_string AUIPC      ; Using "*"
     RD_A2 RS1_A2 !multiply_string ADDI
@@ -3313,7 +3313,7 @@
 
     RD_A0 ~postfix_expr AUIPC         ; Using postfix_expr
     RD_A0 RS1_A0 !postfix_expr ADDI
-    RD_A1 ~additive_expr_stub_string_3 AUIPC ; Using "RD_A0 RS1_A1 RS2_A0 DIVW"
+    RD_A1 ~additive_expr_stub_string_3 AUIPC ; Using "RD_A0 RS1_A1 RS2_A0 DIV\n"
     RD_A1 RS1_A1 !additive_expr_stub_string_3 ADDI
     RD_A2 ~divide_string AUIPC        ; Using "/"
     RD_A2 RS1_A2 !divide_string ADDI
@@ -3323,7 +3323,7 @@
 
     RD_A0 ~postfix_expr AUIPC         ; Using postfix_expr
     RD_A0 RS1_A0 !postfix_expr ADDI
-    RD_A1 ~additive_expr_stub_string_4 AUIPC ; Using "RD_A0 RS1_A1 RS2_A0 REMW"
+    RD_A1 ~additive_expr_stub_string_4 AUIPC ; Using "RD_A0 RS1_A1 RS2_A0 REM\n"
     RD_A1 RS1_A1 !additive_expr_stub_string_4 ADDI
     RD_A2 ~modulus_string AUIPC       ; Using "%"
     RD_A2 RS1_A2 !modulus_string ADDI
@@ -3333,7 +3333,7 @@
 
     RD_A0 ~postfix_expr AUIPC         ; Using postfix_expr
     RD_A0 RS1_A0 !postfix_expr ADDI
-    RD_A1 ~additive_expr_stub_string_5 AUIPC ; Using "RD_A0 RS1_A1 RS2_A0 SLLW"
+    RD_A1 ~additive_expr_stub_string_5 AUIPC ; Using "RD_A0 RS1_A1 RS2_A0 SLL\n"
     RD_A1 RS1_A1 !additive_expr_stub_string_5 ADDI
     RD_A2 ~left_shift_string AUIPC    ; Using "<<"
     RD_A2 RS1_A2 !left_shift_string ADDI
@@ -3343,7 +3343,7 @@
 
     RD_A0 ~postfix_expr AUIPC         ; Using postfix_expr
     RD_A0 RS1_A0 !postfix_expr ADDI
-    RD_A1 ~additive_expr_stub_string_6 AUIPC ; Using "RD_A0 RS1_A1 RS2_A0 SRLW"
+    RD_A1 ~additive_expr_stub_string_6 AUIPC ; Using "RD_A0 RS1_A1 RS2_A0 SRL\n"
     RD_A1 RS1_A1 !additive_expr_stub_string_6 ADDI
     RD_A2 ~right_shift_string AUIPC   ; Using ">>"
     RD_A2 RS1_A2 !right_shift_string ADDI
@@ -3448,7 +3448,7 @@
     RD_RA $numerate_number JAL        ; Turn into string
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 ~unary_expr_sizeof_string_3 AUIPC ; Using "ADDI\n"
+    RD_A0 ~unary_expr_sizeof_string_3 AUIPC ; Using " ADDI\n"
     RD_A0 RS1_A0 !unary_expr_sizeof_string_3 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
@@ -3625,7 +3625,7 @@
     RD_RA $numerate_number JAL        ; Convert to string
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 ~postfix_expr_arrow_string_2 AUIPC ; Using "ADDI\nRD_A0 RS1_A1 RS2_A0 ADD\n"
+    RD_A0 ~postfix_expr_arrow_string_2 AUIPC ; Using " ADDI\nRD_A0 RS1_A1 RS2_A0 ADD\n"
     RD_A0 RS1_A0 !postfix_expr_arrow_string_2 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
@@ -3678,6 +3678,10 @@
     RS1_A0 RS2_T0 @primary_expr_not BNE ; Try negative IF global_token->S[0] == "-", else NOT
 
     ; Deal with negative numbers
+    RD_A0 ~primary_expr_string_0 AUIPC ; Using "RD_A0 MV\n"
+    RD_A0 RS1_A0 !primary_expr_string_0 ADDI
+    RD_RA $emit_out JAL               ; Emit it
+
     RD_A0 ~postfix_expr AUIPC         ; Using postfix_expr
     RD_A0 RS1_A0 !postfix_expr ADDI
     RD_RA $common_recursion JAL       ; Get what it is notting
@@ -3920,7 +3924,7 @@
     RD_A1 RS1_A1 !open_paren ADDI
     RD_RA $require_match JAL          ; Make sure we have it
 
-    RD_A0 ~function_call_string_1 AUIPC ; Using "RD_SP RS1_SP !-16 ADDI\nRS1_SP RS2_RA @8 SD\t# Protect the old return pointer\n"
+    RD_A0 ~function_call_string_1 AUIPC ; Using "RD_SP RS1_SP !-24 ADDI\nRS1_SP RS2_RA @8 SD\t# Protect the old return pointer\n"
     RD_A0 RS1_A0 !function_call_string_1 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
@@ -4033,7 +4037,7 @@
     $function_call_cleanup JAL        ; Keep going
 
 :function_call_done
-    RD_A0 ~function_call_string_14 AUIPC ; Using "RD_FP RS1_SP !8 LD\t# Restore old frame pointer\n"
+    RD_A0 ~function_call_string_14 AUIPC ; Using "RD_FP RS1_SP LD\t# Restore old frame pointer\n"
     RD_A0 RS1_A0 !function_call_string_14 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
@@ -4041,7 +4045,7 @@
     RD_A0 RS1_A0 !function_call_string_14a ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 ~function_call_string_15 AUIPC ; Using "RD_RA RS1_SP LD\t# Restore return address\nRD_SP RS1_SP !16 ADDI\n"
+    RD_A0 ~function_call_string_15 AUIPC ; Using "RD_RA RS1_SP !8 LD\t# Restore return address\nRD_SP RS1_SP !24 ADDI\n"
     RD_A0 RS1_A0 !function_call_string_15 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
@@ -4283,7 +4287,7 @@
     RD_A0 RS1_S4 !16 LD               ; global_token->S
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 ~primary_expr_number_string_2 AUIPC ; Using " LUI\nRD_A0 RS1_A0 !"
+    RD_A0 ~primary_expr_number_string_2 AUIPC ; Using " ADDIW\n"
     RD_A0 RS1_A0 !primary_expr_number_string_2 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
@@ -4304,7 +4308,7 @@
     RS1_SP RS2_A1 @8 SD               ; protect a1
     RS1_SP RS2_A2 @16 SD              ; protect a2
 
-    RD_A0 ~primary_expr_char_string_0 AUIPC ; Using "RD_RA !"
+    RD_A0 ~primary_expr_char_string_0 AUIPC ; Using "RD_A0 !"
     RD_A0 RS1_A0 !primary_expr_char_string_0 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
@@ -5062,7 +5066,7 @@ MISSING (
 $ELSE_"
 
 :process_if_string_2a
-" JAL
+"JAL
 "
 
 :process_if_string_3
@@ -5114,9 +5118,9 @@ MISSING ;
 $DO_"
 
 :process_do_string_7
-" JAL
+"JAL
 :DO_END_"
-
+process_for_string_6
 :process_while_string_0
 "END_WHILE_"
 
@@ -5138,7 +5142,7 @@ MISSING (
 $END_WHILE_"
 
 :process_while_string_4
-" JAL
+"JAL
 # THEN_while_"
 
 :process_while_string_5
@@ -5177,7 +5181,7 @@ MISSING ;1
 $FOR_END_"
 
 :process_for_string_6
-" JAL
+"JAL
 $FOR_THEN_"
 
 :process_for_string_7
@@ -5259,6 +5263,10 @@ Missing ;
 
 :expression_string_1
 "RS1_A1 RS2_A0 SB
+"
+
+:primary_expr_string_0
+"RD_A0 MV
 "
 
 :primary_expr_string_1
@@ -5375,12 +5383,12 @@ RD_A0 RS1_A0 !STRING_"
 :relational_expr_stub_string_0  "RD_A0 RS1_A1 RS2_A0 SLT
 "
 
-:relational_expr_stub_string_1  "RD_A0 RS1_A0 !1 ADDI
-RD_A0 RS1_A1 RS2_A0 SLT
+:relational_expr_stub_string_1  "RD_A0 RS1_A0 RS2_A1 SLT
+RD_A0 RS1_A0 !1 XORI
 "
 
-:relational_expr_stub_string_2  "RD_A0 RS1_A0 !-1 ADDI
-RD_A0 RS1_A0 RS2_A1 SLT
+:relational_expr_stub_string_2  "RD_A0 RS1_A1 RS2_A0 SLT
+RD_A0 RS1_A0 !1 XORI
 "
 
 :relational_expr_stub_string_3  "RD_A0 RS1_A0 RS2_A1 SLT

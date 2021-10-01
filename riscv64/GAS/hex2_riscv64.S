@@ -736,7 +736,7 @@ Read_byte:
     ecall                        # syscall
 
     beqz a0, Read_byte_1         # Deal with EOF
-    lb a0, (a1)                  # return char in a0
+    lbu a0, (a1)                 # return char in a0
 
     j Read_byte_done             # return
 

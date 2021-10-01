@@ -55,8 +55,8 @@ F3 00              ## e_machine Indicating RISC-V
 00 00 60 00 00 00 00 00 ## p_vaddr
 00 00 60 00 00 00 00 00 ## p_physaddr
 
-FC 07 00 00 00 00 00 00 ## p_filesz
-FC 07 00 00 00 00 00 00 ## p_memsz
+EC 07 00 00 00 00 00 00 ## p_filesz
+EC 07 00 00 00 00 00 00 ## p_memsz
 
 01 00 00 00 00 00 00 00 ## Required alignment
 
@@ -801,7 +801,7 @@ FC 07 00 00 00 00 00 00 ## p_memsz
     73 00 00 00     # ECALL                             ; syscall
 
     @K 63 00 05 00  # RS1_A0 @Read_byte_1 BEQZ          ; Deal with EOF
-    03 85 05 00     # RD_A0 RS1_A1 LB                   ; return char in a0
+    03 C5 05 00     # RD_A0 RS1_A1 LBU                  ; return char in a0
 
     $M 6F 00 00 00  # $Read_byte_done JAL               ; return
 

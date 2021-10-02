@@ -24,6 +24,7 @@ TOOLS="../bin"
 BLOOD_FLAG=" "
 BASE_ADDRESS="0x08048000"
 BINDIR="../bin"
+ENDIAN_FLAG="--little-endian"
 cd ../mescc-tools-extra
 ../bin/kaem --verbose --strict --file mescc-tools-extra.kaem
 cd ..

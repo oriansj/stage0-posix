@@ -29,11 +29,12 @@
 	-f ../M2libc/amd64/Linux/fcntl.h \
 	-f ../M2libc/stdio.c \
 	-f ../M2libc/bootstrappable.c \
+	-f ../mescc-tools/stringify.c \
 	-f ../mescc-tools/blood-elf.c \
 	--debug \
 	-o blood-elf.M1
 
-./blood-elf-0 --64 -f blood-elf.M1 -o blood-elf-footer.M1
+./blood-elf-0 --64 --little-endian -f blood-elf.M1 -o blood-elf-footer.M1
 ../bin/M1 --architecture amd64 \
 	--little-endian \
 	-f ../M2libc/amd64/amd64_defs.M1 \
@@ -68,7 +69,7 @@
 	--debug \
 	-o get_machine.M1
 
-../bin/blood-elf --64 -f get_machine.M1 -o get_machine-footer.M1
+../bin/blood-elf --64 --little-endian -f get_machine.M1 -o get_machine-footer.M1
 
 ../bin/M1 --architecture amd64 \
 	--little-endian \
@@ -108,7 +109,7 @@
 	--debug \
 	-o M2.M1
 
-../bin/blood-elf --64 -f M2.M1 -o M2-footer.M1
+../bin/blood-elf --little-endian --64 -f M2.M1 -o M2-footer.M1
 
 ../bin/M1 --architecture amd64 \
 	--little-endian \

@@ -89,6 +89,7 @@
 ./M2 --architecture aarch64 \
 	-f ../M2libc/aarch64/Linux/bootstrap.c \
 	-f ../M2libc/bootstrappable.c \
+	-f ../mescc-tools/stringify.c \
 	-f ../mescc-tools/blood-elf.c \
 	--bootstrap-mode \
 	-o blood-elf.M1
@@ -106,12 +107,13 @@
 ./M2 --architecture aarch64 \
 	-f ../M2libc/aarch64/Linux/bootstrap.c \
 	-f ../M2libc/bootstrappable.c \
+	-f ../mescc-tools/stringify.c \
 	-f ../mescc-tools/M1-macro.c \
 	--bootstrap-mode \
 	--debug \
 	-o M1-macro.M1
 
-./blood-elf-0 --64 -f M1-macro.M1 -o M1-macro-footer.M1
+./blood-elf-0 --64 --little-endian -f M1-macro.M1 -o M1-macro-footer.M1
 ./catm hold ../M2libc/aarch64/aarch64_defs.M1 ../M2libc/aarch64/libc-core.M1 M1-macro.M1 M1-macro-footer.M1
 ./M0 hold temp1
 ./catm hold ../M2libc/aarch64/ELF-aarch64-debug.hex2 temp1
@@ -139,7 +141,7 @@
 	--debug \
 	-o hex2_linker.M1
 
-./blood-elf-0 --64 -f hex2_linker.M1 -o hex2_linker-footer.M1
+./blood-elf-0 --64 --little-endian -f hex2_linker.M1 -o hex2_linker-footer.M1
 ./M1-0 --architecture aarch64 \
 	--little-endian \
 	-f ../M2libc/aarch64/aarch64_defs.M1 \
@@ -167,11 +169,12 @@
 	-f ../M2libc/aarch64/Linux/fcntl.h \
 	-f ../M2libc/stdio.c \
 	-f ../M2libc/bootstrappable.c \
+	-f ../mescc-tools/stringify.c \
 	-f ../mescc-tools/M1-macro.c \
 	--debug \
 	-o M1-macro.M1
 
-./blood-elf-0 --64 -f M1-macro.M1 -o M1-macro-footer.M1
+./blood-elf-0 --64 --little-endian -f M1-macro.M1 -o M1-macro-footer.M1
 
 ./M1-0 --architecture aarch64 \
 	--little-endian \
@@ -207,7 +210,7 @@
 	--debug \
 	-o hex2_linker.M1
 
-./blood-elf-0 --64 -f hex2_linker.M1 -o hex2_linker-footer.M1
+./blood-elf-0 --64 --little-endian -f hex2_linker.M1 -o hex2_linker-footer.M1
 
 ../bin/M1 --architecture aarch64 \
 	--little-endian \
@@ -244,7 +247,7 @@
 	--debug \
 	-o kaem.M1
 
-./blood-elf-0 --64 -f kaem.M1 -o kaem-footer.M1
+./blood-elf-0 --64 --little-endian -f kaem.M1 -o kaem-footer.M1
 
 ../bin/M1 --architecture aarch64 \
 	--little-endian \

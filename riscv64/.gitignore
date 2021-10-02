@@ -3,6 +3,7 @@ kaem
 hex0
 hex1
 hex2-0
+hex2-1
 catm
 M0
 hold*
@@ -10,3 +11,16 @@ temp1
 cc_riscv64
 M2
 M2.M1
+M2-footer.M1
+blood-elf-0
+blood-elf-footer.M1
+blood-elf.M1
+M1-0
+M1-macro-footer.M1
+M1-macro.M1
+hex2_linker-footer.M1
+hex2_linker.M1
+kaem-footer.M1
+kaem.M1
+get_machine-footer.M1
+get_machine.M1

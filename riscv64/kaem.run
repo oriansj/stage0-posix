@@ -89,3 +89,185 @@
 ./M0 hold temp1
 ./catm hold ELF-riscv64.hex2 temp1
 ./hex2-0 hold M2
+
+#############################################
+# Phase-6 Build blood-elf-0 from C sources  #
+#############################################
+./M2 --architecture riscv64 \
+	-f ../M2libc/riscv64/Linux/bootstrap.c \
+	-f ../M2libc/bootstrappable.c \
+	-f ../mescc-tools/stringify.c \
+	-f ../mescc-tools/blood-elf.c \
+	--bootstrap-mode\
+	-o blood-elf.M1
+
+./catm hold ../M2libc/riscv64/riscv64_defs.M1 ../M2libc/riscv64/libc-core.M1 blood-elf.M1
+./M0 hold temp1
+./catm hold ../M2libc/riscv64/ELF-riscv64.hex2 temp1
+./hex2-0 hold blood-elf-0
+# This is the last stage where the binaries will not have debug info
+# and the last piece built that isn't part of the output binaries
+
+#####################################
+# Phase-7 Build M1-0 from C sources #
+#####################################
+./M2 --architecture riscv64 \
+	-f ../M2libc/riscv64/Linux/bootstrap.c \
+	-f ../M2libc/bootstrappable.c \
+	-f ../mescc-tools/stringify.c \
+	-f ../mescc-tools/M1-macro.c \
+	--bootstrap-mode \
+	--debug \
+	-o M1-macro.M1
+
+./blood-elf-0 --64 --little-endian -f M1-macro.M1 -o M1-macro-footer.M1
+./catm hold ../M2libc/riscv64/riscv64_defs.M1 ../M2libc/riscv64/libc-core.M1 M1-macro.M1 M1-macro-footer.M1
+./M0 hold temp1
+./catm hold ../M2libc/riscv64/ELF-riscv64-debug.hex2 temp1
+./hex2-0 hold M1-0
+
+# This is the last stage where M0 is used, as we will being using it's
+# much more powerful and cross-platform version with a bunch of extra goodies.
+
+#######################################
+# Phase-8 Build hex2-1 from C sources #
+#######################################
+./M2 --architecture riscv64 \
+	-f ../M2libc/sys/types.h \
+	-f ../M2libc/riscv64/Linux/sys/stat.h \
+	-f ../M2libc/stddef.h \
+	-f ../M2libc/riscv64/Linux/unistd.h \
+	-f ../M2libc/stdlib.c \
+	-f ../M2libc/riscv64/Linux/fcntl.h \
+	-f ../M2libc/stdio.c \
+	-f ../M2libc/bootstrappable.c \
+	-f ../mescc-tools/hex2.h \
+	-f ../mescc-tools/hex2_linker.c \
+	-f ../mescc-tools/hex2_word.c \
+	-f ../mescc-tools/hex2.c \
+	--debug \
+	-o hex2_linker.M1
+
+./blood-elf-0 --64 --little-endian -f hex2_linker.M1 -o hex2_linker-footer.M1
+./M1-0 --architecture riscv64 \
+	--little-endian \
+	-f ../M2libc/riscv64/riscv64_defs.M1 \
+	-f ../M2libc/riscv64/libc-full.M1 \
+	-f hex2_linker.M1 \
+	-f hex2_linker-footer.M1 \
+	-o temp1
+
+./catm hold ../M2libc/riscv64/ELF-riscv64-debug.hex2 temp1
+./hex2-0 hold hex2-1
+
+# This is the last stage where we will be using the handwritten hex2 and instead
+# be using the far more powerful, cross-platform version with a bunch more goodies
+
+###################################
+# Phase-9 Build M1 from C sources #
+###################################
+./M2 --architecture riscv64 \
+	-f ../M2libc/sys/types.h \
+	-f ../M2libc/stddef.h \
+	-f ../M2libc/string.c \
+	-f ../M2libc/riscv64/Linux/unistd.h \
+	-f ../M2libc/stdlib.c \
+	-f ../M2libc/riscv64/Linux/fcntl.h \
+	-f ../M2libc/stdio.c \
+	-f ../M2libc/bootstrappable.c \
+	-f ../mescc-tools/stringify.c \
+	-f ../mescc-tools/M1-macro.c \
+	--debug \
+	-o M1-macro.M1
+
+./blood-elf-0 --64 --little-endian -f M1-macro.M1 -o M1-macro-footer.M1
+
+./M1-0 --architecture riscv64 \
+	--little-endian \
+	-f ../M2libc/riscv64/riscv64_defs.M1 \
+	-f ../M2libc/riscv64/libc-full.M1 \
+	-f M1-macro.M1 \
+	-f M1-macro-footer.M1 \
+	-o temp1
+
+./hex2-1 --architecture riscv64 \
+	--little-endian \
+	--base-address 0x00600000 \
+	-f ../M2libc/riscv64/ELF-riscv64-debug.hex2 \
+	-f temp1 \
+	-o ../bin/M1
+
+######################################
+# Phase-10 Build hex2 from C sources #
+######################################
+./M2 --architecture riscv64 \
+	-f ../M2libc/sys/types.h \
+	-f ../M2libc/riscv64/Linux/sys/stat.h \
+	-f ../M2libc/stddef.h \
+	-f ../M2libc/riscv64/Linux/unistd.h \
+	-f ../M2libc/stdlib.c \
+	-f ../M2libc/riscv64/Linux/fcntl.h \
+	-f ../M2libc/stdio.c \
+	-f ../M2libc/bootstrappable.c \
+	-f ../mescc-tools/hex2.h \
+	-f ../mescc-tools/hex2_linker.c \
+	-f ../mescc-tools/hex2_word.c \
+	-f ../mescc-tools/hex2.c \
+	--debug \
+	-o hex2_linker.M1
+
+./blood-elf-0 --64 --little-endian -f hex2_linker.M1 -o hex2_linker-footer.M1
+
+../bin/M1 --architecture riscv64 \
+	--little-endian \
+	-f ../M2libc/riscv64/riscv64_defs.M1 \
+	-f ../M2libc/riscv64/libc-full.M1 \
+	-f hex2_linker.M1 \
+	-f hex2_linker-footer.M1 \
+	-o hold
+
+./hex2-1 --architecture riscv64 \
+	--little-endian \
+	--base-address 0x00600000 \
+	-f ../M2libc/riscv64/ELF-riscv64-debug.hex2 \
+	-f hold \
+	-o ../bin/hex2
+
+
+#####################################
+# Phase-11 Build kaem from C sources#
+#####################################
+./M2 --architecture riscv64 \
+	-f ../M2libc/sys/types.h \
+	-f ../M2libc/stddef.h \
+	-f ../M2libc/string.c \
+	-f ../M2libc/riscv64/Linux/unistd.h \
+	-f ../M2libc/stdlib.c \
+	-f ../M2libc/riscv64/Linux/fcntl.h \
+	-f ../M2libc/stdio.c \
+	-f ../M2libc/bootstrappable.c \
+	-f ../mescc-tools/Kaem/kaem.h \
+	-f ../mescc-tools/Kaem/variable.c \
+	-f ../mescc-tools/Kaem/kaem_globals.c \
+	-f ../mescc-tools/Kaem/kaem.c \
+	--debug \
+	-o kaem.M1
+
+./blood-elf-0 --64 --little-endian -f kaem.M1 -o kaem-footer.M1
+
+../bin/M1 --architecture riscv64 \
+	--little-endian \
+	-f ../M2libc/riscv64/riscv64_defs.M1 \
+	-f ../M2libc/riscv64/libc-full.M1 \
+	-f kaem.M1 \
+	-f kaem-footer.M1 \
+	-o hold
+
+../bin/hex2 --architecture riscv64 \
+	--little-endian \
+	--base-address 0x00600000 \
+	-f ../M2libc/riscv64/ELF-riscv64-debug.hex2 \
+	-f hold \
+	-o ../bin/kaem
+
+../bin/kaem --verbose --strict --file mescc-tools-full-kaem.kaem

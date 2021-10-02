@@ -34,6 +34,9 @@ Generate-amd64-answers:
 Generate-aarch64-answers:
 	sha256sum bin/* >| aarch64.answers
 
+Generate-riscv64-answers:
+	sha256sum bin/* >| riscv64.answers
+
 .PHONY: clean
 clean:
 	git clean -xdf
@@ -50,7 +53,11 @@ test-aarch64:
 	cd AArch64 && ../bootstrap-seeds/POSIX/AArch64/kaem-optional-seed
 	sha256sum -c aarch64.answers
 
-###  dist
+test-riscv64:
+	cd riscv64 && ../bootstrap-seeds/POSIX/riscv64/kaem-optional-seed
+	sha256sum -c riscv64.answers
+
+### dist
 .PHONY: dist
 
 COMMIT=$(shell git describe --dirty)

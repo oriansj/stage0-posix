@@ -156,18 +156,17 @@ F3 00              ## e_machine Indicating RISC-V
     83 B5 05 00     # RD_A1 RS1_A1 LD                   ; Dereference wstatus pointer
     93 02 F0 07     # RD_T0 !0x7f ADDI                  ; t0 = 0x7f
     B3 F2 55 00     # RD_T0 RS1_A1 RS2_T0 AND           ; WTERMSIG(s) ((s) & 0x7f)
-    93 C2 F2 FF     # RD_T0 RS1_T0 NOT                  ; WIFEXITED(s) = ! WTERMSIG(s)
-    @Fail 63 80 02 00 # RS1_T0 @Fail BEQZ               ; Something went wrong, child did not exit
+    @abort 63 90 02 00 # RS1_T0 @abort BNEZ             ; Something went wrong, child did not exit
 
     # Check exit status: WEXITSTATUS(s) (((s) & 0xff00) >> 8)
     B7 02 01 00     # RD_T0 ~0xff00 LUI                 ; 0xff00 = 0xffff - 0xff = 2^16 - 2^8
     9B 82 02 F0     # RD_T0 RS1_T0 !-256 ADDIW          ; t0 = 0xff00
     B3 F2 55 00     # RD_T0 RS1_A1 RS2_T0 AND           ; (s) & 0xff00
-    #RD_S3 RS1_T0 8 SRLI              # Use S0 as 8th register
-    93 D9 82 00     # RD_S3 RS1_T0 RS2_S0 SRLI          ; Shift right by 8 to get status
+    93 D9 82 00     # RD_S3 RS1_T0 RS2_X8 SRLI          ; Shift right by 8 to get status
 
     @main_loop 63 80 09 00 # RS1_S3 @main_loop BEQZ     ; Loop if 0 == status
 
+:abort
     ~hard 17 05 00 00 # RD_A0 ~hard AUIPC               ; Get error string
     !hard 13 05 05 00 # RD_A0 RS1_A0 !hard ADDI         ; Get error string
     $File_Print EF 00 00 00 # RD_RA $File_Print JAL     ; Print it

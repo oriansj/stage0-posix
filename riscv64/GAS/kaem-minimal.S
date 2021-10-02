@@ -103,8 +103,7 @@ collect_command_parent:
     ld a1, (a1)                       # Dereference wstatus pointer
     li t0, 0x7f
     and t0, a1, t0                    # WTERMSIG(s) ((s) & 0x7f)
-    not t0, t0                        # WIFEXITED(s) = ! WTERMSIG(s)
-    beqz t0, Fail                     # Something went wrong, child did not exit
+    bnez t0, abort                    # Something went wrong, child did not exit
 
     # Check exit status: WEXITSTATUS(s) (((s) & 0xff00) >> 8)
     li t0, 0xff00
@@ -113,6 +112,7 @@ collect_command_parent:
 
     beqz s3, main_loop                # Loop if 0 == status
 
+abort:
     la a0, hard                       # Get error string
     jal File_Print                    # Print it
     j Fail                            # Exit with failure

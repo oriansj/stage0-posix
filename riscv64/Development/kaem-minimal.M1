@@ -109,18 +109,17 @@
     RD_A1 RS1_A1 LD                   # Dereference wstatus pointer
     RD_T0 !0x7F ADDI                  # t0 = 0x7f
     RD_T0 RS1_A1 RS2_T0 AND           # WTERMSIG(s) ((s) & 0x7f)
-    RD_T0 RS1_T0 NOT                  # WIFEXITED(s) = ! WTERMSIG(s)
-    RS1_T0 @Fail BEQZ                 # Something went wrong, child did not exit
+    RS1_T0 @abort BNEZ                # Something went wrong, child did not exit
 
     # Check exit status: WEXITSTATUS(s) (((s) & 0xff00) >> 8)
     RD_T0 ~0xFF00 LUI                 # 0xff00 = 0xffff - 0xff = 2^16 - 2^8
     RD_T0 RS1_T0 !-256 ADDIW          # t0 = 0xff00
     RD_T0 RS1_A1 RS2_T0 AND           # (s) & 0xff00
-    #RD_S3 RS1_T0 8 SRLI              # Use S0 as 8th register
-    RD_S3 RS1_T0 RS2_S0 SRLI          # Shift right by 8 to get status
+    RD_S3 RS1_T0 RS2_X8 SRLI          # Shift right by 8 to get status
 
     RS1_S3 @main_loop BEQZ            # Loop if 0 == status
 
+:abort
     RD_A0 ~hard AUIPC                 # Get error string
     RD_A0 RS1_A0 !hard ADDI           # Get error string
     RD_RA $File_Print JAL             # Print it

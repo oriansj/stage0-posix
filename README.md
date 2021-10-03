@@ -32,7 +32,7 @@ kernel is trusted.
 This repository currently supports AMD64 (x86_64), x86 (i386), AArch64 and RISC-V (64-bit)
 architectures. To run the entire bootstrap process in the safest way, cd into
 the respective directory for your architecture -- AArch64 for AArch64, AMD64 for
-amd64 and x86 for x86/i386 -- then run the matching following command:
+amd64, x86 for x86/i386 and riscv64 for RISC-V -- then run the matching following command:
 `../bootstrap-seeds/POSIX/AMD64/kaem-optional-seed`
 `../bootstrap-seeds/POSIX/x86/kaem-optional-seed`
 `../bootstrap-seeds/POSIX/AArch64/kaem-optional-seed`

@@ -28,5 +28,4 @@ BINDIR="../bin"
 cd ../mescc-tools-extra
 ../bin/kaem --verbose --strict --file mescc-tools-extra.kaem
 cd ..
-# Broken due to missing 32-bit number support in M2-Planet
-# ./bin/sha256sum -c riscv64.answers
+./bin/sha256sum -c riscv64.answers

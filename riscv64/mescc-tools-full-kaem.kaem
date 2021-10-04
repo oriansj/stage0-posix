@@ -127,4 +127,4 @@
 	-o ../bin/M2-Planet
 
 
-../bin/kaem --verbose --strict --file mescc-tools-extra.kaem
+exec ../bin/kaem --verbose --strict --file mescc-tools-extra.kaem

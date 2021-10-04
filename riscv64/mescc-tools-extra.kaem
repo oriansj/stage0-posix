@@ -30,3 +30,4 @@ cd ../mescc-tools-extra
 ../bin/kaem --verbose --strict --file mescc-tools-extra.kaem
 cd ..
 ./bin/sha256sum -c riscv64.answers
+exec ./bin/kaem --verbose --strict --file after.kaem

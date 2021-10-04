@@ -24,3 +24,9 @@ kaem-footer.M1
 kaem.M1
 get_machine-footer.M1
 get_machine.M1
+
+# The files build in the NASM tests
+bin/*
+
+# All of the build artifacts
+artifact/*

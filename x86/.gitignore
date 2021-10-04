@@ -31,3 +31,6 @@ mes.hex2
 
 # The files build in the NASM tests
 bin/*
+
+# All of the build artifacts
+artifact/*

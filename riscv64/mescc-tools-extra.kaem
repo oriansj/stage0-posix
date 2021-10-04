@@ -25,6 +25,7 @@ BLOOD_FLAG="--64"
 ENDIAN_FLAG="--little-endian"
 BASE_ADDRESS="0x00600000"
 BINDIR="../bin"
+BUILDDIR="../riscv64/artifact"
 cd ../mescc-tools-extra
 ../bin/kaem --verbose --strict --file mescc-tools-extra.kaem
 cd ..

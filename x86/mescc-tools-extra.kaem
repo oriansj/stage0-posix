@@ -25,6 +25,7 @@ BLOOD_FLAG=" "
 BASE_ADDRESS="0x08048000"
 BINDIR="../bin"
 ENDIAN_FLAG="--little-endian"
+BUILDDIR="../x86/artifact"
 cd ../mescc-tools-extra
 ../bin/kaem --verbose --strict --file mescc-tools-extra.kaem
 cd ..

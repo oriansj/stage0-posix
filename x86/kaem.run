@@ -28,15 +28,15 @@
 ##################################################
 
 ../bootstrap-seeds/POSIX/x86/kaem-optional-seed mescc-tools-seed-kaem.kaem
-./kaem-0 mescc-tools-mini-kaem.kaem
-../bin/kaem --verbose --strict -f mescc-tools-full-kaem.kaem
+./artifact/kaem-0 mescc-tools-mini-kaem.kaem
+./bin/kaem --verbose --strict -f mescc-tools-full-kaem.kaem
 
 ######################################################
 # Phase 15-22 Build mescc-tools-extra from M2-Planet #
 ######################################################
-../bin/kaem --verbose --strict --file mescc-tools-extra.kaem
+./bin/kaem --verbose --strict --file mescc-tools-extra.kaem
 
 #########################
 # Load after.kaem hook  #
 #########################
-../bin/kaem --verbose --strict --file ../after.kaem
+./bin/kaem --verbose --strict --file ../after.kaem

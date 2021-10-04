@@ -20,13 +20,13 @@
 
 ARCH="x86"
 M2LIBC="../M2libc"
-TOOLS="../bin"
+TOOLS="../x86/bin"
 BLOOD_FLAG=" "
 BASE_ADDRESS="0x08048000"
-BINDIR="../bin"
+BINDIR="../x86/bin"
 ENDIAN_FLAG="--little-endian"
 BUILDDIR="../x86/artifact"
 cd ../mescc-tools-extra
-../bin/kaem --verbose --strict --file mescc-tools-extra.kaem
+../x86/bin/kaem --verbose --strict --file mescc-tools-extra.kaem
 cd ..
-./bin/sha256sum -c x86.answers
+./x86/bin/sha256sum -c x86.answers

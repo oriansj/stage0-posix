@@ -26,7 +26,7 @@ all:
 	cd $(arch) && ../bootstrap-seeds/POSIX/$(arch)/kaem-optional-seed
 
 Generate-x86-answers:
-	sha256sum bin/* >| x86.answers
+	sha256sum x86/bin/* >| x86.answers
 
 Generate-amd64-answers:
 	sha256sum bin/* >| amd64.answers

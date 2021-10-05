@@ -32,7 +32,7 @@ Generate-amd64-answers:
 	sha256sum AMD64/bin/* >| amd64.answers
 
 Generate-aarch64-answers:
-	sha256sum bin/* >| aarch64.answers
+	sha256sum AArch64/bin/* >| aarch64.answers
 
 Generate-riscv64-answers:
 	sha256sum bin/* >| riscv64.answers

@@ -21,7 +21,7 @@
 #################################################
 # Phase-12 Build final blood-elf from C sources #
 #################################################
-./M2 --architecture aarch64 \
+./artifact/M2 --architecture aarch64 \
 	-f ../M2libc/sys/types.h \
 	-f ../M2libc/stddef.h \
 	-f ../M2libc/aarch64/Linux/unistd.h \
@@ -32,24 +32,24 @@
 	-f ../mescc-tools/stringify.c \
 	-f ../mescc-tools/blood-elf.c \
 	--debug \
-	-o blood-elf.M1
+	-o ./artifact/blood-elf-1.M1
 
-./blood-elf-0 --64 --little-endian -f blood-elf.M1 -o blood-elf-footer.M1
+./artifact/blood-elf-0 --64 --little-endian -f ./artifact/blood-elf-1.M1 -o ./artifact/blood-elf-1-footer.M1
 
-../bin/M1 --architecture aarch64 \
+./bin/M1 --architecture aarch64 \
 	--little-endian \
 	-f ../M2libc/aarch64/aarch64_defs.M1 \
 	-f ../M2libc/aarch64/libc-full.M1 \
-	-f blood-elf.M1 \
-	-f blood-elf-footer.M1 \
-	-o hold
+	-f ./artifact/blood-elf-1.M1 \
+	-f ./artifact/blood-elf-1-footer.M1 \
+	-o ./artifact/blood-elf-1.hex2
 
-../bin/hex2 --architecture aarch64 \
+./bin/hex2 --architecture aarch64 \
 	--little-endian \
 	--base-address 0x00600000 \
 	-f ../M2libc/aarch64/ELF-aarch64-debug.hex2 \
-	-f hold \
-	-o ../bin/blood-elf
+	-f ./artifact/blood-elf-1.hex2 \
+	-o ./bin/blood-elf
 
 # Now we have our shipping debuggable blood-elf, the rest will be down hill from
 # here as we have ALL of the core pieces of compiling and assembling debuggable
@@ -58,7 +58,7 @@
 #############################################
 # Phase-13 Build get_machine from C sources #
 #############################################
-./M2 --architecture aarch64 \
+./artifact/M2 --architecture aarch64 \
 	-f ../M2libc/sys/types.h \
 	-f ../M2libc/stddef.h \
 	-f ../M2libc/aarch64/Linux/unistd.h \
@@ -68,30 +68,30 @@
 	-f ../M2libc/bootstrappable.c \
 	-f ../mescc-tools/get_machine.c \
 	--debug \
-	-o get_machine.M1
+	-o ./artifact/get_machine.M1
 
-../bin/blood-elf --64 --little-endian -f get_machine.M1 -o get_machine-footer.M1
+./bin/blood-elf --64 --little-endian -f ./artifact/get_machine.M1 -o ./artifact/get_machine-footer.M1
 
-../bin/M1 --architecture aarch64 \
+./bin/M1 --architecture aarch64 \
 	--little-endian \
 	-f ../M2libc/aarch64/aarch64_defs.M1 \
 	-f ../M2libc/aarch64/libc-full.M1 \
-	-f get_machine.M1 \
-	-f get_machine-footer.M1 \
-	-o hold
+	-f ./artifact/get_machine.M1 \
+	-f ./artifact/get_machine-footer.M1 \
+	-o ./artifact/get_machine.hex2
 
-../bin/hex2 --architecture aarch64 \
+./bin/hex2 --architecture aarch64 \
 	--little-endian \
 	--base-address 0x00600000 \
 	-f ../M2libc/aarch64/ELF-aarch64-debug.hex2 \
-	-f hold \
-	-o ../bin/get_machine
+	-f ./artifact/get_machine.hex2 \
+	-o ./bin/get_machine
 
 ############################################
 # Phase-14 Build M2-Planet from M2-Planet  #
 ############################################
 
-./M2 --architecture aarch64 \
+./artifact/M2 --architecture aarch64 \
 	-f ../M2libc/sys/types.h \
 	-f ../M2libc/stddef.h \
 	-f ../M2libc/aarch64/Linux/unistd.h \
@@ -108,21 +108,21 @@
 	-f ../M2-Planet/cc_macro.c \
 	-f ../M2-Planet/cc.c \
 	--debug \
-	-o M2.M1
+	-o ./artifact/M2-1.M1
 
-../bin/blood-elf --64 --little-endian -f M2.M1 -o M2-footer.M1
+./bin/blood-elf --64 --little-endian -f ./artifact/M2-1.M1 -o ./artifact/M2-1-footer.M1
 
-../bin/M1 --architecture aarch64 \
+./bin/M1 --architecture aarch64 \
 	--little-endian \
 	-f ../M2libc/aarch64/aarch64_defs.M1 \
 	-f ../M2libc/aarch64/libc-full.M1 \
-	-f M2.M1 \
-	-f M2-footer.M1 \
-	-o hold
+	-f ./artifact/M2-1.M1 \
+	-f ./artifact/M2-1-footer.M1 \
+	-o ./artifact/M2-1.hex2
 
-../bin/hex2 --architecture aarch64 \
+./bin/hex2 --architecture aarch64 \
 	--little-endian \
 	--base-address 0x00600000 \
 	-f ../M2libc/aarch64/ELF-aarch64-debug.hex2 \
-	-f hold \
-	-o ../bin/M2-Planet
+	-f ./artifact/M2-1.hex2 \
+	-o ./bin/M2-Planet

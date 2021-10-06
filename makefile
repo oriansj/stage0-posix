@@ -18,12 +18,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Mes.  If not, see <http://www.gnu.org/licenses/>.
 
-arch ?= x86
-PACKAGE = mescc-tools-seed
-
-.PHONY: all
-all:
-	cd $(arch) && ../bootstrap-seeds/POSIX/$(arch)/kaem-optional-seed
+PACKAGE = stage0-posix
 
 Generate-x86-answers:
 	sha256sum x86/bin/* >| x86.answers
@@ -35,7 +30,7 @@ Generate-aarch64-answers:
 	sha256sum AArch64/bin/* >| aarch64.answers
 
 Generate-riscv64-answers:
-	sha256sum bin/* >| riscv64.answers
+	sha256sum riscv64/bin/* >| riscv64.answers
 
 .PHONY: clean
 clean:
@@ -56,6 +51,8 @@ test-aarch64:
 test-riscv64:
 	cd riscv64 && ../bootstrap-seeds/POSIX/riscv64/kaem-optional-seed
 	sha256sum -c riscv64.answers
+
+test-all: test-x86 test-amd64 test-aarch64 test-riscv64
 
 ### dist
 .PHONY: dist

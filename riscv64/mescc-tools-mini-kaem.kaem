@@ -255,5 +255,3 @@
 	-f ../M2libc/riscv64/ELF-riscv64-debug.hex2 \
 	-f ./artifact/kaem.hex2 \
 	-o ./bin/kaem
-
-./bin/kaem --verbose --strict --file mescc-tools-full-kaem.kaem

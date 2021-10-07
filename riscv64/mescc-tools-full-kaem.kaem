@@ -21,6 +21,7 @@
 #################################################
 # Phase-12 Build final blood-elf from C sources #
 #################################################
+cd riscv64
 ./artifact/M2 --architecture riscv64 \
 	-f ../M2libc/sys/types.h \
 	-f ../M2libc/stddef.h \
@@ -125,3 +126,5 @@
 	-f ../M2libc/riscv64/ELF-riscv64-debug.hex2 \
 	-f ./artifact/M2-1.hex2 \
 	-o ./bin/M2-Planet
+
+cd ..

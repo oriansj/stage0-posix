@@ -49,7 +49,7 @@ test-aarch64:
 	sha256sum -c aarch64.answers
 
 test-riscv64:
-	cd riscv64 && ../bootstrap-seeds/POSIX/riscv64/kaem-optional-seed
+	../bootstrap-seeds/POSIX/riscv64/kaem-optional-seed
 	sha256sum -c riscv64.answers
 
 test-all: test-x86 test-amd64 test-aarch64 test-riscv64

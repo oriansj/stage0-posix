@@ -26,7 +26,7 @@ ENDIAN_FLAG="--little-endian"
 BASE_ADDRESS="0x00600000"
 BINDIR="../riscv64/bin"
 BUILDDIR="../riscv64/artifact"
-cd ../mescc-tools-extra
+cd mescc-tools-extra
 ../riscv64/bin/kaem --verbose --strict --file mescc-tools-extra.kaem
 cd ..
 ./riscv64/bin/sha256sum -c riscv64.answers

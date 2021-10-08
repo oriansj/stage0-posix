@@ -391,7 +391,7 @@ DEFINE ZERO_EXTEND_AL 480FB6C0
 	SYSCALL                             ; Call it a good day
 
 :default_file
-	"kaem.run"
+	"kaem.amd64"
 :prefix
 	" +> "
 :hard

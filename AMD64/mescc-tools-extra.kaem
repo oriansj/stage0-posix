@@ -26,7 +26,7 @@ BASE_ADDRESS="0x00600000"
 BINDIR="../AMD64/bin"
 ENDIAN_FLAG="--little-endian"
 BUILDDIR="../AMD64/artifact"
-cd ../mescc-tools-extra
+cd mescc-tools-extra
 ../AMD64/bin/kaem --verbose --strict --file mescc-tools-extra.kaem
 cd ..
 ./AMD64/bin/sha256sum -c amd64.answers

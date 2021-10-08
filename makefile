@@ -41,7 +41,7 @@ test-x86:
 	sha256sum -c x86.answers
 
 test-amd64:
-	cd AMD64 && ../bootstrap-seeds/POSIX/AMD64/kaem-optional-seed
+	./bootstrap-seeds/POSIX/AMD64/kaem-optional-seed
 	sha256sum -c amd64.answers
 
 test-aarch64:

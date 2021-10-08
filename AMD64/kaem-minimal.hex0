@@ -59,8 +59,8 @@
 	00006000 00000000       ## p_vaddr
 	00006000 00000000       ## p_physaddr
 
-	7E030000 00000000       ## p_filesz
-	7E030000 00000000       ## p_memsz
+	80030000 00000000       ## p_filesz
+	80030000 00000000       ## p_memsz
 
 	01 00 00 00 00 00 00 00 ## Required alignment
 
@@ -81,7 +81,7 @@
 
 	4883F8 00                       # CMPI8_RAX !0                        ; IF NULL We couldn't open the file
 	0F8E CE000000                   # JLE32 %Exit_Failure                 ; Abort hard
-	48890425 46036000               # STORE64_from_RAX_into_ABS32 &script ; Set input pointer
+	48890425 48036000               # STORE64_from_RAX_into_ABS32 &script ; Set input pointer
 
 	58                              # POP_RAX                             ; Get start of envp
 	4889E5                          # COPY_RSP_to_RBP                     ; Protect envp
@@ -89,19 +89,19 @@
 	B8 0C000000                     # LOADI32_EAX %12                     ; the Syscall # for SYS_BRK
 	BF 00000000                     # LOADI32_EDI %0                      ; Get current brk
 	0F05                            # SYSCALL                             ; Let the kernel do the work
-	48890425 6E036000               # STORE64_from_RAX_into_ABS32 &MALLOC ; Set our malloc pointer
+	48890425 70036000               # STORE64_from_RAX_into_ABS32 &MALLOC ; Set our malloc pointer
 
 	;; Where the main work gets done
 	;; Using RDI for tokens and RSI for tokens[i]
 # :main_loop ; (0x6000BD)
-	488B0425 5E036000               # LOAD64_RAX_from_ABS32 &max_args     ; Using 256 char* of space
+	488B0425 60036000               # LOAD64_RAX_from_ABS32 &max_args     ; Using 256 char* of space
 	E8 A4010000                     # CALLI32 %malloc                     ; get it
 	4889C7                          # COPY_RAX_to_RDI                     ; set tokens
 
 	4889FE                          # COPY_RDI_to_RSI                     ; I = 0
 	B8 00000000                     # LOADI32_EAX %0                      ; Using 0
-	48890425 76036000               # STORE64_from_RAX_into_ABS32 &status ; status = 0
-	48890425 56036000               # STORE64_from_RAX_into_ABS32 &command_done   ; command_done = 0
+	48890425 78036000               # STORE64_from_RAX_into_ABS32 &status ; status = 0
+	48890425 58036000               # STORE64_from_RAX_into_ABS32 &command_done   ; command_done = 0
 
 	;; Using RAX for result and RDI for tokens[i]
 # :collect_command ; (0x6000E5)
@@ -113,7 +113,7 @@
 	4883C6 08                       # ADDI8_RSI !8                        ; i = i + 1 (adjusted for char* size)
 
 # :collect_command_comment ; (0x6000F7)
-	488B0425 56036000               # LOAD64_RAX_from_ABS32 &command_done ; Using command_done
+	488B0425 58036000               # LOAD64_RAX_from_ABS32 &command_done ; Using command_done
 	4883F8 00                       # CMPI8_RAX !0                        ; IF 0 == command_done
 	74 E0                           # JE8 !collect_command                ; keep looping
 
@@ -145,17 +145,17 @@
 
 # :collect_command_parent ; (0x60013B)
 	4889C7                          # COPY_RAX_to_RDI                     ; first arg = f
-	BE 76036000                     # LOADI32_ESI &status                 ; second arg = &status
+	BE 78036000                     # LOADI32_ESI &status                 ; second arg = &status
 	BA 00000000                     # LOADI32_EDX %0                      ; third arg = NULL
 	B8 3D000000                     # LOADI32_EAX %61                     ; WAITPID
 	0F05                            # SYSCALL                             ; wait4pid(f, &status, 0, 0); [r10 = 0]
 
-	488B0425 76036000               # LOAD64_RAX_from_ABS32 &status       ; Using status
+	488B0425 78036000               # LOAD64_RAX_from_ABS32 &status       ; Using status
 	4883F8 00                       # CMPI8_RAX !0                        ; IF 0 == status
 	0F84 5CFFFFFF                   # JE32 %main_loop                     ; Loop forever
 
 	;; Deal with very unhappy case
-	B8 26036000                     # LOADI32_EAX &hard                   ; Using "Subprocess error\nABORTING HARD\n"
+	B8 28036000                     # LOADI32_EAX &hard                   ; Using "Subprocess error\nABORTING HARD\n"
 	E8 5E010000                     # CALLI32 %File_Print                 ; Print it
 
 ;; Exit_Failure function
@@ -173,7 +173,7 @@
 ;; Modifies RAX
 # :print_command ; (0x600177)
 	57                              # PUSH_RDI                            ; Protect RDI
-	B8 21036000                     # LOADI32_EAX &prefix                 ; using " +> "
+	B8 23036000                     # LOADI32_EAX &prefix                 ; using " +> "
 	E8 47010000                     # CALLI32 %File_Print                 ; print it
 # :print_command_loop ; (0x600182)
 	488B07                          # LOAD64_into_RAX_from_Address_RDI    ; using tokens[j]
@@ -197,7 +197,7 @@
 # :collect_token ; (0x6001A9)
 	57                              # PUSH_RDI                            ; Protect RDI
 	56                              # PUSH_RSI                            ; Protect RSI
-	488B0425 66036000               # LOAD64_RAX_from_ABS32 &max_string   ; Using max_string
+	488B0425 68036000               # LOAD64_RAX_from_ABS32 &max_string   ; Using max_string
 	E8 B6000000                     # CALLI32 %malloc                     ; allocate space
 	4889C7                          # COPY_RAX_to_RDI                     ; token = malloc(max_string);
 	4889C6                          # COPY_RAX_to_RSI                     ; i = 0; set token[i]
@@ -218,7 +218,7 @@
 
 	;; It is a newline
 	B8 01000000                     # LOADI32_EAX %1                      ; Using 1
-	48890425 56036000               # STORE64_from_RAX_into_ABS32 &command_done   ; Set command_done = TRUE
+	48890425 58036000               # STORE64_from_RAX_into_ABS32 &command_done   ; Set command_done = TRUE
 	EB 3C                           # JMP8 !collect_token_done            ; Be done
 
 # :collect_token_string ; (0x6001EB)
@@ -236,7 +236,7 @@
 	;; It is a line comment
 	E8 52000000                     # CALLI32 %collect_comment            ; Read it all
 	B8 01000000                     # LOADI32_EAX %1                      ; Using 1
-	48890425 56036000               # STORE64_from_RAX_into_ABS32 &command_done   ; Set command_done = TRUE
+	48890425 58036000               # STORE64_from_RAX_into_ABS32 &command_done   ; Set command_done = TRUE
 	EB 15                           # JMP8 !collect_token_done            ; Be done
 
 # :collect_token_escape ; (0x600215)
@@ -307,12 +307,12 @@
 	57                              # PUSH_RDI                            ; Protect RDI
 	56                              # PUSH_RSI                            ; Protect RSI
 	52                              # PUSH_RDX                            ; Protect RDX
-	488B3C25 6E036000               # LOAD64_RDI_from_ABS32 &MALLOC       ; Using the current pointer
+	488B3C25 70036000               # LOAD64_RDI_from_ABS32 &MALLOC       ; Using the current pointer
 	4801C7                          # ADD_RAX_to_RDI                      ; Request the number of desired bytes
 	B8 0C000000                     # LOADI32_EAX %12                     ; the Syscall # for SYS_BRK
 	0F05                            # SYSCALL                             ; call the Kernel
-	488B0425 6E036000               # LOAD64_RAX_from_ABS32 &MALLOC       ; Return pointer
-	48893C25 6E036000               # STORE64_from_RDI_into_ABS32 &MALLOC ; Update pointer
+	488B0425 70036000               # LOAD64_RAX_from_ABS32 &MALLOC       ; Return pointer
+	48893C25 70036000               # STORE64_from_RDI_into_ABS32 &MALLOC ; Update pointer
 	5A                              # POP_RDX                             ; Restore RDX
 	5E                              # POP_RSI                             ; Restore RSI
 	5F                              # POP_RDI                             ; Restore RDI
@@ -329,7 +329,7 @@
 	48C7C0 FCFFFFFF                 # LOADI32_RAX %-4                     ; Put EOF in rax
 	50                              # PUSH_RAX                            ; Assume bad (If nothing read, value will remain EOF)
 	488D3424                        # LEA_RSI                             ; Get stack address
-	488B3C25 46036000               # LOAD64_RDI_from_ABS32 &script       ; Where are we reading from
+	488B3C25 48036000               # LOAD64_RDI_from_ABS32 &script       ; Where are we reading from
 	B8 00000000                     # LOADI32_EAX %0                      ; the syscall number for read
 	BA 01000000                     # LOADI32_EDX %1                      ; set the size of chars we want
 	0F05                            # SYSCALL                             ; call the Kernel
@@ -396,23 +396,23 @@
 	0F05                            # SYSCALL                             ; Call it a good day
 
 # :default_file ; (0x600318)
-	6B 61 65 6D 2E 72 75 6E 00      ; "kaem.run"
-# :prefix ; (0x600321)
+	6B 61 65 6D 2E 61 6D 64 36 34 00      ; "kaem.amd64"
+# :prefix ; (0x600323)
 	20 2B 3E 20 00                  ; " +> "
-# :hard ; (0x600326)
+# :hard ; (0x600328)
 	53 75 62 70 72 6F 63 65 73 73 20 65 72 72 6F 72 0A 41 42 4F 52 54 49 4E 47 20 48 41 52 44 0A 00 ; "Subprocess error\nABORTING HARD\n"
-# :script ; (0x600346)
+# :script ; (0x600348)
 	00000000 00000000               ; NULL
-# :tokens ; (0x60034E)
+# :tokens ; (0x600350)
 	00000000 00000000               ; NULL
-# :command_done ; (0x600356)
+# :command_done ; (0x600358)
 	00000000 00000000               ; NULL
-# :max_args ; (0x60035E)
+# :max_args ; (0x600360)
 	00080000 00000000               ; 2048
-# :max_string ; (0x600366)
+# :max_string ; (0x600368)
 	00100000 00000000               ; 4096
-# :MALLOC ; (0x60036E)
+# :MALLOC ; (0x600370)
 	00000000 00000000               ; NULL
-# :status ; (0x600376)
+# :status ; (0x600378)
 	00000000 00000000               ; NULL
-# :ELF_end ; (0x60037E)
+# :ELF_end ; (0x600380)

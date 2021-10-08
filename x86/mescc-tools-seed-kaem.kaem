@@ -30,12 +30,12 @@
 ###############################################
 # Phase-0 Build hex0 from bootstrapped binary #
 ###############################################
-../bootstrap-seeds/POSIX/x86/hex0-seed hex0_x86.hex0 artifact/hex0
+./bootstrap-seeds/POSIX/x86/hex0-seed ./x86/hex0_x86.hex0 ./x86/artifact/hex0
 # hex0 should have the exact same checksum as hex0-seed as they are both supposed
 # to be built from hex0_x86.hex0 and by definition must be identical
 
 #########################################
 # Phase-0b Build minimal kaem from hex0 #
 #########################################
-./artifact/hex0 kaem-minimal.hex0 ./artifact/kaem-0
+./x86/artifact/hex0 ./x86/kaem-minimal.hex0 ./x86/artifact/kaem-0
 # for checksum validation reasons

@@ -37,7 +37,7 @@ clean:
 	git clean -xdf
 
 test-x86:
-	cd x86 && ../bootstrap-seeds/POSIX/x86/kaem-optional-seed
+	./bootstrap-seeds/POSIX/x86/kaem-optional-seed
 	sha256sum -c x86.answers
 
 test-amd64:
@@ -49,7 +49,7 @@ test-aarch64:
 	sha256sum -c aarch64.answers
 
 test-riscv64:
-	../bootstrap-seeds/POSIX/riscv64/kaem-optional-seed
+	./bootstrap-seeds/POSIX/riscv64/kaem-optional-seed
 	sha256sum -c riscv64.answers
 
 test-all: test-x86 test-amd64 test-aarch64 test-riscv64

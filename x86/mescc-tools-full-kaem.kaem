@@ -21,6 +21,7 @@
 ##################################################
 # Phase-12 Build final blood-elf from C sources  #
 ##################################################
+cd x86
 ./artifact/M2 --architecture x86 \
 	-f ../M2libc/sys/types.h \
 	-f ../M2libc/stddef.h \
@@ -127,3 +128,4 @@
 
 # Congrats you successfully completed the bootstrap of mescc-tools;
 # the resulting binaries that you want are in bin
+cd ..

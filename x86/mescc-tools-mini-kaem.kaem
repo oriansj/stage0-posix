@@ -29,21 +29,21 @@
 #################################
 # Phase-1 Build hex1 from hex0  #
 #################################
-./artifact/hex0 hex1_x86.hex0 artifact/hex1
+./x86/artifact/hex0 ./x86/hex1_x86.hex0 ./x86/artifact/hex1
 # hex1 adds support for single character labels and is available in various forms
 # in mescc-tools/x86_bootstrap to allow you various ways to verify correctness
 
 #################################
 # Phase-1b Build catm from hex0 #
 #################################
-./artifact/hex0 catm_x86.hex0 ./artifact/catm
+./x86/artifact/hex0 ./x86/catm_x86.hex0 ./x86/artifact/catm
 # catm removes the need for cat or shell support for redirection by providing
 # equivalent functionality via catm output_file input1 input2 ... inputN
 
 #################################
 # Phase-2 Build hex2 from hex1  #
 #################################
-./artifact/hex1 hex2_x86.hex1 ./artifact/hex2-0
+./x86/artifact/hex1 ./x86/hex2_x86.hex1 ./x86/artifact/hex2-0
 # hex2 adds support for long labels and absolute addresses thus allowing it
 # to function as an effective linker for later stages of the bootstrap
 # This is a minimal version which will be used to bootstrap a much more advanced
@@ -52,74 +52,74 @@
 ###############################
 # Phase-3 Build M0 from hex2  #
 ###############################
-./artifact/catm ./artifact/M0.hex2 ELF-i386.hex2 M0_x86.hex2
-./artifact/hex2-0 ./artifact/M0.hex2 ./artifact/M0
+./x86/artifact/catm ./x86/artifact/M0.hex2 ./x86/ELF-i386.hex2 ./x86/M0_x86.hex2
+./x86/artifact/hex2-0 ./x86/artifact/M0.hex2 ./x86/artifact/M0
 # M0 is the architecture specific version of M1 and is by design single
 # architecture only and will be replaced by the C code version of M1
 
 ###################################
 # Phase-4 Build cc_x86 from M0    #
 ###################################
-./artifact/M0 cc_x86.M1 ./artifact/cc_x86-0.hex2
-./artifact/catm ./artifact/cc_x86-1.hex2 ELF-i386.hex2 ./artifact/cc_x86-0.hex2
-./artifact/hex2-0 ./artifact/cc_x86-1.hex2 ./artifact/cc_x86
+./x86/artifact/M0 ./x86/cc_x86.M1 ./x86/artifact/cc_x86-0.hex2
+./x86/artifact/catm ./x86/artifact/cc_x86-1.hex2 ./x86/ELF-i386.hex2 ./x86/artifact/cc_x86-0.hex2
+./x86/artifact/hex2-0 ./x86/artifact/cc_x86-1.hex2 ./x86/artifact/cc_x86
 
 
 #########################################
 # Phase-5 Build M2-Planet from cc_x86   #
 #########################################
-./artifact/catm ./artifact/M2-0.c \
-	../M2libc/x86/Linux/bootstrap.c \
-	../M2-Planet/cc.h \
-	../M2libc/bootstrappable.c \
-	../M2-Planet/cc_globals.c \
-	../M2-Planet/cc_reader.c \
-	../M2-Planet/cc_strings.c \
-	../M2-Planet/cc_types.c \
-	../M2-Planet/cc_core.c \
-	../M2-Planet/cc_macro.c \
-	../M2-Planet/cc.c
-./artifact/cc_x86 ./artifact/M2-0.c ./artifact/M2-0.M1
-./artifact/catm ./artifact/M2-0-0.M1 x86_defs.M1 libc-core.M1 ./artifact/M2-0.M1
-./artifact/M0 ./artifact/M2-0-0.M1 ./artifact/M2-0.hex2
-./artifact/catm ./artifact/M2-0-0.hex2 ELF-i386.hex2 ./artifact/M2-0.hex2
-./artifact/hex2-0 ./artifact/M2-0-0.hex2 ./artifact/M2
+./x86/artifact/catm ./x86/artifact/M2-0.c \
+	./M2libc/x86/Linux/bootstrap.c \
+	./M2-Planet/cc.h \
+	./M2libc/bootstrappable.c \
+	./M2-Planet/cc_globals.c \
+	./M2-Planet/cc_reader.c \
+	./M2-Planet/cc_strings.c \
+	./M2-Planet/cc_types.c \
+	./M2-Planet/cc_core.c \
+	./M2-Planet/cc_macro.c \
+	./M2-Planet/cc.c
+./x86/artifact/cc_x86 ./x86/artifact/M2-0.c ./x86/artifact/M2-0.M1
+./x86/artifact/catm ./x86/artifact/M2-0-0.M1 ./x86/x86_defs.M1 ./x86/libc-core.M1 ./x86/artifact/M2-0.M1
+./x86/artifact/M0 ./x86/artifact/M2-0-0.M1 ./x86/artifact/M2-0.hex2
+./x86/artifact/catm ./x86/artifact/M2-0-0.hex2 ./x86/ELF-i386.hex2 ./x86/artifact/M2-0.hex2
+./x86/artifact/hex2-0 ./x86/artifact/M2-0-0.hex2 ./x86/artifact/M2
 
 #############################################
 # Phase-6 Build blood-elf-0 from C sources  #
 #############################################
-./artifact/M2 --architecture x86 \
-	-f ../M2libc/x86/Linux/bootstrap.c \
-	-f ../M2libc/bootstrappable.c \
-	-f ../mescc-tools/stringify.c \
-	-f ../mescc-tools/blood-elf.c \
+./x86/artifact/M2 --architecture x86 \
+	-f ./M2libc/x86/Linux/bootstrap.c \
+	-f ./M2libc/bootstrappable.c \
+	-f ./mescc-tools/stringify.c \
+	-f ./mescc-tools/blood-elf.c \
 	--bootstrap-mode \
-	-o ./artifact/blood-elf-0.M1
+	-o ./x86/artifact/blood-elf-0.M1
 
-./artifact/catm ./artifact/blood-elf-0-0.M1 ../M2libc/x86/x86_defs.M1  ../M2libc/x86/libc-core.M1 ./artifact/blood-elf-0.M1
-./artifact/M0 ./artifact/blood-elf-0-0.M1 ./artifact/blood-elf-0.hex2
-./artifact/catm ./artifact/blood-elf-0-0.hex2 ../M2libc/x86/ELF-x86.hex2 ./artifact/blood-elf-0.hex2
-./artifact/hex2-0 ./artifact/blood-elf-0-0.hex2 ./artifact/blood-elf-0
+./x86/artifact/catm ./x86/artifact/blood-elf-0-0.M1 ./M2libc/x86/x86_defs.M1  ./M2libc/x86/libc-core.M1 ./x86/artifact/blood-elf-0.M1
+./x86/artifact/M0 ./x86/artifact/blood-elf-0-0.M1 ./x86/artifact/blood-elf-0.hex2
+./x86/artifact/catm ./x86/artifact/blood-elf-0-0.hex2 ./M2libc/x86/ELF-x86.hex2 ./x86/artifact/blood-elf-0.hex2
+./x86/artifact/hex2-0 ./x86/artifact/blood-elf-0-0.hex2 ./x86/artifact/blood-elf-0
 # This is the last stage where the binaries will not have debug info
 # and the last piece built that isn't part of the output binaries
 
 #####################################
 # Phase-7 Build M1-0 from C sources #
 #####################################
-./artifact/M2 --architecture x86 \
-	-f ../M2libc/x86/Linux/bootstrap.c \
-	-f ../M2libc/bootstrappable.c \
-	-f ../mescc-tools/stringify.c \
-	-f ../mescc-tools/M1-macro.c \
+./x86/artifact/M2 --architecture x86 \
+	-f ./M2libc/x86/Linux/bootstrap.c \
+	-f ./M2libc/bootstrappable.c \
+	-f ./mescc-tools/stringify.c \
+	-f ./mescc-tools/M1-macro.c \
 	--bootstrap-mode \
 	--debug \
-	-o ./artifact/M1-macro-0.M1
+	-o ./x86/artifact/M1-macro-0.M1
 
-./artifact/blood-elf-0 -f ./artifact/M1-macro-0.M1 --little-endian -o ./artifact/M1-macro-0-footer.M1
-./artifact/catm ./artifact/M1-macro-0-0.M1 ../M2libc/x86/x86_defs.M1  ../M2libc/x86/libc-core.M1 ./artifact/M1-macro-0.M1 ./artifact/M1-macro-0-footer.M1
-./artifact/M0 ./artifact/M1-macro-0-0.M1 ./artifact/M1-macro-0.hex2
-./artifact/catm ./artifact/M1-macro-0-0.hex2 ../M2libc/x86/ELF-x86-debug.hex2 ./artifact/M1-macro-0.hex2
-./artifact/hex2-0 ./artifact/M1-macro-0-0.hex2 ./artifact/M1-0
+./x86/artifact/blood-elf-0 -f ./x86/artifact/M1-macro-0.M1 --little-endian -o ./x86/artifact/M1-macro-0-footer.M1
+./x86/artifact/catm ./x86/artifact/M1-macro-0-0.M1 ./M2libc/x86/x86_defs.M1  ./M2libc/x86/libc-core.M1 ./x86/artifact/M1-macro-0.M1 ./x86/artifact/M1-macro-0-footer.M1
+./x86/artifact/M0 ./x86/artifact/M1-macro-0-0.M1 ./x86/artifact/M1-macro-0.hex2
+./x86/artifact/catm ./x86/artifact/M1-macro-0-0.hex2 ./M2libc/x86/ELF-x86-debug.hex2 ./x86/artifact/M1-macro-0.hex2
+./x86/artifact/hex2-0 ./x86/artifact/M1-macro-0-0.hex2 ./x86/artifact/M1-0
 
 # This is the last stage where catm will need to be used and the last stage where
 # M0 is used, as we will being using it's much more powerful and cross-platform
@@ -128,35 +128,35 @@
 #######################################
 # Phase-8 Build hex2-1 from C sources #
 #######################################
-./artifact/M2 --architecture x86 \
-	-f ../M2libc/sys/types.h \
-	-f ../M2libc/x86/Linux/sys/stat.h \
-	-f ../M2libc/stddef.h \
-	-f ../M2libc/x86/Linux/unistd.h \
-	-f ../M2libc/stdlib.c \
-	-f ../M2libc/x86/Linux/fcntl.h \
-	-f ../M2libc/stdio.c \
-	-f ../M2libc/bootstrappable.c \
-	-f ../mescc-tools/hex2.h \
-	-f ../mescc-tools/hex2_linker.c \
-	-f ../mescc-tools/hex2_word.c \
-	-f ../mescc-tools/hex2.c \
+./x86/artifact/M2 --architecture x86 \
+	-f ./M2libc/sys/types.h \
+	-f ./M2libc/x86/Linux/sys/stat.h \
+	-f ./M2libc/stddef.h \
+	-f ./M2libc/x86/Linux/unistd.h \
+	-f ./M2libc/stdlib.c \
+	-f ./M2libc/x86/Linux/fcntl.h \
+	-f ./M2libc/stdio.c \
+	-f ./M2libc/bootstrappable.c \
+	-f ./mescc-tools/hex2.h \
+	-f ./mescc-tools/hex2_linker.c \
+	-f ./mescc-tools/hex2_word.c \
+	-f ./mescc-tools/hex2.c \
 	--debug \
-	-o ./artifact/hex2_linker-0.M1
+	-o ./x86/artifact/hex2_linker-0.M1
 
-./artifact/blood-elf-0 -f ./artifact/hex2_linker-0.M1 --little-endian -o ./artifact/hex2_linker-0-footer.M1
+./x86/artifact/blood-elf-0 -f ./x86/artifact/hex2_linker-0.M1 --little-endian -o ./x86/artifact/hex2_linker-0-footer.M1
 
-./artifact/M1-0 --architecture x86 \
+./x86/artifact/M1-0 --architecture x86 \
 	--little-endian \
-	-f ../M2libc/x86/x86_defs.M1 \
-	-f ../M2libc/x86/libc-full.M1 \
-	-f ./artifact/hex2_linker-0.M1 \
-	-f ./artifact/hex2_linker-0-footer.M1 \
-	-o ./artifact/hex2_linker-0.hex2
+	-f ./M2libc/x86/x86_defs.M1 \
+	-f ./M2libc/x86/libc-full.M1 \
+	-f ./x86/artifact/hex2_linker-0.M1 \
+	-f ./x86/artifact/hex2_linker-0-footer.M1 \
+	-o ./x86/artifact/hex2_linker-0.hex2
 
-./artifact/catm ./artifact/hex2_linker-0-0.hex2 ../M2libc/x86/ELF-x86-debug.hex2 ./artifact/hex2_linker-0.hex2
+./x86/artifact/catm ./x86/artifact/hex2_linker-0-0.hex2 ./M2libc/x86/ELF-x86-debug.hex2 ./x86/artifact/hex2_linker-0.hex2
 
-./artifact/hex2-0 ./artifact/hex2_linker-0-0.hex2 ./artifact/hex2-1
+./x86/artifact/hex2-0 ./x86/artifact/hex2_linker-0-0.hex2 ./x86/artifact/hex2-1
 
 # This is the last stage where we will be using the handwritten hex2 and instead
 # be using the far more powerful, cross-platform version with a bunch more goodies
@@ -164,106 +164,106 @@
 ###################################
 # Phase-9 Build M1 from C sources #
 ###################################
-./artifact/M2 --architecture x86 \
-	-f ../M2libc/sys/types.h \
-	-f ../M2libc/stddef.h \
-	-f ../M2libc/string.c \
-	-f ../M2libc/x86/Linux/unistd.h \
-	-f ../M2libc/stdlib.c \
-	-f ../M2libc/x86/Linux/fcntl.h \
-	-f ../M2libc/stdio.c \
-	-f ../M2libc/bootstrappable.c \
-	-f ../mescc-tools/stringify.c \
-	-f ../mescc-tools/M1-macro.c \
+./x86/artifact/M2 --architecture x86 \
+	-f ./M2libc/sys/types.h \
+	-f ./M2libc/stddef.h \
+	-f ./M2libc/string.c \
+	-f ./M2libc/x86/Linux/unistd.h \
+	-f ./M2libc/stdlib.c \
+	-f ./M2libc/x86/Linux/fcntl.h \
+	-f ./M2libc/stdio.c \
+	-f ./M2libc/bootstrappable.c \
+	-f ./mescc-tools/stringify.c \
+	-f ./mescc-tools/M1-macro.c \
 	--debug \
-	-o ./artifact/M1-macro-1.M1
+	-o ./x86/artifact/M1-macro-1.M1
 
-./artifact/blood-elf-0 -f ./artifact/M1-macro-1.M1 --little-endian -o ./artifact/M1-macro-1-footer.M1
+./x86/artifact/blood-elf-0 -f ./x86/artifact/M1-macro-1.M1 --little-endian -o ./x86/artifact/M1-macro-1-footer.M1
 
-./artifact/M1-0 --architecture x86 \
+./x86/artifact/M1-0 --architecture x86 \
 	--little-endian \
-	-f ../M2libc/x86/x86_defs.M1 \
-	-f ../M2libc/x86/libc-full.M1 \
-	-f ./artifact/M1-macro-1.M1 \
-	-f ./artifact/M1-macro-1-footer.M1 \
-	-o ./artifact/M1-macro-1.hex2
+	-f ./M2libc/x86/x86_defs.M1 \
+	-f ./M2libc/x86/libc-full.M1 \
+	-f ./x86/artifact/M1-macro-1.M1 \
+	-f ./x86/artifact/M1-macro-1-footer.M1 \
+	-o ./x86/artifact/M1-macro-1.hex2
 
-./artifact/hex2-1 --architecture x86 \
+./x86/artifact/hex2-1 --architecture x86 \
 	--little-endian \
 	--base-address 0x8048000 \
-	-f ../M2libc/x86/ELF-x86-debug.hex2 \
-	-f ./artifact/M1-macro-1.hex2 \
-	-o ./bin/M1
+	-f ./M2libc/x86/ELF-x86-debug.hex2 \
+	-f ./x86/artifact/M1-macro-1.hex2 \
+	-o ./x86/bin/M1
 
 ######################################
 # Phase-10 Build hex2 from C sources #
 ######################################
-./artifact/M2 --architecture x86 \
-	-f ../M2libc/sys/types.h \
-	-f ../M2libc/x86/Linux/sys/stat.h \
-	-f ../M2libc/stddef.h \
-	-f ../M2libc/x86/Linux/unistd.h \
-	-f ../M2libc/stdlib.c \
-	-f ../M2libc/x86/Linux/fcntl.h \
-	-f ../M2libc/stdio.c \
-	-f ../M2libc/bootstrappable.c \
-	-f ../mescc-tools/hex2.h \
-	-f ../mescc-tools/hex2_linker.c \
-	-f ../mescc-tools/hex2_word.c \
-	-f ../mescc-tools/hex2.c \
+./x86/artifact/M2 --architecture x86 \
+	-f ./M2libc/sys/types.h \
+	-f ./M2libc/x86/Linux/sys/stat.h \
+	-f ./M2libc/stddef.h \
+	-f ./M2libc/x86/Linux/unistd.h \
+	-f ./M2libc/stdlib.c \
+	-f ./M2libc/x86/Linux/fcntl.h \
+	-f ./M2libc/stdio.c \
+	-f ./M2libc/bootstrappable.c \
+	-f ./mescc-tools/hex2.h \
+	-f ./mescc-tools/hex2_linker.c \
+	-f ./mescc-tools/hex2_word.c \
+	-f ./mescc-tools/hex2.c \
 	--debug \
-	-o ./artifact/hex2_linker-2.M1
+	-o ./x86/artifact/hex2_linker-2.M1
 
-./artifact/blood-elf-0 -f ./artifact/hex2_linker-2.M1 --little-endian -o ./artifact/hex2_linker-2-footer.M1
+./x86/artifact/blood-elf-0 -f ./x86/artifact/hex2_linker-2.M1 --little-endian -o ./x86/artifact/hex2_linker-2-footer.M1
 
-./bin/M1 --architecture x86 \
+./x86/bin/M1 --architecture x86 \
 	--little-endian \
-	-f ../M2libc/x86/x86_defs.M1 \
-	-f ../M2libc/x86/libc-full.M1 \
-	-f ./artifact/hex2_linker-2.M1 \
-	-f ./artifact/hex2_linker-2-footer.M1 \
-	-o ./artifact/hex2_linker-2.hex2
+	-f ./M2libc/x86/x86_defs.M1 \
+	-f ./M2libc/x86/libc-full.M1 \
+	-f ./x86/artifact/hex2_linker-2.M1 \
+	-f ./x86/artifact/hex2_linker-2-footer.M1 \
+	-o ./x86/artifact/hex2_linker-2.hex2
 
-./artifact/hex2-1 --architecture x86 \
+./x86/artifact/hex2-1 --architecture x86 \
 	--little-endian \
 	--base-address 0x8048000 \
-	-f ../M2libc/x86/ELF-x86-debug.hex2 \
-	-f ./artifact/hex2_linker-2.hex2 \
-	-o ./bin/hex2
+	-f ./M2libc/x86/ELF-x86-debug.hex2 \
+	-f ./x86/artifact/hex2_linker-2.hex2 \
+	-o ./x86/bin/hex2
 
 
 #####################################
 # Phase-11 Build kaem from C sources#
 #####################################
-./artifact/M2 --architecture x86 \
-	-f ../M2libc/sys/types.h \
-	-f ../M2libc/stddef.h \
-	-f ../M2libc/string.c \
-	-f ../M2libc/x86/Linux/unistd.h \
-	-f ../M2libc/stdlib.c \
-	-f ../M2libc/x86/Linux/fcntl.h \
-	-f ../M2libc/stdio.c \
-	-f ../M2libc/bootstrappable.c \
-	-f ../mescc-tools/Kaem/kaem.h \
-	-f ../mescc-tools/Kaem/variable.c \
-	-f ../mescc-tools/Kaem/kaem_globals.c \
-	-f ../mescc-tools/Kaem/kaem.c \
+./x86/artifact/M2 --architecture x86 \
+	-f ./M2libc/sys/types.h \
+	-f ./M2libc/stddef.h \
+	-f ./M2libc/string.c \
+	-f ./M2libc/x86/Linux/unistd.h \
+	-f ./M2libc/stdlib.c \
+	-f ./M2libc/x86/Linux/fcntl.h \
+	-f ./M2libc/stdio.c \
+	-f ./M2libc/bootstrappable.c \
+	-f ./mescc-tools/Kaem/kaem.h \
+	-f ./mescc-tools/Kaem/variable.c \
+	-f ./mescc-tools/Kaem/kaem_globals.c \
+	-f ./mescc-tools/Kaem/kaem.c \
 	--debug \
-	-o ./artifact/kaem.M1
+	-o ./x86/artifact/kaem.M1
 
-./artifact/blood-elf-0 -f ./artifact/kaem.M1 --little-endian -o ./artifact/kaem-footer.M1
+./x86/artifact/blood-elf-0 -f ./x86/artifact/kaem.M1 --little-endian -o ./x86/artifact/kaem-footer.M1
 
-./bin/M1 --architecture x86 \
+./x86/bin/M1 --architecture x86 \
 	--little-endian \
-	-f ../M2libc/x86/x86_defs.M1 \
-	-f ../M2libc/x86/libc-full.M1 \
-	-f ./artifact/kaem.M1 \
-	-f ./artifact/kaem-footer.M1 \
-	-o ./artifact/kaem.hex2
+	-f ./M2libc/x86/x86_defs.M1 \
+	-f ./M2libc/x86/libc-full.M1 \
+	-f ./x86/artifact/kaem.M1 \
+	-f ./x86/artifact/kaem-footer.M1 \
+	-o ./x86/artifact/kaem.hex2
 
-./bin/hex2 --architecture x86 \
+./x86/bin/hex2 --architecture x86 \
 	--little-endian \
-	-f ../M2libc/x86/ELF-x86-debug.hex2 \
-	-f ./artifact/kaem.hex2 \
+	-f ./M2libc/x86/ELF-x86-debug.hex2 \
+	-f ./x86/artifact/kaem.hex2 \
 	--base-address 0x8048000 \
-	-o ./bin/kaem
+	-o ./x86/bin/kaem

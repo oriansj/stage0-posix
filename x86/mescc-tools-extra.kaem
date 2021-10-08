@@ -26,7 +26,7 @@ BASE_ADDRESS="0x08048000"
 BINDIR="../x86/bin"
 ENDIAN_FLAG="--little-endian"
 BUILDDIR="../x86/artifact"
-cd ../mescc-tools-extra
+cd mescc-tools-extra
 ../x86/bin/kaem --verbose --strict --file mescc-tools-extra.kaem
 cd ..
 ./x86/bin/sha256sum -c x86.answers

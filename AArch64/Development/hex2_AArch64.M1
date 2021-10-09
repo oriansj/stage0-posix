@@ -23,6 +23,7 @@ DEFINE PUSH_X1 e10f1ff8
 DEFINE PUSH_LR fe0f1ff8
 
 DEFINE POP_X0 e00741f8
+DEFINE POP_X0SB e0078138
 DEFINE POP_X1 e10741f8
 DEFINE POP_LR fe0741f8
 
@@ -70,6 +71,7 @@ DEFINE SET_X0_FROM_X9 e00309aa
 DEFINE SET_X0_FROM_X10 e0030aaa
 DEFINE SET_X0_FROM_X12 e0030caa
 DEFINE SET_X1_FROM_X12 e1030caa
+DEFINE SET_X1_FROM_SP e1030091
 DEFINE SET_X2_FROM_X0 e20300aa
 DEFINE SET_X2_FROM_X6 e20306aa
 DEFINE SET_X3_FROM_X0 e30300aa
@@ -486,17 +488,13 @@ DEFINE RBRANCH 17
 :print
     # update the sum and store in output
     ADD_X0_X0_X14_LSL_4
-    LOAD_W1_AHEAD
-    SKIP_32_DATA
-    &io
-    STR_BYTE_W0_[X1]
-
-    # flip the toggle
-    NOT_X15_X15
 
     # Print our first Hex
     SET_X2_TO_1                   # set the size of chars we want
     ^~print_chars FCALL
+
+    # flip the toggle
+    NOT_X15_X15
 
     ADD_X13_X13_1                 # Increment IP
     ^~Second_pass_loop RBRANCH
@@ -506,10 +504,6 @@ DEFINE RBRANCH 17
     SUB_X0_X0_X2                  # target - ip
     CBZ_X7_PAST_INST
     ASR_X0_X0_2
-    LOAD_W1_AHEAD
-    SKIP_32_DATA
-    &io
-    STR_X0_[X1]                   # put value in output
     SET_X2_TO_4                   # set the size of chars we want
     ^~print_chars FCALL
     ^~ClearScratch FCALL          # Clean up after ourselves
@@ -520,10 +514,6 @@ DEFINE RBRANCH 17
     SUB_X0_X0_X2                  # target - ip
     CBZ_X7_PAST_INST
     ASR_X0_X0_2
-    LOAD_W1_AHEAD
-    SKIP_32_DATA
-    &io
-    STR_X0_[X1]                   # put value in output
     SET_X2_TO_3                   # set the size of chars we want
     ^~print_chars FCALL
     ^~ClearScratch FCALL          # Clean up after ourselves
@@ -534,10 +524,6 @@ DEFINE RBRANCH 17
     SUB_X0_X0_X2                  # target - ip
     CBZ_X7_PAST_INST
     ASR_X0_X0_2
-    LOAD_W1_AHEAD
-    SKIP_32_DATA
-    &io
-    STR_X0_[X1]                   # put value in output
     SET_X2_TO_2                   # set the size of chars we want
     ^~print_chars FCALL
     ^~ClearScratch FCALL          # Clean up after ourselves
@@ -548,10 +534,6 @@ DEFINE RBRANCH 17
     SUB_X0_X0_X2                  # target - ip
     CBZ_X7_PAST_INST
     ASR_X0_X0_2
-    LOAD_W1_AHEAD
-    SKIP_32_DATA
-    &io
-    STR_X0_[X1]                   # put value in output
     SET_X2_TO_1                   # set the size of chars we want
     ^~print_chars FCALL
     ^~ClearScratch FCALL          # Clean up after ourselves
@@ -559,10 +541,6 @@ DEFINE RBRANCH 17
 
 :StorePointer_abs4
     ^~StorePointer FCALL          # Do Common
-    LOAD_W1_AHEAD
-    SKIP_32_DATA
-    &io
-    STR_X0_[X1]                   # put value in output
     SET_X2_TO_4                   # set the size of chars we want
     ^~print_chars FCALL
     ^~ClearScratch FCALL          # Clean up after ourselves
@@ -570,10 +548,6 @@ DEFINE RBRANCH 17
 
 :StorePointer_abs2
     ^~StorePointer FCALL          # Do Common
-    LOAD_W1_AHEAD
-    SKIP_32_DATA
-    &io
-    STR_X0_[X1]                   # put value in output
     SET_X2_TO_2                   # set the size of chars we want
     ^~print_chars FCALL
     ^~ClearScratch FCALL          # Clean up after ourselves
@@ -663,40 +637,27 @@ DEFINE RBRANCH 17
 
 :Read_byte
     PUSH_X1
+    SET_X0_TO_MINUS_4             # Put EOF in x0
+    PUSH_X0
+
     # Attempt to read 1 byte from STDIN
     SET_X0_FROM_X9                # Where are we reading from
-    LOAD_W1_AHEAD                 # Where to put it
-    SKIP_32_DATA
-    &io
+    SET_X1_FROM_SP                # Where to put it
     SET_X2_TO_1                   # set the size of chars we want
     SET_X8_TO_SYS_READ            # the syscall number for read
     SYSCALL                       # call the Kernel
 
-    CMP_X0_TO_0                   # check what we got
-    SKIP_INST_NE                  # Got EOF call it done
-    ^~Read_byte_1 FBRANCH
-
-    # load byte
-    LOAD_W0_AHEAD
-    SKIP_32_DATA
-    &io
-    LDR_BYTE_W0_[X0]              # load char, unsigned so zero-extended already
-    POP_X1
-    RETURN
-
-    # Deal with EOF
-:Read_byte_1
-    SET_X0_TO_MINUS_4             # Put EOF in x0
+    POP_X0SB
     POP_X1
     RETURN
 
 :print_chars
+    PUSH_X0
+    SET_X1_FROM_SP
     SET_X0_FROM_X10               # Write to target file
-    LOAD_W1_AHEAD                 # What we are writing
-    SKIP_32_DATA
-    &io
     SET_X8_TO_SYS_WRITE           # the syscall number for write
     SYSCALL                       # call the Kernel
+    POP_X0
     RETURN
 
 # Receives pointer in x1

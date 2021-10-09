@@ -372,17 +372,13 @@ B7 00                          # e_machine Indicating AArch64
 :p ; :print
     # update the sum and store in output
     00100e8b                    ; ADD_X0_X0_X14_LSL_4
-    41000018                    ; LOAD_W1_AHEAD
-    02000014                    ; SKIP_32_DATA
-    &0                          ; &io
-    20000039                    ; STR_BYTE_W0_[X1]
-
-    # flip the toggle
-    ef032faa                    ; NOT_X15_X15
 
     # Print our first Hex
     220080d2                    ; SET_X2_TO_1                   # set the size of chars we want
     ^~I 94                      ; ^~print_chars FCALL
+
+    # flip the toggle
+    ef032faa                    ; NOT_X15_X15
 
     ad050091                    ; ADD_X13_X13_1                 # Increment IP
     ^~j 17                      ; ^~Second_pass_loop RBRANCH
@@ -392,10 +388,6 @@ B7 00                          # e_machine Indicating AArch64
     000002cb                    ; SUB_X0_X0_X2                  # target - ip
     470000b4                    ; CBZ_X7_PAST_INST
     00fc4293                    ; ASR_X0_X0_2
-    41000018                    ; LOAD_W1_AHEAD
-    02000014                    ; SKIP_32_DATA
-    &0                          ; &io
-    200000f9                    ; STR_X0_[X1]                   # put value in output
     820080d2                    ; SET_X2_TO_4                   # set the size of chars we want
     ^~I 94                      ; ^~print_chars FCALL
     ^~C 94                      ; ^~ClearScratch FCALL          # Clean up after ourselves
@@ -406,10 +398,6 @@ B7 00                          # e_machine Indicating AArch64
     000002cb                    ; SUB_X0_X0_X2                  # target - ip
     470000b4                    ; CBZ_X7_PAST_INST
     00fc4293                    ; ASR_X0_X0_2
-    41000018                    ; LOAD_W1_AHEAD
-    02000014                    ; SKIP_32_DATA
-    &0                          ; &io
-    200000f9                    ; STR_X0_[X1]                   # put value in output
     620080d2                    ; SET_X2_TO_3                   # set the size of chars we want
     ^~I 94                      ; ^~print_chars FCALL
     ^~C 94                      ; ^~ClearScratch FCALL          # Clean up after ourselves
@@ -420,10 +408,6 @@ B7 00                          # e_machine Indicating AArch64
     000002cb                    ; SUB_X0_X0_X2                  # target - ip
     470000b4                    ; CBZ_X7_PAST_INST
     00fc4293                    ; ASR_X0_X0_2
-    41000018                    ; LOAD_W1_AHEAD
-    02000014                    ; SKIP_32_DATA
-    &0                          ; &io
-    200000f9                    ; STR_X0_[X1]                   # put value in output
     420080d2                    ; SET_X2_TO_2                   # set the size of chars we want
     ^~I 94                      ; ^~print_chars FCALL
     ^~C 94                      ; ^~ClearScratch FCALL          # Clean up after ourselves
@@ -434,10 +418,6 @@ B7 00                          # e_machine Indicating AArch64
     000002cb                    ; SUB_X0_X0_X2                  # target - ip
     470000b4                    ; CBZ_X7_PAST_INST
     00fc4293                    ; ASR_X0_X0_2
-    41000018                    ; LOAD_W1_AHEAD
-    02000014                    ; SKIP_32_DATA
-    &0                          ; &io
-    200000f9                    ; STR_X0_[X1]                   # put value in output
     220080d2                    ; SET_X2_TO_1                   # set the size of chars we want
     ^~I 94                      ; ^~print_chars FCALL
     ^~C 94                      ; ^~ClearScratch FCALL          # Clean up after ourselves
@@ -445,10 +425,6 @@ B7 00                          # e_machine Indicating AArch64
 
 :u ; :StorePointer_abs4
     ^~W 94                      ; ^~StorePointer FCALL          # Do Common
-    41000018                    ; LOAD_W1_AHEAD
-    02000014                    ; SKIP_32_DATA
-    &0                          ; &io
-    200000f9                    ; STR_X0_[X1]                   # put value in output
     820080d2                    ; SET_X2_TO_4                   # set the size of chars we want
     ^~I 94                      ; ^~print_chars FCALL
     ^~C 94                      ; ^~ClearScratch FCALL          # Clean up after ourselves
@@ -456,10 +432,6 @@ B7 00                          # e_machine Indicating AArch64
 
 :v ; :StorePointer_abs2
     ^~W 94                      ; ^~StorePointer FCALL          # Do Common
-    41000018                    ; LOAD_W1_AHEAD
-    02000014                    ; SKIP_32_DATA
-    &0                          ; &io
-    200000f9                    ; STR_X0_[X1]                   # put value in output
     420080d2                    ; SET_X2_TO_2                   # set the size of chars we want
     ^~I 94                      ; ^~print_chars FCALL
     ^~C 94                      ; ^~ClearScratch FCALL          # Clean up after ourselves
@@ -549,40 +521,27 @@ B7 00                          # e_machine Indicating AArch64
 
 :R ; :Read_byte
     e10f1ff8                    ; PUSH_X1
+    60008092                    ; SET_X0_TO_MINUS_4             # Put EOF in x0
+    e00f1ff8                    ; PUSH_X0
+
     # Attempt to read 1 byte from STDIN
     e00309aa                    ; SET_X0_FROM_X9                # Where are we reading from
-    41000018                    ; LOAD_W1_AHEAD                 # Where to put it
-    02000014                    ; SKIP_32_DATA
-    &0                          ; &io
+    e1030091                    ; SET_X1_FROM SP                # Where to put it
     220080d2                    ; SET_X2_TO_1                   # set the size of chars we want
     e80780d2                    ; SET_X8_TO_SYS_READ            # the syscall number for read
     010000d4                    ; SYSCALL                       # call the Kernel
 
-    1f0000f1                    ; CMP_X0_TO_0                   # check what we got
-    41000054                    ; SKIP_INST_NE                  # Got EOF call it done
-    ^~Q 14                      ; ^~Read_byte_1 FBRANCH
-
-    # load byte
-    40000098                    ; LOAD_W0_AHEAD
-    02000014                    ; SKIP_32_DATA
-    &0                          ; &io
-    00004039                    ; LDR_BYTE_W0_[X0]              # load char, unsigned so zero-extended already
-    e10741f8                    ; POP_X1
-    c0035fd6                    ; RETURN
-
-    # Deal with EOF
-:Q ; :Read_byte_1
-    60008092                    ; SET_X0_TO_MINUS_4             # Put EOF in x0
+    e0078138                    ; POP_X0SB
     e10741f8                    ; POP_X1
     c0035fd6                    ; RETURN
 
 :I ; :print_chars
+    e00f1ff8                    ; PUSH_X0
+    e1030091                    ; SET_X1_FROM_SP
     e0030aaa                    ; SET_X0_FROM_X10               # Write to target file
-    41000018                    ; LOAD_W1_AHEAD                 # What we are writing
-    02000014                    ; SKIP_32_DATA
-    &0                          ; &io
     080880d2                    ; SET_X8_TO_SYS_WRITE           # the syscall number for write
     010000d4                    ; SYSCALL                       # call the Kernel
+    e00741f8                    ; POP_X0
     c0035fd6                    ; RETURN
 
 # Receives pointer in x1

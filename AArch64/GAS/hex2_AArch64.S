@@ -294,15 +294,13 @@ Second_pass_0:
 print:
     // update the sum and store in output
     add x0, x0, x14, lsl #4
-    adr x1, io
-    strb w0, [x1]
-
-    // flip the toggle
-    mvn x15, x15
 
     // Print our first Hex
     mov x2,  1                  // set the size of chars we want
     bl print_chars
+
+    // flip the toggle
+    mvn x15, x15
 
     add x13, x13, 1             // Increment IP
     b Second_pass_loop
@@ -313,8 +311,6 @@ StorePointer_rel4:
     cbz x7, StorePointer_rel4_0
     asr x0, x0, #2
 StorePointer_rel4_0:
-    adr x1, io
-    str x0, [x1]                // put value in output
     mov x2,  4                  // set the size of chars we want
     bl print_chars
     bl ClearScratch             // Clean up after ourselves
@@ -326,8 +322,6 @@ StorePointer_rel3:
     cbz x7, StorePointer_rel3_0
     asr x0, x0, #2
 StorePointer_rel3_0:
-    adr x1, io
-    str x0, [x1]                // put value in output
     mov x2,  3                  // set the size of chars we want
     bl print_chars
     bl ClearScratch             // Clean up after ourselves
@@ -339,8 +333,6 @@ StorePointer_rel2:
     cbz x7, StorePointer_rel2_0
     asr x0, x0, #2
 StorePointer_rel2_0:
-    adr x1, io
-    str x0, [x1]                // put value in output
     mov x2, 2                   // set the size of chars we want
     bl print_chars
     bl ClearScratch             // Clean up after ourselves
@@ -352,8 +344,6 @@ StorePointer_rel1:
     cbz x7, StorePointer_rel1_0
     asr x0, x0, #2
 StorePointer_rel1_0:
-    adr x1, io
-    str x0, [x1]                // put value in output
     mov x2, 1                   // set the size of chars we want
     bl print_chars
     bl ClearScratch             // Clean up after ourselves
@@ -361,8 +351,6 @@ StorePointer_rel1_0:
 
 StorePointer_abs4:
     bl StorePointer             // Do Common
-    adr x1, io
-    str x0, [x1]                // put value in output
     mov x2, 4                   // set the size of chars we want
     bl print_chars
     bl ClearScratch             // Clean up after ourselves
@@ -370,8 +358,6 @@ StorePointer_abs4:
 
 StorePointer_abs2:
     bl StorePointer             // Do Common
-    adr x1, io
-    str x0, [x1]                // put value in output
     mov x2, 2                   // set the size of chars we want
     bl print_chars
     bl ClearScratch             // Clean up after ourselves
@@ -449,33 +435,29 @@ malloc:
 
 
 Read_byte:
-    str x1, [sp,-8]
+    str x1, [sp, #-16]!
+    mov x0, #-4
+    str x0, [sp, #-16]!
+
     // Attempt to read 1 byte from STDIN
     mov x0, x9                  // Where are we reading from
-    adr x1, io                  // Where to put it
     mov x2, #1                  // set the size of chars we want
     mov x8, #63                 // the syscall number for read
+    mov x1, sp
     svc #0                      // call the Kernel
 
-    cmp x0, 0                   // check what we got
-    b.eq Read_byte_1            // Got EOF call it done
-
-    // load byte
-    adr x0, io
-    ldrb w0, [x0]               // load char, unsigned so zero-extended already
-    ldr x1, [sp,-8]
+    ldrsb x0, [sp], #16
+    ldr x1, [sp], #16
     ret
 
-// Deal with EOF
-Read_byte_1:
-    mov x0, -4                  // Put EOF in x0
-    ret
 
 print_chars:
+    str x0, [sp,#-16]!          // put value in output
+    mov x1, sp                  // What we are writing
     mov x0, x10                 // Write to target file
-    adr x1, io                  // What we are writing
     mov x8, #64                 // the syscall number for write
     svc #0                      // call the Kernel
+    ldr x0, [sp], #16
     ret
 
     // Receives pointer in x1
@@ -603,7 +585,5 @@ fail:
 
     .section .data
 ELF_end:
-io:
-    .quad 0
 scratch:
     .byte 0

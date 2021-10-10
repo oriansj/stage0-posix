@@ -357,7 +357,7 @@
     ECALL                             # syscall
 # PROGRAM END
 
-:default_file "kaem.run"
+:default_file "kaem.riscv64"
 :prefix " +> "
 :hard "Subprocess error
 ABORTING HARD

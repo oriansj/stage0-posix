@@ -402,7 +402,7 @@ F3 00              ## e_machine Indicating RISC-V
 # PROGRAM END
 
 :default_file
-    6B 61 65 6D 2E 72 75 6E 00                          ; kaem.run
+    6B 61 65 6D 2E 72 69 73 63 76 36 34 00                          ; kaem.riscv64
 :prefix
     20 2B 3E 20 00                                      ; " +> "
 :hard

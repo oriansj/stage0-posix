@@ -352,7 +352,7 @@ Done:
 
 
 section .data
-default_file: db "kaem.run", 0
+default_file: db "kaem.x86", 0
 prefix: db " +> ", 0
 hard: db "Subprocess error", 10, "ABORTING HARD", 10, 0
 script: dd 0

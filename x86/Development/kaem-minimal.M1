@@ -398,7 +398,7 @@ DEFINE STORE8_al_into_Address_ECX 8801
 	LOADI32_EAX %1                    ; put the exit syscall number in eax
 	INT_80                            ; Call it a good day
 
-:default_file "kaem.run"
+:default_file "kaem.x86"
 :prefix " +> "
 :hard "Subprocess error
 ABORTING HARD

@@ -350,6 +350,6 @@ Fail:
 .data
 .align 4
 
-default_file: .string "kaem.run"
+default_file: .string "kaem.riscv64"
 prefix: .string " +> "
 hard: .string "Subprocess error\nABORTING HARD\n"

@@ -141,7 +141,7 @@ B7 00                          # e_machine Indicating AArch64
     41000054                    ;    SKIP_INST_NE                # keep looping
     ^~collect_command 17        ;    ^~collect_command RBRANCH
 
-                                        # Deal with line comments
+                                     # Deal with line comments
     5f0001eb                    ;    CMP_X2_X1                   # if 0 < i
     41000054                    ;    SKIP_INST_NE                # It was a comment
     ^~main_loop 17              ;    ^~main_loop RBRANCH
@@ -174,7 +174,7 @@ B7 00                          # e_machine Indicating AArch64
     02000014                    ;    SKIP_32_DATA
     &envp                       ;    &envp
     220140f9                    ;    LDR_X2_[X9]
-                                                                # second arg = tokens, already in x1
+                                                                 # second arg = tokens, already in x1
     200040f9                    ;    LDR_X0_[X1]                 # program = tokens[0]
     010000d4                    ;    SYSCALL                     # execve(program, tokens, envp);
     ^~Exit_Failure 14           ;    ^~Exit_Failure FBRANCH      # return error
@@ -284,7 +284,7 @@ B7 00                          # e_machine Indicating AArch64
     ^~collect_token_done 14     ;    ^~collect_token_done FBRANCH # Be done
 
 :collect_token_string
-    1f8800f1                    ;    CMP_X0_TO_34                # IF C == '"'
+    1f8800f1                    ;    CMP_X0_TO_34                # IF C == '\"'
     40000054                    ;    SKIP_INST_EQ                # otherwise check next
     ^~collect_token_comment 14  ;    ^~collect_token_comment FBRANCH
 
@@ -346,7 +346,7 @@ B7 00                          # e_machine Indicating AArch64
     41000054                    ;    SKIP_INST_NE                # Something went horriably wrong
     ^~Exit_Failure 17           ;    ^~Exit_Failure RBRANCH
 
-    1f8800f1                    ;    CMP_X0_TO_34                # IF C == '"'
+    1f8800f1                    ;    CMP_X0_TO_34                # IF C == '\"'
     41000054                    ;    SKIP_INST_NE                # be done
     ^~collect_string_done 14    ;    ^~collect_string_done FBRANCH
 
@@ -497,7 +497,7 @@ B7 00                          # e_machine Indicating AArch64
     0000000000000000 0000000000000000 0000000000000000 0000000000000000     ; NULL64 NULL64 NULL64 NULL64
 
 :default_file
-    6B 61 65 6D 2E 72 75 6E 00  ; "kaem.run"
+    6B 61 65 6D 2E 61 61 72 63 68 36 34 00  ; "kaem.run"
 :prefix
     20 2B 3E 20 00              ; " +> "
 :hard

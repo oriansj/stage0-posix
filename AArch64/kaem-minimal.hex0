@@ -53,8 +53,8 @@ B7 00                          # e_machine Indicating AArch64
 00 00 00 00 00 00 00 00                   # ph_offset
 00 00 60 00 00 00 00 00                     # ph_vaddr
 00 00 60 00 00 00 00 00                     # ph_physaddr
-BE 05 00 00 00 00 00 00             # ph_filesz
-BE 05 00 00 00 00 00 00             # ph_memsz
+C2 05 00 00 00 00 00 00             # ph_filesz
+C2 05 00 00 00 00 00 00             # ph_memsz
 01 00 00 00 00 00 00 00                   # ph_align
 
 
@@ -201,7 +201,7 @@ BE 05 00 00 00 00 00 00             # ph_memsz
                                                                 # Deal with very unhappy case
     40000098                    ; LOAD_W0_AHEAD               # Using "Subprocess error\nABORTING HARD\n"
     02000014                    ; SKIP_32_DATA
-    9e056000                    ; &hard
+    A2056000                    ; &hard
     8c0000 94                   ; ^~File_Print FCALL          # Print it
 
 # Exit_Failure function
@@ -222,7 +222,7 @@ BE 05 00 00 00 00 00 00             # ph_memsz
     e10f1ff8                    ; PUSH_X1                     # Protect X1
     40000098                    ; LOAD_W0_AHEAD               # using " +> "
     02000014                    ; SKIP_32_DATA
-    99056000                    ; &prefix
+    9D056000                    ; &prefix
     830000 94                   ; ^~File_Print FCALL          # print it
 #:print_command_loop
     200040f9                    ; LDR_X0_[X1]                 # using tokens[j]
@@ -284,7 +284,7 @@ BE 05 00 00 00 00 00 00             # ph_memsz
     180000 14                   ; ^~collect_token_done FBRANCH # Be done
 
 #:collect_token_string
-    1f8800f1                    ; CMP_X0_TO_34                # IF C == '"'
+    1f8800f1                    ; CMP_X0_TO_34                # IF C == '\"'
     40000054                    ; SKIP_INST_EQ                # otherwise check next
     030000 14                   ; ^~collect_token_comment FBRANCH
 
@@ -346,7 +346,7 @@ BE 05 00 00 00 00 00 00             # ph_memsz
     41000054                    ; SKIP_INST_NE                # Something went horriably wrong
     a9ffff 17                   ; ^~Exit_Failure RBRANCH
 
-    1f8800f1                    ; CMP_X0_TO_34                # IF C == '"'
+    1f8800f1                    ; CMP_X0_TO_34                # IF C == '\"'
     41000054                    ; SKIP_INST_NE                # be done
     040000 14                   ; ^~collect_string_done FBRANCH
 
@@ -504,7 +504,7 @@ BE 05 00 00 00 00 00 00             # ph_memsz
     0000000000000000 0000000000000000 0000000000000000 0000000000000000     ; NULL64 NULL64 NULL64 NULL64
 
 #:default_file
-    6B 61 65 6D 2E 72 75 6E 00  ; "kaem.run"
+    6B 61 65 6D 2E 61 61 72 63 68 36 34 00  ; "kaem.aarch64"
 #:prefix
     20 2B 3E 20 00              ; " +> "
 #:hard

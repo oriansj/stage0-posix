@@ -26,7 +26,7 @@ BASE_ADDRESS="0x00600000"
 BINDIR="../AArch64/bin"
 ENDIAN_FLAG="--little-endian"
 BUILDDIR="../AArch64/artifact"
-cd ../mescc-tools-extra
+cd ./mescc-tools-extra
 ../AArch64/bin/kaem --verbose --strict --file mescc-tools-extra.kaem
 cd ..
 ./AArch64/bin/sha256sum -c aarch64.answers

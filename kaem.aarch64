@@ -27,16 +27,16 @@
 # Phase 0-14 Build hex0 from bootstrapped binary #
 ##################################################
 
-../bootstrap-seeds/POSIX/AArch64/kaem-optional-seed mescc-tools-seed-kaem.kaem
-./artifact/kaem-0 mescc-tools-mini-kaem.kaem
-./bin/kaem --verbose --strict -f mescc-tools-full-kaem.kaem
+./bootstrap-seeds/POSIX/AArch64/kaem-optional-seed ./AArch64/mescc-tools-seed-kaem.kaem
+./AArch64/artifact/kaem-0 ./AArch64/mescc-tools-mini-kaem.kaem
+./AArch64/bin/kaem --verbose --strict -f ./AArch64/mescc-tools-full-kaem.kaem
 
 ######################################################
 # Phase 15-22 Build mescc-tools-extra from M2-Planet #
 ######################################################
-./bin/kaem --verbose --strict --file mescc-tools-extra.kaem
+./AArch64/bin/kaem --verbose --strict --file ./AArch64/mescc-tools-extra.kaem
 
 #########################
 # Load after.kaem hook  #
 #########################
-./bin/kaem --verbose --strict --file ../after.kaem
+./AArch64/bin/kaem --verbose --strict --file ./after.kaem

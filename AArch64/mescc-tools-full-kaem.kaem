@@ -18,6 +18,8 @@
 # You should have received a copy of the GNU General Public License
 # along with stage0.  If not, see <http://www.gnu.org/licenses/>.
 
+cd AArch64
+
 #################################################
 # Phase-12 Build final blood-elf from C sources #
 #################################################
@@ -126,3 +128,5 @@
 	-f ../M2libc/aarch64/ELF-aarch64-debug.hex2 \
 	-f ./artifact/M2-1.hex2 \
 	-o ./bin/M2-Planet
+
+cd ..

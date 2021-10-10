@@ -131,7 +131,7 @@ DEFINE RBRANCH 17
     SKIP_INST_EQ                # Have real input
     ^~_start_out FBRANCH
     ADD_X2_SP_24                # Nope, envp is here!
-    LOAD_W1_AHEAD               # Use "kaem.run"
+    LOAD_W1_AHEAD               # Use "kaem.aarch64"
     SKIP_32_DATA
     &default_file
 
@@ -345,7 +345,7 @@ DEFINE RBRANCH 17
     ^~collect_token_done FBRANCH # Be done
 
 :collect_token_string
-    CMP_X0_TO_34                # IF C == '"'
+    CMP_X0_TO_34                # IF C == '\"'
     SKIP_INST_EQ                # otherwise check next
     ^~collect_token_comment FBRANCH
 
@@ -407,7 +407,7 @@ DEFINE RBRANCH 17
     SKIP_INST_NE                # Something went horriably wrong
     ^~Exit_Failure RBRANCH
 
-    CMP_X0_TO_34                # IF C == '"'
+    CMP_X0_TO_34                # IF C == '\"'
     SKIP_INST_NE                # be done
     ^~collect_string_done FBRANCH
 
@@ -557,7 +557,7 @@ NULL64 NULL64 NULL64 NULL64
 NULL64 NULL64 NULL64 NULL64
 NULL64 NULL64 NULL64 NULL64
 
-:default_file "kaem.run"
+:default_file "kaem.aarch64"
 :prefix " +> "
 :hard "Subprocess error
 ABORTING HARD

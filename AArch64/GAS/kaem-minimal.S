@@ -400,6 +400,6 @@ MALLOC: .quad 0
 info:
     .quad 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
-default_file: .asciz "kaem.run"
+default_file: .asciz "kaem.aarch64"
 prefix: .asciz " +> "
 hard: .asciz "Subprocess error\nABORTING HARD\n"

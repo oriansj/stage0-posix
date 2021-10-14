@@ -72,6 +72,8 @@ F3 00              ## e_machine Indicating RISC-V
 01 00 00 00 00 00 00 00 ## Required alignment
 
 :_start
+    # RD_S4 MV                 ; Initialize register
+    .000A0000 13000000
     # RD_A2 RS1_SP !16 LD      ; Input file name
     .00060000 .00000100 .00000001 03300000
 

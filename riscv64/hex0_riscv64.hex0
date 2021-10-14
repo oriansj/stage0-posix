@@ -69,6 +69,7 @@ F3 00              ## e_machine Indicating RISC-V
 01 00 00 00 00 00 00 00 ## Required alignment
 
 # :_start ; (0x0600078)
+    13 0A 00 00    # RD_S4 MV                 ; Initialize register
     03 36 01 01    # RD_A2 RS1_SP !16 LD      ; Input file name
 
     ; Open input file and store FD in s2

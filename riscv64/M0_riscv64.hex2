@@ -39,6 +39,9 @@
 ; STRING => 2
 
 :_start
+    # RD_S4 LUI                         ; Initialize register
+    .000A0000 37000000
+
     # RD_A2 RS1_SP !16 LD               ; Input file name
     .00060000 .00000100 .00000001 03300000
 

@@ -39,6 +39,9 @@
 ; STRING => 2
 
 :_start
+    # RD_S4 ADDI
+    .000A0000 13000000
+
     # RD_A2 RS1_SP !16 LD               ; Input file name
     .00060000 .00000100 .00000001 03300000
 

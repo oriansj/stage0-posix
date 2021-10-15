@@ -45,6 +45,9 @@
 ; ARGS/DEPTH => 32
 
 :_start
+    RD_S7 MV                          ; Initialize globals_list
+    RD_S8 MV                          ; Initialize global_function_list
+    RD_S9 MV                          ; Initialize update_list
 
     RD_A2 RS1_SP !16 LD               ; Input file name
 

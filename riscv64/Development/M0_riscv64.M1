@@ -39,6 +39,7 @@
 ; STRING => 2
 
 :_start
+    RD_S4 ADDI                        ; Initialize register
     RD_A2 RS1_SP !16 LD               ; Input file name
 
     ; Open input file and store FD in s2

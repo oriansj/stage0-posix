@@ -1,5 +1,6 @@
 ## Copyright (C) 2017 Jeremiah Orians
 ## Copyright (C) 2021 Andrius Štikonas
+## Copyright (C) 2021 Gabriel Wicki
 ## This file is part of stage0.
 ##
 ## stage0 is free software: you can redistribute it and/or modify

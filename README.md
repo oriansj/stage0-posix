@@ -12,6 +12,7 @@ following:
   - catm
   - cp
   - chmod
+  - match
   - mkdir
   - ungz
   - untar
@@ -206,38 +207,43 @@ using itself and so is going to work more quickly and reliably.
 
 sha256sum is used for giving us a cryptographically signed build chain.
 
-### Phase 16: build mkdir
+### Phase 16: Build match
+
+match compares two strings. This allows to write architecture specific
+conditional code in kaem scripts.
+
+### Phase 17: build mkdir
 
 To eliminate the need to premake directories in live-bootstrap.
 
-### Phase 17: Build untar
+### Phase 18: Build untar
 
 untar enables stage0-posix to unpack source tarballs so that git submodules are
 not needed to further extend stage0-posix to achieve GCC+Linux.
 
-### Phase 18: Build ungz
+### Phase 19: Build ungz
 
 ungz enables the decompressing of .tar.gz tarballs such as Gnu Mes. Thus
 enabling source tarballs on hosts that don't distribute uncompressed tarballs.
 
-### Phase 19: Build catm
+### Phase 20: Build catm
 
 catm is a simple tool that provides the functionality of:
 cat file1 file2 ... fileN >| output in environments where pipes and I/O
 redirection doesn't exist. With slightly unique syntax:
 catm output file1 file2 ... fileN
 
-### Phase 20: build primitive cp
+### Phase 21: build primitive cp
 
 This primitive version of cp simply copies the contents of the file but does NOT
 copy the file permissions or any other STAT information.
 
-### Phase 21: build chmod
+### Phase 22: build chmod
 
 To fix up the permissions, of any binaries you used the primitive cp command to
 move, chmod is included.
 
-### Phase 22: after.kaem
+### Phase 23: after.kaem
 
 after.kaem exists for you to replace with anything you want to kick off your
 bootstrap chain.

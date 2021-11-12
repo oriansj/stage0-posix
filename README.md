@@ -2,13 +2,13 @@
 
 This repository contains all the various parts needed to bootstrap the
 following:
- - mescc-tools (https://github.com/oriansj/mescc-tools), containing:
+- mescc-tools (https://github.com/oriansj/mescc-tools), containing:
   - M1
   - blood-elf
   - get_machine
   - hex2
   - kaem
- - mescc-tools-extra (https://github.com/oriansj/mescc-tools-extra), containing:
+- mescc-tools-extra (https://github.com/oriansj/mescc-tools-extra), containing:
   - catm
   - cp
   - chmod
@@ -17,7 +17,7 @@ following:
   - ungz
   - untar
   - sha256sum
- - M2-Planet (https://github.com/oriansj/M2-Planet)
+- M2-Planet (https://github.com/oriansj/M2-Planet)
 
 It bootstraps all these from a single 357 byte seed (which you will find in the
 folder bootstrap-seeds). The ultimate goal is for this to bootstrap all the way

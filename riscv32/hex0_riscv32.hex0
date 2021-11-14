@@ -26,52 +26,54 @@
 
 ## ELF Header
 #:ELF_base
-7F 45 4C 46        ## e_ident[EI_MAG0-3] ELF's magic number
+7F 45 4C 46        # e_ident[EI_MAG0-3] ELF's magic number
 
-02                 ## e_ident[EI_CLASS] Indicating 64 bit
-01                 ## e_ident[EI_DATA] Indicating little endianness
-01                 ## e_ident[EI_VERSION] Indicating original elf
+01                 # e_ident[EI_CLASS] Indicating 32 bit
+01                 # e_ident[EI_DATA] Indicating little endianness
+01                 # e_ident[EI_VERSION] Indicating original elf
 
-03                 ## e_ident[EI_OSABI] Set at 3 for Linux
-00                 ## e_ident[EI_ABIVERSION] Ignored for Statically linked executables
+03                 # e_ident[EI_OSABI] Set at 3 for Linux
+00                 # e_ident[EI_ABIVERSION] Ignored for Statically linked executables
 
-00 00 00 00 00 00 00 ## e_ident[EI_PAD]
-02 00              ## e_type Indicating Executable
-F3 00              ## e_machine Indicating RISC-V
-01 00 00 00        ## e_version Indicating original elf
+00 00 00 00 00 00 00 # e_ident[EI_PAD]
+02 00              # e_type Indicating Executable
+F3 00              # e_machine Indicating RISC-V
+01 00 00 00        # e_version Indicating original elf
 
-78 00 60 00 00 00 00 00 ## e_entry Address of the entry point (Number of bytes this header is + Base Address)
-40 00 00 00 00 00 00 00 ## e_phoff Address of program header table
-00 00 00 00 00 00 00 00 ## e_shoff Address of section header table
+54 00 60 00        # e_entry Address of the entry point
+34 00 00 00        # e_phoff Address of program header table
+00 00 00 00        # e_shoff Address of section header table
 
-00 00 00 00        ## e_flags
-40 00              ## e_ehsize Indicating our 64 Byte header
+00 00 00 00        # e_flags
 
-38 00              ## e_phentsize size of a program header table
-01 00              ## e_phnum number of entries in program table
+34 00              # e_ehsize Indicating our 52 Byte header
 
-00 00              ## e_shentsize size of a section header table
-00 00              ## e_shnum number of entries in section table
+20 00              # e_phentsize size of a program header table
+01 00              # e_phnum number of entries in program table
 
-00 00              ## e_shstrndx index of the section names
+00 00              # e_shentsize size of a section header table
+00 00              # e_shnum number of entries in section table
+
+00 00              # e_shstrndx index of the section names
 
 ## Program Header
 #:ELF_program_headers
-01 00 00 00             ## p_type
-07 00 00 00             ## Flags
-00 00 00 00 00 00 00 00 ## p_offset
+#:ELF_program_header__text
+01 00 00 00        # ph_type: PT-LOAD = 1
+00 00 00 00        # ph_offset
 
-00 00 60 00 00 00 00 00 ## p_vaddr
-00 00 60 00 00 00 00 00 ## p_physaddr
+00 00 60 00        # ph_vaddr
+00 00 60 00        # ph_physaddr
 
-8c 01 00 00 00 00 00 00 ## p_filesz
-8c 01 00 00 00 00 00 00 ## p_memsz
+68 01 00 00        # ph_filesz
+68 01 00 00        # ph_memsz
 
-01 00 00 00 00 00 00 00 ## Required alignment
+07 00 00 00        # ph_flags: PF-X|PF-W|PF-R = 7
+01 00 00 00        # ph_align
 
-# :_start ; (0x0600078)
+# :_start ; (0x0600054)
     13 0A 00 00    # RD_S4 MV                 ; Initialize register
-    03 36 01 01    # RD_A2 RS1_SP !16 LD      ; Input file name
+    03 26 81 00    # RD_A2 RS1_SP !8 LW       ; Input file name
 
     ; Open input file and store FD in s2
     93 08 80 03    # RD_A7 !56 ADDI           ; sys_openat
@@ -83,7 +85,7 @@ F3 00              ## e_machine Indicating RISC-V
 
     ; Open output file and store the FD in s3
     13 05 C0 F9    # RD_A0 !-100 ADDI         ; AT_FDCWD
-    83 35 81 01    # RD_A1 RS1_SP !24 LD      ; Output file (argument 3)
+    83 25 C1 00    # RD_A1 RS1_SP !12 LW      ; Output file (argument 3)
     13 06 10 24    # RD_A2 !577 ADDI          ; octal 00001101
     ; O_TRUNC   00001000
     ; O_CREAT   00000100
@@ -97,7 +99,7 @@ F3 00              ## e_machine Indicating RISC-V
     73 00 00 00    # ECALL
     93 09 05 00    # RD_S3 RS1_A0 MV          ; Save fd in for later
 
-# :next_byte ; (0x06000B0)
+# :next_byte ; (0x060008C)
     93 08 F0 03    # RD_A7 !63 ADDI           ; sys_read
     13 05 09 00    # RD_A0 RS1_S2 MV          ; File descriptor
     93 05 01 00    # RD_A1 RS1_SP MV          ; Buffer
@@ -118,7 +120,7 @@ F3 00              ## e_machine Indicating RISC-V
                    # +8B
     6F 00 80 02    # $not_comment JAL
                    # +40B
-# :loop ; (0x06000E0)
+# :loop ; (0x06000BC)
         13 05 09 00    # RD_A0 RS1_S2 MV   ; File descriptor
         73 00 00 00    # ECALL             ; sys_read
 
@@ -135,7 +137,7 @@ F3 00              ## e_machine Indicating RISC-V
         E3 0A 55 FA     # RS1_A0 RS2_T0 @next_byte BEQ ; a0 eq to \r
                         # -76B
     6F F0 1F FE    # $loop JAL
-# :not_comment ; (0x0600104)
+# :not_comment ; (0x06000E0)
     ; Check if it's a hex character:
     ; in the case it's not, ignores and reads next byte
     03 05 01 00    # RD_A0 RS1_SP LB
@@ -150,7 +152,7 @@ F3 00              ## e_machine Indicating RISC-V
     13 05 05 FD    # RD_A0 RS1_A0 !-48 ADDI
     6F 00 00 03    # $hex_read JAL
                    # +48B
-# :uppercase_alpha ; (0x0600120)
+# :uppercase_alpha ; (0x06000FC)
     ; Is it between 'A' and 'F'?
     93 02 10 04    # RD_T0 !65 ADDI           ; 'A' character
     63 4A 55 00    # RS1_A0 RS2_T0 @lowercase_alpha BLT
@@ -170,7 +172,7 @@ F3 00              ## e_machine Indicating RISC-V
     E3 C6 A2 F6    # RS1_T0 RS2_A0 @next_byte BLT ; Not hex, continue reading
                    # -148B
     13 05 95 FA    # RD_A0 RS1_A0 !-87 ADDI
-# :hex_read ; (0x060014C)
+# :hex_read ; (0x0600128)
     ; END check hex -- leaves the half byte in a0
 
     63 18 0A 00    # RS1_S4 @combine BNEZ     ; if toggle != 0 -> combine
@@ -182,7 +184,7 @@ F3 00              ## e_machine Indicating RISC-V
     6F F0 9F F5    # $next_byte JAL           ; Read next byte
                    # -168B
 
-# :combine ; (0x060015C)
+# :combine ; (0x0600138)
     ; Combine half bytes
     93 95 4A 00    # RD_A1 RS1_S5 RS2_X4 SLLI ; Shift logical left 4 times
     33 05 B5 00    # RD_A0 RS1_A0 RS2_A1 ADD  ; Combine two half bytes
@@ -203,10 +205,10 @@ F3 00              ## e_machine Indicating RISC-V
     6F F0 1F F3    # $next_byte JAL
                    # -208B
 
-# :terminate  ; (0x600184)
+# :terminate  ; (0x600160)
     ; Terminate program with 0 return code
     93 08 D0 05    # RD_A7 !93 ADDI           ; sys_exit
     73 00 00 00    # ECALL
 # PROGRAM END
 
-# :ELF_end ; (0x60018C)
+# :ELF_end ; (0x600168)

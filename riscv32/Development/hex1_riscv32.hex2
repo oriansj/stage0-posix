@@ -19,7 +19,7 @@
 :ELF_base
 7F 45 4C 46        ## e_ident[EI_MAG0-3] ELF's magic number
 
-02                 ## e_ident[EI_CLASS] Indicating 64 bit
+01                 ## e_ident[EI_CLASS] Indicating 32 bit
 01                 ## e_ident[EI_DATA] Indicating little endianness
 01                 ## e_ident[EI_VERSION] Indicating original elf
 
@@ -31,14 +31,14 @@
 F3 00              ## e_machine Indicating RISC-V
 01 00 00 00        ## e_version Indicating original elf
 
-&_start 00 00 00 00 ## e_entry Address of the entry point (Number of bytes this header is + Base Address)
-%ELF_program_headers>ELF_base 00 00 00 00 ## e_phoff Address of program header table
-00 00 00 00 00 00 00 00 ## e_shoff Address of section header table
+&_start            ## e_entry Address of the entry point (Number of bytes this header is + Base Address)
+%ELF_program_headers>ELF_base ## e_phoff Address of program header table
+00 00 00 00 ## e_shoff Address of section header table
 
 00 00 00 00        ## e_flags
-40 00              ## e_ehsize Indicating our 64 Byte header
+34 00              ## e_ehsize Indicating our 64 Byte header
 
-38 00              ## e_phentsize size of a program header table
+20 00              ## e_phentsize size of a program header table
 01 00              ## e_phnum number of entries in program table
 
 00 00              ## e_shentsize size of a section header table
@@ -48,17 +48,17 @@ F3 00              ## e_machine Indicating RISC-V
 
 ## Program Header
 :ELF_program_headers
-01 00 00 00             ## p_type
-07 00 00 00             ## ph_flags: PF-X|PF-W|PF-R = 7
-00 00 00 00 00 00 00 00 ## p_offset
+01 00 00 00        ## p_type
+07 00 00 00        ## ph_flags: PF-X|PF-W|PF-R = 7
+00 00 00 00        ## p_offset
 
-&ELF_base 00 00 00 00 ## p_vaddr
-&ELF_base 00 00 00 00 ## p_physaddr
+&ELF_base ## p_vaddr
+&ELF_base ## p_physaddr
 
-%ELF_end>ELF_base 00 00 00 00 ## p_filesz
-%ELF_end>ELF_base 00 00 00 00 ## p_memsz
+%ELF_end>ELF_base  ## p_filesz
+%ELF_end>ELF_base  ## p_memsz
 
-01 00 00 00 00 00 00 00 ## Required alignment
+01 00 00 00        ## Required alignment
 
 :ELF_text
 ; Register use:
@@ -73,7 +73,7 @@ F3 00              ## e_machine Indicating RISC-V
 ; Our main function
 :_start
 
-    03 36 01 01     # RD_A2 RS1_SP !16 LD               ; Input file name
+    03 26 81 00     # RD_A2 RS1_SP !8 LW                ; Input file name
 
     ; Initialize globals
     13 0A F0 FF     # RD_S4 !-1 ADDI                    ; Toggle
@@ -94,14 +94,14 @@ F3 00              ## e_machine Indicating RISC-V
 
     ; If we only have 2 arguments, don't use the third (it's not set)
     93 02 20 00     # RD_T0 !2 ADDI
-    03 35 01 00     # RD_A0 RS1_SP LD                   ; Get number of the args
+    03 25 01 00     # RD_A0 RS1_SP LW                   ; Get number of the args
     @Fail 63 40 55 00 # RS1_A0 RS2_T0 @Fail BLT         ; No input file provided
     @after_open 63 00 55 00 # RS1_A0 RS2_T0 @after_open BEQ ; No output file provided. Use stdout
 
     ; Open output file and store the FD in s3
     93 08 80 03     # RD_A7 !56 ADDI                    ; sys_openat
     13 05 C0 F9     # RD_A0 !-100 ADDI                  ; AT_FDCWD
-    83 35 81 01     # RD_A1 RS1_SP !24 LD               ; Output file (argument 3)
+    83 25 C1 00     # RD_A1 RS1_SP !12 LW               ; Output file (argument 3)
     13 06 10 24     # RD_A2 !00001101 ADDI              ; decimal 577
     ; O_TRUNC   00001000
     ; O_CREAT   00000100
@@ -136,8 +136,8 @@ F3 00              ## e_machine Indicating RISC-V
 
 ; First pass loop to determine addresses of labels
 :First_pass
-    13 01 81 FF     # RD_SP RS1_SP !-8 ADDI             ; Allocate stack
-    23 30 11 00     # RS1_SP RS2_RA SD                  ; protect ra
+    13 01 C1 FF     # RD_SP RS1_SP !-4 ADDI             ; Allocate stack
+    23 20 11 00     # RS1_SP RS2_RA SW                  ; protect ra
 
 :First_pass_loop
     $Read_byte EF 00 00 00 # RD_RA $Read_byte JAL       ; Get another byte
@@ -182,13 +182,13 @@ F3 00              ## e_machine Indicating RISC-V
     $First_pass_loop 6F 00 00 00 # $First_pass_loop JAL ; Loop again
 
 :First_pass_done
-    83 30 01 00     # RD_RA RS1_SP LD                   ; restore ra
-    13 01 81 00     # RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    83 20 01 00     # RD_RA RS1_SP LW                   ; restore ra
+    13 01 41 00     # RD_SP RS1_SP !4 ADDI              ; deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
 :Second_pass
-    13 01 81 FF     # RD_SP RS1_SP !-8 ADDI             ; Allocate stack
-    23 30 11 00     # RS1_SP RS2_RA SD                  ; protect ra
+    13 01 C1 FF     # RD_SP RS1_SP !-4 ADDI             ; Allocate stack
+    23 20 11 00     # RS1_SP RS2_RA SW                  ; protect ra
 
 :Second_pass_loop
     $Read_byte EF 00 00 00 # RD_RA $Read_byte JAL       ; Read another byte
@@ -234,7 +234,7 @@ F3 00              ## e_machine Indicating RISC-V
 :UpdateShiftRegister
     93 05 05 00     # RD_A1 RS1_A0 MV                   ; Store label prefix
     $Get_table_target EF 00 00 00 # RD_RA $Get_table_target JAL ; Get target
-    03 35 05 00     # RD_A0 RS1_A0 LD                   ; Dereference pointer
+    03 25 05 00     # RD_A0 RS1_A0 LW                   ; Dereference pointer
     33 05 65 41     # RD_A0 RS1_A0 RS2_S6 SUB           ; target - ip
 
     ; Check for !
@@ -260,7 +260,7 @@ F3 00              ## e_machine Indicating RISC-V
     13 05 45 00     # RD_A0 RS1_A0 !4 ADDI              ; add 4 due to this being 2nd part of AUIPC combo
 
     37 13 00 00     # RD_T1 ~0xFFF LUI                  ; load higher bits
-    1B 03 F3 FF     # RD_T1 RS1_T1 !0xFFF ADDIW
+    13 03 F3 FF     # RD_T1 RS1_T1 !0xFFF ADDI
     33 73 65 00     # RD_T1 RS1_A0 RS2_T1 AND           ; (value & 0xfff)
     93 1B 43 01     # RD_S7 RS1_T1 RS2_X20 SLLI         ; tempword = (value & 0xfff) << 20
     33 4C 7C 01     # RD_S8 RS1_S8 RS2_S7 XOR           ; shiftregister = shiftregister ^ tempword
@@ -285,7 +285,7 @@ F3 00              ## e_machine Indicating RISC-V
     B3 E2 62 00     # RD_T0 RS1_T0 RS2_T1 OR            ; logical or with the previous expression
 
     37 13 00 00     # RD_T1 ~0x800 LUI                  ; load higher bits
-    1B 03 03 80     # RD_T1 RS1_T1 !0x800 ADDIW
+    13 03 03 80     # RD_T1 RS1_T1 !0x800 ADDI
     33 73 65 00     # RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x800
     13 53 43 00     # RD_T1 RS1_T1 RS2_X4 SRLI          ; (value & 0x800) >> 4
     B3 E2 62 00     # RD_T0 RS1_T0 RS2_T1 OR            ; logical or with the previous expression
@@ -312,7 +312,7 @@ F3 00              ## e_machine Indicating RISC-V
     93 12 43 01     # RD_T0 RS1_T1 RS2_X20 SLLI         ; tempword = (value & 0x7fe) << 20
 
     37 13 00 00     # RD_T1 ~0x800 LUI                  ; load higher bits
-    1B 03 03 80     # RD_T1 RS1_T1 !0x800 ADDIW
+    13 03 03 80     # RD_T1 RS1_T1 !0x800 ADDI
     33 73 65 00     # RD_T1 RS1_A0 RS2_T1 AND           ; value & 0x800
     13 13 93 00     # RD_T1 RS1_T1 RS2_X9 SLLI          ; (value & 0x800) << (20 - 11)
     B3 E2 62 00     # RD_T0 RS1_T0 RS2_T1 OR            ; logical or with the previous expression
@@ -335,13 +335,13 @@ F3 00              ## e_machine Indicating RISC-V
     ; if value is 0x800 or more we have to add 11-th bit (0x1000) to compensate for signed extension
 
     B7 12 00 00     # RD_T0 ~0x800 LUI                  ; load higher bits
-    9B 82 02 80     # RD_T0 RS1_T0 !0x800 ADDIW
+    93 82 02 80     # RD_T0 RS1_T0 !0x800 ADDI
     37 13 00 00     # RD_T1 ~0xFFF LUI                  ; load higher bits
-    1B 03 F3 FF     # RD_T1 RS1_T1 !0xFFF ADDIW
+    13 03 F3 FF     # RD_T1 RS1_T1 !0xFFF ADDI
 
     ; We are outside 31-bit that ~ can normally load
     B7 03 10 00     # RD_T2 ~0x100000 LUI               ; load 0xfffff000
-    9B 83 F3 FF     # RD_T2 RS1_T2 !-1 ADDIW            ; load 0xfffff000
+    93 83 F3 FF     # RD_T2 RS1_T2 !-1 ADDI             ; load 0xfffff000
     93 93 C3 00     # RD_T2 RS1_T2 RS2_X12 SLLI         ; load 0xfffff000
     33 73 65 00     # RD_T1 RS1_A0 RS2_T1 AND           ; value & 0xfff
     B3 7B 75 00     # RD_S7 RS1_A0 RS2_T2 AND           ; value & 0xfffff000
@@ -349,7 +349,7 @@ F3 00              ## e_machine Indicating RISC-V
 
     # Deal with sign extension: add 0x1000
     B7 12 00 00     # RD_T0 ~0x1000 LUI                 ; load higher bits
-    BB 8B 72 01     # RD_S7 RS1_T0 RS2_S7 ADDW          ; (value & 0xfffff000) + 0x1000
+    B3 8B 72 01     # RD_S7 RS1_T0 RS2_S7 ADD           ; (value & 0xfffff000) + 0x1000
 
 :UpdateShiftRegister_U_small
     33 4C 7C 01     # RD_S8 RS1_S8 RS2_S7 XOR           ; shiftregister = shiftregister ^ tempword
@@ -357,8 +357,8 @@ F3 00              ## e_machine Indicating RISC-V
     $Second_pass_loop 6F 00 00 00 # $Second_pass_loop JAL ; continue looping
 
 :Second_pass_done
-    83 30 01 00     # RD_RA RS1_SP LD                   ; restore ra
-    13 01 81 00     # RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    83 20 01 00     # RD_RA RS1_SP LW                   ; restore ra
+    13 01 41 00     # RD_SP RS1_SP !4 ADDI              ; deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
 
@@ -368,8 +368,8 @@ F3 00              ## e_machine Indicating RISC-V
 ;   bool write in a1
 ; Does not return anything
 :DoByte
-    13 01 81 FF     # RD_SP RS1_SP !-8 ADDI             ; Allocate stack
-    23 30 11 00     # RS1_SP RS2_RA SD                  ; protect ra
+    13 01 C1 FF     # RD_SP RS1_SP !-4 ADDI             ; Allocate stack
+    23 20 11 00     # RS1_SP RS2_RA SW                  ; protect ra
 
     $hex EF 00 00 00 # RD_RA $hex JAL                   ; Process hex, store it in a6
 
@@ -405,8 +405,8 @@ F3 00              ## e_machine Indicating RISC-V
     13 4A FA FF     # RD_S4 RS1_S4 NOT                  ; Flip the toggle
 
 :DoByte_Done
-    83 30 01 00     # RD_RA RS1_SP LD                   ; restore ra
-    13 01 81 00     # RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    83 20 01 00     # RD_RA RS1_SP LW                   ; restore ra
+    13 01 41 00     # RD_SP RS1_SP !4 ADDI              ; deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
 ; Convert ASCII hex characters into binary representation, e.g. 'a' -> 0xA
@@ -415,9 +415,9 @@ F3 00              ## e_machine Indicating RISC-V
 ; Returns:
 ;   a6 with character's hex value.
 :hex
-    13 01 01 FF     # RD_SP RS1_SP !-16 ADDI            ; Allocate stack
-    23 30 11 00     # RS1_SP RS2_RA SD                  ; protect ra
-    23 34 B1 00     # RS1_SP RS2_A1 @8 SD               ; protect a1
+    13 01 81 FF     # RD_SP RS1_SP !-8 ADDI             ; Allocate stack
+    23 20 11 00     # RS1_SP RS2_RA SW                  ; protect ra
+    23 22 B1 00     # RS1_SP RS2_A1 @4 SW               ; protect a1
 
     ; Deal with EOF
     13 03 C0 FF     # RD_T1 !-4 ADDI
@@ -482,20 +482,19 @@ F3 00              ## e_machine Indicating RISC-V
 :ascii_comment_cr
     13 08 F0 FF     # RD_A6 !-1 ADDI                    ; Return -1
 :hex_return
-    83 30 01 00     # RD_RA RS1_SP LD                   ; restore ra
-    83 35 81 00     # RD_A1 RS1_SP !8 LD                ; restore a1
-    13 01 01 01     # RD_SP RS1_SP !16 ADDI             ; Deallocate stack
+    83 20 01 00     # RD_RA RS1_SP LW                   ; restore ra
+    83 25 41 00     # RD_A1 RS1_SP !4 LW                ; restore a1
+    13 01 81 00     # RD_SP RS1_SP !8 ADDI              ; Deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
 ; Read byte into a0
 :Read_byte
-    13 01 01 FF     # RD_SP RS1_SP !-16 ADDI            ; Allocate stack
-    23 34 B1 00     # RS1_SP RS2_A1 @8 SD               ; protect a1
+    13 01 81 FF     # RD_SP RS1_SP !-8 ADDI             ; Allocate stack
+    23 22 B1 00     # RS1_SP RS2_A1 @4 SW               ; protect a1
 
     93 08 F0 03     # RD_A7 !63 ADDI                    ; sys_read
     13 05 09 00     # RD_A0 RS1_S2 MV                   ; File descriptor
     93 05 01 00     # RD_A1 RS1_SP MV                   ; Get stack address for buffer
-    13 00 00 00     # NOP                               ; no-op
     13 06 10 00     # RD_A2 !1 ADDI                     ; Size of what we want to read
     73 00 00 00     # ECALL                             ; syscall
 
@@ -507,46 +506,46 @@ F3 00              ## e_machine Indicating RISC-V
 :Read_byte_1
     13 05 C0 FF     # RD_A0 !-4 ADDI                    ; Put EOF in a0
 :Read_byte_done
-    83 35 81 00     # RD_A1 RS1_SP !8 LD                ; restore a1
-    13 01 01 01     # RD_SP RS1_SP !16 ADDI             ; Deallocate stack
+    83 25 41 00     # RD_A1 RS1_SP !4 LW                ; restore a1
+    13 01 81 00     # RD_SP RS1_SP !16 ADDI             ; Deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
 ; Reads a byte and calculates table address
 ; Returns a pointer in a0
 :Get_table_target
-    13 01 81 FF     # RD_SP RS1_SP !-8 ADDI             ; Allocate stack
-    23 30 11 00     # RS1_SP RS2_RA SD                  ; protect ra
+    13 01 C1 FF     # RD_SP RS1_SP !-4 ADDI             ; Allocate stack
+    23 20 11 00     # RS1_SP RS2_RA SW                  ; protect ra
 
     $Read_byte EF 00 00 00 # RD_RA $Read_byte JAL       ; Get single char label
-    13 15 35 00     # RD_A0 RS1_A0 RS2_X3 SLLI          ; Each label in table takes 8 bytes to store
+    13 15 25 00     # RD_A0 RS1_A0 RS2_X2 SLLI          ; Each label in table takes 4 bytes to store
     97 02 00 00     # RD_T0 ~table AUIPC                ; Load address of table
     !table 93 82 02 00 # RD_T0 RS1_T0 !table ADDI       ; into register t0
     33 05 55 00     # RD_A0 RS1_A0 RS2_T0 ADD           ; Calculate offset
 
-    83 30 01 00     # RD_RA RS1_SP LD                   ; restore ra
-    13 01 81 00     # RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    83 20 01 00     # RD_RA RS1_SP LW                   ; restore ra
+    13 01 41 00     # RD_SP RS1_SP !4 ADDI              ; deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
 :StoreLabel
-    13 01 81 FF     # RD_SP RS1_SP !-8 ADDI             ; Allocate stack
-    23 30 11 00     # RS1_SP RS2_RA SD                  ; protect ra
+    13 01 C1 FF     # RD_SP RS1_SP !-4 ADDI             ; Allocate stack
+    23 20 11 00     # RS1_SP RS2_RA SW                  ; protect ra
 
     $Get_table_target EF 00 00 00 # RD_RA $Get_table_target JAL
-    23 30 65 01     # RS1_A0 RS2_S6 SD                  ; Store ip into table target
+    23 20 65 01     # RS1_A0 RS2_S6 SW                  ; Store ip into table target
 
-    83 30 01 00     # RD_RA RS1_SP LD                   ; restore ra
-    13 01 81 00     # RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    83 20 01 00     # RD_RA RS1_SP LW                   ; restore ra
+    13 01 41 00     # RD_SP RS1_SP !4 ADDI              ; deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
 ; fputc function
 ; Receives CHAR in a0
 ; Writes and returns number of bytes written in a0
 :fputc
-    13 01 01 FE     # RD_SP RS1_SP !-32 ADDI            ; allocate stack
-    23 30 A1 00     # RS1_SP RS2_A0 SD                  ; protect a0
-    23 34 11 00     # RS1_SP RS2_RA @8 SD               ; protect ra
-    23 38 B1 00     # RS1_SP RS2_A1 @16 SD              ; protect a1
-    23 3C C1 00     # RS1_SP RS2_A2 @24 SD              ; protect a2
+    13 01 01 FF     # RD_SP RS1_SP !-16 ADDI            ; allocate stack
+    23 20 A1 00     # RS1_SP RS2_A0 SW                  ; protect a0
+    23 22 11 00     # RS1_SP RS2_RA @4 SW               ; protect ra
+    23 24 B1 00     # RS1_SP RS2_A1 @8 SW               ; protect a1
+    23 26 C1 00     # RS1_SP RS2_A2 @12 SW              ; protect a2
 
     93 08 00 04     # RD_A7 !64 ADDI                    ; sys_write
     13 85 09 00     # RD_A0 RS1_S3 MV                   ; write to output
@@ -554,10 +553,10 @@ F3 00              ## e_machine Indicating RISC-V
     13 06 10 00     # RD_A2 !1 ADDI                     ; write 1 character
     73 00 00 00     # ECALL                             ; syscall
 
-    83 30 81 00     # RD_RA RS1_SP !8 LD                ; restore ra
-    83 35 01 01     # RD_A1 RS1_SP !16 LD               ; restore a1
-    03 36 81 01     # RD_A2 RS1_SP !24 LD               ; restore a2
-    13 01 01 02     # RD_SP RS1_SP !32 ADDI             ; Deallocate stack
+    83 20 41 00     # RD_RA RS1_SP !4 LW                ; restore ra
+    83 25 81 00     # RD_A1 RS1_SP !8 LW                ; restore a1
+    03 26 C1 00     # RD_A2 RS1_SP !12 LW               ; restore a2
+    13 01 01 01     # RD_SP RS1_SP !16 ADDI             ; Deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
 :Done

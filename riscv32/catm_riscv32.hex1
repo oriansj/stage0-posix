@@ -17,54 +17,50 @@
 
 ## ELF Header
 #:ELF_base
-7F 45 4C 46        ## e_ident[EI_MAG0-3] ELF's magic number
+7F 45 4C 46        # e_ident[EI_MAG0-3] ELF's magic number
 
-02                 ## e_ident[EI_CLASS] Indicating 64 bit
-01                 ## e_ident[EI_DATA] Indicating little endianness
-01                 ## e_ident[EI_VERSION] Indicating original elf
+01                 # e_ident[EI_CLASS] Indicating 32 bit
+01                 # e_ident[EI_DATA] Indicating little endianness
+01                 # e_ident[EI_VERSION] Indicating original elf
 
-03                 ## e_ident[EI_OSABI] Set at 3 for Linux
-00                 ## e_ident[EI_ABIVERSION] Ignored for Statically linked executables
+03                 # e_ident[EI_OSABI] Set at 3 for Linux
+00                 # e_ident[EI_ABIVERSION] Ignored for Statically linked executables
 
-00 00 00 00 00 00 00 ## e_ident[EI_PAD]
-02 00              ## e_type Indicating Executable
-F3 00              ## e_machine Indicating RISC-V
-01 00 00 00        ## e_version Indicating original elf
+00 00 00 00 00 00 00 # e_ident[EI_PAD]
+02 00              # e_type Indicating Executable
+F3 00              # e_machine Indicating RISC-V
+01 00 00 00        # e_version Indicating original elf
 
-78 00 60 00 00 00 00 00 ## e_entry Address of the entry point (Number of bytes this header is + Base Address)
-40 00 00 00 00 00 00 00 ## e_phoff Address of program header table
-00 00 00 00 00 00 00 00 ## e_shoff Address of section header table
+54 00 60 00        # e_entry Address of the entry point
+34 00 00 00        # e_phoff Address of program header table
+00 00 00 00        # e_shoff Address of section header table
 
-00 00 00 00        ## e_flags
-40 00              ## e_ehsize Indicating our 64 Byte header
+00 00 00 00        # e_flags
 
-38 00              ## e_phentsize size of a program header table
-01 00              ## e_phnum number of entries in program table
+34 00              # e_ehsize Indicating our 52 Byte header
 
-00 00              ## e_shentsize size of a section header table
-00 00              ## e_shnum number of entries in section table
+20 00              # e_phentsize size of a program header table
+01 00              # e_phnum number of entries in program table
 
-00 00              ## e_shstrndx index of the section names
+00 00              # e_shentsize size of a section header table
+00 00              # e_shnum number of entries in section table
+
+00 00              # e_shstrndx index of the section names
 
 ## Program Header
 #:ELF_program_headers
-01 00 00 00             ## p_type
-07 00 00 00             ## Flags
-00 00 00 00 00 00 00 00 ## p_offset
+#:ELF_program_header__text
+01 00 00 00        # ph_type: PT-LOAD = 1
+00 00 00 00        # ph_offset
 
-00 00 60 00 00 00 00 00 ## p_vaddr
-00 00 60 00 00 00 00 00 ## p_physaddr
+00 00 60 00        # ph_vaddr
+00 00 60 00        # ph_physaddr
 
-18 01 00 00 00 00 00 00 ## p_filesz
-18 01 00 00 00 00 00 00 ## p_memsz
+F4 00 00 00        # ph_filesz
+F4 00 00 00        # ph_memsz
 
-01 00 00 00 00 00 00 00 ## Required alignment
-
-#:ELF_text
-
-; Simply jump to _start
-; Our main function
-#:_start
+07 00 00 00        # ph_flags: PF-X|PF-W|PF-R = 7
+01 00 00 00        # ph_align
 
 # Register use:
 # s1: output file descriptor
@@ -75,8 +71,8 @@ F3 00              ## e_machine Indicating RISC-V
 # Open output file and store the FD in s1
     93 08 80 03     # RD_A7 !56 ADDI                    ; sys_openat
     13 05 C0 F9     # RD_A0 !-100 ADDI                  ; AT_FDCWD
-    13 01 01 01     # RD_SP RS1_SP !16 ADDI             ; Prepare stack for reading output file
-    83 35 01 00     # RD_A1 RS1_SP LD                   ; Output file (argument 1)
+    13 01 81 00     # RD_SP RS1_SP !8 ADDI              ; Prepare stack for reading output file
+    83 25 01 00     # RD_A1 RS1_SP LW                   ; Output file (argument 1)
     13 06 10 24     # RD_A2 !577 ADDI                   ; Prepare file as O_WRONLY|O_CREAT|O_TRUNC
     93 06 00 18     # RD_A3 !384 ADDI                   ; Prepare file as RW for owner only (600 in octal)
     73 00 00 00     # ECALL                             ; syscall
@@ -93,8 +89,8 @@ F3 00              ## e_machine Indicating RISC-V
     73 00 00 00     # ECALL                             ; syscall
 
 :c #:core
-    13 01 81 00     # RD_SP RS1_SP !8 ADDI              ; Move stack pointer to next input file
-    83 35 01 00     # RD_A1 RS1_SP LD                   ; Get the input file name
+    13 01 41 00     # RD_SP RS1_SP !4 ADDI              ; Move stack pointer to next input file
+    83 25 01 00     # RD_A1 RS1_SP LW                   ; Get the input file name
     @D 63 80 05 00  # RS1_A1 @Done BEQ                  ; This was the last file, we are done
 
     93 08 80 03     # RD_A7 !56 ADDI                    ; sys_openat

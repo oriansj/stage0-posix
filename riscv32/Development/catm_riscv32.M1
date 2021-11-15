@@ -16,7 +16,7 @@
 
 DEFINE ADD   33000000
 DEFINE ADDI  13000000
-DEFINE LD    03300000
+DEFINE LW    03200000
 DEFINE JAL   6F000000
 DEFINE ECALL 73000000
 DEFINE BEQ   63000000
@@ -59,8 +59,8 @@ DEFINE RS2_A2  .0000C000
 # Open output file and store the FD in s1
     RD_A7 !56 ADDI                    ; sys_openat
     RD_A0 !-100 ADDI                  ; AT_FDCWD
-    RD_SP RS1_SP !16 ADDI             ; Prepare stack for reading output file
-    RD_A1 RS1_SP LD                   ; Output file (argument 1)
+    RD_SP RS1_SP !8 ADDI              ; Prepare stack for reading output file
+    RD_A1 RS1_SP LW                   ; Output file (argument 1)
     RD_A2 !577 ADDI                   ; Prepare file as O_WRONLY|O_CREAT|O_TRUNC
     RD_A3 !384 ADDI                   ; Prepare file as RW for owner only (600 in octal)
     ECALL                             ; syscall
@@ -77,8 +77,8 @@ DEFINE RS2_A2  .0000C000
     ECALL                             ; syscall
 
 :core
-    RD_SP RS1_SP !8 ADDI              ; Move stack pointer to next input file
-    RD_A1 RS1_SP LD                   ; Get the input file name
+    RD_SP RS1_SP !4 ADDI              ; Move stack pointer to next input file
+    RD_A1 RS1_SP LW                   ; Get the input file name
     RS1_A1 @Done BEQ                  ; This was the last file, we are done
 
     RD_A7 !56 ADDI                    ; sys_openat

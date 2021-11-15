@@ -1,0 +1,8 @@
+# These files are generated when the build runs
+# and should never be included
+
+# The final binaries
+bin/*
+
+# All of the build artifacts
+artifact/*

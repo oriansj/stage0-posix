@@ -430,6 +430,8 @@
     RS1_SP RS2_A2 @24 SD              ; protect a2
 
 :Line_Macro_Loop
+    RS1_A0 @Line_Macro_done BEQZ      ; Check if we are done
+
     RD_A1 RS1_A0 !8 LD                ; I->TYPE
     RD_T0 !1 ADDI                     ; t0 = MACRO
     RS1_A1 RS2_T0 @Line_Macro_Next BNE ; Move on unless I->TYPE == MACRO
@@ -445,6 +447,7 @@
     RD_A0 RS1_A0 LD                   ; I->NEXT
     RS1_A0 @Line_Macro_Loop BNEZ      ; Check if we are done
 
+:Line_Macro_done
     RD_RA RS1_SP LD                   ; restore ra
     RD_A0 RS1_SP !8 LD                ; restore a0
     RD_A1 RS1_SP !16 LD               ; restore a1
@@ -464,6 +467,8 @@
     RS1_SP RS2_A2 @24 SD              ; protect a2
     RS1_SP RS2_A3 @32 SD              ; protect a3
 
+    RS1_A0 @Set_Expression_done BEQZ  ; Check if we are done
+
     RD_A3 RS1_A0 MV                   ; Set I
 :Set_Expression_Loop
     RD_A0 RS1_A3 !8 LD                ; I->TYPE
@@ -481,6 +486,7 @@
     RD_A3 RS1_A3 LD                   ; I = I->NEXT
     RS1_A3 @Set_Expression_Loop BNEZ  ; Check if we are done
 
+:Set_Expression_done
     RD_RA RS1_SP LD                   ; restore ra
     RD_A0 RS1_SP !8 LD                ; restore a0
     RD_A1 RS1_SP !16 LD               ; restore a1

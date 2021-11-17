@@ -676,6 +676,8 @@
     .00000100 .0000C000 .000C0000 23300000
 
 :Line_Macro_Loop
+    # RS1_A0 @Line_Macro_done BEQZ      ; Check if we are done
+    .00000500 @Line_Macro_done 63000000
     # RD_A1 RS1_A0 !8 LD                ; I->TYPE
     .80050000 .00000500 .00008000 03300000
     # RD_T0 !1 ADDI                     ; t0 = MACRO
@@ -701,6 +703,7 @@
     # RS1_A0 @Line_Macro_Loop BNEZ      ; Check if we are done
     .00000500 @Line_Macro_Loop 63100000
 
+:Line_Macro_done
     # RD_RA RS1_SP LD                   ; restore ra
     .80000000 .00000100 03300000
     # RD_A0 RS1_SP !8 LD                ; restore a0
@@ -733,6 +736,9 @@
     # RS1_SP RS2_A3 @32 SD              ; protect a3
     .00000100 .0000D000 .00000002 23300000
 
+    # RS1_A0 @Set_Expression_done BEQZ  ; Check if we are done
+    .00000500 @Set_Expression_done 63000000
+
     # RD_A3 RS1_A0 MV                   ; Set I
     .80060000 .00000500 13000000
 :Set_Expression_Loop
@@ -759,6 +765,8 @@
     .80060000 .00800600 03300000
     # RS1_A3 @Set_Expression_Loop BNEZ  ; Check if we are done
     .00800600 @Set_Expression_Loop 63100000
+
+:Set_Expression_done
     # RD_RA RS1_SP LD                   ; restore ra
     .80000000 .00000100 03300000
     # RD_A0 RS1_SP !8 LD                ; restore a0

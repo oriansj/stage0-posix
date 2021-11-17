@@ -429,6 +429,7 @@ Line_Macro:
     sd a2, 24(sp)                     # protect a2
 
 Line_Macro_Loop:
+    beqz a0, Line_Macro_done          # Check if we are done
     ld a1, 8(a0)                      # I->TYPE
     li t0, 1                          # t0 = MACRO
     bne a1, t0, Line_Macro_Next       # Move on unless I->TYPE == MACRO
@@ -444,12 +445,14 @@ Line_Macro_Next:
     ld a0, (a0)                       # I->NEXT
     bnez a0, Line_Macro_Loop          # Check if we are done
 
+Line_Macro_done:
     ld ra, 0(sp)                      # restore ra
     ld a0, 8(sp)                      # restore a0
     ld a1, 16(sp)                     # restore a1
     ld a2, 24(sp)                     # restore a2
     addi sp, sp, 32                   # deallocate stack
     ret                               # return
+
 
 # Set_Expression function
 # Receives List in a0, CHAR* in a1 and CHAR* in a2
@@ -462,6 +465,8 @@ Set_Expression:
     sd a1, 16(sp)                     # protect a1
     sd a2, 24(sp)                     # protect a2
     sd a3, 32(sp)                     # protect a3
+
+    beqz a0, Set_Expression_done      # Check if we are done
 
     mv a3, a0                         # Set I
 Set_Expression_Loop:
@@ -480,6 +485,7 @@ Set_Expression_Next:
     ld a3, (a3)                       # I = I->NEXT
     bnez a3, Set_Expression_Loop      # Check if we are done
 
+Set_Expression_done:
     ld ra, 0(sp)                      # restore ra
     ld a0, 8(sp)                      # restore a0
     ld a1, 16(sp)                     # restore a1
@@ -487,6 +493,7 @@ Set_Expression_Next:
     ld a3, 32(sp)                     # restore a3
     addi sp, sp, 40                   # deallocate stack
     ret                               # return
+
 
 # Process_String function
 # Receives List in a0

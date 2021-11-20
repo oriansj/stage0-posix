@@ -21,7 +21,7 @@
 ; s2: input fd
 ; s3: output fd
 ; s4: C, global_token
-; s5: string_index, global_constant_list
+; s5: string_index, global_constant_listcollect_arguments
 ; s6: Token, global_symbol_list
 ; s7: globals_list
 ; s8: global_function_list
@@ -29,28 +29,28 @@
 ; s10: current_count
 ; s11: function
 
-; Struct TYPE format: (size 56)
+; Struct TYPE format: (size 28)
 ; NEXT => 0
-; SIZE => 8
-; OFFSET => 16
-; INDIRECT => 24
-; MEMBERS => 32
-; TYPE => 40
-; NAME => 48
+; SIZE => 4
+; OFFSET => 8
+; INDIRECT => 12
+; MEMBERS => 16
+; TYPE => 20
+; NAME => 24
 
-; Struct TOKEN_LIST format: (size 40)
+; Struct TOKEN_LIST format: (size 20)
 ; NEXT => 0
-; LOCALS/PREV => 8
-; S => 16
-; TYPE => 24
-; ARGS/DEPTH => 32
+; LOCALS/PREV => 4
+; S => 8
+; TYPE => 12
+; ARGS/DEPTH => 16
 
 :_start
     RD_S7 MV                          ; Initialize globals_list
     RD_S8 MV                          ; Initialize global_function_list
     RD_S9 MV                          ; Initialize update_list
 
-    RD_A2 RS1_SP !16 LD               ; Input file name
+    RD_A2 RS1_SP !8 LW                ; Input file name
 
     ; Open input file and store FD in s2
     RD_A7 !56 ADDI                    ; sys_openat
@@ -66,14 +66,14 @@
 
     ; If we only have 2 arguments, don't use the third (it's not set)
     RD_T0 !2 ADDI
-    RD_A0 RS1_SP LD                   ; Get number of the args
+    RD_A0 RS1_SP LW                   ; Get number of the args
     RS1_A0 RS2_T0 @Fail BLT           ; No input file provided
     RS1_A0 RS2_T0 @after_open BEQ     ; No output file provided. Use stdout
 
     ; Open output file and store the FD in s3
     RD_A7 !56 ADDI                    ; sys_openat
     RD_A0 !-100 ADDI                  ; AT_FDCWD
-    RD_A1 RS1_SP !24 LD               ; Output file (argument 3)
+    RD_A1 RS1_SP !12 LW               ; Output file (argument 3)
     RD_A2 !577 ADDI                   ; octal 00001101
     ; O_TRUNC   00001000
     ; O_CREAT   00000100
@@ -116,7 +116,7 @@
     RD_RA $File_Print JAL             ; Print it
     RD_A0 ~strings_list AUIPC         ; Our strings
     RD_A0 RS1_A0 !strings_list ADDI
-    RD_A0 RS1_A0 LD
+    RD_A0 RS1_A0 LW
     RD_RA $recursive_output JAL       ; Print them
     RD_A0 ~header_string5 AUIPC       ; Our final header
     RD_A0 RS1_A0 !header_string5 ADDI ; Our final header
@@ -141,8 +141,8 @@
 ;; Returns TOKEN in a0
 ;; Uses a0 for C
 :read_all_tokens
-    RD_SP RS1_SP !-8 ADDI                   ; allocate stack
-    RS1_SP RS2_RA SD                        ; protect ra
+    RD_SP RS1_SP !-4 ADDI                   ; allocate stack
+    RS1_SP RS2_RA SW                        ; protect ra
 
     RD_S6 RS1_A0 MV                         ; Store Token
     RD_RA $fgetc JAL
@@ -154,8 +154,8 @@
 :read_all_tokens_done
     RD_A0 RS1_S6 MV                         ; Return Token
 
-    RD_RA RS1_SP LD                         ; restore ra
-    RD_SP RS1_SP !8 ADDI                    ; deallocate stack
+    RD_RA RS1_SP LW                         ; restore ra
+    RD_SP RS1_SP !4 ADDI                    ; deallocate stack
     RETURN
 
 
@@ -166,22 +166,22 @@
 ; a2 is used for S and a3 is used for current
 ; Returns C in a0
 :get_token
-    RD_SP RS1_SP !-32 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
-    RS1_SP RS2_A3 @24 SD              ; protect a3
+    RD_SP RS1_SP !-16 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
+    RS1_SP RS2_A3 @12 SW              ; protect a3
 
     RD_S4 RS1_A0 MV                   ; Set C
 
-    RD_A0 !40 MV                      ; Malloc CURRENT
+    RD_A0 !20 MV                      ; Malloc CURRENT
     RD_RA $malloc JAL                 ; Get Pointer
     RD_A3 RS1_A0 MV                   ; Set CURRENT
 
     RD_A0 !256 MV                     ; Malloc the string
     RD_RA $malloc JAL                 ; Get Pointer to S
     RD_A2 RS1_A0 MV                   ; Set S
-    RS1_A3 RS2_A2 @16 SD              ; CURRENT->S = S
+    RS1_A3 RS2_A2 @8 SW               ; CURRENT->S = S
 :reset
     RD_S5 RS1_A2 MV                   ; S[0]
     RD_A0 RS1_S4 MV                   ; Using C
@@ -299,16 +299,16 @@
     RD_S4 RS1_A0 MV                   ; Set C
 
 :get_token_done
-    RS1_A3 RS2_S6 @8 SD               ; CURRENT->PREV = TOKEN
-    RS1_A3 RS2_S6 SD                  ; CURRENT->NEXT = TOKEN
+    RS1_A3 RS2_S6 @4 SW               ; CURRENT->PREV = TOKEN
+    RS1_A3 RS2_S6 SW                  ; CURRENT->NEXT = TOKEN
     RD_S6 RS1_A3 MV                   ; TOKEN = CURRENT
 
 :get_token_abort
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_A3 RS1_SP !24 LD               ; restore a3
-    RD_SP RS1_SP !32 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_A3 RS1_SP !12 LW               ; restore a3
+    RD_SP RS1_SP !16 ADDI             ; deallocate stack
     RD_A0 RS1_S4 MV                   ; Return C
     RETURN
 
@@ -317,8 +317,8 @@
 ; Receives INT in a0 and FILE* in s2
 ; Returns first non-whitespace char in a0
 :clear_white_space
-    RD_SP RS1_SP !-8 ADDI                     ; allocate stack
-    RS1_SP RS2_RA SD                          ; protect ra
+    RD_SP RS1_SP !-4 ADDI                     ; allocate stack
+    RS1_SP RS2_RA SW                          ; protect ra
 
 :clear_white_space_loop
     RD_T0 !32 ADDI                            ; Check for ' '
@@ -337,8 +337,8 @@
     $clear_white_space_loop JAL               ; iterate
 
 :clear_white_space_done
-    RD_RA RS1_SP LD                           ; restore ra
-    RD_SP RS1_SP !8 ADDI                      ; deallocate stack
+    RD_RA RS1_SP LW                           ; restore ra
+    RD_SP RS1_SP !4 ADDI                      ; deallocate stack
     RETURN
 
 
@@ -348,10 +348,10 @@
 ; Returns C in a0
 ; Uses a2 for INT C
 :preserve_keyword
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
     RD_A2 RS1_A0 MV                   ; Setup C
     RD_A1 ~alphas AUIPC               ; Get alphanumeric
@@ -376,10 +376,10 @@
     RD_A0 !32 ADDI                    ; Return Whitespace
 
 :preserve_keyword_done
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -389,10 +389,10 @@
 ; Returns C in a0
 ; Uses a2 for INT C
 :preserve_symbol
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
     RD_A2 RS1_A0 MV                   ; Setup C
     RD_A1 ~symbols AUIPC              ; Get symbols
@@ -409,10 +409,10 @@
 
 :preserve_symbol_done
     RD_A0 RS1_A2 MV                   ; Fix return
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -421,10 +421,10 @@
 ; returns INT C in a0
 ; Uses a0 for C, a1 for FREQ and a2 for ESCAPE
 :consume_word
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
     RD_A1 RS1_A0 MV                   ; FREQ = C
     RD_A2 MV                          ; ESCAPE = FALSE
@@ -450,10 +450,10 @@
 
     RD_RA $fgetc JAL                  ; return next char
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -462,9 +462,9 @@
 ; Inserts C into string S, updates String S
 ; Returns Next char in a0
 :consume_byte
-    RD_SP RS1_SP !-16 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
+    RD_SP RS1_SP !-8 ADDI             ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
 
     RD_A1 RS1_S5 MV                   ; S[0]
     RS1_A1 RS2_A0 SB                  ; S[0] = C
@@ -472,9 +472,9 @@
     RD_S5 RS1_A1 MV                   ; Update S
     RD_RA $fgetc JAL
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_SP RS1_SP !16 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_SP RS1_SP !8 ADDI              ; deallocate stack
     RETURN
 
 
@@ -483,13 +483,13 @@
 ; prepends ':' to string
 ; Uses a0 for HOLD, a1 for PREV and a2 for S[0]
 :fixup_label
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_A0 SD                  ; protect a0
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_A0 SW                  ; protect a0
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
     RD_A0 !58 ADDI                    ; HOLD = ':'
-    RD_A2 RS1_A3 !16 LD               ; HOLD_STRING[0]
+    RD_A2 RS1_A3 !8 LW                ; HOLD_STRING[0]
 :fixup_label_loop
     RD_A1 RS1_A0 MV                   ; PREV = HOLD
     RD_A0 RS1_A2 LBU                  ; HOLD = HOLD_STRING[I]
@@ -497,10 +497,10 @@
     RD_A2 RS1_A2 !1 ADDI              ; I = I + 1
     RS1_A0 @fixup_label_loop BNEZ     ; Keep looping if NULL == HOLD
 
-    RD_A0 RS1_SP LD                   ; restore a0
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_A0 RS1_SP LW                   ; restore a0
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -508,10 +508,10 @@
 ; Loads FILE* from s2
 ; Returns -4 (EOF) or char in a0
 :fgetc
-    RD_SP RS1_SP !-32 ADDI            ; allocate stack
-    RS1_SP RS2_RA @8 SD               ; protect ra
-    RS1_SP RS2_A1 @16 SD              ; protect a1
-    RS1_SP RS2_A2 @24 SD              ; protect a2
+    RD_SP RS1_SP !-16 ADDI            ; allocate stack
+    RS1_SP RS2_RA @4 SW               ; protect ra
+    RS1_SP RS2_A1 @8 SW               ; protect a1
+    RS1_SP RS2_A2 @12 SW              ; protect a2
 
     RD_A7 !63 ADDI                    ; sys_read
     RD_A1 RS1_SP MV                   ; Get stack address for buffer
@@ -525,10 +525,10 @@
 
 :fgetc_done
     RD_A0 RS1_A1 LB                   ; return char in a0
-    RD_RA RS1_SP !8 LD                ; restore ra
-    RD_A1 RS1_SP !16 LD               ; restore a1
-    RD_A2 RS1_SP !24 LD               ; restore a2
-    RD_SP RS1_SP !32 ADDI             ; deallocate stack
+    RD_RA RS1_SP !4 LW                ; restore ra
+    RD_A1 RS1_SP !8 LW                ; restore a1
+    RD_A2 RS1_SP !12 LW               ; restore a2
+    RD_SP RS1_SP !16 ADDI             ; deallocate stack
     RETURN
 
 
@@ -536,24 +536,24 @@
 ; Receives list in a0
 ; Returns the list reversed in a0
 :Reverse_List
-    RD_SP RS1_SP !-16 ADDI            ; allocate stack
-    RS1_SP RS2_A1 SD                  ; protect a1
-    RS1_SP RS2_A2 @8 SD               ; protect a2
+    RD_SP RS1_SP !-8 ADDI             ; allocate stack
+    RS1_SP RS2_A1 SW                  ; protect a1
+    RS1_SP RS2_A2 @4 SW               ; protect a2
     RD_A1 RS1_A0 MV                   ; Set HEAD
     RD_A0 MV                          ; ROOT = NULL
 :Reverse_List_Loop
     RS1_A1 @Reverse_List_Done BEQZ    ; Stop if HEAD == NULL
 
-    RD_A2 RS1_A1 LD                   ; NEXT = HEAD->NEXT
-    RS1_A1 RS2_A0 SD                  ; HEAD->NEXT = ROOT
+    RD_A2 RS1_A1 LW                   ; NEXT = HEAD->NEXT
+    RS1_A1 RS2_A0 SW                  ; HEAD->NEXT = ROOT
     RD_A0 RS1_A1 MV                   ; ROOT = HEAD
     RD_A1 RS1_A2 MV                   ; HEAD = NEXT
     $Reverse_List_Loop JAL            ; Continue looping
 
 :Reverse_List_Done
-    RD_A1 RS1_SP LD                   ; restore a1
-    RD_A2 RS1_SP !8 LD                ; restore a2
-    RD_SP RS1_SP !16 ADDI             ; deallocate stack
+    RD_A1 RS1_SP LW                   ; restore a1
+    RD_A2 RS1_SP !4 LW                ; restore a2
+    RD_SP RS1_SP !8 ADDI              ; deallocate stack
     RETURN
 
 
@@ -561,9 +561,9 @@
 ; However, it doesn't take much to add it.
 ; Requires MALLOC pointer to be initialized and a0 to have the number of desired bytes
 :malloc
-    RD_SP RS1_SP !-16 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
+    RD_SP RS1_SP !-8 ADDI             ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
 
     RD_A1 RS1_S1 MV                   ; Store the current pointer
     RD_A0 RS1_A0 RS2_S1 ADD           ; Request the number of desired bytes
@@ -572,9 +572,9 @@
     RD_S1 RS1_A0 MV                   ; Set our malloc pointer
     RD_A0 RS1_A1 MV                   ; Return the pointer
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_SP RS1_SP !16 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_SP RS1_SP !8 ADDI              ; deallocate stack
     RETURN
 
 
@@ -583,25 +583,25 @@
 ; walks the list and prints the I->S for all nodes backwards
 ; Uses a1 for I
 :recursive_output
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
     RS1_A0 @recursive_output_done BEQZ ; Check if we are done
     RD_A1 RS1_A0 MV                   ; I = Head
 
-    RD_A0 RS1_A1 LD                   ; I = I->next
+    RD_A0 RS1_A1 LW                   ; I = I->next
     RD_RA $recursive_output JAL       ; Recurse
 
-    RD_A0 RS1_A1 !16 LD               ; Using S
+    RD_A0 RS1_A1 !8 LW                ; Using S
     RD_RA $File_Print JAL             ; Print it
 
 :recursive_output_done
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -609,10 +609,10 @@
 ; Receives CHAR* in a0
 ; calls fputc for every non-null char
 :File_Print
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
     RD_A1 RS1_A0 MV                   ; protect a0
 
     RS1_A0 @File_Print_Done BEQZ      ; Protect against nulls
@@ -626,10 +626,10 @@
     $File_Print_Loop JAL              ; Keep printing
 
 :File_Print_Done
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -637,11 +637,11 @@
 ; receives CHAR in a0 and load FILE* from s3
 ; writes char and returns
 :fputc
-    RD_SP RS1_SP !-32 ADDI            ; allocate stack
-    RS1_SP RS2_A0 SD                  ; protect a0
-    RS1_SP RS2_RA @8 SD               ; protect ra
-    RS1_SP RS2_A1 @16 SD              ; protect a1
-    RS1_SP RS2_A2 @24 SD              ; protect a2
+    RD_SP RS1_SP !-16 ADDI            ; allocate stack
+    RS1_SP RS2_A0 SW                  ; protect a0
+    RS1_SP RS2_RA @4 SW               ; protect ra
+    RS1_SP RS2_A1 @8 SW               ; protect a1
+    RS1_SP RS2_A2 @12 SW              ; protect a2
 
     RD_A7 !64 ADDI                    ; sys_write
     RD_A0 RS1_S3 MV                   ; write to output
@@ -649,11 +649,11 @@
     RD_A2 !1 ADDI                     ; write 1 character
     ECALL                             ; syscall
 
-    RD_A0 RS1_SP LD                   ; restore a0
-    RD_RA RS1_SP !8 LD                ; restore ra
-    RD_A1 RS1_SP !16 LD               ; restore a1
-    RD_A2 RS1_SP !24 LD               ; restore a2
-    RD_SP RS1_SP !32 ADDI             ; deallocate stack
+    RD_A0 RS1_SP LW                   ; restore a0
+    RD_RA RS1_SP !4 LW                ; restore ra
+    RD_A1 RS1_SP !8 LW                ; restore a1
+    RD_A2 RS1_SP !12 LW               ; restore a2
+    RD_SP RS1_SP !16 ADDI             ; deallocate stack
     RETURN
 
 
@@ -661,10 +661,10 @@
 ; Receives CHAR* in a0 and CHAR* in a1
 ; Returns 0 (TRUE) or 1 (FALSE) in a0
 :match
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_A1 SD                  ; protect a1
-    RS1_SP RS2_A2 @8 SD               ; protect a2
-    RS1_SP RS2_A3 @16 SD              ; protect a3
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_A1 SW                  ; protect a1
+    RS1_SP RS2_A2 @4 SW               ; protect a2
+    RS1_SP RS2_A3 @8 SW               ; protect a3
 
     RD_A2 RS1_A0 MV                   ; S1 in place
     RD_A3 RS1_A1 MV                   ; S2 in place
@@ -682,10 +682,10 @@
 :match_False
     RD_A0 !1 ADDI                     ; Return false
 :match_Done
-    RD_A1 RS1_SP LD                   ; restore a1
-    RD_A2 RS1_SP !8 LD                ; restore a2
-    RD_A3 RS1_SP !16 LD               ; restore a3
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_A1 RS1_SP LW                   ; restore a1
+    RD_A2 RS1_SP !4 LW                ; restore a2
+    RD_A3 RS1_SP !8 LW                ; restore a3
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -693,8 +693,8 @@
 ; Receives char C in a0 and Char* in a1
 ; Returns 1 if true, zero if false in a0
 :In_Set
-    RD_SP RS1_SP !-8 ADDI             ; allocate stack
-    RS1_SP RS2_A1 SD                  ; protect a1
+    RD_SP RS1_SP !-4 ADDI             ; allocate stack
+    RS1_SP RS2_A1 SW                  ; protect a1
 
 :In_Set_loop
     RD_T0 RS1_A1 LBU                  ; Read char
@@ -705,14 +705,14 @@
 
 :In_Set_True
     RD_A0 !1 ADDI                     ; Set True
-    RD_A1 RS1_SP LD                   ; restore a1
-    RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    RD_A1 RS1_SP LW                   ; restore a1
+    RD_SP RS1_SP !4 ADDI              ; deallocate stack
     RETURN
 
 :In_Set_False
     RD_A0 MV                          ; Set False
-    RD_A1 RS1_SP LD                   ; restore a1
-    RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    RD_A1 RS1_SP LW                   ; restore a1
+    RD_SP RS1_SP !4 ADDI              ; deallocate stack
     RETURN
 
 
@@ -721,10 +721,10 @@
 ; Returns value of CHAR* in a0
 ; Uses a0 for VALUE, a1 for S, a2 for CH and a3 for NEGATIVE?
 :numerate_string
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_A1 SD                  ; protect a1
-    RS1_SP RS2_A2 @8 SD               ; protect a2
-    RS1_SP RS2_A3 @16 SD              ; protect a3
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_A1 SW                  ; protect a1
+    RS1_SP RS2_A2 @4 SW               ; protect a2
+    RS1_SP RS2_A3 @8 SW               ; protect a3
 
     RD_A1 RS1_A0 MV                   ; put S in correct place
     RD_A0 MV                          ; Initialize to Zero
@@ -790,10 +790,10 @@
     RD_A0 MV                          ; return ZERO
 
 :numerate_string_done
-    RD_A1 RS1_SP LD                   ; restore a1
-    RD_A2 RS1_SP !8 LD                ; restore a2
-    RD_A3 RS1_SP !16 LD               ; restore a3
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_A1 RS1_SP LW                   ; restore a1
+    RD_A2 RS1_SP !4 LW                ; restore a2
+    RD_A3 RS1_SP !8 LW                ; restore a3
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RS1_RA JALR                       ; return
 
 
@@ -804,20 +804,20 @@
 ; Behaves badly when given a negative number too large
 ; Uses a0 for temp, a1 for DIVISOR, a3 for mod/0, a4 for result[i] and a2 for A
 :numerate_number
-    RD_SP RS1_SP !-48 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
-    RS1_SP RS2_A3 @24 SD              ; protect a3
-    RS1_SP RS2_A4 @32 SD              ; protect a4
+    RD_SP RS1_SP !-24 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
+    RS1_SP RS2_A3 @12 SW              ; protect a3
+    RS1_SP RS2_A4 @16 SW              ; protect a4
 
     RD_A2 RS1_A0 MV                   ; Protect A
     RD_A0 !16 ADDI                    ; 16 bytes
     RD_RA $malloc JAL                 ; Get our pointer
-    RS1_SP RS2_A0 @40 SD              ; protect our pointer
+    RS1_SP RS2_A0 @20 SW              ; protect our pointer
     RD_A4 RS1_A0 MV                   ; Put pointer in right place
-    RD_A1 ~0x3B9ACA00 LUI             ; Set divisor to largest positive number that fits in 32bits
-    RD_A1 RS1_A1 !0x3B9ACA00 ADDI     ; Set divisor to largest positive number that fits in 32bits
+    RD_A1 ~1000000000 LUI             ; Set divisor to largest positive number that fits in 32bits
+    RD_A1 RS1_A1 !1000000000 ADDI     ; Set divisor to largest positive number that fits in 32bits
 
     RS1_A2 @numerate_number_ZERO BEQZ    ; Deal with 0 case
     RS2_A2 @numerate_number_positive BLT ; Check if positive
@@ -849,13 +849,13 @@
     $numerate_number_iter JAL         ; Keep going
 
 :numerate_number_done
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_A3 RS1_SP !24 LD               ; restore a3
-    RD_A4 RS1_SP !32 LD               ; restore a4
-    RD_A0 RS1_SP !40 LD               ; restore our result
-    RD_SP RS1_SP !48 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_A3 RS1_SP !12 LW               ; restore a3
+    RD_A4 RS1_SP !16 LW               ; restore a4
+    RD_A0 RS1_SP !20 LW               ; restore our result
+    RD_SP RS1_SP !24 ADDI             ; deallocate stack
     RETURN
 
 :numerate_number_ZERO
@@ -871,10 +871,10 @@
 ; Aborts hard if unknown escape is received
 ; Uses a2 to hold char* C
 :escape_lookup
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
     RD_A2 RS1_A0 MV                   ; Put char* C in safe place
     RD_A0 RS1_A2 LBU                  ; c[0]
@@ -937,10 +937,10 @@
     RD_A0 RS1_A0 RS2_A1 ADD           ; hex(c[2]) << 4 + hex(c[3])
 
 :escape_lookup_done
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -977,9 +977,9 @@
 ; Returns cleaned up string
 ; Protects char* string in a1
 :parse_string
-    RD_SP RS1_SP !-16 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
+    RD_SP RS1_SP !-8 ADDI             ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
 
     RD_A1 RS1_A0 MV                   ; Protect char *string
     RD_RA $weird JAL                  ; Determine if we have a weird string
@@ -995,9 +995,9 @@
     RD_RA $collect_weird_string JAL   ; Collect it
 
 :parse_string_done
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_SP RS1_SP !16 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_SP RS1_SP !8 ADDI              ; deallocate stack
     RETURN
 
 
@@ -1006,11 +1006,11 @@
 ; Returns true(0) or false(1) in a0
 ; Uses a2 to hold char* string
 :weird
-    RD_SP RS1_SP !-32 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
-    RS1_SP RS2_A3 @24 SD              ; protect a3
+    RD_SP RS1_SP !-16 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
+    RS1_SP RS2_A3 @12 SW              ; protect a3
 
     RD_A2 RS1_A0 MV                   ; Place string in safe place
     RD_A2 RS1_A2 !1 ADDI              ; increment past the "
@@ -1057,11 +1057,11 @@
     $weird_reset JAL                  ; Keep trying
 
 :weird_done
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_A3 RS1_SP !24 LD               ; restore a3
-    RD_SP RS1_SP !32 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_A3 RS1_SP !12 LW               ; restore a3
+    RD_SP RS1_SP !16 ADDI             ; deallocate stack
     RETURN
 
 :weird_true
@@ -1078,17 +1078,17 @@
 ; Malloc and creates new string to return in a0 
 ; Uses a2 for return string and a3 for passed string
 :collect_regular_string
-    RD_SP RS1_SP !-40 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
-    RS1_SP RS2_A3 @24 SD              ; protect a3
+    RD_SP RS1_SP !-20 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
+    RS1_SP RS2_A3 @12 SW              ; protect a3
 
     RD_A3 RS1_A0 MV                   ; Protect our passed string
     RD_A0 !256 ADDI                   ; We need 256 bytes of storage
     RD_RA $malloc JAL                 ; Get our new pointer
     RD_A2 RS1_A0 MV                   ; put it in place
-    RS1_SP RS2_A0 @32 SD              ; protect until done
+    RS1_SP RS2_A0 @16 SW              ; protect until done
 
 :collect_regular_string_reset
     RD_A0 RS1_A3 LBU                  ; string[0]
@@ -1124,12 +1124,12 @@
     RD_A0 !10 ADDI                    ; Using "\n"
     RS1_A2 RS2_A0 SB                  ; hold_string[index] = '\n'
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_A3 RS1_SP !24 LD               ; restore a3
-    RD_A0 RS1_SP !32 LD               ; restore a0
-    RD_SP RS1_SP !40 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_A3 RS1_SP !12 LW               ; restore a3
+    RD_A0 RS1_SP !16 LW               ; restore a0
+    RD_SP RS1_SP !20 ADDI             ; deallocate stack
     RETURN
 
 
@@ -1138,17 +1138,17 @@
 ; Mallocs and returns char* hold in a0
 ; Uses a2 for char* hold and a3 for char* string
 :collect_weird_string
-    RD_SP RS1_SP !-40 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
-    RS1_SP RS2_A3 @24 SD              ; protect a3
+    RD_SP RS1_SP !-20 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
+    RS1_SP RS2_A3 @12 SW              ; protect a3
 
     RD_A3 RS1_A0 MV                   ; Protect our passed string
     RD_A0 !512 ADDI                   ; We need 512 bytes of storage
     RD_RA $malloc JAL                 ; Get our new pointer
     RD_A2 RS1_A0 MV                   ; put it in place
-    RS1_SP RS2_A0 @32 SD              ; protect until done
+    RS1_SP RS2_A0 @16 SW              ; protect until done
 
     RD_A0 !39 ADDI                    ; Using "'"
     RS1_A2 RS2_A0 SB                  ; hold_string[index] = "'"
@@ -1195,12 +1195,12 @@
     RD_A0 !10 ADDI                    ; Using '\n'
     RS1_A2 RS2_A0 SB                  ; hold_string[index] = '\n'
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_A3 RS1_SP !24 LD               ; restore a3
-    RD_A0 RS1_SP !32 LD               ; restore a0
-    RD_SP RS1_SP !40 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_A3 RS1_SP !12 LW               ; restore a3
+    RD_A0 RS1_SP !16 LW               ; restore a0
+    RD_SP RS1_SP !20 ADDI             ; deallocate stack
     RETURN
 
 
@@ -1209,15 +1209,15 @@
 ; Stores ascii of INT in CHAR*
 ; Returns only modifying a0 and a2
 :hex8
-    RD_SP RS1_SP !-16 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; Protect ra
-    RS1_SP RS2_A0 @8 SD               ; Protect bottom nibble
+    RD_SP RS1_SP !-8 ADDI             ; allocate stack
+    RS1_SP RS2_RA SW                  ; Protect ra
+    RS1_SP RS2_A0 @4 SW               ; Protect bottom nibble
     RD_A0 RS1_A0 RS2_X4 SRLI          ; do high nibble first
     RD_RA $hex4 JAL                   ; Store it
-    RD_A0 RS1_SP !8 LD                ; do low nibble
+    RD_A0 RS1_SP !8 LW                ; do low nibble
     RD_RA $hex4 JAL                   ; Store it
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_SP RS1_SP !16 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_SP RS1_SP !8 ADDI              ; deallocate stack
     RETURN
 
 :hex4
@@ -1237,34 +1237,34 @@
 ; receives nothing, returns nothing
 ; Uses a0 for type_size
 :program
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
     ; The binary initialized the globals to null, so we can skip those steps
 
 :new_type
     RS1_S4 @program_done BEQZ         ; Be done if null
 
-    RD_A1 RS1_S4 !16 LD               ; GLOBAL_TOKEN->S
+    RD_A1 RS1_S4 !8 LW                ; GLOBAL_TOKEN->S
     RD_A0 ~constant AUIPC             ; "CONSTANT"
     RD_A0 RS1_A0 !constant ADDI
     RD_RA $match JAL                  ; Check if GLOBAL_TOKEN->S == "CONSTANT"
     RS1_A0 @program_else BNEZ
 
     ; Deal with minimal constant case
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_A1 MV                          ; NULL
     RD_A2 RS1_S5 MV                   ; global_constant_list
     RD_RA $sym_declare JAL            ; Declare that constant
     RD_S5 RS1_A0 MV                   ; global_constant_list = sym_declare(global_token->s, NULL, global_constant_list);
 
-    RD_A1 RS1_S4 LD                   ; global_token->next
-    RS1_S5 RS2_A1 @32 SD              ; global_constant_list->arguments = global_token->next
+    RD_A1 RS1_S4 LW                   ; global_token->next
+    RS1_S5 RS2_A1 @16 SW              ; global_constant_list->arguments = global_token->next
 
-    RD_S4 RS1_A1 LD                   ; global_token = global_token->next->next
+    RD_S4 RS1_A1 LW                   ; global_token = global_token->next->next
     $new_type JAL                     ; go around again
 
 :program_else
@@ -1273,13 +1273,13 @@
 
     ; Add to global symbol table
     RD_A1 RS1_A0 MV                   ; put type_size in the right spot
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_A2 RS1_S6 MV                   ; Using global_symbol_list
     RD_RA $sym_declare JAL            ; Declare symbol
     RD_S6 RS1_A0 MV                   ; global_symbol_list = sym_declare(global_token->s, type_size, global_symbol_list);
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_A0 ~semicolon AUIPC            ; ";"
     RD_A0 RS1_A0 !semicolon ADDI
     RD_RA $match JAL                  ; match(";", global_token->s)
@@ -1292,8 +1292,8 @@
     RD_RA $emit JAL                   ; Emit it
     RD_A1 RS1_A0 MV                   ; Update globals_list
 
-    RD_A0 RS1_S4 !8 LD                ; global_token->prev
-    RD_A0 RS1_A0 !16 LD               ; global_token->prev->S
+    RD_A0 RS1_S4 !4 LW                ; global_token->prev
+    RD_A0 RS1_A0 !8 LW                ; global_token->prev->S
     RD_RA $emit JAL                   ; Emit it
 
     RD_A1 RS1_A0 MV                   ; update globals_list
@@ -1302,11 +1302,11 @@
     RD_RA $emit JAL                   ; Emit it
     RD_S7 RS1_A0 MV                   ; update globals_list
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
     $new_type JAL                     ; go around again
 
 :program_function
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_A0 ~open_paren AUIPC           ; "("
     RD_A0 RS1_A0 !open_paren ADDI
     RD_RA $match JAL                  ; (match(";", global_token->s)
@@ -1320,10 +1320,10 @@
     ; Deal with the case of something we don't support
 
 :program_done
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -1332,20 +1332,20 @@
 ; Returns struct token_list* in a0
 ; Uses a0 for A
 :sym_declare
-    RD_SP RS1_SP !-16 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A3 @8 SD               ; protect a3
+    RD_SP RS1_SP !-8 ADDI             ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A3 @4 SW               ; protect a3
     RD_A3 RS1_A0 MV                   ; Get char *S safely out of the way
 
     RD_A0 !40 ADDI                    ; Using sizeof(struct token_list)
     RD_RA $malloc JAL                 ; Get pointer to A
-    RS1_A0 RS2_A2 SD                  ; A->NEXT = LIST
-    RS1_A0 RS2_A3 @16 SD              ; A->S = S
-    RS1_A0 RS2_A1 @24 SD              ; A->TYPE = T
+    RS1_A0 RS2_A2 SW                  ; A->NEXT = LIST
+    RS1_A0 RS2_A3 @8 SW               ; A->S = S
+    RS1_A0 RS2_A1 @12 SW              ; A->TYPE = T
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A3 RS1_SP !8 LD                ; restore a3
-    RD_SP RS1_SP !16 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A3 RS1_SP !4 LW                ; restore a3
+    RD_SP RS1_SP !8 ADDI              ; deallocate stack
     RETURN
 
 
@@ -1355,19 +1355,19 @@
 ; Updates output_list
 ; MUST NOT ALTER REGISTERS
 :emit_out
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A0 @8 SD               ; protect a0
-    RS1_SP RS2_A1 @16 SD              ; protect a1
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A0 @4 SW               ; protect a0
+    RS1_SP RS2_A1 @8 SW               ; protect a1
 
     RD_A1 RS1_S9 MV                   ; Using output_list
     RD_RA $emit JAL                   ; emit it
     RD_S9 RS1_A0 MV                   ; update it
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A0 RS1_SP !8 LD                ; restore a0
-    RD_A1 RS1_SP !16 LD               ; restore a1
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A0 RS1_SP !4 LW                ; restore a0
+    RD_A1 RS1_SP !8 LW                ; restore a1
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -1375,19 +1375,19 @@
 ; Receives char *s in a0 and struct token_list* head in a1
 ; Returns struct token_list* T in a0
 :emit
-    RD_SP RS1_SP !-16 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A2 @8 SD               ; protect a2
+    RD_SP RS1_SP !-8 ADDI             ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A2 @4 SW               ; protect a2
 
     RD_A2 RS1_A0 MV                   ; Put S out of the way
     RD_A0 !40 ADDI                    ; sizeof(struct token_list)
     RD_RA $malloc JAL                 ; get T
-    RS1_A0 RS2_A1 SD                  ; t->next = head
-    RS1_A0 RS2_A2 @16 SD              ; t->s = s
+    RS1_A0 RS2_A1 SW                  ; t->next = head
+    RS1_A0 RS2_A2 @8 SW               ; t->s = s
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A2 RS1_SP !8 LD                ; restore a2
-    RD_SP RS1_SP !16 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A2 RS1_SP !4 LW                ; restore a2
+    RD_SP RS1_SP !8 ADDI              ; deallocate stack
     RETURN
 
 
@@ -1396,12 +1396,12 @@
 ; Returns type_size in a0
 ; Uses a2 for STRUCT TYPE* RET
 :type_name
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_A0 ~struct AUIPC               ; Using "struct"
     RD_A0 RS1_A0 !struct ADDI
     RD_RA $match JAL                  ; Check if global_token->S == "struct"
@@ -1409,11 +1409,11 @@
     RS1_A0 @type_name_native BNEZ     ; skip over "struct"
 
     ; Deal with possible STRUCTs
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_A1 ~global_types AUIPC         ; get all known types
     RD_A1 RS1_A1 !global_types ADDI
-    RD_A1 RS1_A1 LD                   ; Dereference pointer
+    RD_A1 RS1_A1 LW                   ; Dereference pointer
     RD_RA $lookup_type JAL            ; Find type if possible
     RD_A2 RS1_A0 MV                   ; Set ret
 
@@ -1429,7 +1429,7 @@
     RD_A0 RS1_A1 MV                   ; Put global_token->S in the right place
     RD_A1 ~global_types AUIPC         ; get all known types
     RD_A1 RS1_A1 !global_types ADDI
-    RD_A1 RS1_A1 LD                   ; Dereference pointer
+    RD_A1 RS1_A1 LW                   ; Dereference pointer
     RD_RA $lookup_type JAL            ; Find the type if possible
     RD_A2 RS1_A0 MV                   ; Set ret
 
@@ -1441,7 +1441,7 @@
     RD_A0 RS1_A0 !type_name_string_0 ADDI
     RD_RA $File_Print JAL
 
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_RA $File_Print JAL             ; Print it
 
     RD_A0 ~type_name_string_1 AUIPC   ; "Print footer"
@@ -1451,25 +1451,25 @@
     $Fail JAL                         ; Abort
 
 :type_name_common
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
 :type_name_iter
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_A0 RS1_A0 LBU                  ; global_token->S[0]
     RD_T0 !42 ADDI                    ; '*'
     RS1_A0 RS2_T0 @type_name_done BNE ; recurse
 
     ; Deal with char**
-    RD_A2 RS1_A2 !24 LD               ; ret = ret->indirect
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_A2 RS1_A2 !12 LW               ; ret = ret->indirect
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
     $type_name_iter JAL               ; keep looping
 
 :type_name_done
     RD_A0 RS1_A2 MV                   ; put ret in the right place
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -1478,10 +1478,10 @@
 ; Returns struct type* in a0
 ; Uses a1 for S and a2 for I
 :lookup_type
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
     RD_A2 RS1_A1 MV                   ; I = Start
     RD_A1 RS1_A0 MV                   ; Put S in place
@@ -1489,19 +1489,19 @@
 :lookup_type_iter
     RS1_A2 @lookup_type_done BEQZ     ; return NULL
 
-    RD_A0 RS1_A2 !48 LD               ; I->NAME
+    RD_A0 RS1_A2 !24 LW               ; I->NAME
     RD_RA $match JAL                  ; Check if matching
     RS1_A0 @lookup_type_done BEQZ     ; Return it if I->NAME == S
 
-    RD_A2 RS1_A2 LD                   ; Otherwise I = I->NEXT
+    RD_A2 RS1_A2 LW                   ; Otherwise I = I->NEXT
     $lookup_type_iter JAL             ; Keep looping
 
 :lookup_type_done
     RD_A0 RS1_A2 MV                   ; return either I or NULL
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -1513,43 +1513,43 @@
 ; a4 for member_size (Which is passed) and a5 for LAST
 ; a0 and a1 are is used for scratch
 :create_struct
-    RD_SP RS1_SP !-56 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
-    RS1_SP RS2_A3 @24 SD              ; protect a3
-    RS1_SP RS2_A4 @32 SD              ; protect a4
-    RS1_SP RS2_A5 @40 SD              ; protect a5
-    RS1_SP RS2_A6 @48 SD              ; protect a6
+    RD_SP RS1_SP !-28 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
+    RS1_SP RS2_A3 @12 SW              ; protect a3
+    RS1_SP RS2_A4 @16 SW              ; protect a4
+    RS1_SP RS2_A5 @20 SW              ; protect a5
+    RS1_SP RS2_A6 @24 SW              ; protect a6
 
     RD_A6 MV                          ; OFFSET = 0
     RD_A4 MV                          ; member_size = 0
 
-    RD_A0 !56 ADDI                    ; sizeof(struct type)
+    RD_A0 !28 ADDI                    ; sizeof(struct type)
     RD_RA $malloc JAL                 ; malloc(sizeof(struct type))
     RD_A2 RS1_A0 MV                   ; Set HEAD
 
-    RD_A0 !56 ADDI                    ; sizeof(struct type)
+    RD_A0 !28 ADDI                    ; sizeof(struct type)
     RD_RA $malloc JAL                 ; malloc(sizeof(struct type))
     RD_A3 RS1_A0 MV                   ; Set I
 
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
-    RS1_A2 RS2_A0 @48 SD              ; HEAD->NAME = global_token->S
-    RS1_A3 RS2_A0 @48 SD              ; I->NAME = global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
+    RS1_A2 RS2_A0 @24 SW              ; HEAD->NAME = global_token->S
+    RS1_A3 RS2_A0 @24 SW              ; I->NAME = global_token->S
 
-    RS1_A2 RS2_A3 @24 SD              ; HEAD->INDIRECT = I
-    RS1_A3 RS2_A2 @24 SD              ; I->INDIRECT = HEAD
+    RS1_A2 RS2_A3 @12 SW              ; HEAD->INDIRECT = I
+    RS1_A3 RS2_A2 @12 SW              ; I->INDIRECT = HEAD
 
     RD_A0 ~global_types AUIPC         ; Using global_types
     RD_A0 RS1_A0 !global_types ADDI
-    RD_A1 RS1_A0 LD                   ; Dereference pointer
-    RS1_A2 RS2_A1 SD                  ; HEAD->NEXT = global_types
-    RS1_A0 RS2_A2 SD                  ; global_types = HEAD
+    RD_A1 RS1_A0 LW                   ; Dereference pointer
+    RS1_A2 RS2_A1 SW                  ; HEAD->NEXT = global_types
+    RS1_A0 RS2_A2 SW                  ; global_types = HEAD
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
-    RD_A0 !8 ADDI                     ; Using register size
-    RS1_A3 RS2_A0 @8 SD               ; I->SIZE = register size
+    RD_A0 !4 ADDI                     ; Using register size
+    RS1_A3 RS2_A0 @4 SW               ; I->SIZE = register size
 
     RD_A0 ~create_struct_string_0 AUIPC ; Using "ERROR in create_struct\n Missing {\n"
     RD_A0 RS1_A0 !create_struct_string_0 ADDI
@@ -1560,14 +1560,14 @@
     RD_A5 MV                          ; LAST = NULL
 
 :create_struct_iter
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_A0 RS1_A0 LBU                  ; global_token->S[0]
     RD_T0 !125 ADDI                   ; "}"
     RS1_A0 RS2_T0 @create_struct_done BEQ ; We are done
 
     ; Looks like we are adding members
     ; Lets see if it is a union
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_A1 ~union AUIPC                ; Using "union"
     RD_A1 RS1_A1 !union ADDI
     RD_RA $match JAL                  ; match(global_token->s, "union")
@@ -1597,25 +1597,25 @@
     $create_struct_iter JAL           ; Keep going
 
 :create_struct_done
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
     RD_A0 ~create_struct_string_1 AUIPC ; Using "ERROR in create_struct\n Missing ;\n"
     RD_A0 RS1_A0 !create_struct_string_1 ADDI
     RD_A1 ~semicolon AUIPC            ; Using ";"
     RD_A1 RS1_A1 !semicolon ADDI
     RD_RA $require_match JAL          ; Make sure we have it
 
-    RS1_A2 RS2_A6 @8 SD               ; HEAD->SIZE = OFFSET
-    RS1_A2 RS2_A5 @32 SD              ; HEAD->MEMBERS = LAST
-    RS1_A3 RS2_A5 @32 SD              ; I->MEMBERS = LAST
+    RS1_A2 RS2_A6 @4 SW               ; HEAD->SIZE = OFFSET
+    RS1_A2 RS2_A5 @16 SW              ; HEAD->MEMBERS = LAST
+    RS1_A3 RS2_A5 @16 SW              ; I->MEMBERS = LAST
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_A3 RS1_SP !24 LD               ; restore a3
-    RD_A4 RS1_SP !32 LD               ; restore a4
-    RD_A5 RS1_SP !40 LD               ; restore a5
-    RD_A6 RS1_SP !48 LD               ; restore a6
-    RD_SP RS1_SP !56 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_A3 RS1_SP !12 LW               ; restore a3
+    RD_A4 RS1_SP !16 LW               ; restore a4
+    RD_A5 RS1_SP !20 LW               ; restore a5
+    RD_A6 RS1_SP !24 LW               ; restore a6
+    RD_SP RS1_SP !28 ADDI             ; deallocate stack
     RETURN
 
 
@@ -1625,31 +1625,31 @@
 ; Uses char* NAME in a1, a2 for struct type* I and a3 to hold parent for errors
 ; Aborts hard if not found
 :lookup_member
-    RD_SP RS1_SP !-32 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
-    RS1_SP RS2_A3 @24 SD              ; protect a3
+    RD_SP RS1_SP !-16 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
+    RS1_SP RS2_A3 @12 SW              ; protect a3
 
     RD_A3 RS1_A0 MV                   ; Protect Parent
-    RD_A2 RS1_A0 !32 LD               ; struct type* I = parent->MEMBERS
+    RD_A2 RS1_A0 !16 LW               ; struct type* I = parent->MEMBERS
 
 :lookup_member_iter
     RS1_A2 @lookup_member_fail BEQZ   ; Abort HARD IF I == NULL
 
-    RD_A0 RS1_A2 !48 LD               ; Using I->NAME
+    RD_A0 RS1_A2 !24 LW               ; Using I->NAME
     RD_RA $match JAL                  ; IF I->NAME == NAME
     RD_T0 RS1_A0 MV                   ; Protect result
     RD_A0 RS1_A2 MV                   ; Prepare for return
-    RD_A2 RS1_A2 !32 LD               ; Prepare for loop I = I->MEMBERS
+    RD_A2 RS1_A2 !16 LW               ; Prepare for loop I = I->MEMBERS
     RS1_T0 @lookup_member_iter BNEZ   ; Looks like we are looping
 
     ; I is aready in a0
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_A3 RS1_SP !24 LD               ; restore a3
-    RD_SP RS1_SP !32 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_A3 RS1_SP !12 LW               ; restore a3
+    RD_SP RS1_SP !16 ADDI             ; deallocate stack
     RETURN
 
 :lookup_member_fail
@@ -1658,10 +1658,10 @@
     RD_A0 RS1_A0 !lookup_member_string_0 ADDI
     RD_RA $File_Print JAL             ; print it
 
-    RD_A0 RS1_A3 !48 LD               ; PARENT->NAME
+    RD_A0 RS1_A3 !24 LW               ; PARENT->NAME
     RD_RA $File_Print JAL             ; print it
 
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
 
     RD_A0 ~lookup_member_string_1 AUIPC ; Using " does not exist\n"
     RD_A0 RS1_A0 !lookup_member_string_1 ADDI
@@ -1678,46 +1678,46 @@
 ; Updates member_size in a4 and returns struct type* I in a0
 ; Uses a2 for struct type* member_type and a3 for struct type* I
 :build_member
-    RD_SP RS1_SP !-32 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
-    RS1_SP RS2_A3 @24 SD              ; protect a3
+    RD_SP RS1_SP !-16 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
+    RS1_SP RS2_A3 @12 SW              ; protect a3
 
     RD_A3 RS1_A0 MV                   ; Put last out of the way
-    RD_A0 !56 ADDI                    ; Allocate type
+    RD_A0 !28 ADDI                    ; Allocate type
     RD_RA $malloc JAL                 ; Get I
-    RS1_A0 RS2_A3 @32 SD              ; I->MEMBERS = LAST
-    RS1_A0 RS2_A1 @16 SD              ; I->OFFSET = OFFSET
+    RS1_A0 RS2_A3 @16 SW              ; I->MEMBERS = LAST
+    RS1_A0 RS2_A1 @8 SW               ; I->OFFSET = OFFSET
     RD_A3 RS1_A0 MV                   ; Put I in place
 
     RD_RA $type_name JAL              ; Get member_type
     RD_A2 RS1_A0 MV                   ; Put in place
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
-    RS1_A3 RS2_A1 @48 SD              ; I->NAME = global_token->S
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
+    RS1_A3 RS2_A1 @24 SW              ; I->NAME = global_token->S
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
     ; Check if we have an array
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_A0 ~open_bracket AUIPC         ; Using "["
     RD_A0 RS1_A0 !open_bracket ADDI
     RD_RA $match JAL                  ; If global_token->S == "["
     RS1_A0 $build_member_array BEQZ   ; Then we have to deal with arrays in our struct
 
     ; Deal with non-array case
-    RD_A0 RS1_A2 !8 LD                ; member_type->SIZE
-    RS1_A3 RS2_A0 @8 SD               ; I->SIZE = member_type->SIZE
+    RD_A0 RS1_A2 !4 LW                ; member_type->SIZE
+    RS1_A3 RS2_A0 @4 SW               ; I->SIZE = member_type->SIZE
     $build_member_done JAL            ; We are done
 
 :build_member_array
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_RA $numerate_string JAL        ; convert number
-    RD_A1 RS1_A2 !40 LD               ; member_type->TYPE
-    RD_A1 RS1_A1 !8 LD                ; member_type->TYPE->SIZE
+    RD_A1 RS1_A2 !20 LW               ; member_type->TYPE
+    RD_A1 RS1_A1 !4 LW                ; member_type->TYPE->SIZE
     RD_A0 RS1_A0 RS2_A1 MUL           ; member_type->type->size * numerate_string(global_token->s)
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
     RD_A0 ~build_member_string_0 AUIPC ; Using "Struct only supports [num] form\n"
     RD_A0 RS1_A0 !build_member_string_0 ADDI
@@ -1726,15 +1726,15 @@
     RD_RA $require_match JAL          ; Make sure we have it
 
 :build_member_done
-    RD_A4 RS1_A3 !8 LD                ; MEMBER_SIZE = I->SIZE
-    RS1_A3 RS2_A2 @40 SD              ; I->TYPE = MEMBER_TYPE
+    RD_A4 RS1_A3 !4 LW                ; MEMBER_SIZE = I->SIZE
+    RS1_A3 RS2_A2 @20 SW              ; I->TYPE = MEMBER_TYPE
     RD_A0 RS1_A3 MV                   ; Return I
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_A3 RS1_SP !24 LD               ; restore a3
-    RD_SP RS1_SP !32 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_A3 RS1_SP !12 LW               ; restore a3
+    RD_SP RS1_SP !16 ADDI             ; deallocate stack
     RETURN
 
 
@@ -1743,18 +1743,18 @@
 ; Updates member_size in a4 and returns struct type* LAST in a0
 ; Uses a2 for struct type* last, a3 for int offset, a5 for int size and a4 for int member_size
 :build_union
-    RD_SP RS1_SP !-40 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
-    RS1_SP RS2_A3 @24 SD              ; protect a3
-    RS1_SP RS2_A5 @32 SD              ; protect a5
+    RD_SP RS1_SP !-20 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
+    RS1_SP RS2_A3 @12 SW              ; protect a3
+    RS1_SP RS2_A5 @16 SW              ; protect a5
 
     RD_A2 RS1_A0 MV                   ; Put LAST in the right spot
     RD_A3 RS1_A1 MV                   ; Put OFFSET in the right spot
     RD_A5 MV                          ; SIZE = 0
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
     RD_A0 ~build_union_string_0 AUIPC ; Using "ERROR in build_union\nMissing {\n"
     RD_A0 RS1_A0 !build_union_string_0 ADDI
@@ -1763,7 +1763,7 @@
     RD_RA $require_match JAL          ; Make sure we have it
 
 :build_union_iter
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_A0 RS1_A0 LBU                  ; global_token->S[0]
     RD_T0 !125 ADDI                   ; "}"
     RS1_A0 RS2_T0 @build_union_done BEQ ; We are done
@@ -1790,16 +1790,16 @@
 :build_union_done
     RD_A4 RS1_A5 MV                   ; MEMBER_SIZE = SIZE
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
     RD_A0 RS1_A2 MV                   ; return last
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_A3 RS1_SP !24 LD               ; restore a3
-    RD_A5 RS1_SP !32 LD               ; restore a5
-    RD_SP RS1_SP !40 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_A3 RS1_SP !12 LW               ; restore a3
+    RD_A5 RS1_SP !16 LW               ; restore a5
+    RD_SP RS1_SP !20 ADDI             ; deallocate stack
     RETURN
 
 
@@ -1808,13 +1808,13 @@
 ; Returns nothing
 ; Uses a2 to hold message and updates global_token
 :require_match
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
     RD_A2 RS1_A0 MV                   ; put the message somewhere safe
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_RA $match JAL                  ; IF required == global_token->S
     RS1_A0 @require_match_good BEQZ   ; otherwise print error
 
@@ -1825,11 +1825,11 @@
     $Fail JAL                         ; Abort HARD
 
 :require_match_good
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -1837,10 +1837,10 @@
 ; Receives char *S in a0, struct token_list* l in a1 and char* num in a2
 ; Returns updated struct token_list* L in a0
 :uniqueID
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
     RD_RA $emit JAL                   ; emit(s, l)
     RD_A1 RS1_A0 MV                   ; Put L in correct place
@@ -1855,10 +1855,10 @@
     RD_A0 RS1_A0 !uniqueID_string_0 ADDI
     RD_RA $emit JAL                   ; emit("\n", l)
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -1866,22 +1866,22 @@
 ; Receives char* S in a0 and char* num in a1
 ; Returns nothing
 :uniqueID_out
-    RD_SP RS1_SP !-32 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A0 @8 SD               ; protect a0
-    RS1_SP RS2_A1 @16 SD              ; protect a1
-    RS1_SP RS2_A2 @24 SD              ; protect a2
+    RD_SP RS1_SP !-16 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A0 @4 SW               ; protect a0
+    RS1_SP RS2_A1 @8 SW               ; protect a1
+    RS1_SP RS2_A2 @12 SW              ; protect a2
 
     RD_A2 RS1_A1 MV                   ; Put num in right spot
     RD_A1 RS1_S9 MV                   ; Using output_list
     RD_RA $uniqueID JAL               ; Get updated list
     RD_S9 RS1_A0 MV                   ; output_list = uniqueID(s, output_list, num)
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A0 RS1_SP !8 LD                ; restore a0
-    RD_A1 RS1_SP !16 LD               ; restore a1
-    RD_A2 RS1_SP !24 LD               ; restore a2
-    RD_SP RS1_SP !32 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A0 RS1_SP !4 LW                ; restore a0
+    RD_A1 RS1_SP !8 LW                ; restore a1
+    RD_A2 RS1_SP !12 LW               ; restore a2
+    RD_SP RS1_SP !16 ADDI             ; deallocate stack
     RETURN
 
 
@@ -1889,14 +1889,14 @@
 ; Receives nothing and returns nothing
 ; Sets current function and adds it to the global function list
 :declare_function
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
     RD_S10 MV                         ; current_count = 0
-    RD_A0 RS1_S4 !8 LD                ; global_token->prev
-    RD_A0 RS1_A0 !16 LD               ; global_token->prev->s
+    RD_A0 RS1_S4 !4 LW                ; global_token->prev
+    RD_A0 RS1_A0 !8 LW                ; global_token->prev->s
     RD_A1 MV                          ; NULL
     RD_A2 RS1_S8 MV                   ; global_function_list
     RD_RA $sym_declare JAL            ; sym_declare(global_token->prev->s, NULL, global_function_list);
@@ -1905,14 +1905,14 @@
 
     RD_RA $collect_arguments JAL      ; collect all of the function arguments
 
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_A1 ~semicolon AUIPC            ; ";"
     RD_A1 RS1_A1 !semicolon ADDI
     RD_RA $match JAL                  ; If global_token->s == ";"
     RS1_A0 @declare_function_full BNEZ ; then it is a function prototype
 
     ; Deal with prototypes
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
     $declare_function_done JAL        ; Move on
 
 :declare_function_full
@@ -1921,14 +1921,14 @@
     RD_A0 RS1_A0 !declare_function_string_0 ADDI
     RD_RA $emit_out JAL               ; emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->s
+    RD_A0 RS1_S11 !8 LW               ; function->s
     RD_RA $emit_out JAL               ; emit it
 
     RD_A0 ~declare_function_string_1 AUIPC ; "\n:FUNCTION_"
     RD_A0 RS1_A0 !declare_function_string_1 ADDI
     RD_RA $emit_out JAL               ; emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->s
+    RD_A0 RS1_S11 !8 LW               ; function->s
     RD_RA $emit_out JAL               ; emit it
 
     RD_A0 ~declare_function_string_3 AUIPC ; "\n"
@@ -1937,7 +1937,7 @@
 
     RD_RA $statement JAL              ; Recursively get the function pieces
 
-    RD_A0 RS1_S9 !16 LD               ; output->s
+    RD_A0 RS1_S9 !8 LW                ; output->s
     RD_A1 ~declare_function_string_2 AUIPC ; "RETURN\n"
     RD_A1 RS1_A1 !declare_function_string_2 ADDI
     RD_RA $match JAL                  ; If output->s == "RETURN\n"
@@ -1949,10 +1949,10 @@
     RD_RA $emit_out JAL               ; emit it
 
 :declare_function_done
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -1962,13 +1962,13 @@
 ; Adds arguments to the function definition
 ; holds struct type* type_size in a2, then replace with struct token_list* A in a2 when type_size is used
 :collect_arguments
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 :collect_arguments_loop
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_A0 ~close_paren AUIPC          ; ")"
     RD_A0 RS1_A0 !close_paren ADDI
     RD_RA $match JAL                  ; IF global_token->S == ")"
@@ -1978,61 +1978,61 @@
     RD_RA $type_name JAL              ; Get the type
     RD_A2 RS1_A0 MV                   ; put type_size safely out of the way
 
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_A0 ~close_paren AUIPC          ; ")"
     RD_A0 RS1_A0 !close_paren ADDI
     RD_RA $match JAL                  ; IF global_token->S == ")"
     RS1_A0 @collect_arguments_common BEQZ ; is a foo(int, char,void) case
 
     ; Trying second else
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_A0 ~comma AUIPC                ; ","
     RD_A0 RS1_A0 !comma ADDI
     RD_RA $match JAL                  ; IF global_token->S == ","
     RS1_A0 @collect_arguments_common BEQZ ; then deal with commas between arguments
 
     ; deal with foo(int a, char b)
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_A1 RS1_A2 MV                   ; put type_size in the right place
-    RD_A2 RS1_S11 !32 LD              ; function->args
+    RD_A2 RS1_S11 !16 LW              ; function->args
     RD_RA $sym_declare JAL            ; sym_declare(global_token->s, type_size, function->arguments)
     RD_A2 RS1_A0 MV                   ; put A in a safe place
 
-    RD_A0 RS1_S11 !32 LD              ; function->args
+    RD_A0 RS1_S11 !16 LW              ; function->args
     RS1_A0 @collect_arguments_another BNEZ ; Check if it's the first argument (IF function->args == NULL)
 
     ; Deal with the case of first argument in the function
-    RD_T0 !8 ADDI                     ; 8
-    RS1_A2 RS2_T0 @32 SD              ; a->depth = 8
+    RD_T0 !4 ADDI                     ; 4
+    RS1_A2 RS2_T0 @16 SW              ; a->depth = 4
     $collect_arguments_next JAL       ; get to next
 
 :collect_arguments_another
-    RD_A0 RS1_S11 !32 LD              ; function->args
-    RD_A0 RS1_A0 !32 LD               ; function->args->depth
-    RD_A0 RS1_A0 !8 ADDI              ; function->args->depth + 8
-    RS1_A2 RS2_A0 @32 SD              ; a->depth = function->args->depth + 8
+    RD_A0 RS1_S11 !16 LW              ; function->args
+    RD_A0 RS1_A0 !16 LW               ; function->args->depth
+    RD_A0 RS1_A0 !4 ADDI              ; function->args->depth + 4
+    RS1_A2 RS2_A0 @16 SW              ; a->depth = function->args->depth + 4
 
 :collect_arguments_next
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
-    RS1_S11 RS2_A2 @32 SD             ; function->args = a
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
+    RS1_S11 RS2_A2 @16 SW             ; function->args = a
 
 :collect_arguments_common
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_A0 ~comma AUIPC                ; ","
     RD_A0 RS1_A0 !comma ADDI
     RD_RA $match JAL                  ; IF global_token->S == ","
     RS1_A0 @collect_arguments_loop BNEZ ; then deal with comma, else loop
 
     ; keep foo(bar(), 1) expressions working
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
     $collect_arguments_loop JAL       ; keep going
 
 :collect_arguments_done
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -2041,12 +2041,12 @@
 ; Returns nothing
 ; Walks down global_token recursively to collect the contents of the function
 :statement
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_A0 ~open_curly_brace AUIPC     ; "{"
     RD_A0 RS1_A0 !open_curly_brace ADDI
     RD_RA $match JAL                  ; IF global_token->S == "{"
@@ -2057,7 +2057,7 @@
     $statement_done JAL               ; We are done
 
 :statement_label
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_A0 RS1_A0 LBU                  ; global_token->S[0]
     RD_T0 !58 ADDI                    ; Check if global_token->S == ':'
     RS1_A0 RS2_T0 @statement_local BNE ; otherwise try locals
@@ -2070,7 +2070,7 @@
     RD_A0 RS1_A0 !statement_string_0 ADDI
     RD_RA $emit_out JAL               ; emit it
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
     $statement_done JAL               ; We are done
 
 :statement_local
@@ -2081,7 +2081,7 @@
     RS1_A0 @statement_local_success BNEZ ; Collect new local
 
     ; Second chance
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_A0 ~struct AUIPC               ; "struct"
     RD_A0 RS1_A0 !struct ADDI
     RD_RA $match JAL                  ; IF global_token->S == "struct"
@@ -2152,8 +2152,8 @@
     RD_A0 RS1_A0 !statement_string_1 ADDI
     RD_RA $emit_out JAL               ; emit it
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_RA $emit_out JAL               ; emit it
 
     ; Deal with GOTO statement
@@ -2161,7 +2161,7 @@
     RD_A0 RS1_A0 !statement_string_2 ADDI
     RD_RA $emit_out JAL               ; emit it
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
     RD_A0 ~statement_string_4 AUIPC   ; Using "ERROR in statement\nMissing ;\n"
     RD_A0 RS1_A0 !statement_string_4 ADDI
@@ -2197,7 +2197,7 @@
     RS1_A0 @statement_else BNEZ       ; then we have a continue statement, else we are punting to an expression
 
     ; Deal with CONTINUE statement
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
     RD_A0 ~statement_string_3 AUIPC   ; Using "\n#continue statement\n"
     RD_A0 RS1_A0 !statement_string_3 ADDI
@@ -2219,10 +2219,10 @@
     RD_RA $require_match JAL          ; Make sure we have it
 
 :statement_done
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -2232,16 +2232,16 @@
 ; Walks the global_token list to build the contents of statements
 ; Uses struct token_list* frame in a2
 :recursive_statement
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
-    RD_A2 RS1_S11 !8 LD               ; frame = function->locals
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
+    RD_A2 RS1_S11 !4 LW               ; frame = function->locals
 
 :recursive_statement_loop
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_A0 ~close_curly_brace AUIPC    ; "}"
     RD_A0 RS1_A0 !close_curly_brace ADDI
     RD_RA $match JAL                  ; IF global_token->S == "}"
@@ -2252,16 +2252,16 @@
     $recursive_statement_loop JAL     ; keep looping
 
 :recursive_statement_cleanup
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
     RD_A0 ~recursive_statement_string_0 AUIPC ; Using "RETURN\n"
     RD_A0 RS1_A0 !recursive_statement_string_0 ADDI
-    RD_A1 RS1_S9 !16 LD               ; output->S
+    RD_A1 RS1_S9 !8 LW                ; output->S
     RD_RA $match JAL                  ; IF output->S == "RETURN\n"
     RS1_A0 @recursive_statement_done BEQZ ; We are done
 
     ;; Deal with cleanup
-    RD_A1 RS1_S11 !8 LD               ; i = function->locals
-    RD_A0 ~recursive_statement_string_1 AUIPC ; Using "RD_A1 RS1_SP LD	# _recursive_statement_locals..."
+    RD_A1 RS1_S11 !4 LW               ; i = function->locals
+    RD_A0 ~recursive_statement_string_1 AUIPC ; Using "RD_A1 RS1_SP LW	# _recursive_statement_locals..."
     RD_A0 RS1_A0 !recursive_statement_string_1 ADDI
 
 :recursive_statement_locals
@@ -2269,16 +2269,16 @@
 
     ; Let's emit
     RD_RA $emit_out JAL               ; emit it
-    RD_A1 RS1_A1 LD                   ; i = i->next
+    RD_A1 RS1_A1 LW                   ; i = i->next
     $recursive_statement_locals JAL   ; keep going
 
 :recursive_statement_done
-    RS1_S11 RS2_A2 @8 SD              ; function->locals = frame
+    RS1_S11 RS2_A2 @8 SW              ; function->locals = frame
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -2288,90 +2288,90 @@
 ; Walks global_token list to create function locals
 ; Uses a2 for struct token_list* A
 :collect_local
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
     RD_RA $type_name JAL              ; Get the local's type
 
     RD_A1 RS1_A0 MV                   ; Put struct type* type_size in the right place
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
-    RD_A2 RS1_S11 !8 LD               ; function->locals
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
+    RD_A2 RS1_S11 !4 LW               ; function->locals
     RD_RA $sym_declare JAL            ; Declare it
     RD_A2 RS1_A0 MV                   ; put it away safely
 
     ; Try for main
     RD_A0 ~main_string AUIPC          ; Using "main"
     RD_A0 RS1_A0 !main_string ADDI
-    RD_A1 RS1_S11 !16 LD              ; function->S
+    RD_A1 RS1_S11 !8 LW               ; function->S
     RD_RA $match JAL                  ; IF match("main", function->s)
     RS1_A0 @collect_local_fresh BNEZ  ; try to see if fresh function
 
     ; Ok we are in main, now to see if main is fresh
-    RD_A0 RS1_S11 !8 LD               ; function->locals
+    RD_A0 RS1_S11 !4 LW               ; function->locals
     RS1_A0 @collect_local_fresh BNEZ  ; try to see if fresh function
 
     ; Sweet we are in a fresh main
-    RD_A0 !32 ADDI                    ; Start at 32
-    RS1_A2 RS2_A0 @32 SD              ; a->DEPTH = 32
+    RD_A0 !16 ADDI                    ; Start at 16
+    RS1_A2 RS2_A0 @16 SW              ; a->DEPTH = 16
     $collect_local_common JAL         ; Go to the commons
 
 :collect_local_fresh
-    RD_A0 RS1_S11 !32 LD              ; function->args
+    RD_A0 RS1_S11 !16 LW              ; function->args
     RS1_A0 @collect_local_first BNEZ  ; Otherwise see if first
 
-    RD_A0 RS1_S11 !8 LD               ; function->locals
+    RD_A0 RS1_S11 !4 LW               ; function->locals
     RS1_A0 @collect_local_first BNEZ  ; Otherwise try first
 
     ; Sweet we are in a fresh function
-    RD_A0 !8 ADDI                     ; We start at 8
-    RS1_A2 RS2_A0 @32 SD              ; a->DEPTH = 8
+    RD_A0 !4 ADDI                     ; We start at 4
+    RS1_A2 RS2_A0 @16 SW              ; a->DEPTH = 4
     $collect_local_common JAL         ; Go to the commons
 
 :collect_local_first
-    RD_A0 RS1_S11 !8 LD               ; function->locals
+    RD_A0 RS1_S11 !4 LW               ; function->locals
     RS1_A0 @collect_local_else BNEZ   ; Looks like we are just another local
 
     ; Ok we are the first local
-    RD_A0 RS1_S11 !32 LD              ; function->args
-    RD_A0 RS1_A0 !32 LD               ; function->args->depth
-    RD_A0 RS1_A0 !8 ADDI              ; function->arguments->depth + 8
-    RS1_A2 RS2_A0 @32 SD              ; a->DEPTH = function->arguments->depth + 8
+    RD_A0 RS1_S11 !16 LW              ; function->args
+    RD_A0 RS1_A0 !16 LW               ; function->args->depth
+    RD_A0 RS1_A0 !4 ADDI              ; function->arguments->depth + 4
+    RS1_A2 RS2_A0 @16 SW              ; a->DEPTH = function->arguments->depth + 4
     $collect_local_common JAL         ; Go to the commons
 
 :collect_local_else
     ; Always the last to know
-    RD_A0 RS1_S11 !8 LD               ; function->locals
-    RD_A0 RS1_A0 !32 LD               ; function->locals->depth
-    RD_A0 RS1_A0 !8 ADDI              ; function->locals->depth + 8
-    RS1_A2 RS2_A0 @32 SD              ; a->DEPTH = function->locals->depth + 8
+    RD_A0 RS1_S11 !4 LW               ; function->locals
+    RD_A0 RS1_A0 !16 LW               ; function->locals->depth
+    RD_A0 RS1_A0 !4 ADDI              ; function->locals->depth + 4
+    RS1_A2 RS2_A0 @16 SW              ; a->DEPTH = function->locals->depth + 4
 
 :collect_local_common
-    RS1_S11 RS2_A2 @8 SD              ; function->locals = a
-    RD_A2 RS1_A2 !16 LD               ; a->S
+    RS1_S11 RS2_A2 @4 SW              ; function->locals = a
+    RD_A2 RS1_A2 !8 LW                ; a->S
 
     RD_A0 ~collect_local_string_0 AUIPC ; Using "# Defining local "
     RD_A0 RS1_A0 !collect_local_string_0 ADDI
     RD_RA $emit_out JAL               ; emit it
 
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_RA $emit_out JAL               ; emit it
 
     RD_A0 ~collect_local_string_1 AUIPC ; Using "\n"
     RD_A0 RS1_A0 !collect_local_string_1 ADDI
     RD_RA $emit_out JAL               ; emit it
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_A0 ~equal AUIPC                ; Using "="
     RD_A0 RS1_A0 !equal ADDI
     RD_RA $match JAL                  ; IF match("=", global_token->s)
     RS1_A0 @collect_local_done BNEZ   ; Deal with assignment, else finish it
 
     ; Deal with assignment
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
     RD_RA $expression JAL             ; Recurse
 
@@ -2382,7 +2382,7 @@
     RD_A1 RS1_A1 !semicolon ADDI
     RD_RA $require_match JAL          ; Make sure we have it
 
-    RD_A0 ~collect_local_string_3 AUIPC ; Using "RD_SP RS1_SP !-8 ADDI\nRS1_SP RS2_A0 SD\t#"
+    RD_A0 ~collect_local_string_3 AUIPC ; Using "RD_SP RS1_SP !-4 ADDI\nRS1_SP RS2_A0 SW\t#"
     RD_A0 RS1_A0 !collect_local_string_3 ADDI
     RD_RA $emit_out JAL               ; emit it
 
@@ -2393,10 +2393,10 @@
     RD_A0 RS1_A0 !collect_local_string_1 ADDI
     RD_RA $emit_out JAL               ; emit it
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -2406,10 +2406,10 @@
 ; Increments current_count recurses into expression + statement
 ; Uses a2 for char* NUMBER_STRING
 :process_if
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
     RD_A0 RS1_S10 MV                  ; Get current_count
     RD_S10 RS1_S10 !1 ADDI            ; current_count = current_count + 1
@@ -2420,11 +2420,11 @@
     RD_A0 RS1_A0 !process_if_string_0 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
     RD_A0 ~process_if_string_1 AUIPC  ; Using "ERROR in process_if\nMISSING (\n"
     RD_A0 RS1_A0 !process_if_string_1 ADDI
@@ -2438,7 +2438,7 @@
     RD_A0 RS1_A0 !process_if_string_2 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
@@ -2458,7 +2458,7 @@
     RD_A0 RS1_A0 !process_if_string_4 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
@@ -2466,18 +2466,18 @@
     RD_A0 RS1_A0 !process_if_string_5 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_A0 ~else_string AUIPC          ; Using "else"
     RD_A0 RS1_A0 !else_string ADDI
     RD_RA $match JAL                  ; IF global_token->S == "else"
     RS1_A0 @process_if_done BNEZ      ; Then we need to collect the else too, otherwise done
 
     ; deal with else statement
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
     RD_RA $statement JAL              ; Recurse to get the ELSE {...} part
 
@@ -2486,14 +2486,14 @@
     RD_A0 RS1_A0 !process_if_string_6 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -2503,10 +2503,10 @@
 ; Increments current_count and leverages save/restore_break_frame pieces
 ; Uses a2 for char* NUMBER_STRING
 :process_do
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
     RD_RA $save_break_frame JAL       ; Save the frame
     RD_A0 RS1_S10 MV                  ; Get current_count
@@ -2523,11 +2523,11 @@
     RD_A0 RS1_A0 !process_do_string_1 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
     RD_RA $statement JAL              ; Do the DO {...} part
 
@@ -2561,7 +2561,7 @@
     RD_A0 RS1_A0 !process_do_string_6 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
@@ -2569,7 +2569,7 @@
     RD_A0 RS1_A0 !process_do_string_6a ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
@@ -2577,15 +2577,15 @@
     RD_A0 RS1_A0 !process_do_string_7 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
     RD_RA $restore_break_frame JAL    ; Restore the old break frame
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -2595,10 +2595,10 @@
 ; Increments current_count and leverages save/restore_break_frame pieces
 ; Uses a2 for char* NUMBER_STRING
 :process_while
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
     RD_RA $save_break_frame JAL       ; Save the frame
     RD_A0 RS1_S10 MV                  ; Get current_count
@@ -2615,11 +2615,11 @@
     RD_A0 RS1_A0 !process_while_string_1 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
     RD_A0 ~process_while_string_2 AUIPC ; Using "ERROR in process_while\nMISSING (\n"
     RD_A0 RS1_A0 !process_while_string_2 ADDI
@@ -2633,7 +2633,7 @@
     RD_A0 RS1_A0 !process_while_string_3 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11  !8 LW              ; function->S
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
@@ -2641,7 +2641,7 @@
     RD_A0 RS1_A0 !process_while_string_4 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
@@ -2657,7 +2657,7 @@
     RD_A0 RS1_A0 !process_while_string_6 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
@@ -2665,16 +2665,16 @@
     RD_A0 RS1_A0 !process_while_string_7 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
     RD_RA $restore_break_frame JAL    ; Restore the old break frame
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -2684,10 +2684,10 @@
 ; Increments current_count and leverages save/restore_break_frame pieces
 ; Uses a2 for char* NUMBER_STRING
 :process_for
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
     RD_RA $save_break_frame JAL       ; Save the frame
     RD_A0 RS1_S10 MV                  ; Get current_count
@@ -2704,11 +2704,11 @@
     RD_A0 RS1_A0 !process_for_string_1 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
     RD_A0 ~process_for_string_2 AUIPC ; Using "ERROR in process_for\nMISSING (\n"
     RD_A0 RS1_A0 !process_for_string_2 ADDI
@@ -2716,7 +2716,7 @@
     RD_A1 RS1_A1 !open_paren ADDI
     RD_RA $require_match JAL          ; Make sure we have it
 
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_A0 ~semicolon AUIPC            ; Using ";"
     RD_A0 RS1_A0 !semicolon ADDI
     RD_RA $match JAL                  ; IF global_token->S == ";"
@@ -2730,7 +2730,7 @@
     RD_A0 RS1_A0 !process_for_string_3 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
@@ -2746,7 +2746,7 @@
     RD_A0 RS1_A0 !process_for_string_5 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
@@ -2754,14 +2754,14 @@
     RD_A0 RS1_A0 !process_for_string_6 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
     RD_A0 ~process_for_string_7 AUIPC ; Using "JAL\n:FOR_ITER_"
     RD_A0 RS1_A0 !process_for_string_7 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
     RD_A0 ~process_for_string_8 AUIPC ; Using "ERROR in process_for\nMISSING ;2\n"
@@ -2776,7 +2776,7 @@
     RD_A0 RS1_A0 !process_for_string_9 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
@@ -2784,7 +2784,7 @@
     RD_A0 RS1_A0 !process_for_string_10 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
@@ -2800,7 +2800,7 @@
     RD_A0 RS1_A0 !process_for_string_12 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
@@ -2808,16 +2808,16 @@
     RD_A0 RS1_A0 !process_for_string_13 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
     RD_RA $restore_break_frame JAL    ; Restore the old break frame
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -2827,11 +2827,11 @@
 ; Simply inlines the asm statements
 ; Uses a1 for global_token temp storage
 :process_asm
-    RD_SP RS1_SP !-16 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
+    RD_SP RS1_SP !-8 ADDI             ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
     RD_A0 ~process_asm_string_0 AUIPC ; Using "ERROR in process_asm\nMISSING (\n"
     RD_A0 RS1_A0 !process_asm_string_0 ADDI
@@ -2840,12 +2840,12 @@
     RD_RA $require_match JAL          ; Make sure we have it
 
 :process_asm_iter
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_A0 RS1_A0 LBU                  ; global_token->S[0]
     RD_T0 !34 ADDI                    ; IF global_token->S[0] == '"'
     RS1_A0 RS2_T0 @process_asm_done BNE ; Otherwise be done
 
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_A0 RS1_A0 !1 ADDI              ; global_token->S + 1
     RD_RA $emit_out JAL               ; Emit it
 
@@ -2853,7 +2853,7 @@
     RD_A0 RS1_A0 !process_asm_string_1 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
     $process_asm_iter JAL             ; keep going
 
 :process_asm_done
@@ -2869,9 +2869,9 @@
     RD_A1 RS1_A1 !semicolon ADDI
     RD_RA $require_match JAL          ; Make sure we have it
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_SP RS1_SP !16 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_SP RS1_SP !8 ADDI              ; deallocate stack
     RETURN
 
 
@@ -2881,14 +2881,14 @@
 ; Cleans up function and generates return
 ; Also handles returning expressions
 :return_result
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_A0 RS1_A0 LBU                  ; global_token->S[0]
     RD_T0 !59 ADDI                    ; ';'
     RS1_A0 RS2_T0 @return_result_cleanup BEQ ; Go straight to cleanup
@@ -2902,15 +2902,15 @@
     RD_A1 RS1_A1 !semicolon ADDI
     RD_RA $require_match JAL          ; Make sure we have it
 
-    RD_A1 RS1_S11 !8 LD               ; i = function->locals
-    RD_A0 ~return_result_string_1 AUIPC ; Using "RD_A1 RS1_SP LD\t# _return_result_locals..."
+    RD_A1 RS1_S11 !4 LW               ; i = function->locals
+    RD_A0 ~return_result_string_1 AUIPC ; Using "RD_A1 RS1_SP LW\t# _return_result_locals..."
     RD_A0 RS1_A0 !return_result_string_1 ADDI
 
 :return_result_locals
     RS1_A1 @return_result_done BEQZ   ; We are done if NULL == i
 
     RD_RA $emit_out JAL               ; Emit out pop
-    RD_A1 RS1_A1 LD                   ; i = i->NEXT
+    RD_A1 RS1_A1 LW                   ; i = i->NEXT
     $return_result_locals JAL         ; Keep going
 
 :return_result_done
@@ -2918,10 +2918,10 @@
     RD_A0 RS1_A0 !return_result_string_2 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -2931,21 +2931,21 @@
 ; Handles the break out of loops case
 ; Uses a1 for struct token_list* break_frame and a2 for struct token_list* I
 :process_break
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
     RD_T0 ~break_target_head AUIPC    ; Get break_target_head
     RD_T0 RS1_T0 !break_target_head ADDI
-    RD_A0 RS1_T0 LD                   ; Catch big error
+    RD_A0 RS1_T0 LW                   ; Catch big error
     RS1_A0 @process_break_bad BEQZ    ; Exit if IF(NULL == break_target_head)
 
-    RD_A2 RS1_S11 !8 LD               ; I = function->locals
+    RD_A2 RS1_S11 !4 LW               ; I = function->locals
     RD_T0 ~break_frame AUIPC          ; Get break_frame
     RD_T0 RS1_T0 !break_frame ADDI
-    RD_A1 RS1_T0 LD                   ; Put break_frame in the right spot
-    RD_A0 ~process_break_string_1 AUIPC ; Using "RD_A1 RS1_SP LD	# break_cleanup_locals..."
+    RD_A1 RS1_T0 LW                   ; Put break_frame in the right spot
+    RD_A0 ~process_break_string_1 AUIPC ; Using "RD_A1 RS1_SP LW	# break_cleanup_locals..."
     RD_A0 RS1_A0 !process_break_string_1 ADDI
 
 :process_break_iter
@@ -2953,23 +2953,23 @@
     RS1_A1 RS2_A2 @process_break_cleaned BEQ ; We are done IF I != break_frame
 
     RD_RA $emit_out JAL               ; Emit it
-    RD_A2 RS1_A2 LD                   ; I = I->NEXT
+    RD_A2 RS1_A2 LW                   ; I = I->NEXT
     $process_break_iter JAL           ; Keep looping
 
 :process_break_cleaned
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
     RD_A0 ~process_break_string_2 AUIPC ; Using "$"
     RD_A0 RS1_A0 !process_break_string_2 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
     RD_T0 ~break_target_head AUIPC    ; Using break_target_head
     RD_T0 RS1_T0 !break_target_head ADDI
-    RD_A0 RS1_T0 LD                   ; Get what we are in
+    RD_A0 RS1_T0 LW                   ; Get what we are in
     RD_RA $emit_out JAL               ; Emit it
 
     RD_T0 ~break_target_func AUIPC    ; Using break_target_func
     RD_T0 RS1_T0 !break_target_func ADDI
-    RD_A0 RS1_T0 LD                   ; Get what function we are in
+    RD_A0 RS1_T0 LW                   ; Get what function we are in
     RD_RA $emit_out JAL               ; Emit it
 
     RD_A0 ~underline AUIPC            ; Using "_"
@@ -2978,7 +2978,7 @@
 
     RD_T0 ~break_target_num AUIPC    ; Using break_target_num
     RD_T0 RS1_T0 !break_target_num ADDI
-    RD_A0 RS1_T0 LD                   ; Get the digits
+    RD_A0 RS1_T0 LW                   ; Get the digits
     RD_RA $emit_out JAL               ; Emit it
 
     RD_A0 ~process_break_string_3 AUIPC ; Using " JAL\n"
@@ -2991,10 +2991,10 @@
     RD_A1 RS1_A1 !semicolon ADDI
     RD_RA $require_match JAL          ; Make sure we have it
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 :process_break_bad
@@ -3015,14 +3015,14 @@
 ; Walks global_token and updates output_list
 ; Uses a0 and a1 for match and a2 for char* store
 :expression
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
     RD_RA $bitwise_expr JAL           ; Collect bitwise expressions
 
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_A0 ~equal AUIPC                ; "="
     RD_A0 RS1_A0 !equal ADDI
     RD_RA $match JAL                  ; IF global_token->S == "="
@@ -3031,8 +3031,8 @@
     ; Deal with possible assignment
     RD_A2 ~expression_string_1 AUIPC  ; Assume "RS1_A1 RS2_A0 SB\n" by default
     RD_A2 RS1_A2 !expression_string_1 ADDI
-    RD_A1 RS1_S4 !8 LD                ; global_token->prev
-    RD_A1 RS1_A1 !16 LD               ; global_token->prev->S
+    RD_A1 RS1_S4 !4 LW                ; global_token->prev
+    RD_A1 RS1_A1 !8 LW               ; global_token->prev->S
     RD_A0 ~close_bracket AUIPC        ; Using "]"
     RD_A0 RS1_A0 !close_bracket ADDI
     RD_RA $match JAL                  ; IF global_token->S == "]"
@@ -3041,8 +3041,8 @@
     ; Deal with char
     RD_A1 ~current_target AUIPC       ; Using current_target
     RD_A1 RS1_A1 !current_target ADDI
-    RD_A1 RS1_A1 LD                   ; current_target
-    RD_A1 RS1_A1 !48 LD               ; current_target->NAME
+    RD_A1 RS1_A1 LW                   ; current_target
+    RD_A1 RS1_A1 !24 LW               ; current_target->NAME
     RD_A0 ~type_char_indirect_name AUIPC ; Using "char *"
     RD_A0 RS1_A0 !type_char_indirect_name ADDI
     RD_RA $match JAL                  ; Intentional inefficiency because I feel like it
@@ -3051,7 +3051,7 @@
     $expression_common JAL            ; Looks like we have to use "RS1_A1 RS2_A0 SB\n"
 
 :expression_int
-    RD_A2 ~expression_string_0 AUIPC  ; Using "RS1_A1 RS2_A0 SD\n"
+    RD_A2 ~expression_string_0 AUIPC  ; Using "RS1_A1 RS2_A0 SW\n"
     RD_A2 RS1_A2 !expression_string_0 ADDI
 
 :expression_common
@@ -3062,13 +3062,13 @@
     RD_RA $emit_out JAL               ; Emit it
     RD_T0 ~current_target AUIPC       ; Using current_target
     RD_T0 RS1_T0 !current_target ADDI
-    RS1_T0 SD                         ; current_target = NULL
+    RS1_T0 SW                         ; current_target = NULL
     
 :expression_done
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -3078,14 +3078,14 @@
 ; Walks global_token list and updates output list
 ; Just calls other functions
 :bitwise_expr
-    RD_SP RS1_SP !-8 ADDI             ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
+    RD_SP RS1_SP !-4 ADDI             ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
 
     RD_RA $relational_expr JAL        ; Walk up the tree
     RD_RA $bitwise_expr_stub JAL      ; Let general recursion do the work
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_SP RS1_SP !4 ADDI              ; deallocate stack
     RETURN
 
 
@@ -3095,11 +3095,11 @@
 ; Just calls general_recursion a bunch
 ; Uses a0, a1, a2 and a3 for passing constants to general recursion
 :bitwise_expr_stub
-    RD_SP RS1_SP !-32 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
-    RS1_SP RS2_A3 @24 SD              ; protect a3
+    RD_SP RS1_SP !-16 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
+    RS1_SP RS2_A3 @12 SW              ; protect a3
 
     RD_A0 ~relational_expr AUIPC      ; Using relational_expr
     RD_A0 RS1_A0 !relational_expr ADDI
@@ -3108,7 +3108,7 @@
     RD_A2 ~bitwise_and AUIPC          ; Using "&"
     RD_A2 RS1_A2 !bitwise_and ADDI
     RD_A3 ~bitwise_expr_stub AUIPC    ; And recurse
-    RD_A3 RS1_A3 !bitwise_expr_stub ADDIW
+    RD_A3 RS1_A3 !bitwise_expr_stub ADDI
     RD_RA $general_recursion JAL      ; Hit it
 
     RD_A0 ~relational_expr AUIPC      ; Using relational_expr
@@ -3118,7 +3118,7 @@
     RD_A2 ~logical_and AUIPC          ; Using "&&"
     RD_A2 RS1_A2 !logical_and ADDI
     RD_A3 ~bitwise_expr_stub AUIPC    ; And recurse
-    RD_A3 RS1_A3 !bitwise_expr_stub ADDIW
+    RD_A3 RS1_A3 !bitwise_expr_stub ADDI
     RD_RA $general_recursion JAL      ; Hit it
 
     RD_A0 ~relational_expr AUIPC      ; Using relational_expr
@@ -3128,7 +3128,7 @@
     RD_A2 ~bitwise_or AUIPC           ; Using "|"
     RD_A2 RS1_A2 !bitwise_or ADDI
     RD_A3 ~bitwise_expr_stub AUIPC    ; And recurse
-    RD_A3 RS1_A3 !bitwise_expr_stub ADDIW
+    RD_A3 RS1_A3 !bitwise_expr_stub ADDI
     RD_RA $general_recursion JAL      ; Hit it
 
     RD_A0 ~relational_expr AUIPC      ; Using relational_expr
@@ -3138,7 +3138,7 @@
     RD_A2 ~logical_or AUIPC           ; Using "||"
     RD_A2 RS1_A2 !logical_or ADDI
     RD_A3 ~bitwise_expr_stub AUIPC    ; And recurse
-    RD_A3 RS1_A3 !bitwise_expr_stub ADDIW
+    RD_A3 RS1_A3 !bitwise_expr_stub ADDI
     RD_RA $general_recursion JAL      ; Hit it
 
     RD_A0 ~relational_expr AUIPC      ; Using relational_expr
@@ -3148,14 +3148,14 @@
     RD_A2 ~bitwise_xor AUIPC          ; Using "^"
     RD_A2 RS1_A2 !bitwise_xor ADDI
     RD_A3 ~bitwise_expr_stub AUIPC    ; And recurse
-    RD_A3 RS1_A3 !bitwise_expr_stub ADDIW
+    RD_A3 RS1_A3 !bitwise_expr_stub ADDI
     RD_RA $general_recursion JAL      ; Hit it
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_A3 RS1_SP !24 LD               ; restore a3
-    RD_SP RS1_SP !32 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_A3 RS1_SP !12 LW               ; restore a3
+    RD_SP RS1_SP !16 ADDI             ; deallocate stack
     RETURN
 
 
@@ -3165,14 +3165,14 @@
 ; Walks global_token list and updates output list
 ; Just calls other functions
 :relational_expr
-    RD_SP RS1_SP !-8 ADDI             ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
+    RD_SP RS1_SP !-4 ADDI             ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
 
     RD_RA $additive_expr JAL          ; Walk up the tree
     RD_RA $relational_expr_stub JAL   ; Recurse
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_SP RS1_SP !4 ADDI              ; deallocate stack
     RETURN
 
 
@@ -3182,11 +3182,11 @@
 ; Just calls general_recursion a bunch
 ; Uses a0, a1, a2 and a3 for passing constants to general recursion
 :relational_expr_stub
-    RD_SP RS1_SP !-32 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
-    RS1_SP RS2_A3 @24 SD              ; protect a3
+    RD_SP RS1_SP !-16 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
+    RS1_SP RS2_A3 @12 SW              ; protect a3
 
     RD_A0 ~additive_expr AUIPC        ; Using additive_expr
     RD_A0 RS1_A0 !additive_expr ADDI
@@ -3195,7 +3195,7 @@
     RD_A2 ~less_than_string AUIPC     ; Using "<"
     RD_A2 RS1_A2 !less_than_string ADDI
     RD_A3 ~relational_expr_stub AUIPC ; And recurse
-    RD_A3 RS1_A3 !relational_expr_stub ADDIW
+    RD_A3 RS1_A3 !relational_expr_stub ADDI
     RD_RA $general_recursion JAL      ; Hit it
 
     RD_A0 ~additive_expr AUIPC        ; Using additive_expr
@@ -3205,7 +3205,7 @@
     RD_A2 ~less_than_equal_string AUIPC ; Using "<="
     RD_A2 RS1_A2 !less_than_equal_string ADDI
     RD_A3 ~relational_expr_stub AUIPC ; And recurse
-    RD_A3 RS1_A3 !relational_expr_stub ADDIW
+    RD_A3 RS1_A3 !relational_expr_stub ADDI
     RD_RA $general_recursion JAL      ; Hit it
 
     RD_A0 ~additive_expr AUIPC        ; Using additive_expr
@@ -3215,7 +3215,7 @@
     RD_A2 ~greater_than_equal_string AUIPC ; Using ">="
     RD_A2 RS1_A2 !greater_than_equal_string ADDI
     RD_A3 ~relational_expr_stub AUIPC ; And recurse
-    RD_A3 RS1_A3 !relational_expr_stub ADDIW
+    RD_A3 RS1_A3 !relational_expr_stub ADDI
     RD_RA $general_recursion JAL      ; Hit it
 
     RD_A0 ~additive_expr AUIPC        ; Using additive_expr
@@ -3225,7 +3225,7 @@
     RD_A2 ~greater_than_string AUIPC  ; Using ">"
     RD_A2 RS1_A2 !greater_than_string ADDI
     RD_A3 ~relational_expr_stub AUIPC ; And recurse
-    RD_A3 RS1_A3 !relational_expr_stub ADDIW
+    RD_A3 RS1_A3 !relational_expr_stub ADDI
     RD_RA $general_recursion JAL      ; Hit it
 
     RD_A0 ~additive_expr AUIPC        ; Using additive_expr
@@ -3235,7 +3235,7 @@
     RD_A2 ~equal_to_string AUIPC      ; Using "=="
     RD_A2 RS1_A2 !equal_to_string ADDI
     RD_A3 ~relational_expr_stub AUIPC ; And recurse
-    RD_A3 RS1_A3 !relational_expr_stub ADDIW
+    RD_A3 RS1_A3 !relational_expr_stub ADDI
     RD_RA $general_recursion JAL      ; Hit it
 
     RD_A0 ~additive_expr AUIPC        ; Using additive_expr
@@ -3245,14 +3245,14 @@
     RD_A2 ~not_equal_string AUIPC     ; Using "!="
     RD_A2 RS1_A2 !not_equal_string ADDI
     RD_A3 ~relational_expr_stub AUIPC ; And recurse
-    RD_A3 RS1_A3 !relational_expr_stub ADDIW
+    RD_A3 RS1_A3 !relational_expr_stub ADDI
     RD_RA $general_recursion JAL      ; Hit it
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_A3 RS1_SP !24 LD               ; restore a3
-    RD_SP RS1_SP !32 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_A3 RS1_SP !12 LW               ; restore a3
+    RD_SP RS1_SP !16 ADDI             ; deallocate stack
     RETURN
 
 
@@ -3262,14 +3262,14 @@
 ; Walks global_token list and updates output list
 ; Just calls other functions
 :additive_expr
-    RD_SP RS1_SP !-8 ADDI             ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
+    RD_SP RS1_SP !-4 ADDI             ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
 
     RD_RA $postfix_expr JAL           ; Walk up the tree
     RD_RA $additive_expr_stub JAL     ; Recurse
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_SP RS1_SP !4 ADDI              ; deallocate stack
     RETURN
 
 
@@ -3279,11 +3279,11 @@
 ; Just calls general_recursion a bunch
 ; Uses a0, a1, a2 and a3 for passing constants to general recursion
 :additive_expr_stub
-    RD_SP RS1_SP !-32 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
-    RS1_SP RS2_A3 @24 SD              ; protect a3
+    RD_SP RS1_SP !-16 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
+    RS1_SP RS2_A3 @12 SW              ; protect a3
 
     RD_A0 ~postfix_expr AUIPC         ; Using postfix_expr
     RD_A0 RS1_A0 !postfix_expr ADDI
@@ -3292,7 +3292,7 @@
     RD_A2 ~plus_string AUIPC          ; Using "+"
     RD_A2 RS1_A2 !plus_string ADDI
     RD_A3 ~additive_expr_stub AUIPC   ; And recurse
-    RD_A3 RS1_A3 !additive_expr_stub ADDIW
+    RD_A3 RS1_A3 !additive_expr_stub ADDI
     RD_RA $general_recursion JAL      ; Hit it
 
     RD_A0 ~postfix_expr AUIPC         ; Using postfix_expr
@@ -3302,7 +3302,7 @@
     RD_A2 ~minus_string AUIPC         ; Using "-"
     RD_A2 RS1_A2 !minus_string ADDI
     RD_A3 ~additive_expr_stub AUIPC   ; And recurse
-    RD_A3 RS1_A3 !additive_expr_stub ADDIW
+    RD_A3 RS1_A3 !additive_expr_stub ADDI
     RD_RA $general_recursion JAL      ; Hit it
 
     RD_A0 ~postfix_expr AUIPC         ; Using postfix_expr
@@ -3312,7 +3312,7 @@
     RD_A2 ~multiply_string AUIPC      ; Using "*"
     RD_A2 RS1_A2 !multiply_string ADDI
     RD_A3 ~additive_expr_stub AUIPC   ; And recurse
-    RD_A3 RS1_A3 !additive_expr_stub ADDIW
+    RD_A3 RS1_A3 !additive_expr_stub ADDI
     RD_RA $general_recursion JAL      ; Hit it
 
     RD_A0 ~postfix_expr AUIPC         ; Using postfix_expr
@@ -3322,7 +3322,7 @@
     RD_A2 ~divide_string AUIPC        ; Using "/"
     RD_A2 RS1_A2 !divide_string ADDI
     RD_A3 ~additive_expr_stub AUIPC   ; And recurse
-    RD_A3 RS1_A3 !additive_expr_stub ADDIW
+    RD_A3 RS1_A3 !additive_expr_stub ADDI
     RD_RA $general_recursion JAL      ; Hit it
 
     RD_A0 ~postfix_expr AUIPC         ; Using postfix_expr
@@ -3332,7 +3332,7 @@
     RD_A2 ~modulus_string AUIPC       ; Using "%"
     RD_A2 RS1_A2 !modulus_string ADDI
     RD_A3 ~additive_expr_stub AUIPC   ; And recurse
-    RD_A3 RS1_A3 !additive_expr_stub ADDIW
+    RD_A3 RS1_A3 !additive_expr_stub ADDI
     RD_RA $general_recursion JAL      ; Hit it
 
     RD_A0 ~postfix_expr AUIPC         ; Using postfix_expr
@@ -3342,7 +3342,7 @@
     RD_A2 ~left_shift_string AUIPC    ; Using "<<"
     RD_A2 RS1_A2 !left_shift_string ADDI
     RD_A3 ~additive_expr_stub AUIPC   ; And recurse
-    RD_A3 RS1_A3 !additive_expr_stub ADDIW
+    RD_A3 RS1_A3 !additive_expr_stub ADDI
     RD_RA $general_recursion JAL      ; Hit it
 
     RD_A0 ~postfix_expr AUIPC         ; Using postfix_expr
@@ -3352,14 +3352,14 @@
     RD_A2 ~right_shift_string AUIPC   ; Using ">>"
     RD_A2 RS1_A2 !right_shift_string ADDI
     RD_A3 ~additive_expr_stub AUIPC   ; And recurse
-    RD_A3 RS1_A3 !additive_expr_stub ADDIW
+    RD_A3 RS1_A3 !additive_expr_stub ADDI
     RD_RA $general_recursion JAL      ; Hit it
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_A3 RS1_SP !24 LD               ; restore a3
-    RD_SP RS1_SP !32 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_A3 RS1_SP !12 LW               ; restore a3
+    RD_SP RS1_SP !16 ADDI             ; deallocate stack
     RETURN
 
 
@@ -3369,14 +3369,14 @@
 ; Walks global_token list and updates output list
 ; just calls other function
 :postfix_expr
-    RD_SP RS1_SP !-8 ADDI             ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
+    RD_SP RS1_SP !-4 ADDI             ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
 
     RD_RA $primary_expr JAL           ; Walk up the tree
     RD_RA $postfix_expr_stub JAL      ; Recurse
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_SP RS1_SP !4 ADDI              ; deallocate stack
     RETURN
 
 
@@ -3386,11 +3386,11 @@
 ; Checks for "[" and "->" and deals with them otherwise does nothing
 ; Uses a0, a1, a2 and a3 for passing constants to general recursion
 :postfix_expr_stub
-    RD_SP RS1_SP !-16 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
+    RD_SP RS1_SP !-8 ADDI             ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
 
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_A0 ~open_bracket AUIPC         ; Using "["
     RD_A0 RS1_A0 !open_bracket ADDI
     RD_RA $match JAL                  ; IF global_token->S == "["
@@ -3411,9 +3411,9 @@
     RD_RA $postfix_expr_stub JAL      ; Recurse
 
 :postfix_expr_stub_done
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_SP RS1_SP !16 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_SP RS1_SP !8 ADDI              ; deallocate stack
     RETURN
 
 
@@ -3422,12 +3422,12 @@
 ; Returns nothing
 ; Uses a2 for A->SIZE
 :unary_expr_sizeof
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
     RD_A0 ~unary_expr_sizeof_string_0 AUIPC ; Using "ERROR in unary_expr\nMissing (\n"
     RD_A0 RS1_A0 !unary_expr_sizeof_string_0 ADDI
@@ -3436,7 +3436,7 @@
     RD_RA $require_match JAL          ; Make sure we have it
 
     RD_RA $type_name JAL              ; Get the type
-    RD_A2 RS1_A0 !8 LD                ; Set A->TYPE
+    RD_A2 RS1_A0 !4 LW                ; Set A->TYPE
 
     RD_A0 ~unary_expr_sizeof_string_1 AUIPC ; Using "ERROR in unary_expr\nMissing )\n"
     RD_A0 RS1_A0 !unary_expr_sizeof_string_1 ADDI
@@ -3456,10 +3456,10 @@
     RD_A0 RS1_A0 !unary_expr_sizeof_string_3 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -3468,32 +3468,32 @@
 ; Returns Nothing
 ; Uses a1 for struct type* ARRAY and a2 for char* ASSIGN
 :postfix_expr_array
-    RD_SP RS1_SP !-32 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-16 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
     RD_A0 ~current_target AUIPC       ; Using current_target
     RD_A0 RS1_A0 !current_target ADDI
-    RD_A0 RS1_A0 LD                   ; ARRAY = current_target
-    RS1_SP RS2_A0 @24 SD              ; Protect it
+    RD_A0 RS1_A0 LW                   ; ARRAY = current_target
+    RS1_SP RS2_A0 @12 SW              ; Protect it
 
     RD_A0 ~expression AUIPC           ; Using expression
     RD_A0 RS1_A0 !expression ADDI
     RD_RA $common_recursion JAL       ; Recurse
 
-    RD_A1 RS1_SP !24 LD               ; Restore array
+    RD_A1 RS1_SP !12 LW               ; Restore array
     RD_A0 ~current_target AUIPC       ; Using current_target
     RD_A0 RS1_A0 !current_target ADDI
-    RS1_A0 RS2_A1 SD                  ; current_target = ARRAY
-    RD_A1 RS1_A0 LD                   ; Dereferece current_target
+    RS1_A0 RS2_A1 SW                  ; current_target = ARRAY
+    RD_A1 RS1_A0 LW                   ; Dereferece current_target
 
-    RD_A2 ~postfix_expr_array_string_0 AUIPC ; ASSIGN = "RD_A0 RS1_A0 LD\n"
+    RD_A2 ~postfix_expr_array_string_0 AUIPC ; ASSIGN = "RD_A0 RS1_A0 LW\n"
     RD_A2 RS1_A2 !postfix_expr_array_string_0 ADDI
 
     RD_A0 ~type_char_indirect_name AUIPC ; Using "char*"
     RD_A0 RS1_A0 !type_char_indirect_name ADDI
-    RD_A1 RS1_A1 !48 LD               ; current_target->NAME
+    RD_A1 RS1_A1 !24 LW               ; current_target->NAME
     RD_RA $match JAL                  ; IF current_target->NAME == "char*"
     RS1_A0 @postfix_expr_array_large BNEZ ; load a byte. otherwise adjust
 
@@ -3509,9 +3509,9 @@
 
     RD_A0 ~current_target AUIPC       ; Using current_target
     RD_A0 RS1_A0 !current_target ADDI
-    RD_A0 RS1_A0 LD                   ; current_target
-    RD_A0 RS1_A0 !24 LD               ; current_target->INDIRECT
-    RD_A0 RS1_A0 !8 LD                ; current_target->INDIRECT->SIZE
+    RD_A0 RS1_A0 LW                   ; current_target
+    RD_A0 RS1_A0 !12 LW               ; current_target->INDIRECT
+    RD_A0 RS1_A0 !4 LW                ; current_target->INDIRECT->SIZE
     RD_RA $ceil_log2 JAL              ; ceil_log2(current_target->indirect->size)
     RD_RA $numerate_number JAL        ; numerate_number(ceil_log2(current_target->indirect->size))
     RD_RA $emit_out JAL               ; Emit it
@@ -3531,7 +3531,7 @@
     RD_A1 RS1_A1 !close_bracket ADDI
     RD_RA $require_match JAL          ; Make sure we have it
 
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_A0 ~equal AUIPC                ; Using "="
     RD_A0 RS1_A0 !equal ADDI
     RD_RA $match JAL                  ; IF global_token->S == "="
@@ -3545,10 +3545,10 @@
     RD_A0 RS1_A2 MV                   ; Using ASSIGN
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !32 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !16 ADDI             ; deallocate stack
     RETURN
 
 
@@ -3558,10 +3558,10 @@
 ; Returns result in a0
 ; Uses a1 for INT A and a2 for INT RESULT
 :ceil_log2
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
     RS2_A0 MV                         ; RESULT = 0
 
@@ -3581,10 +3581,10 @@
 
 :ceil_log2_done
     RD_A0 RS1_A2 MV                   ; Return RESULT
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -3594,30 +3594,30 @@
 ; Emits a bunch and updates current_target
 ; Uses a1 for struct type* I
 :postfix_expr_arrow
-    RD_SP RS1_SP !-16 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
+    RD_SP RS1_SP !-8 ADDI             ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
 
     RD_A0 ~postfix_expr_arrow_string_0 AUIPC ; Using "# looking up offset\n"
     RD_A0 RS1_A0 !postfix_expr_arrow_string_0 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_A0 ~current_target AUIPC       ; Using current_target
     RD_A0 RS1_A0 !current_target ADDI
-    RD_A0 RS1_A0 LD                   ; current_target
+    RD_A0 RS1_A0 LW                   ; current_target
     RD_RA $lookup_member JAL          ; lookup_member(current_target, global_token->s)
     RD_A1 RS1_A0 MV                   ; struct type* I = lookup_member(current_target, global_token->s)
 
-    RD_A0 RS1_A0 !40 LD               ; I->TYPE
+    RD_A0 RS1_A0 !20 LW               ; I->TYPE
     RD_T0 ~current_target AUIPC       ; Using current_target
     RD_T0 RS1_T0 !current_target ADDI
-    RS1_T0 RS2_A0 SD                  ; current_target = I->TYPE
+    RS1_T0 RS2_A0 SW                  ; current_target = I->TYPE
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
-    RD_A0 RS1_A1 !16 LD               ; I->OFFSET
+    RD_A0 RS1_A1 !8 LW                ; I->OFFSET
     RS1_A0 @postfix_expr_arrow_first BEQZ ; IF 0 != I->OFFSET then we don't need to do an offset
 
     ; Deal with needing an offset
@@ -3625,7 +3625,7 @@
     RD_A0 RS1_A0 !postfix_expr_arrow_string_1 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_A1 !16 LD               ; I->OFFSET
+    RD_A0 RS1_A1 !8 LW                ; I->OFFSET
     RD_RA $numerate_number JAL        ; Convert to string
     RD_RA $emit_out JAL               ; Emit it
 
@@ -3634,26 +3634,26 @@
     RD_RA $emit_out JAL               ; Emit it
 
 :postfix_expr_arrow_first
-    RD_A0 RS1_A1 !8 LD                ; I->SIZE
+    RD_A0 RS1_A1 !4 LW                ; I->SIZE
     RD_T0 !4 ADDI                     ; 4
     RS1_A0 RS2_T0 @postfix_expr_arrow_done BLT ; Check IF I->SIZE >= 4, otherwise be done
 
     ; Last chance for load
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_A0 ~equal AUIPC                ; Using "="
     RD_A0 RS1_A0 !equal ADDI
     RD_RA $match JAL                  ; IF global_token->S == "="
     RS1_A0 @postfix_expr_arrow_done BEQZ ; Then we have assignment and should not load
 
     ; Deal with load case
-    RD_A0 ~postfix_expr_arrow_string_3 AUIPC ; Using "RD_A0 RS1_A0 LD\n"
+    RD_A0 ~postfix_expr_arrow_string_3 AUIPC ; Using "RD_A0 RS1_A0 LW\n"
     RD_A0 RS1_A0 !postfix_expr_arrow_string_3 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
 :postfix_expr_arrow_done
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_SP RS1_SP !16 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_SP RS1_SP !8 ADDI              ; deallocate stack
     RETURN
 
 
@@ -3661,11 +3661,11 @@
 ; Receives nothing
 ; Returns nothing
 :primary_expr
-    RD_SP RS1_SP !-16 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
+    RD_SP RS1_SP !-8 ADDI             ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
 
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_A0 ~sizeof_string AUIPC        ; Using postfix_expr
     RD_A0 RS1_A0 !sizeof_string ADDI
     RD_RA $match JAL                  ; See if match
@@ -3676,7 +3676,7 @@
     $primary_expr_done JAL            ; We are done
 
 :primary_expr_neg
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_A0 RS1_A0 LBU                  ; global_token->S[0]
     RD_T0 !45 ADDI                    ; "-"
     RS1_A0 RS2_T0 @primary_expr_not BNE ; Try negative IF global_token->S[0] == "-", else NOT
@@ -3696,7 +3696,7 @@
     $primary_expr_done JAL            ; We are done
 
 :primary_expr_not
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_A0 RS1_A0 LBU                  ; global_token->S[0]
     RD_T0 !33 ADDI                    ; IF global_token->S[0] == "!"
     RS1_A0 RS2_T0 @primary_expr_bin BNE ; Otherwise try '~'
@@ -3716,7 +3716,7 @@
     $primary_expr_done JAL            ; We are done
 
 :primary_expr_bin
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !16 LW               ; global_token->S
     RD_A0 RS1_A0 LBU                  ; global_token->S[0]
     RD_T0 !126 ADDI                   ; IF global_token->S[0] == "~"
     RS1_A0 RS2_T0 @primary_expr_paren BNE ; Otherwise try paren
@@ -3735,13 +3735,13 @@
     $primary_expr_done JAL            ; We are done
 
 :primary_expr_paren
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_A0 RS1_A0 LBU                  ; global_token->S[0]
     RD_T0 !40 ADDI                    ; IF global_token->S[0] == "("
     RS1_A0 RS2_T0 @primary_expr_ch BNE ; Otherwise try paren
 
     ; deal with nesting
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
     RD_RA $expression JAL             ; Lets recurse
 
     RD_A0 ~primary_expr_string_5 AUIPC ; Using Error in Primary expression\nDidn't get )\n"
@@ -3752,7 +3752,7 @@
     $primary_expr_done JAL            ; We are done
 
 :primary_expr_ch
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_A0 RS1_A0 LBU                  ; global_token->S[0]
     RD_T0 !39 ADDI                    ; IF global_token->S[0] == "'"
     RS1_A0 RS2_T0 @primary_expr_str BNE ; Otherwise try string
@@ -3762,7 +3762,7 @@
     $primary_expr_done JAL            ; We are done
 
 :primary_expr_str
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_A0 RS1_A0 LBU                  ; global_token->S[0]
     RD_T0 !34 ADDI                    ; IF global_token->S[0] == '"'
     RS1_A0 RS2_T0 @primary_expr_var BNE ; Otherwise try variable
@@ -3772,7 +3772,7 @@
     $primary_expr_done JAL            ; We are done
 
 :primary_expr_var
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_A0 RS1_A0 LBU                  ; global_token->S[0]
     RD_A1 ~primary_expr_string_6 AUIPC ; Using "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
     RD_A1 RS1_A1 !primary_expr_string_6 ADDI
@@ -3784,7 +3784,7 @@
     $primary_expr_done JAL            ; We are done
 
 :primary_expr_num
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_A0 RS1_A0 LBU                  ; global_token->S[0]
     RD_A1 ~primary_expr_string_7 AUIPC ; Using "0123456789"
     RD_A1 RS1_A1 !primary_expr_string_7 ADDI
@@ -3801,9 +3801,9 @@
     RD_RA $primary_expr_failure JAL   ; No match means failure
 
 :primary_expr_done
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_SP RS1_SP !16 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_SP RS1_SP !8 ADDI              ; deallocate stack
     RETURN
 
 
@@ -3813,13 +3813,13 @@
 ; Walks global and updates output
 ; Uses a0 for struct token_list* a and a2 for char* S
 :primary_expr_variable
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
-    RD_A2 RS1_S4 !16 LD               ; global_token->S
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_A2 RS1_S4 !8 LW                ; global_token->S
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
     RD_A0 RS1_A2 MV                   ; Using S
     RD_A1 RS1_S5 MV                   ; Using global_constant_list
@@ -3827,29 +3827,29 @@
     RS1_A0 @primary_expr_variable_local BEQZ ; Try locals next
 
     ; Deal with constant load
-    RD_A1 RS1_A0 !32 LD               ; a->ARGS
+    RD_A1 RS1_A0 !16 LW               ; a->ARGS
     RD_A0 ~primary_expr_variable_string_1 AUIPC ; Using "RD_A0 ~"
     RD_A0 RS1_A0 !primary_expr_variable_string_1 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_A1 !16 LD               ; a->ARGS->S
+    RD_A0 RS1_A1 !8 LW                ; a->ARGS->S
     RD_RA $emit_out JAL               ; Emit it
 
     RD_A0 ~primary_expr_variable_string_2 AUIPC ; Using " LUI\nRD_A0 RS1_A0 !"
     RD_A0 RS1_A0 !primary_expr_variable_string_2 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_A1 !16 LD               ; a->ARGS->S
+    RD_A0 RS1_A1 !8 LW                ; a->ARGS->S
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 ~primary_expr_variable_string_3 AUIPC ; Using " ADDIW\n"
+    RD_A0 ~primary_expr_variable_string_3 AUIPC ; Using " ADDI\n"
     RD_A0 RS1_A0 !primary_expr_variable_string_3 ADDI
     RD_RA $emit_out JAL               ; Emit it
     $primary_expr_variable_done JAL   ; Be done
 
 :primary_expr_variable_local
     RD_A0 RS1_A2 MV                   ; Using S
-    RD_A1 RS1_S11 !8 LD               ; function->locals
+    RD_A1 RS1_S11 !4 LW               ; function->locals
     RD_RA $sym_lookup JAL             ; sym_lookup(s, function->locals)
     RS1_A0 @primary_expr_variable_arguments BEQZ ; IF NULL == sym_lookup(s, function->locals)
 
@@ -3859,7 +3859,7 @@
 
 :primary_expr_variable_arguments
     RD_A0 RS1_A2 MV                   ; Using S
-    RD_A1 RS1_S11 !32 LD              ; function->args
+    RD_A1 RS1_S11 !16 LW              ; function->args
     RD_RA $sym_lookup JAL             ; sym_lookup(s, function->args)
     RS1_A0 @primary_expr_variable_function BEQZ ; IF NULL == sym_lookup(s, function->args)
 
@@ -3899,10 +3899,10 @@
     $Fail JAL                         ; Abort Hard
 
 :primary_expr_variable_done
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -3911,12 +3911,12 @@
 ; Builds stack frames before and tears them down after function calls
 ; Uses a2 for char* S, a3 for int BOOL, a4 for PASSED
 :function_call
-    RD_SP RS1_SP !-40 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
-    RS1_SP RS2_A3 @24 SD              ; protect a3
-    RS1_SP RS2_A4 @32 SD              ; protect a4
+    RD_SP RS1_SP !-20 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
+    RS1_SP RS2_A3 @12 SW              ; protect a3
+    RS1_SP RS2_A4 @16 SW              ; protect a4
 
     RD_A2 RS1_A0 MV                   ; Put S in place
     RD_A3 RS1_A1 MV                   ; Put BOOL in place
@@ -3928,15 +3928,15 @@
     RD_A1 RS1_A1 !open_paren ADDI
     RD_RA $require_match JAL          ; Make sure we have it
 
-    RD_A0 ~function_call_string_1 AUIPC ; Using "RD_SP RS1_SP !-24 ADDI\nRS1_SP RS2_RA @8 SD\t# Protect the old return pointer\n"
+    RD_A0 ~function_call_string_1 AUIPC ; Using "RD_SP RS1_SP !-12 ADDI\nRS1_SP RS2_RA @4 SW\t# Protect the old return pointer\n"
     RD_A0 RS1_A0 !function_call_string_1 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 ~function_call_string_2 AUIPC ; Using "RS1_SP RS2_FP SD\t# Protect the old frame pointer\n"
+    RD_A0 ~function_call_string_2 AUIPC ; Using "RS1_SP RS2_FP SW\t# Protect the old frame pointer\n"
     RD_A0 RS1_A0 !function_call_string_2 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 ~function_call_string_2a AUIPC ; Using "RS1_SP RS2_TP @16 SD\t# Protect temp register we are going to use\n"
+    RD_A0 ~function_call_string_2a AUIPC ; Using "RS1_SP RS2_TP @8 SW\t# Protect temp register we are going to use\n"
     RD_A0 RS1_A0 !function_call_string_2a ADDI
     RD_RA $emit_out JAL               ; Emit it
 
@@ -3948,29 +3948,29 @@
     ;RD_A0 RS1_A0 !function_call_string_3 ADDI
     ;RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_A0 RS1_A0 LBU                  ; global_token->S[0]
     RD_T0 !41 ADDI                    ; ")"
     RS1_A0 RS2_T0 @function_call_gen_done BEQ ; IF global_token->S[0] == ")" then no arguments to send
 
     ; looks like we have arguments to collect
     RD_RA $expression JAL             ; Collect the argument
-    RD_A0 ~function_call_string_4 AUIPC ; Using "RD_SP RS1_SP !-8 ADDI\nRS1_SP RS2_A0 SD\t#_process_expression1\n"
+    RD_A0 ~function_call_string_4 AUIPC ; Using "RD_SP RS1_SP !-4 ADDI\nRS1_SP RS2_A0 SW\t#_process_expression1\n"
     RD_A0 RS1_A0 !function_call_string_4 ADDI
     RD_RA $emit_out JAL               ; Emit it
     RD_A4 !1 ADDI                     ; PASSED = 1
 
 :function_call_gen_iter
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !4 LW                ; global_token->S
     RD_A0 RS1_A0 LBU                  ; global_token->S[0]
     RD_T0 !44 ADDI                    ; ","
     RS1_A0 RS2_T0 @function_call_gen_done BNE ; Check IF global_token->S[0] == ","
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
     RD_RA $expression JAL             ; Collect the argument
 
-    RD_A0 ~function_call_string_5 AUIPC ; Using "RD_SP RS1_SP !-8 ADDI\nRS1_SP RS2_A0 SD\t#_process_expression2\n"
+    RD_A0 ~function_call_string_5 AUIPC ; Using "RD_SP RS1_SP !-4 ADDI\nRS1_SP RS2_A0 SW\t#_process_expression2\n"
     RD_A0 RS1_A0 !function_call_string_5 ADDI
     RD_RA $emit_out JAL               ; Emit it
     RD_A4 RS1_A4 !1 ADDI              ; PASSED = PASSED + 1
@@ -3978,7 +3978,7 @@
 
 :function_call_gen_done
     ; All is collected
-    RD_A0 ~function_call_string_6 AUIPC ; Using "ERROR in process_expression_list\nNo ) was found\n"
+    RD_A0 ~function_call_string_6 AUIPC ; Using "ERROR in process_expression_list\nNo ) was found\n" SD\t#_process_expression2\n"
     RD_A0 RS1_A0 !function_call_string_6 ADDI
     RD_A1 ~close_paren AUIPC          ; Using ")"
     RD_A1 RS1_A1 !close_paren ADDI
@@ -3994,7 +3994,7 @@
     RD_A0 RS1_A2 MV                   ; Using S
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 ~function_call_string_8 AUIPC ; Using " ADDI\nRD_A0 RS1_A0 LD\n"
+    RD_A0 ~function_call_string_8 AUIPC ; Using " ADDI\nRD_A0 RS1_A0 LW\n"
     RD_A0 RS1_A0 !function_call_string_8 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
@@ -4006,7 +4006,7 @@
     RD_A0 RS1_A0 !function_call_string_10 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 ~function_call_string_13 AUIPC ; Using "RD_A1 RS1_SP LD\t# _process_expression_locals\nRD_SP RS1_SP !8 ADDI\n"
+    RD_A0 ~function_call_string_13 AUIPC ; Using "RD_A1 RS1_SP LW\t# _process_expression_locals\nRD_SP RS1_SP !4 ADDI\n"
     RD_A0 RS1_A0 !function_call_string_13 ADDI
     $function_call_cleanup JAL        ; Clean up
 
@@ -4028,7 +4028,7 @@
     RD_A0 RS1_A0 !function_call_string_12 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 ~function_call_string_13 AUIPC ; Using "RD_A1 RS1_SP LD\t# _process_expression_locals\nRD_SP RS1_SP !8 ADDI\n"
+    RD_A0 ~function_call_string_13 AUIPC ; Using "RD_A1 RS1_SP LW\t# _process_expression_locals\nRD_SP RS1_SP !4 ADDI\n"
     RD_A0 RS1_A0 !function_call_string_13 ADDI
 
 :function_call_cleanup
@@ -4041,24 +4041,24 @@
     $function_call_cleanup JAL        ; Keep going
 
 :function_call_done
-    RD_A0 ~function_call_string_14 AUIPC ; Using "RD_FP RS1_SP LD\t# Restore old frame pointer\n"
+    RD_A0 ~function_call_string_14 AUIPC ; Using "RD_FP RS1_SP LW\t# Restore old frame pointer\n"
     RD_A0 RS1_A0 !function_call_string_14 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 ~function_call_string_14a AUIPC ; Using "RD_TP RS1_SP !16 LD\t# Restore temp register\n"
+    RD_A0 ~function_call_string_14a AUIPC ; Using "RD_TP RS1_SP !8 LW\t# Restore temp register\n"
     RD_A0 RS1_A0 !function_call_string_14a ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 ~function_call_string_15 AUIPC ; Using "RD_RA RS1_SP !8 LD\t# Restore return address\nRD_SP RS1_SP !24 ADDI\n"
+    RD_A0 ~function_call_string_15 AUIPC ; Using "RD_RA RS1_SP !4 LW\t# Restore return address\nRD_SP RS1_SP !12 ADDI\n"
     RD_A0 RS1_A0 !function_call_string_15 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_A3 RS1_SP !24 LD               ; restore a3
-    RD_A4 RS1_SP !32 LD               ; restore a4
-    RD_SP RS1_SP !40 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_A3 RS1_SP !12 LW               ; restore a3
+    RD_A4 RS1_SP !16 LW               ; restore a4
+    RD_SP RS1_SP !20 ADDI             ; deallocate stack
     RETURN
 
 
@@ -4068,45 +4068,45 @@
 ; Updates output and current_target
 ; Uses a2 for A
 :variable_load
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
     RD_A2 RS1_A0 MV                   ; Protect A
 
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_A0 ~open_paren AUIPC           ; "("
     RD_A0 RS1_A0 !open_paren ADDI
     RD_RA $match JAL                  ; Might be a function IF global_token->S == "("
     RS1_A0 @variable_load_regular BNEZ ; Otherwise it is regular
 
-    RD_A1 RS1_A2 !24 LD               ; A->TYPE
-    RD_A1 RS1_A1 !48 LD               ; A->TYPE->NAME
+    RD_A1 RS1_A2 !12 LW               ; A->TYPE
+    RD_A1 RS1_A1 !24 LW               ; A->TYPE->NAME
     RD_A0 ~type_function_name AUIPC   ; Using "FUNCTION"
     RD_A0 RS1_A0 !type_function_name ADDI
     RD_RA $match JAL                  ; IF A->TYPE->NAME == "FUNCTION"
     RS1_A0 @variable_load_regular BNEZ ; then it mus be a function, otherwise another regular
 
     ; deal with function
-    RD_A0 RS1_A2 !32 LD               ; A->DEPTH
+    RD_A0 RS1_A2 !16 LW               ; A->DEPTH
     RD_RA $numerate_number JAL        ; Convert to string
     RD_A1 MV                          ; pass 0 for true
     RD_RA $function_call JAL          ; Create the function call
     $variable_load_done JAL           ; Be done
 
 :variable_load_regular
-    RD_A0 RS1_A2 !24 LD               ; A->TYPE
+    RD_A0 RS1_A2 !12 LW               ; A->TYPE
     RD_T0 ~current_target AUIPC       ; Using current_target
     RD_T0 RS1_T0 !current_target ADDI
-    RS1_T0 RS2_A0 SD                  ; current_target = A->TYPE
+    RS1_T0 RS2_A0 SW                  ; current_target = A->TYPE
 
     RD_A0 ~variable_load_string_0 AUIPC ; Using "RD_A0 RS1_FP !-"
     RD_A0 RS1_A0 !variable_load_string_0 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
     RD_A0 RS1_A2 MV
-    RD_A0 RS1_A2 !32 LD               ; A->DEPTH
+    RD_A0 RS1_A2 !16 LW               ; A->DEPTH
     RD_RA $numerate_number JAL        ; Convert to string
     RD_RA $emit_out JAL               ; Emit it
 
@@ -4115,22 +4115,22 @@
     RD_RA $emit_out JAL               ; Emit it
 
     ; Check for special case of assignment
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_A0 ~equal AUIPC                ; Using "="
     RD_A0 RS1_A0 !equal ADDI
     RD_RA $match JAL                  ; IF global_token->S == "="
     RS1_A0 @variable_load_done BEQZ   ; Then we skip loading
 
     ; Deal with common case
-    RD_A0 ~variable_load_string_2 AUIPC ; Using "RD_A0 RS1_A0 LD\n"
+    RD_A0 ~variable_load_string_2 AUIPC ; Using "RD_A0 RS1_A0 LW\n"
     RD_A0 RS1_A0 !variable_load_string_2 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
 :variable_load_done
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -4139,14 +4139,14 @@
 ; Returns nothing
 ; Uses a2 to hold A->S
 :function_load
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
-    RD_A0 RS1_A0 !16 LD               ; A->S
+    RD_A0 RS1_A0 !8 LW                ; A->S
     RD_A2 RS1_A0 MV                   ; Protect A->S
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_A0 ~open_paren AUIPC           ; Using "("
     RD_A0 RS1_A0 !open_paren ADDI
     RD_RA $match JAL                  ; IF global_token->S == "("
@@ -4173,15 +4173,15 @@
     RD_A0 RS1_A2 MV                   ; Using A->S
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 ~function_load_string_2 AUIPC ; Using " ADDIW\n"
+    RD_A0 ~function_load_string_2 AUIPC ; Using " ADDI\n"
     RD_A0 RS1_A0 !function_load_string_2 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
 :function_load_done
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -4190,17 +4190,17 @@
 ; Returns nothing
 ; Uses a1 to hold A->S
 :global_load
-    RD_SP RS1_SP !-16 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
+    RD_SP RS1_SP !-8 ADDI             ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
 
     RD_A1 RS1_A0 MV                   ; Set as A
-    RD_A1 RS1_A1 !16 LD               ; Set as A->S
+    RD_A1 RS1_A1 !8 LW                ; Set as A->S
 
-    RD_A0 RS1_A0 !24 LD               ; A->TYPE
+    RD_A0 RS1_A0 !12 LW               ; A->TYPE
     RD_T0 ~current_target AUIPC       ; Using current_target
     RD_T0 RS1_T0 !current_target ADDI
-    RS1_T0 RS2_A0 SD                  ; current_target = A->TYPE
+    RS1_T0 RS2_A0 SW                  ; current_target = A->TYPE
 
     RD_A0 ~global_load_string_0 AUIPC ; Using "RD_A0 ~GLOBAL_"
     RD_A0 RS1_A0 !global_load_string_0 ADDI
@@ -4220,21 +4220,21 @@
     RD_A0 RS1_A0 !global_load_string_2 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_A0 ~equal AUIPC ; "="
     RD_A0 RS1_A0 !equal ADDI
     RD_RA $match JAL                  ; IF global_token->S == "="
     RS1_A0 @global_load_done BEQZ     ; we need to skip for assignment and be done
 
     ; Otherwise we are loading contents
-    RD_A0 ~global_load_string_3 AUIPC ; Using "RD_A0 RS1_A0 LD\n"
+    RD_A0 ~global_load_string_3 AUIPC ; Using "RD_A0 RS1_A0 LW\n"
     RD_A0 RS1_A0 !global_load_string_3 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
 :global_load_done
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_SP RS1_SP !16 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_SP RS1_SP !8 ADDI              ; deallocate stack
     RETURN
 
 
@@ -4243,10 +4243,10 @@
 ; Uses I->S in a0, S in a1 and I in a2
 ; Returns match or NULL
 :sym_lookup
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
     RD_A2 RS1_A1 MV                   ; I = symbol_list
     RD_A1 RS1_A0 MV                   ; Put S in the right place
@@ -4254,19 +4254,19 @@
 :sym_lookup_iter
     RS1_A2 @sym_lookup_done BEQZ      ; We failed to find match IF NULL == I
 
-    RD_A0 RS1_A2 !16 LD               ; Using I->S
+    RD_A0 RS1_A2 !8 LW                ; Using I->S
     RD_RA $match JAL                  ; IF I->S == S
     RS1_A0 @sym_lookup_done BEQZ      ; Then we are done, else failed
 
-    RD_A2 RS1_A2 LD                   ; I = I->NEXT
+    RD_A2 RS1_A2 LW                   ; I = I->NEXT
     $sym_lookup_iter JAL              ; otherwise keep looping
 
 :sym_lookup_done
     RD_A0 RS1_A2 MV                   ; Return I
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -4275,31 +4275,31 @@
 ; Returns nothing
 ; Simply uses current global token to update output and then steps to next global_token
 :primary_expr_number
-    RD_SP RS1_SP !-8 ADDI             ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
+    RD_SP RS1_SP !-4 ADDI             ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
 
     RD_A0 ~primary_expr_number_string_0 AUIPC ; Using "RD_A0 ~"
     RD_A0 RS1_A0 !primary_expr_number_string_0 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_RA $emit_out JAL               ; Emit it
 
     RD_A0 ~primary_expr_number_string_1 AUIPC ; Using " LUI\nRD_A0 RS1_A0 !"
     RD_A0 RS1_A0 !primary_expr_number_string_1 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 ~primary_expr_number_string_2 AUIPC ; Using " ADDIW\n"
+    RD_A0 ~primary_expr_number_string_2 AUIPC ; Using " ADDI\n"
     RD_A0 RS1_A0 !primary_expr_number_string_2 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_SP RS1_SP !4 ADDI              ; deallocate stack
     RETURN
 
 
@@ -4308,16 +4308,16 @@
 ; Returns nothing
 ; Updates output_list using global_token
 :primary_expr_char
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
     RD_A0 ~primary_expr_char_string_0 AUIPC ; Using "RD_A0 !"
     RD_A0 RS1_A0 !primary_expr_char_string_0 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_A0 RS1_A0 !1 ADDI              ; global_token->S + 1
     RD_RA $escape_lookup JAL          ; Get the char
     RD_RA $numerate_number JAL        ; Convert to string
@@ -4327,12 +4327,12 @@
     RD_A0 RS1_A0 !primary_expr_char_string_1 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -4342,10 +4342,10 @@
 ; creates entries for string and calls to generate string output
 ; uses a2 for char* number_string
 :primary_expr_string
-    RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
+    RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
 
     RD_A0 RS1_S10 MV                  ; Get current_count
     RD_S10 RS1_S10 !1 ADDI            ; current_count = current_count + 1
@@ -4356,7 +4356,7 @@
     RD_A0 RS1_A0 !primary_expr_string_string_0 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
@@ -4364,7 +4364,7 @@
     RD_A0 RS1_A0 !primary_expr_string_string_1 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
@@ -4377,28 +4377,28 @@
     RD_A0 RS1_A0 !primary_expr_string_string_3 ADDI
     RD_A1 ~strings_list AUIPC         ; Using strings_list
     RD_A1 RS1_A1 !strings_list ADDI
-    RD_A1 RS1_A1 LD
+    RD_A1 RS1_A1 LW
     RD_RA $emit JAL                   ; Emit it
     RD_A1 RS1_A0 MV                   ; Put new strings_list in place
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_RA $uniqueID JAL               ; uniqueID(function->s, number_string)
     RD_A1 RS1_A0 MV                   ; Put new strings_list in place
 
     ; Parse the string
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_RA $parse_string JAL           ; convert it to useful form
     RD_RA $emit JAL                   ; Emit it
     RD_T0 ~strings_list AUIPC         ; Using strings_list
     RD_T0 RS1_T0 !strings_list ADDI
-    RS1_T0 RS2_A0 SD                  ; Update strings_list
+    RS1_T0 RS2_A0 SW                  ; Update strings_list
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_SP RS1_SP !12 ADDI             ; deallocate stack
     RETURN
 
 
@@ -4412,7 +4412,7 @@
     RD_A0 RS1_A0 !primary_expr_failure_string_0 ADDI
     RD_RA $File_Print JAL             ; Print it
 
-    RD_A0 RS1_S4 !16 LD               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_RA $File_Print JAL             ; Print it
 
     RD_A0 ~primary_expr_failure_string_1 AUIPC ; Using "Received "
@@ -4426,11 +4426,11 @@
 ; Returns the most recent type in a0
 ; Uses a0 for struct type* I, a2 for struct type* A and a3 for struct type* B
 :promote_type
-    RD_SP RS1_SP !-32 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
-    RS1_SP RS2_A3 @24 SD              ; protect a3
+    RD_SP RS1_SP !-16 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
+    RS1_SP RS2_A3 @12 SW              ; protect a3
 
     RS1_A1 @promote_type_done BEQZ    ; IF NULL == B, return A
 
@@ -4440,38 +4440,38 @@
     RS1_A2 @promote_type_done BEQZ    ; IF NULL == A, return B
 
     ; Looks like we need to walk the list
-    RD_A2 RS1_A2 !48 LD               ; A->NAME
-    RD_A3 RS1_A3 !48 LD               ; B->NAME
+    RD_A2 RS1_A2 !24 LW               ; A->NAME
+    RD_A3 RS1_A3 !24 LW               ; B->NAME
 
     RD_A0 ~global_types AUIPC         ; Using global_types
     RD_A0 RS1_A0 !global_types ADDI
-    RD_A0 RS1_A0 LD                   ; I = global_types
+    RD_A0 RS1_A0 LW                   ; I = global_types
 
 :promote_type_iter
     RS1_A0 @promote_type_done BEQZ    ; Be done IF NULL == I
 
-    RD_A1 RS1_A0 !48 LD               ; I->NAME
+    RD_A1 RS1_A0 !24 LW               ; I->NAME
     RS1_A1 RS2_A2 @promote_type_done BEQ ; Be done IF(A->NAME == I->NAME)
 
     RS1_A1 RS2_A3 @promote_type_done BEQ ; Be done IF(B->NAME == I->NAME)
 
-    RD_A1 RS1_A0 !24 LD               ; I->INDIRECT
-    RD_A1 RS1_A1 !48 LD               ; I->INDIRECT->NAME
+    RD_A1 RS1_A0 !12 LW               ; I->INDIRECT
+    RD_A1 RS1_A1 !24 LW               ; I->INDIRECT->NAME
 
     RS1_A1 RS2_A2 @promote_type_done BEQ ; Done IF(A->NAME == I->INDIRECT->NAME)
 
     RS1_A1 RS2_A3 @promote_type_done BEQ ; Done IF(B->NAME == I->INDIRECT->NAME)
 
-    RD_A0 RS1_A0 LD                   ; I = I->NEXT
+    RD_A0 RS1_A0 LW                   ; I = I->NEXT
     $promote_type_iter JAL            ; Keep going
 
 :promote_type_done
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_A3 RS1_SP !24 LD               ; restore a3
-    RD_SP RS1_SP !32 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_A3 RS1_SP !12 LW               ; restore a3
+    RD_SP RS1_SP !16 ADDI             ; deallocate stack
     RETURN
 
 
@@ -4482,35 +4482,35 @@
 ; Updates current_target
 ; Uses a1 to hold FUNCTION F and struct type* last_type
 :common_recursion
-    RD_SP RS1_SP !-16 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
+    RD_SP RS1_SP !-8 ADDI             ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
 
     RD_A1 RS1_A0 MV                   ; Put FUNCTION F safely out of the way
-    RD_A0 ~common_recursion_string_0 AUIPC ; Using "RD_SP RS1_SP !-8 ADDI\t# _common_recursion\nRS1_SP RS2_A0 SD\n"
+    RD_A0 ~common_recursion_string_0 AUIPC ; Using "RD_SP RS1_SP !-4 ADDI\t# _common_recursion\nRS1_SP RS2_A0 SW\n"
     RD_A0 RS1_A0 !common_recursion_string_0 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_S4 RS1_S4 LD                   ; global_token = global_token->next
+    RD_S4 RS1_S4 LW                   ; global_token = global_token->next
 
     RD_A0 RS1_A1 MV                   ; Prepare for function call
     RD_T0 ~current_target AUIPC       ; Using current_target
     RD_T0 RS1_T0 !current_target ADDI
-    RD_A1 RS1_T0 LD                   ; Get last_type
+    RD_A1 RS1_T0 LW                   ; Get last_type
     RD_RA RS1_A0 JALR                 ; F()
     RD_T0 ~current_target AUIPC       ; Using current_target
     RD_T0 RS1_T0 !current_target ADDI
-    RD_A0 RS1_T0 LD                   ; Get last current_target
+    RD_A0 RS1_T0 LW                   ; Get last current_target
     RD_RA $promote_type JAL           ; get the right type
-    RS1_T0 RS2_A0 SD                  ; Set new current target
+    RS1_T0 RS2_A0 SW                  ; Set new current target
 
-    RD_A0 ~common_recursion_string_1 AUIPC ; Using "RD_A1 RS1_SP LD..."
+    RD_A0 ~common_recursion_string_1 AUIPC ; Using "RD_A1 RS1_SP LW..."
     RD_A0 RS1_A0 !common_recursion_string_1 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_SP RS1_SP !16 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_SP RS1_SP !8 ADDI              ; deallocate stack
     RETURN
 
 
@@ -4519,18 +4519,18 @@
 ; Returns nothing
 ; Uses a2 for char* S, a3 for FUNCTION iterate and a4 for FUNCTION F
 :general_recursion
-    RD_SP RS1_SP !-40 ADDI            ; allocate stack
-    RS1_SP RS2_RA SD                  ; protect ra
-    RS1_SP RS2_A1 @8 SD               ; protect a1
-    RS1_SP RS2_A2 @16 SD              ; protect a2
-    RS1_SP RS2_A3 @24 SD              ; protect a3
-    RS1_SP RS2_A4 @32 SD              ; protect a4
+    RD_SP RS1_SP !-20 ADDI            ; allocate stack
+    RS1_SP RS2_RA SW                  ; protect ra
+    RS1_SP RS2_A1 @4 SW               ; protect a1
+    RS1_SP RS2_A2 @8 SW               ; protect a2
+    RS1_SP RS2_A3 @12 SW              ; protect a3
+    RS1_SP RS2_A4 @16 SW              ; protect a4
 
     RD_A4 RS1_A0 MV                   ; Protect F
     RD_A0 RS1_A2 MV                   ; Put name in the right place
     RD_A2 RS1_A1 MV                   ; Protect S
 
-    RD_A1 RS1_S4 !16 LD               ; global_token->S
+    RD_A1 RS1_S4 !8 LW                ; global_token->S
     RD_RA $match JAL                  ; IF match(name, global_token->s)
     RS1_A0 @general_recursion_done BNEZ ; do recursion, else skip it
 
@@ -4545,12 +4545,12 @@
     RD_RA RS1_A0 JALR                 ; Down the rabbit hole
 
 :general_recursion_done
-    RD_RA RS1_SP LD                   ; restore ra
-    RD_A1 RS1_SP !8 LD                ; restore a1
-    RD_A2 RS1_SP !16 LD               ; restore a2
-    RD_A3 RS1_SP !24 LD               ; restore a3
-    RD_A4 RS1_SP !32 LD               ; restore a4
-    RD_SP RS1_SP !40 ADDI             ; deallocate stack
+    RD_RA RS1_SP LW                   ; restore ra
+    RD_A1 RS1_SP !4 LW                ; restore a1
+    RD_A2 RS1_SP !8 LW                ; restore a2
+    RD_A3 RS1_SP !12 LW               ; restore a3
+    RD_A4 RS1_SP !16 LW               ; restore a4
+    RD_SP RS1_SP !20 ADDI             ; deallocate stack
     RETURN
 
 
@@ -4559,34 +4559,34 @@
 ; Saves break frame on stack
 ; Returns to caller
 :save_break_frame
-    RD_A1 RS1_SP LD                   ; Save return Address
+    RD_A1 RS1_SP LW                   ; Save return Address
 
     RD_T0 ~break_frame AUIPC          ; Get break_frame
     RD_T0 RS1_T0 !break_frame ADDI
-    RD_A0 RS1_T0 LD
-    RS1_SP RS2_A0 SD                  ; Store as nested_locals
+    RD_A0 RS1_T0 LW
+    RS1_SP RS2_A0 SW                  ; Store as nested_locals
 
     RD_T0 ~break_target_head AUIPC    ; Get break_target_head
     RD_T0 RS1_T0 !break_target_head ADDI
-    RD_A0 RS1_T0 LD
-    RD_SP RS1_SP !-8 ADDI             ; allocate stack
-    RS1_SP RS2_A0 SD                  ; Store as nested_break_head
+    RD_A0 RS1_T0 LW
+    RD_SP RS1_SP !-4 ADDI             ; allocate stack
+    RS1_SP RS2_A0 SW                  ; Store as nested_break_head
 
     RD_T0 ~break_target_func AUIPC    ; Get break_target_func
     RD_T0 RS1_T0 !break_target_func ADDI
-    RD_A0 RS1_T0 LD
-    RD_SP RS1_SP !-8 ADDI             ; allocate stack
-    RS1_SP RS2_A0 SD                  ; Store as nested_break_func
+    RD_A0 RS1_T0 LW
+    RD_SP RS1_SP !-4 ADDI             ; allocate stack
+    RS1_SP RS2_A0 SW                  ; Store as nested_break_func
 
 
     RD_T0 ~break_target_num AUIPC    ; Get break_target_num
     RD_T0 RS1_T0 !break_target_num ADDI
-    RD_A0 RS1_T0 LD
-    RD_SP RS1_SP !-8 ADDI             ; allocate stack
-    RS1_SP RS2_A0 SD                  ; Store as break_target_num
+    RD_A0 RS1_T0 LW
+    RD_SP RS1_SP !-4 ADDI             ; allocate stack
+    RS1_SP RS2_A0 SW                  ; Store as break_target_num
 
-    RD_SP RS1_SP !-8 ADDI             ; allocate stack
-    RS1_SP RS2_A1 SD                  ; Put return back in place
+    RD_SP RS1_SP !-4 ADDI             ; allocate stack
+    RS1_SP RS2_A1 SW                  ; Put return back in place
     RETURN
 
 
@@ -4595,33 +4595,33 @@
 ; Restores break frame from stack
 ; Returns to caller
 :restore_break_frame
-    RD_A1 RS1_SP LD                   ; Save return Address
-    RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    RD_A1 RS1_SP LW                   ; Save return Address
+    RD_SP RS1_SP !4 ADDI              ; deallocate stack
 
-    RD_A0 RS1_SP LD                   ; Get nested_break_num
-    RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    RD_A0 RS1_SP LW                   ; Get nested_break_num
+    RD_SP RS1_SP !4 ADDI              ; deallocate stack
     RD_T0 ~break_target_num AUIPC
     RD_T0 RS1_T0 !break_target_num ADDI
-    RS1_T0 RS2_A0 SD                  ; Restore as nested_break_num
+    RS1_T0 RS2_A0 SW                  ; Restore as nested_break_num
 
-    RD_A0 RS1_SP LD                   ; Get break_target_func
-    RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    RD_A0 RS1_SP LW                   ; Get break_target_func
+    RD_SP RS1_SP !4 ADDI              ; deallocate stack
     RD_T0 ~break_target_func AUIPC
     RD_T0 RS1_T0 !break_target_func ADDI
-    RS1_T0 RS2_A0 SD                  ; Restore as break_target_func
+    RS1_T0 RS2_A0 SW                  ; Restore as break_target_func
 
-    RD_A0 RS1_SP LD                   ; Get break_target_head
-    RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    RD_A0 RS1_SP LW                   ; Get break_target_head
+    RD_SP RS1_SP !4 ADDI              ; deallocate stack
     RD_T0 ~break_target_head AUIPC
     RD_T0 RS1_T0 !break_target_head ADDI
-    RS1_T0 RS2_A0 SD                  ; Restore as break_target_head
+    RS1_T0 RS2_A0 SW                  ; Restore as break_target_head
 
-    RD_A0 RS1_SP LD                   ; Get break_frame
+    RD_A0 RS1_SP LW                   ; Get break_frame
     RD_T0 ~break_frame AUIPC
     RD_T0 RS1_T0 !break_frame ADDI
-    RS1_T0 RS2_A0 SD                  ; Restore as break_frame
+    RS1_T0 RS2_A0 SW                  ; Restore as break_frame
 
-    RS1_SP RS2_A1 SD                  ; Put return back in place
+    RS1_SP RS2_A1 SW                  ; Put return back in place
     RETURN
 
 
@@ -4632,21 +4632,21 @@
 :set_break_frame
     RD_T0 ~break_target_head AUIPC    ; Using break_target_head
     RD_T0 RS1_T0 !break_target_head ADDI
-    RS1_T0 RS2_A0 SD                  ; update break_target_head
+    RS1_T0 RS2_A0 SW                  ; update break_target_head
 
     RD_T0 ~break_target_num AUIPC     ; Using break_target_num
     RD_T0 RS1_T0 !break_target_num ADDI
-    RS1_T0 RS2_A1 SD                  ; update break_target_num
+    RS1_T0 RS2_A1 SW                  ; update break_target_num
 
-    RD_A0 RS1_S11 !8 LD               ; function->locals
+    RD_A0 RS1_S11 !4 LW               ; function->locals
     RD_T0 ~break_frame AUIPC          ; Using break_frame
     RD_T0 RS1_T0 !break_frame ADDI
-    RS1_T0 RS2_A0 SD                  ; break_frame = function->locals
+    RS1_T0 RS2_A0 SW                  ; break_frame = function->locals
 
-    RD_A0 RS1_S11 !16 LD              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_T0 ~break_target_func AUIPC    ; Using break_target_func
     RD_T0 RS1_T0 !break_target_func ADDI
-    RS1_T0 RS2_A0 SD                  ; break_target_func = function->S
+    RS1_T0 RS2_A0 SW                  ; break_target_func = function->S
 
     RETURN
 
@@ -4673,7 +4673,7 @@
     RD_A0 ~debug_list_string1 AUIPC   ; Using our second string
     RD_A0 RS1_A0 !debug_list_string1 ADDI
     RD_RA $File_Print JAL             ; Print it
-    RD_A0 RS1_S11 LD                  ; Use address of pointer
+    RD_A0 RS1_S11 LW                  ; Use address of pointer
     RD_RA $numerate_number JAL        ; Convert it into string
     RD_RA $File_Print JAL             ; Print it
 
@@ -4681,7 +4681,7 @@
     RD_A0 ~debug_list_string2 AUIPC   ; Using our third string
     RD_A0 RS1_A0 !debug_list_string2 ADDI
     RD_RA $File_Print JAL             ; Print it
-    RD_A0 RS1_S11 !8 LD               ; Use address of pointer
+    RD_A0 RS1_S11 !4 LW               ; Use address of pointer
     RD_RA $numerate_number JAL        ; Convert it into string
     RD_RA $File_Print JAL             ; Print it
 
@@ -4689,7 +4689,7 @@
     RD_A0 ~debug_list_string3 AUIPC   ; Using our fourth string
     RD_A0 RS1_A0 !debug_list_string3 ADDI
     RD_RA $File_Print JAL             ; Print it
-    RD_A0 RS1_S11 !16 LD              ; Use address of pointer
+    RD_A0 RS1_S11 !8 LW               ; Use address of pointer
     RD_RA $numerate_number JAL        ; Convert it into string
     RD_RA $File_Print JAL             ; Print it
 
@@ -4697,7 +4697,7 @@
     RD_A0 ~debug_list_string4 AUIPC   ; Using our fifth string
     RD_A0 RS1_A0 !debug_list_string4 ADDI
     RD_RA $File_Print JAL             ; Print it
-    RD_A0 RS1_S11 !16 LD              ; Use address of pointer
+    RD_A0 RS1_S11 !8 LW               ; Use address of pointer
     RS1_A0 @debug_list_null BNEZ      ; Display if not NULL Pointer
     RD_A0 ~debug_list_string_null AUIPC ; Give meaningful message instead
     RD_A0 RS1_A0 !debug_list_string_null ADDI
@@ -4708,7 +4708,7 @@
     RD_A0 ~debug_list_string5 AUIPC   ; Using our sixth string
     RD_A0 RS1_A0 !debug_list_string5 ADDI
     RD_RA $File_Print JAL             ; Print it
-    RD_A0 RS1_S11 !24 LD              ; Use address of pointer
+    RD_A0 RS1_S11 !12 LW              ; Use address of pointer
     RD_RA $numerate_number JAL        ; Convert it into string
     RD_RA $File_Print JAL             ; Print it
 
@@ -4716,7 +4716,7 @@
     RD_A0 ~debug_list_string6 AUIPC   ; Using our seventh string
     RD_A0 RS1_A0 !debug_list_string6 ADDI
     RD_RA $File_Print JAL             ; Print it
-    RD_A0 RS1_S11 !32 LD              ; Use address of pointer
+    RD_A0 RS1_S11 !16 LW              ; Use address of pointer
     RD_RA $numerate_number JAL        ; Convert it into string
     RD_RA $File_Print JAL             ; Print it
 
@@ -4724,7 +4724,7 @@
     RD_RA $fputc JAL                  ; print it
     RD_RA $fputc JAL                  ; print it
 
-    RD_S11 RS1_S11 LD                 ; TOKEN = TOKEN->NEXT
+    RD_S11 RS1_S11 LW                 ; TOKEN = TOKEN->NEXT
     RS1_S11 @debug_list_iter BNEZ     ; iterate otherwise
 
     $Fail JAL
@@ -4734,7 +4734,7 @@
 :prim_types
 :type_void
     &type_int %0                        ; NEXT
-    %8 %0                               ; SIZE
+    %4 %0                               ; SIZE
     NULL                                ; OFFSET
     &type_void %0                       ; INDIRECT
     NULL                                ; MEMBERS
@@ -4743,7 +4743,7 @@
 
 :type_int
     &type_char %0                       ; NEXT
-    %8 %0                               ; SIZE
+    %4 %0                               ; SIZE
     NULL                                ; OFFSET
     &type_int %0                        ; INDIRECT
     NULL                                ; MEMBERS
@@ -4761,7 +4761,7 @@
 
 :type_char_indirect
     &type_file %0                       ; NEXT
-    %8 %0                               ; SIZE
+    %4 %0                               ; SIZE
     NULL                                ; OFFSET
     &type_char_double_indirect %0       ; INDIRECT
     NULL                                ; MEMBERS
@@ -4770,7 +4770,7 @@
 
 :type_char_double_indirect
     &type_file %0                       ; NEXT
-    %8 %0                               ; SIZE
+    %4 %0                               ; SIZE
     NULL                                ; OFFSET
     &type_char_double_indirect %0       ; INDIRECT
     NULL                                ; MEMBERS
@@ -4779,7 +4779,7 @@
 
 :type_file
     &type_function %0                   ; NEXT
-    %8 %0                               ; SIZE
+    %4 %0                               ; SIZE
     NULL                                ; OFFSET
     &type_file %0                       ; INDIRECT
     NULL                                ; MEMBERS
@@ -4788,7 +4788,7 @@
 
 :type_function
     &type_unsigned %0                   ; NEXT
-    %8 %0                               ; SIZE
+    %4 %0                               ; SIZE
     NULL                                ; OFFSET
     &type_function %0                   ; INDIRECT
     NULL                                ; MEMBERS
@@ -4797,7 +4797,7 @@
 
 :type_unsigned
     &type_long %0                       ; NEXT
-    %8 %0                               ; SIZE
+    %4 %0                               ; SIZE
     NULL                                ; OFFSET
     &type_unsigned %0                   ; INDIRECT
     NULL                                ; MEMBERS
@@ -4806,7 +4806,7 @@
 
 :type_long
     NULL                                ; NEXT
-    %8 %0                               ; SIZE
+    %4 %0                               ; SIZE
     NULL                                ; OFFSET
     &type_long %0                       ; INDIRECT
     NULL                                ; MEMBERS
@@ -4989,13 +4989,13 @@ Missing ;
 "
 
 :common_recursion_string_0
-"RD_SP RS1_SP !-8 ADDI	# _common_recursion
-RS1_SP RS2_A0 SD
+"RD_SP RS1_SP !-4 ADDI	# _common_recursion
+RS1_SP RS2_A0 SW
 "
 
 :common_recursion_string_1
-"RD_A1 RS1_SP LD
-RD_SP RS1_SP !8 ADDI	# _common_recursion
+"RD_A1 RS1_SP LW
+RD_SP RS1_SP !4 ADDI	# _common_recursion
 "
 
 :recursive_statement_string_0
@@ -5003,8 +5003,8 @@ RD_SP RS1_SP !8 ADDI	# _common_recursion
 "
 
 :recursive_statement_string_1
-"RD_A1 RS1_SP LD	# _recursive_statement_locals
-RD_SP RS1_SP !8 ADDI
+"RD_A1 RS1_SP LW	# _recursive_statement_locals
+RD_SP RS1_SP !4 ADDI
 "
 
 :collect_local_string_0
@@ -5020,8 +5020,8 @@ Missing ;
 "
 
 :collect_local_string_3
-"RD_SP RS1_SP !-8 ADDI
-RS1_SP RS2_A0 SD	#"
+"RD_SP RS1_SP !-4 ADDI
+RS1_SP RS2_A0 SW	#"
 
 :return_result_string_0
 "ERROR in return_result
@@ -5029,8 +5029,8 @@ MISSING ;
 "
 
 :return_result_string_1
-"RD_A1 RS1_SP LD	# _return_result_locals
-RD_SP RS1_SP !8 ADDI
+"RD_A1 RS1_SP LW	# _return_result_locals
+RD_SP RS1_SP !4 ADDI
 "
 
 :return_result_string_2
@@ -5242,8 +5242,8 @@ MISSING ;
 "Not inside of a loop or case statement"
 
 :process_break_string_1
-"RD_A1 RS1_SP LD	# break_cleanup_locals
-RD_SP RS1_SP !8 ADDI
+"RD_A1 RS1_SP LW	# break_cleanup_locals
+RD_SP RS1_SP !4 ADDI
 "
 
 :process_break_string_2
@@ -5263,7 +5263,7 @@ Missing ;
 "
 
 :expression_string_0
-"RS1_A1 RS2_A0 SD
+"RS1_A1 RS2_A0 SW
 "
 
 :expression_string_1
@@ -5313,7 +5313,7 @@ Didn't get )
 RD_A0 RS1_A0 !"
 
 :primary_expr_variable_string_3
-" ADDIW
+" ADDI
 "
 
 :primary_expr_number_string_0
@@ -5323,7 +5323,7 @@ RD_A0 RS1_A0 !"
 " LUI
 RD_A0 RS1_A0 !"
 :primary_expr_number_string_2
-" ADDIW
+" ADDI
 "
 
 :unary_expr_sizeof_string_0
@@ -5422,7 +5422,7 @@ RD_A0 RS2_A0 SLTU
 "
 
 :postfix_expr_array_string_0
-"RD_A0 RS1_A0 LD
+"RD_A0 RS1_A0 LW
 "
 
 :postfix_expr_array_string_1
@@ -5462,7 +5462,7 @@ RD_A0 RS1_A1 RS2_A0 ADD
 "
 
 :postfix_expr_arrow_string_3
-"RD_A0 RS1_A0 LD
+"RD_A0 RS1_A0 LW
 "
 
 :variable_load_string_0
@@ -5473,7 +5473,7 @@ RD_A0 RS1_A1 RS2_A0 ADD
 "
 
 :variable_load_string_2
-"RD_A0 RS1_A0 LD
+"RD_A0 RS1_A0 LW
 "
 
 :global_load_string_0
@@ -5488,7 +5488,7 @@ RD_A0 RS1_A0 !GLOBAL_"
 "
 
 :global_load_string_3
-"RD_A0 RS1_A0 LD
+"RD_A0 RS1_A0 LW
 "
 
 :function_load_string_0
@@ -5499,7 +5499,7 @@ RD_A0 RS1_A0 !GLOBAL_"
 RD_A0 RS1_A0 !FUNCTION_"
 
 :function_load_string_2
-" ADDIW
+" ADDI
 "
 
 :function_call_string_0
@@ -5508,16 +5508,16 @@ No ( was found
 "
 
 :function_call_string_1
-"RD_SP RS1_SP !-24 ADDI
-RS1_SP RS2_RA @8 SD	# Protect the old return pointer
+"RD_SP RS1_SP !-12 ADDI
+RS1_SP RS2_RA @4 SW	# Protect the old return pointer
 "
 
 :function_call_string_2
-"RS1_SP RS2_FP SD	# Protect the old frame pointer
+"RS1_SP RS2_FP SW	# Protect the old frame pointer
 "
 
 :function_call_string_2a
-"RS1_SP RS2_TP @16 SD	# Protect temp register we are going to use
+"RS1_SP RS2_TP @8 SW	# Protect temp register we are going to use
 "
 
 :function_call_string_2b
@@ -5529,13 +5529,13 @@ RS1_SP RS2_RA @8 SD	# Protect the old return pointer
 "
 
 :function_call_string_4
-"RD_SP RS1_SP !-8 ADDI
-RS1_SP RS2_A0 SD	#_process_expression1
+"RD_SP RS1_SP !-4 ADDI
+RS1_SP RS2_A0 SW	#_process_expression1
 "
 
 :function_call_string_5
-"RD_SP RS1_SP !-8 ADDI
-RS1_SP RS2_A0 SD	#_process_expression2
+"RD_SP RS1_SP !-4 ADDI
+RS1_SP RS2_A0 SW	#_process_expression2
 "
 
 :function_call_string_6
@@ -5548,7 +5548,7 @@ No ) was found
 
 :function_call_string_8
 " ADDI
-RD_A0 RS1_A0 LD
+RD_A0 RS1_A0 LW
 "
 
 :function_call_string_9
@@ -5571,21 +5571,21 @@ RD_A0 RS1_A0 LD
 "
 
 :function_call_string_13
-"RD_A1 RS1_SP LD	# _process_expression_locals
-RD_SP RS1_SP !8 ADDI
+"RD_A1 RS1_SP LW	# _process_expression_locals
+RD_SP RS1_SP !4 ADDI
 "
 
 :function_call_string_14
-"RD_FP RS1_SP LD	# Restore old frame pointer
+"RD_FP RS1_SP LW	# Restore old frame pointer
 "
 
 :function_call_string_14a
-"RD_TP RS1_SP !16 LD	# Restore temp register
+"RD_TP RS1_SP !8 LW	# Restore temp register
 "
 
 :function_call_string_15
-"RD_RA RS1_SP !8 LD	# Restore return address
-RD_SP RS1_SP !24 ADDI
+"RD_RA RS1_SP !4 LW	# Restore return address
+RD_SP RS1_SP !12 ADDI
 "
 
 :char2hex_string_0

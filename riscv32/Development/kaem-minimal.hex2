@@ -19,7 +19,7 @@
 :ELF_base
 7F 45 4C 46        ## e_ident[EI_MAG0-3] ELF's magic number
 
-02                 ## e_ident[EI_CLASS] Indicating 64 bit
+01                 ## e_ident[EI_CLASS] Indicating 32 bit
 01                 ## e_ident[EI_DATA] Indicating little endianness
 01                 ## e_ident[EI_VERSION] Indicating original elf
 
@@ -31,14 +31,14 @@
 F3 00              ## e_machine Indicating RISC-V
 01 00 00 00        ## e_version Indicating original elf
 
-&_start 00 00 00 00 ## e_entry Address of the entry point (Number of bytes this header is + Base Address)
-%ELF_program_headers>ELF_base 00 00 00 00 ## e_phoff Address of program header table
-00 00 00 00 00 00 00 00 ## e_shoff Address of section header table
+&_start            ## e_entry Address of the entry point (Number of bytes this header is + Base Address)
+%ELF_program_headers>ELF_base ## e_phoff Address of program header table
+00 00 00 00        ## e_shoff Address of section header table
 
 00 00 00 00        ## e_flags
-40 00              ## e_ehsize Indicating our 64 Byte header
+34 00              ## e_ehsize Indicating our 52 Byte header
 
-38 00              ## e_phentsize size of a program header table
+20 00              ## e_phentsize size of a program header table
 01 00              ## e_phnum number of entries in program table
 
 00 00              ## e_shentsize size of a section header table
@@ -48,31 +48,31 @@ F3 00              ## e_machine Indicating RISC-V
 
 ## Program Header
 :ELF_program_headers
-01 00 00 00             ## p_type
-07 00 00 00             ## ph_flags: PF-X|PF-W|PF-R = 7
-00 00 00 00 00 00 00 00 ## p_offset
+01 00 00 00        ## ph_type: PT-LOAD = 1
+00 00 00 00        ## p_offset
 
-&ELF_base 00 00 00 00 ## p_vaddr
-&ELF_base 00 00 00 00 ## p_physaddr
+&ELF_base          ## ph_vaddr
+&ELF_base          ## ph_physaddr
 
-%ELF_end>ELF_base 00 00 00 00 ## p_filesz
-%ELF_end>ELF_base 00 00 00 00 ## p_memsz
+%ELF_end>ELF_base  ## p_filesz
+%ELF_end>ELF_base  ## p_memsz
 
-01 00 00 00 00 00 00 00 ## Required alignment
+07 00 00 00        ## ph_flags: PF-X|PF-W|PF-R = 7
+01 00 00 00        ## ph_align
 
 :ELF_text
+
 :_start
 
 # Register use:
 # s2: input fd
-# s3: status
 # s4: command_done
 # s6: malloc pointer
 
 # M1 instructions are encoded into RISC-V words rather than individual hex characters.
 # E.g. RD_A0 RS1_SP LD = 00050000 + 00000100 + 03300000 = 03350100
 
-    03 36 01 01     # RD_A2 RS1_SP !16 LD               ; Input file name
+    03 26 81 00     # RD_A2 RS1_SP !8 LW                ; Input file name
 
     @_start_out 63 10 06 00   # RS1_A2 @_start_out BNEZ           ; Use input file if specified
     # Else use kaem.run
@@ -99,21 +99,19 @@ F3 00              ## e_machine Indicating RISC-V
 # Using a1 for tokens and a2 for tokens[i]
 :main_loop
     13 05 10 00     # RD_A0 !1 ADDI                     ; 256 * sizeof(char*)
-    # RD_A0 RS1_A0 11 SLLI # replace 11 with 11-th register in rs2
-    13 15 B5 00     # RD_A0 RS1_A0 RS2_A1 SLLI          ; 2048 = 1 << 11
+    13 15 B5 00     # RD_A0 RS1_A0 RS2_X11 SLLI         ; 2048 = 1 << 11
     $malloc EF 00 00 00 # RD_RA $malloc JAL             ; allocate space
     93 05 05 00     # RD_A1 RS1_A0 MV                   ; set tokens pointer
     13 06 05 00     # RD_A2 RS1_A0 MV                   ; set tokens[i] pointer (i=0)
 
-    93 09 00 00     # RD_S3 MV                          ; status = 0
     13 0A 00 00     # RD_S4 MV                          ; command_done = 0
 
 :collect_command
     $collect_token EF 00 00 00 # RD_RA $collect_token JAL ; Get another token
     @collect_command_comment 63 00 05 00 # RS1_A0 @collect_command_comment BEQZ ; if NULL == result then it is a comment, don't store
 
-    23 30 A6 00     # RS1_A2 RS2_A0 SD                  ; tokens[i] = result
-    13 06 86 00     # RD_A2 RS1_A2 !8 ADDI              ; i = i + 1 (sizeof(char*) = 8)
+    23 20 A6 00     # RS1_A2 RS2_A0 SW                  ; tokens[i] = result
+    13 06 46 00     # RD_A2 RS1_A2 !4 ADDI              ; i = i + 1 (sizeof(char*) = 4)
 
 :collect_command_comment
     @collect_command 63 00 0A 00 # RS1_S4 @collect_command BEQZ ; keep looping if 0 == command_done
@@ -122,49 +120,40 @@ F3 00              ## e_machine Indicating RISC-V
     @main_loop 63 80 C5 00 # RS1_A1 RS2_A2 @main_loop BEQ ; keep looping if comment
 
     $print_command EF 00 00 00 # RD_RA $print_command JAL ; print the command
-    03 B5 05 00     # RD_A0 RS1_A1 LD                   ; program = tokens[0]
+    03 A5 05 00     # RD_A0 RS1_A1 LW                   ; program = tokens[0]
     @Fail 63 00 05 00 # RS1_A0 @Fail BEQZ               ; Error, no program
 
-    13 01 81 FF     # RD_SP RS1_SP !-8 ADDI             ; allocate stack
-    23 30 B1 00     # RS1_SP RS2_A1 SD                  ; protect tokens
+    13 01 C1 FF     # RD_SP RS1_SP !-4 ADDI             ; allocate stack
+    23 20 B1 00     # RS1_SP RS2_A1 SW                  ; protect tokens
 
     93 08 C0 0D     # RD_A7 !220 ADDI                   ; sys_clone
     13 05 10 01     # RD_A0 !17 ADDI                    ; SIGCHLD flag
     93 05 00 00     # RD_A1 MV                          ; Child uses duplicate of parent's stack
     73 00 00 00     # ECALL                             ; syscall
 
-    83 35 01 00     # RD_A1 RS1_SP LD                   ; restore tokens
-    13 01 81 00     # RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    83 25 01 00     # RD_A1 RS1_SP LW                   ; restore tokens
+    13 01 41 00     # RD_SP RS1_SP !4 ADDI              ; deallocate stack
 
     @Fail 63 40 05 00 # RS1_A0 @Fail BLTZ               ; if f == -1 no child was created
     @collect_command_parent 63 10 05 00 # RS1_A0 @collect_command_parent BNEZ ; if f == 0 it is child
 
     # Deal with child case
     93 08 D0 0D     # RD_A7 !221 ADDI                   ; sys_execve
-    03 B5 05 00     # RD_A0 RS1_A1 LD                   ; program = tokens[0]
+    03 A5 05 00     # RD_A0 RS1_A1 LW                   ; program = tokens[0]
     73 00 00 00     # ECALL                             ; execve(program, tokens)
     $Fail EF 00 00 00 # RD_RA $Fail JAL                 ; Exit with an error
 
 :collect_command_parent
-    93 08 40 10     # RD_A7 !260 ADDI                   ; sys_wait4
-    13 06 00 00     # RD_A2 MV                          ; set options = 0
-    93 06 00 00     # RD_A3 MV                          ; set *ruseage = NULL
+    93 08 F0 05     # RD_A7 !95 ADDI                    ; sys_waitid
+    13 05 00 00     # RD_A0 MV                          ; set idtype = P_ALL
+    ~info 17 06 00 00 # RD_A2 ~info AUIPC               ; a2 = siginfo_t &info
+    !info 13 06 06 00 # RD_A2 RS1_A2 !info ADDI
+    93 06 40 00     # RD_A3 !4 MV                       ; set *options = WEXITED
     73 00 00 00     # ECALL                             ; syscall
 
-    # wait4 returns wstatus pointer, from which we can extract child's exit status
     # Check if child exited
-    83 B5 05 00     # RD_A1 RS1_A1 LD                   ; Dereference wstatus pointer
-    93 02 F0 07     # RD_T0 !0x7f ADDI                  ; t0 = 0x7f
-    B3 F2 55 00     # RD_T0 RS1_A1 RS2_T0 AND           ; WTERMSIG(s) ((s) & 0x7f)
-    @abort 63 90 02 00 # RS1_T0 @abort BNEZ             ; Something went wrong, child did not exit
-
-    # Check exit status: WEXITSTATUS(s) (((s) & 0xff00) >> 8)
-    B7 02 01 00     # RD_T0 ~0xff00 LUI                 ; 0xff00 = 0xffff - 0xff = 2^16 - 2^8
-    9B 82 02 F0     # RD_T0 RS1_T0 !-256 ADDIW          ; t0 = 0xff00
-    B3 F2 55 00     # RD_T0 RS1_A1 RS2_T0 AND           ; (s) & 0xff00
-    93 D9 82 00     # RD_S3 RS1_T0 RS2_X8 SRLI          ; Shift right by 8 to get status
-
-    @main_loop 63 80 09 00 # RS1_S3 @main_loop BEQZ     ; Loop if 0 == status
+    03 26 46 01     # RD_A2 RS1_A2 !20 LW               ; status = info->si_status
+    @main_loop 63 00 06 00 # RS1_A2 @main_loop BEQZ     ; Loop if 0 == status
 
 :abort
     ~hard 17 05 00 00 # RD_A0 ~hard AUIPC               ; Get error string
@@ -177,19 +166,19 @@ F3 00              ## e_machine Indicating RISC-V
 # Receives tokens[j] in a1 and tokens[i] in a2
 # Modifies a0
 :print_command
-    13 01 81 FE     # RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    23 30 11 00     # RS1_SP RS2_RA SD                  ; protect ra
-    23 34 B1 00     # RS1_SP RS2_A1 @8 SD               ; protect a1
-    23 38 C1 00     # RS1_SP RS2_A2 @16 SD              ; protect a2
+    13 01 41 FF     # RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    23 20 11 00     # RS1_SP RS2_RA SW                  ; protect ra
+    23 22 B1 00     # RS1_SP RS2_A1 @4 SW               ; protect a1
+    23 24 C1 00     # RS1_SP RS2_A2 @8 SW               ; protect a2
 
     ~prefix 17 05 00 00 # RD_A0 ~prefix AUIPC           ; Get prefix " +> "
     !prefix 13 05 05 00 # RD_A0 RS1_A0 !prefix ADDI     ; Get prefix " +> "
     $File_Print EF 00 00 00 # RD_RA $File_Print JAL     ; print it
 
 :print_command_loop
-    03 B5 05 00     # RD_A0 RS1_A1 LD                   ; get tokens[j]
+    03 A5 05 00     # RD_A0 RS1_A1 LW                   ; get tokens[j]
     $File_Print EF 00 00 00 # RD_RA $File_Print JAL     ; print it
-    93 85 85 00     # RD_A1 RS1_A1 !8 ADDI              ; j = j + 1
+    93 85 45 00     # RD_A1 RS1_A1 !4 ADDI              ; j = j + 1
     13 05 00 02     # RD_A0 !32 ADDI                    ; a0 = ' '
     $fputc EF 00 00 00 # RD_RA $fputc JAL               ; print it
     @print_command_loop 63 90 C5 00 # RS1_A1 RS2_A2 @print_command_loop BNE ; continue if j < i, otherwise keep looping
@@ -197,10 +186,10 @@ F3 00              ## e_machine Indicating RISC-V
     13 05 A0 00     # RD_A0 !10 ADDI                    ; a0 = '\n'
     $fputc EF 00 00 00 # RD_RA $fputc JAL               ; print it
 
-    83 30 01 00     # RD_RA RS1_SP LD                   ; restore ra
-    83 35 81 00     # RD_A1 RS1_SP !8 LD                ; restore a1
-    03 36 01 01     # RD_A2 RS1_SP !16 LD               ; restore a2
-    13 01 81 01     # RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    83 20 01 00     # RD_RA RS1_SP LW                   ; restore ra
+    83 25 41 00     # RD_A1 RS1_SP !4 LW                ; restore a1
+    03 26 81 00     # RD_A2 RS1_SP !8 LW                ; restore a2
+    13 01 C1 00     # RD_SP RS1_SP !12 ADDI             ; deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
 
@@ -209,10 +198,10 @@ F3 00              ## e_machine Indicating RISC-V
 # Overwrites a0
 # Uses a0 as c, a1 as token and a2 as token[i]
 :collect_token
-    13 01 81 FE     # RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    23 30 11 00     # RS1_SP RS2_RA SD                  ; protect ra
-    23 34 B1 00     # RS1_SP RS2_A1 @8 SD               ; protect a1
-    23 38 C1 00     # RS1_SP RS2_A2 @16 SD              ; protect a2
+    13 01 41 FF     # RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    23 20 11 00     # RS1_SP RS2_RA SW                  ; protect ra
+    23 22 B1 00     # RS1_SP RS2_A1 @4 SW               ; protect a1
+    23 24 C1 00     # RS1_SP RS2_A2 @8 SW               ; protect a2
 
     37 15 00 00     # RD_A0 ~4096 LUI                   ; 4096 * sizeof(char)
     $malloc EF 00 00 00 # RD_RA $malloc JAL             ; allocate space
@@ -265,10 +254,10 @@ F3 00              ## e_machine Indicating RISC-V
 
 :collect_token_good
     13 85 05 00     # RD_A0 RS1_A1 MV                   ; Return token
-    83 30 01 00     # RD_RA RS1_SP LD                   ; Restore ra
-    83 35 81 00     # RD_A1 RS1_SP !8 LD                ; Restore a1
-    03 36 01 01     # RD_A2 RS1_SP !16 LD               ; Restore a2
-    13 01 81 01     # RD_SP RS1_SP !24 ADDI             ; Deallocate stack
+    83 20 01 00     # RD_RA RS1_SP LW                   ; restore ra
+    83 25 41 00     # RD_A1 RS1_SP !4 LW                ; restore a1
+    03 26 81 00     # RD_A2 RS1_SP !8 LW                ; restore a2
+    13 01 C1 00     # RD_SP RS1_SP !12 ADDI             ; Deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
 
@@ -278,8 +267,8 @@ F3 00              ## e_machine Indicating RISC-V
 # uses a0 as c
 # Just throws away everything it reads
 :collect_comment
-    13 01 81 FF     # RD_SP RS1_SP !-8 ADDI             ; allocate stack
-    23 30 11 00     # RS1_SP RS2_RA SD                  ; protect ra
+    13 01 C1 FF     # RD_SP RS1_SP !-4 ADDI             ; allocate stack
+    23 20 11 00     # RS1_SP RS2_RA SW                  ; protect ra
 
     $fgetc EF 00 00 00 # RD_RA $fgetc JAL               ; c = fgetc(input)
     93 02 C0 FF     # RD_T0 !-4 ADDI                    ; if c == EOF
@@ -288,8 +277,8 @@ F3 00              ## e_machine Indicating RISC-V
     93 02 A0 00     # RD_T0 !10 ADDI                    ; if c == '\n'
     @collect_comment 63 10 55 00 # RS1_A0 RS2_T0 @collect_comment BNE ; loop
 
-    83 30 01 00     # RD_RA RS1_SP LD                   ; restore ra
-    13 01 81 00     # RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    83 20 01 00     # RD_RA RS1_SP LW                   ; restore ra
+    13 01 41 00     # RD_SP RS1_SP !4 ADDI              ; deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
 
@@ -297,9 +286,9 @@ F3 00              ## e_machine Indicating RISC-V
 # Loads FILE* from s2
 # Returns -4 (EOF) or char in a0
 :fgetc
-    13 01 81 FE     # RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    23 34 B1 00     # RS1_SP RS2_A1 @8 SD               ; protect a1
-    23 38 C1 00     # RS1_SP RS2_A2 @16 SD              ; protect a2
+    13 01 41 FF     # RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    23 22 B1 00     # RS1_SP RS2_A1 @4 SW               ; protect a1
+    23 24 C1 00     # RS1_SP RS2_A2 @8 SW               ; protect a2
 
     93 08 F0 03     # RD_A7 !63 ADDI                    ; sys_read
     93 05 01 00     # RD_A1 RS1_SP MV                   ; Get stack address
@@ -315,9 +304,9 @@ F3 00              ## e_machine Indicating RISC-V
 
 :fgetc_done
     03 85 05 00     # RD_A0 RS1_A1 LB                   ; return char in a0
-    83 35 81 00     # RD_A1 RS1_SP !8 LD                ; restore a1
-    03 36 01 01     # RD_A2 RS1_SP !16 LD               ; restore a2
-    13 01 81 01     # RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    83 25 41 00     # RD_A1 RS1_SP !4 LW                ; restore a1
+    03 26 81 00     # RD_A2 RS1_SP !8 LW                ; restore a2
+    13 01 C1 00     # RD_SP RS1_SP !12 ADDI             ; deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
 
@@ -326,8 +315,8 @@ F3 00              ## e_machine Indicating RISC-V
 # Requires MALLOC pointer to be initialized and a0 to have the number of desired bytes
 
 :malloc
-    13 01 81 FF     # RD_SP RS1_SP !-8 ADDI             ; allocate stack
-    23 30 B1 00     # RS1_SP RS2_A1 SD                  ; protect a1
+    13 01 C1 FF     # RD_SP RS1_SP !-4 ADDI             ; allocate stack
+    23 20 B1 00     # RS1_SP RS2_A1 SW                  ; protect a1
 
     93 05 0B 00     # RD_A1 RS1_S6 MV                   ; Store the current pointer
     33 05 65 01     # RD_A0 RS1_A0 RS2_S6 ADD           ; Request the number of desired bytes
@@ -336,18 +325,18 @@ F3 00              ## e_machine Indicating RISC-V
     13 0B 05 00     # RD_S6 RS1_A0 MV                   ; Set our malloc pointer
     13 85 05 00     # RD_A0 RS1_A1 MV                   ; Return the pointer
 
-    83 35 01 00     # RD_A1 RS1_SP LD                   ; restore a1
-    13 01 81 00     # RD_SP RS1_SP !8 ADDI              ; deallocate stack
+    83 25 01 00     # RD_A1 RS1_SP LW                   ; restore a1
+    13 01 41 00     # RD_SP RS1_SP !4 ADDI              ; deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
 # File_Print function
 # Receives CHAR* in a0
 # calls fputc for every non-null char
 :File_Print
-    13 01 81 FE     # RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    23 30 11 00     # RS1_SP RS2_RA SD                  ; protect ra
-    23 34 B1 00     # RS1_SP RS2_A1 @8 SD               ; protect a1
-    23 38 C1 00     # RS1_SP RS2_A2 @16 SD              ; protect a2
+    13 01 41 FF     # RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    23 20 11 00     # RS1_SP RS2_RA SW                  ; protect ra
+    23 22 B1 00     # RS1_SP RS2_A1 @4 SW               ; protect a1
+    23 24 C1 00     # RS1_SP RS2_A2 @8 SW               ; protect a2
     93 05 05 00     # RD_A1 RS1_A0 MV                   ; protect a0
 
     @File_Print_Done 63 00 05 00 # RS1_A0 @File_Print_Done BEQZ ; Protect against nulls
@@ -361,20 +350,20 @@ F3 00              ## e_machine Indicating RISC-V
     $File_Print_Loop 6F 00 00 00 # $File_Print_Loop JAL ; Keep printing
 
 :File_Print_Done
-    83 30 01 00     # RD_RA RS1_SP LD                   ; restore ra
-    83 35 81 00     # RD_A1 RS1_SP !8 LD                ; restore a1
-    03 36 01 01     # RD_A2 RS1_SP !16 LD               ; restore a2
-    13 01 81 01     # RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    83 20 01 00     # RD_RA RS1_SP LW                   ; restore ra
+    83 25 41 00     # RD_A1 RS1_SP !4 LW                ; restore a1
+    03 26 81 00     # RD_A2 RS1_SP !8 LW                ; restore a2
+    13 01 C1 00     # RD_SP RS1_SP !12 ADDI             ; deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
 # fputc function
 # receives CHAR in a0 and load FILE* from stdout
 # writes char and returns
 :fputc
-    13 01 81 FE     # RD_SP RS1_SP !-24 ADDI            ; allocate stack
-    23 30 A1 00     # RS1_SP RS2_A0 SD                  ; protect a0
-    23 34 B1 00     # RS1_SP RS2_A1 @8 SD               ; protect a1
-    23 38 C1 00     # RS1_SP RS2_A2 @16 SD              ; protect a2
+    13 01 41 FF     # RD_SP RS1_SP !-12 ADDI            ; allocate stack
+    23 20 A1 00     # RS1_SP RS2_A0 SW                  ; protect a0
+    23 22 B1 00     # RS1_SP RS2_A1 @4 SW               ; protect a1
+    23 24 C1 00     # RS1_SP RS2_A2 @8 SW               ; protect a2
 
     93 08 00 04     # RD_A7 !64 ADDI                    ; sys_write
     13 05 10 00     # RD_A0 !1 ADDI                     ; write to stdout
@@ -382,10 +371,10 @@ F3 00              ## e_machine Indicating RISC-V
     13 06 10 00     # RD_A2 !1 ADDI                     ; write 1 character
     73 00 00 00     # ECALL                             ; syscall
 
-    03 35 01 00     # RD_A0 RS1_SP LD                   ; restore a0
-    83 35 81 00     # RD_A1 RS1_SP !8 LD                ; restore a1
-    03 36 01 01     # RD_A2 RS1_SP !16 LD               ; restore a2
-    13 01 81 01     # RD_SP RS1_SP !24 ADDI             ; deallocate stack
+    03 25 01 00     # RD_A0 RS1_SP LW                   ; restore a0
+    83 25 41 00     # RD_A1 RS1_SP !4 LW                ; restore a1
+    03 26 81 00     # RD_A2 RS1_SP !8 LW                ; restore a2
+    13 01 C1 00     # RD_SP RS1_SP !12 ADDI             ; deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
 :Done
@@ -402,13 +391,14 @@ F3 00              ## e_machine Indicating RISC-V
 # PROGRAM END
 
 :default_file
-    6B 61 65 6D 2E 72 69 73 63 76 36 34 00                          ; kaem.riscv64
+    6B 61 65 6D 2E 72 69 73 63 76 33 32 00                          ; kaem.riscv32
 :prefix
     20 2B 3E 20 00                                      ; " +> "
 :hard
     53 75 62 70 72 6F 63 65 73 73 20 65 72 72 6F 72 0A  ; "Subprocess error"
     41 42 4F 52 54 49 4E 47 20 48 41 52 44 0A           ; "ABORTING HARD"
     00
+:info 00 00 00 00
 :ELF_end
 :ELF_sym
 :ELF_str

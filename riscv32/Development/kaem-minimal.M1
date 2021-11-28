@@ -21,11 +21,10 @@
 
 # Register use:
 # s2: input fd
-# s3: status
 # s4: command_done
 # s6: malloc pointer
 
-    RD_A2 RS1_SP !16 LD               # Input file name
+    RD_A2 RS1_SP !8 LW                # Input file name
 
     RS1_A2 @_start_out BNEZ           # Use input file if specified
     # Else use kaem.run
@@ -52,21 +51,19 @@
 # Using a1 for tokens and a2 for tokens[i]
 :main_loop
     RD_A0 !1 ADDI                     # 256 * sizeof(char*)
-    # RD_A0 RS1_A0 11 SLLI            # replace 11 with 11-th register in rs2
-    RD_A0 RS1_A0 RS2_A1 SLLI          # 2048 = 1 << 11
+    RD_A0 RS1_A0 RS2_X11 SLLI         # 2048 = 1 << 11
     RD_RA $malloc JAL                 # allocate space
     RD_A1 RS1_A0 MV                   # set tokens pointer
     RD_A2 RS1_A0 MV                   # set tokens[i] pointer (i=0)
 
-    RD_S3 MV                          # status = 0
     RD_S4 MV                          # command_done = 0
 
 :collect_command
     RD_RA $collect_token JAL          # Get another token
     RS1_A0 @collect_command_comment BEQZ # if NULL == result then it is a comment, don't store
 
-    RS1_A2 RS2_A0 SD                  # tokens[i] = result
-    RD_A2 RS1_A2 !8 ADDI              # i = i + 1 (sizeof(char*) = 8)
+    RS1_A2 RS2_A0 SW                  # tokens[i] = result
+    RD_A2 RS1_A2 !4 ADDI              # i = i + 1 (sizeof(char*) = 4)
 
 :collect_command_comment
     RS1_S4 @collect_command BEQZ      # keep looping if 0 == command_done
@@ -75,49 +72,40 @@
     RS1_A1 RS2_A2 @main_loop BEQ      # keep looping if comment
 
     RD_RA $print_command JAL          # print the command
-    RD_A0 RS1_A1 LD                   # program = tokens[0]
+    RD_A0 RS1_A1 LW                   # program = tokens[0]
     RS1_A0 @Fail BEQZ                 # Error, no program
 
-    RD_SP RS1_SP !-8 ADDI             # allocate stack
-    RS1_SP RS2_A1 SD                  # protect tokens
+    RD_SP RS1_SP !-4 ADDI             # allocate stack
+    RS1_SP RS2_A1 SW                  # protect tokens
 
     RD_A7 !220 ADDI                   # sys_clone
     RD_A0 !17 ADDI                    # SIGCHLD flag
     RD_A1 MV                          # Child uses duplicate of parent's stack
     ECALL                             # syscall
 
-    RD_A1 RS1_SP LD                   # restore tokens
-    RD_SP RS1_SP !8 ADDI              # deallocate stack
+    RD_A1 RS1_SP LW                   # restore tokens
+    RD_SP RS1_SP !4 ADDI              # deallocate stack
 
     RS1_A0 @Fail BLTZ                 # if f == -1 no child was created
     RS1_A0 @collect_command_parent BNEZ # if f == 0 it is child
 
     # Deal with child case
     RD_A7 !221 ADDI                   # sys_execve
-    RD_A0 RS1_A1 LD                   # program = tokens[0]
+    RD_A0 RS1_A1 LW                   # program = tokens[0]
     ECALL                             # execve(program, tokens)
     RD_RA $Fail JAL                   # Exit with an error
 
 :collect_command_parent
-    RD_A7 !260 ADDI                   # sys_wait4
-    RD_A2 MV                          # set options = 0
-    RD_A3 MV                          # set *ruseage = NULL
+    RD_A7 !95 ADDI                    # sys_waitid
+    RD_A0 MV                          # set idtype = P_ALL
+    RD_A2 ~info AUIPC                 # a2 = siginfo_t &info
+    RD_A2 RS1_A2 !info ADDI
+    RD_A3 !4 MV                       # set *options = WEXITED
     ECALL                             # syscall
 
-    # wait4 returns wstatus pointer, from which we can extract child's exit status
     # Check if child exited
-    RD_A1 RS1_A1 LD                   # Dereference wstatus pointer
-    RD_T0 !0x7F ADDI                  # t0 = 0x7f
-    RD_T0 RS1_A1 RS2_T0 AND           # WTERMSIG(s) ((s) & 0x7f)
-    RS1_T0 @abort BNEZ                # Something went wrong, child did not exit
-
-    # Check exit status: WEXITSTATUS(s) (((s) & 0xff00) >> 8)
-    RD_T0 ~0xFF00 LUI                 # 0xff00 = 0xffff - 0xff = 2^16 - 2^8
-    RD_T0 RS1_T0 !-256 ADDIW          # t0 = 0xff00
-    RD_T0 RS1_A1 RS2_T0 AND           # (s) & 0xff00
-    RD_S3 RS1_T0 RS2_X8 SRLI          # Shift right by 8 to get status
-
-    RS1_S3 @main_loop BEQZ            # Loop if 0 == status
+    RD_A2 RS1_A2 !20 LW               # status = info->si_status
+    RS1_A2 @main_loop BEQZ            # Loop if 0 == status
 
 :abort
     RD_A0 ~hard AUIPC                 # Get error string
@@ -130,19 +118,19 @@
 # Receives tokens[j] in a1 and tokens[i] in a2
 # Modifies a0
 :print_command
-    RD_SP RS1_SP !-24 ADDI            # allocate stack
-    RS1_SP RS2_RA SD                  # protect ra
-    RS1_SP RS2_A1 @8 SD               # protect a1
-    RS1_SP RS2_A2 @16 SD              # protect a2
+    RD_SP RS1_SP !-12 ADDI            # allocate stack
+    RS1_SP RS2_RA SW                  # protect ra
+    RS1_SP RS2_A1 @4 SW               # protect a1
+    RS1_SP RS2_A2 @8 SW               # protect a2
 
     RD_A0 ~prefix AUIPC               # Get prefix " +> "
     RD_A0 RS1_A0 !prefix ADDI         # Get prefix " +> "
     RD_RA $File_Print JAL             # print it
 
 :print_command_loop
-    RD_A0 RS1_A1 LD                   # get tokens[j]
+    RD_A0 RS1_A1 LW                   # get tokens[j]
     RD_RA $File_Print JAL             # print it
-    RD_A1 RS1_A1 !8 ADDI              # j = j + 1
+    RD_A1 RS1_A1 !4 ADDI              # j = j + 1
     RD_A0 !32 ADDI                    # a0 = ' '
     RD_RA $fputc JAL                  # print it
     RS1_A1 RS2_A2 @print_command_loop BNE # continue if j < i, otherwise keep looping
@@ -150,10 +138,10 @@
     RD_A0 !10 ADDI                    # a0 = '\n'
     RD_RA $fputc JAL                  # print it
 
-    RD_RA RS1_SP LD                   # restore ra
-    RD_A1 RS1_SP !8 LD                # restore a1
-    RD_A2 RS1_SP !16 LD               # restore a2
-    RD_SP RS1_SP !24 ADDI             # deallocate stack
+    RD_RA RS1_SP LW                   # restore ra
+    RD_A1 RS1_SP !4 LW                # restore a1
+    RD_A2 RS1_SP !8 LW                # restore a2
+    RD_SP RS1_SP !12 ADDI             # deallocate stack
     RS1_RA JALR                       # return
 
 
@@ -162,13 +150,12 @@
 # Overwrites a0
 # Uses a0 as c, a1 as token and a2 as token[i]
 :collect_token
-    RD_SP RS1_SP !-24 ADDI            # allocate stack
-    RS1_SP RS2_RA SD                  # protect ra
-    RS1_SP RS2_A1 @8 SD               # protect a1
-    RS1_SP RS2_A2 @16 SD              # protect a2
+    RD_SP RS1_SP !-12 ADDI            # allocate stack
+    RS1_SP RS2_RA SW                  # protect ra
+    RS1_SP RS2_A1 @4 SW               # protect a1
+    RS1_SP RS2_A2 @8 SW               # protect a2
 
     RD_A0 ~4096 LUI                   # 4096 * sizeof(char)
-
     RD_RA $malloc JAL                 # allocate space
     RD_A1 RS1_A0 MV                   # token = malloc(max_string)
     RD_A2 RS1_A0 MV                   # i = 0; set token[i]
@@ -219,10 +206,10 @@
 
 :collect_token_good
     RD_A0 RS1_A1 MV                   # Return token
-    RD_RA RS1_SP LD                   # Restore ra
-    RD_A1 RS1_SP !8 LD                # Restore a1
-    RD_A2 RS1_SP !16 LD               # Restore a2
-    RD_SP RS1_SP !24 ADDI             # Deallocate stack
+    RD_RA RS1_SP LW                   # Restore ra
+    RD_A1 RS1_SP !4 LW                # Restore a1
+    RD_A2 RS1_SP !8 LW                # Restore a2
+    RD_SP RS1_SP !12 ADDI             # Deallocate stack
     RS1_RA JALR                       # return
 
 
@@ -232,8 +219,8 @@
 # uses a0 as c
 # Just throws away everything it reads
 :collect_comment
-    RD_SP RS1_SP !-8 ADDI             # allocate stack
-    RS1_SP RS2_RA SD                  # protect ra
+    RD_SP RS1_SP !-4 ADDI             # allocate stack
+    RS1_SP RS2_RA SW                  # protect ra
 
     RD_RA $fgetc JAL                  # c = fgetc(input)
     RD_T0 !-4 ADDI                    # if c == EOF
@@ -242,8 +229,8 @@
     RD_T0 !10 ADDI                    # if c == '\n'
     RS1_A0 RS2_T0 @collect_comment BNE # loop
 
-    RD_RA RS1_SP LD                   # restore ra
-    RD_SP RS1_SP !8 ADDI              # deallocate stack
+    RD_RA RS1_SP LW                   # restore ra
+    RD_SP RS1_SP !4 ADDI              # deallocate stack
     RS1_RA JALR                       # return
 
 
@@ -251,9 +238,9 @@
 # Loads FILE* from s2
 # Returns -4 (EOF) or char in a0
 :fgetc
-    RD_SP RS1_SP !-24 ADDI            # allocate stack
-    RS1_SP RS2_A1 @8 SD               # protect a1
-    RS1_SP RS2_A2 @16 SD              # protect a2
+    RD_SP RS1_SP !-12 ADDI            # allocate stack
+    RS1_SP RS2_A1 @4 SW               # protect a1
+    RS1_SP RS2_A2 @8 SW               # protect a2
 
     RD_A7 !63 ADDI                    # sys_read
     RD_A1 RS1_SP MV                   # Get stack address
@@ -269,9 +256,9 @@
 
 :fgetc_done
     RD_A0 RS1_A1 LB                   # return char in a0
-    RD_A1 RS1_SP !8 LD                # restore a1
-    RD_A2 RS1_SP !16 LD               # restore a2
-    RD_SP RS1_SP !24 ADDI             # deallocate stack
+    RD_A1 RS1_SP !4 LW                # restore a1
+    RD_A2 RS1_SP !8 LW                # restore a2
+    RD_SP RS1_SP !12 ADDI             # deallocate stack
     RS1_RA JALR                       # return
 
 
@@ -280,8 +267,8 @@
 # Requires MALLOC pointer to be initialized and a0 to have the number of desired bytes
 
 :malloc
-    RD_SP RS1_SP !-8 ADDI             # allocate stack
-    RS1_SP RS2_A1 SD                  # protect a1
+    RD_SP RS1_SP !-4 ADDI             # allocate stack
+    RS1_SP RS2_A1 SW                  # protect a1
 
     RD_A1 RS1_S6 MV                   # Store the current pointer
     RD_A0 RS1_A0 RS2_S6 ADD           # Request the number of desired bytes
@@ -290,8 +277,8 @@
     RD_S6 RS1_A0 MV                   # Set our malloc pointer
     RD_A0 RS1_A1 MV                   # Return the pointer
 
-    RD_A1 RS1_SP LD                   # restore a1
-    RD_SP RS1_SP !8 ADDI              # deallocate stack
+    RD_A1 RS1_SP LW                   # restore a1
+    RD_SP RS1_SP !4 ADDI              # deallocate stack
     RS1_RA JALR                       # return
 
 
@@ -299,10 +286,10 @@
 # Receives CHAR* in a0
 # calls fputc for every non-null char
 :File_Print
-    RD_SP RS1_SP !-24 ADDI            # allocate stack
-    RS1_SP RS2_RA SD                  # protect ra
-    RS1_SP RS2_A1 @8 SD               # protect a1
-    RS1_SP RS2_A2 @16 SD              # protect a2
+    RD_SP RS1_SP !-12 ADDI            # allocate stack
+    RS1_SP RS2_RA SW                  # protect ra
+    RS1_SP RS2_A1 @4 SW               # protect a1
+    RS1_SP RS2_A2 @8 SW               # protect a2
     RD_A1 RS1_A0 MV                   # protect a0
 
     RS1_A0 @File_Print_Done BEQZ      # Protect against nulls
@@ -316,10 +303,10 @@
     $File_Print_Loop JAL              # Keep printing
 
 :File_Print_Done
-    RD_RA RS1_SP LD                   # restore ra
-    RD_A1 RS1_SP !8 LD                # restore a1
-    RD_A2 RS1_SP !16 LD               # restore a2
-    RD_SP RS1_SP !24 ADDI             # deallocate stack
+    RD_RA RS1_SP LW                   # restore ra
+    RD_A1 RS1_SP !4 LW                # restore a1
+    RD_A2 RS1_SP !8 LW                # restore a2
+    RD_SP RS1_SP !12 ADDI             # deallocate stack
     RS1_RA JALR                       # return
 
 
@@ -327,10 +314,10 @@
 # receives CHAR in a0 and load FILE* from stdout
 # writes char and returns
 :fputc
-    RD_SP RS1_SP !-24 ADDI            # allocate stack
-    RS1_SP RS2_A0 SD                  # protect a0
-    RS1_SP RS2_A1 @8 SD               # protect a1
-    RS1_SP RS2_A2 @16 SD              # protect a2
+    RD_SP RS1_SP !-12 ADDI            # allocate stack
+    RS1_SP RS2_A0 SW                  # protect a0
+    RS1_SP RS2_A1 @4 SW               # protect a1
+    RS1_SP RS2_A2 @8 SW               # protect a2
 
     RD_A7 !64 ADDI                    # sys_write
     RD_A0 !1 ADDI                     # write to stdout
@@ -338,10 +325,10 @@
     RD_A2 !1 ADDI                     # write 1 character
     ECALL                             # syscall
 
-    RD_A0 RS1_SP LD                   # restore a0
-    RD_A1 RS1_SP !8 LD                # restore a1
-    RD_A2 RS1_SP !16 LD               # restore a2
-    RD_SP RS1_SP !24 ADDI             # deallocate stack
+    RD_A0 RS1_SP LW                   # restore a0
+    RD_A1 RS1_SP !4 LW                # restore a1
+    RD_A2 RS1_SP !8 LW                # restore a2
+    RD_SP RS1_SP !12 ADDI             # deallocate stack
     RS1_RA JALR                       # return
 
 :Done
@@ -357,10 +344,11 @@
     ECALL                             # syscall
 # PROGRAM END
 
-:default_file "kaem.riscv64"
+:default_file "kaem.riscv32"
 :prefix " +> "
 :hard "Subprocess error
 ABORTING HARD
 "
+:info NULL
 
 :ELF_end

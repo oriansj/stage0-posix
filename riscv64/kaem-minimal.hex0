@@ -381,7 +381,7 @@ B2 03 00 00 00 00 00 00 ## p_memsz
     67 80 00 00     # RS1_RA JALR                       ; return
 
 # File_Print function
-# Receives CHAR* in EAX
+# Receives CHAR* in a0
 # calls fputc for every non-null char
 # :File_Print ; (0x06002F0)
     13 01 81 FE     # RD_SP RS1_SP !-24 ADDI            ; allocate stack

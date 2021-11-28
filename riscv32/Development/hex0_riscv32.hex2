@@ -26,51 +26,52 @@
 ; Uses top of the stack as i/o buffer
 
 ## ELF Header
-#:ELF_base
-7F 45 4C 46        # e_ident[EI_MAG0-3] ELF's magic number
 
-01                 # e_ident[EI_CLASS] Indicating 32 bit
-01                 # e_ident[EI_DATA] Indicating little endianness
-01                 # e_ident[EI_VERSION] Indicating original elf
+:ELF_base
+7F 45 4C 46        ## e_ident[EI_MAG0-3] ELF's magic number
 
-03                 # e_ident[EI_OSABI] Set at 3 for Linux
-00                 # e_ident[EI_ABIVERSION] Ignored for Statically linked executables
+01                 ## e_ident[EI_CLASS] Indicating 32 bit
+01                 ## e_ident[EI_DATA] Indicating little endianness
+01                 ## e_ident[EI_VERSION] Indicating original elf
 
-00 00 00 00 00 00 00 # e_ident[EI_PAD]
-02 00              # e_type Indicating Executable
-F3 00              # e_machine Indicating RISC-V
-01 00 00 00        # e_version Indicating original elf
+03                 ## e_ident[EI_OSABI] Set at 3 because FreeBSD is strict
+00                 ## e_ident[EI_ABIVERSION] Set at 0 because none cares
 
-54 00 60 00        # e_entry Address of the entry point
-34 00 00 00        # e_phoff Address of program header table
-00 00 00 00        # e_shoff Address of section header table
+00 00 00 00 00 00 00 ## e_ident[EI_PAD]
+02 00              ## e_type Indicating Executable
+F3 00              ## e_machine Indicating RISC-V
+01 00 00 00        ## e_version Indicating original elf
 
-00 00 00 00        # e_flags
+&_start            ## e_entry Address of the entry point (Number of bytes this header is + Base Address)
+%ELF_program_headers>ELF_base ## e_phoff Address of program header table
+00 00 00 00        ## e_shoff Address of section header table
 
-34 00              # e_ehsize Indicating our 52 Byte header
+00 00 00 00        ## e_flags
+34 00              ## e_ehsize Indicating our 52 Byte header
 
-20 00              # e_phentsize size of a program header table
-01 00              # e_phnum number of entries in program table
+20 00              ## e_phentsize size of a program header table
+01 00              ## e_phnum number of entries in program table
 
-00 00              # e_shentsize size of a section header table
-00 00              # e_shnum number of entries in section table
+00 00              ## e_shentsize size of a section header table
+00 00              ## e_shnum number of entries in section table
 
-00 00              # e_shstrndx index of the section names
+00 00              ## e_shstrndx index of the section names
 
 ## Program Header
-#:ELF_program_headers
-#:ELF_program_header__text
-01 00 00 00        # ph_type: PT-LOAD = 1
-00 00 00 00        # ph_offset
+:ELF_program_headers
+01 00 00 00        ## ph_type: PT-LOAD = 1
+00 00 00 00        ## p_offset
 
-00 00 60 00        # ph_vaddr
-00 00 60 00        # ph_physaddr
+&ELF_base          ## ph_vaddr
+&ELF_base          ## ph_physaddr
 
-68 01 00 00        # ph_filesz
-68 01 00 00        # ph_memsz
+%ELF_end>ELF_base  ## p_filesz
+%ELF_end>ELF_base  ## p_memsz
 
-07 00 00 00        # ph_flags: PF-X|PF-W|PF-R = 7
-01 00 00 00        # ph_align
+07 00 00 00        ## ph_flags: PF-X|PF-W|PF-R = 7
+01 00 00 00        ## ph_align
+
+:ELF_text
 
 :_start
     # RD_S4 MV                 ; Initialize register

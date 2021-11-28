@@ -31,13 +31,12 @@ a shell you trust. The kernel issue is not yet solved and at the moment the
 kernel is trusted.
 
 This repository currently supports AMD64 (x86_64), x86 (i386), AArch64 and RISC-V (64-bit)
-architectures. To run the entire bootstrap process in the safest way, cd into
-the respective directory for your architecture -- AArch64 for AArch64, AMD64 for
-amd64, x86 for x86/i386 and riscv64 for RISC-V -- then run the matching following command:
-`../bootstrap-seeds/POSIX/AMD64/kaem-optional-seed`
-`../bootstrap-seeds/POSIX/x86/kaem-optional-seed`
-`../bootstrap-seeds/POSIX/AArch64/kaem-optional-seed`
-`../bootstrap-seeds/POSIX/riscv64/kaem-optional-seed`
+architectures. To run the entire bootstrap process in the safest way,
+run the following command matching your architecture:
+`bootstrap-seeds/POSIX/AMD64/kaem-optional-seed`
+`bootstrap-seeds/POSIX/x86/kaem-optional-seed`
+`bootstrap-seeds/POSIX/AArch64/kaem-optional-seed`
+`bootstrap-seeds/POSIX/riscv64/kaem-optional-seed`
 This uses the kaem seed rather then relying on your shell.
 
 At this stage of the bootstrap process we use a very minimal kaem. It does not

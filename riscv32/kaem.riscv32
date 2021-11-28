@@ -1,0 +1,4 @@
+/bin/true
+./b
+/bin/sleep 2
+/bin/true

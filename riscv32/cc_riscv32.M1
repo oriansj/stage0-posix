@@ -2633,7 +2633,7 @@
     RD_A0 RS1_A0 !process_while_string_3 ADDI
     RD_RA $emit_out JAL               ; Emit it
 
-    RD_A0 RS1_S11  !8 LW              ; function->S
+    RD_A0 RS1_S11 !8 LW               ; function->S
     RD_A1 RS1_A2 MV                   ; Passing NUMBER_STRING
     RD_RA $uniqueID_out JAL           ; uniqueID_out(function->s, number_string)
 
@@ -3032,7 +3032,7 @@
     RD_A2 ~expression_string_1 AUIPC  ; Assume "RS1_A1 RS2_A0 SB\n" by default
     RD_A2 RS1_A2 !expression_string_1 ADDI
     RD_A1 RS1_S4 !4 LW                ; global_token->prev
-    RD_A1 RS1_A1 !8 LW               ; global_token->prev->S
+    RD_A1 RS1_A1 !8 LW                ; global_token->prev->S
     RD_A0 ~close_bracket AUIPC        ; Using "]"
     RD_A0 RS1_A0 !close_bracket ADDI
     RD_RA $match JAL                  ; IF global_token->S == "]"
@@ -3716,7 +3716,7 @@
     $primary_expr_done JAL            ; We are done
 
 :primary_expr_bin
-    RD_A0 RS1_S4 !16 LW               ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_A0 RS1_A0 LBU                  ; global_token->S[0]
     RD_T0 !126 ADDI                   ; IF global_token->S[0] == "~"
     RS1_A0 RS2_T0 @primary_expr_paren BNE ; Otherwise try paren
@@ -3961,7 +3961,7 @@
     RD_A4 !1 ADDI                     ; PASSED = 1
 
 :function_call_gen_iter
-    RD_A0 RS1_S4 !4 LW                ; global_token->S
+    RD_A0 RS1_S4 !8 LW                ; global_token->S
     RD_A0 RS1_A0 LBU                  ; global_token->S[0]
     RD_T0 !44 ADDI                    ; ","
     RS1_A0 RS2_T0 @function_call_gen_done BNE ; Check IF global_token->S[0] == ","
@@ -4733,85 +4733,85 @@
 
 :prim_types
 :type_void
-    &type_int %0                        ; NEXT
-    %4 %0                               ; SIZE
+    &type_int                           ; NEXT
+    %4                                  ; SIZE
     NULL                                ; OFFSET
-    &type_void %0                       ; INDIRECT
+    &type_void                          ; INDIRECT
     NULL                                ; MEMBERS
-    &type_void %0                       ; TYPE
-    &type_void_name %0                  ; NAME
+    &type_void                          ; TYPE
+    &type_void_name                     ; NAME
 
 :type_int
-    &type_char %0                       ; NEXT
-    %4 %0                               ; SIZE
+    &type_char                          ; NEXT
+    %4                                  ; SIZE
     NULL                                ; OFFSET
-    &type_int %0                        ; INDIRECT
+    &type_int                           ; INDIRECT
     NULL                                ; MEMBERS
-    &type_int %0                        ; TYPE
-    &type_int_name %0                   ; NAME
+    &type_int                           ; TYPE
+    &type_int_name                      ; NAME
 
 :type_char
-    &type_file %0                       ; NEXT
-    %1 %0                               ; SIZE
+    &type_file                          ; NEXT
+    %1                                  ; SIZE
     NULL                                ; OFFSET
-    &type_char_indirect %0              ; INDIRECT
+    &type_char_indirect                 ; INDIRECT
     NULL                                ; MEMBERS
-    &type_char %0                       ; TYPE
-    &type_char_name %0                  ; NAME
+    &type_char                          ; TYPE
+    &type_char_name                     ; NAME
 
 :type_char_indirect
-    &type_file %0                       ; NEXT
-    %4 %0                               ; SIZE
+    &type_file                          ; NEXT
+    %4                                  ; SIZE
     NULL                                ; OFFSET
-    &type_char_double_indirect %0       ; INDIRECT
+    &type_char_double_indirect          ; INDIRECT
     NULL                                ; MEMBERS
-    &type_char_indirect %0              ; TYPE
-    &type_char_indirect_name %0         ; NAME
+    &type_char_indirect                 ; TYPE
+    &type_char_indirect_name            ; NAME
 
 :type_char_double_indirect
-    &type_file %0                       ; NEXT
-    %4 %0                               ; SIZE
+    &type_file                          ; NEXT
+    %4                                  ; SIZE
     NULL                                ; OFFSET
-    &type_char_double_indirect %0       ; INDIRECT
+    &type_char_double_indirect          ; INDIRECT
     NULL                                ; MEMBERS
-    &type_char_indirect %0              ; TYPE
-    &type_char_double_indirect_name %0  ; NAME
+    &type_char_indirect                 ; TYPE
+    &type_char_double_indirect_name     ; NAME
 
 :type_file
-    &type_function %0                   ; NEXT
-    %4 %0                               ; SIZE
+    &type_function                      ; NEXT
+    %4                                  ; SIZE
     NULL                                ; OFFSET
-    &type_file %0                       ; INDIRECT
+    &type_file                          ; INDIRECT
     NULL                                ; MEMBERS
-    &type_file %0                       ; TYPE
-    &type_file_name %0                  ; NAME
+    &type_file                          ; TYPE
+    &type_file_name                     ; NAME
 
 :type_function
-    &type_unsigned %0                   ; NEXT
-    %4 %0                               ; SIZE
+    &type_unsigned                      ; NEXT
+    %4                                  ; SIZE
     NULL                                ; OFFSET
-    &type_function %0                   ; INDIRECT
+    &type_function                      ; INDIRECT
     NULL                                ; MEMBERS
-    &type_function %0                   ; TYPE
-    &type_function_name %0              ; NAME
+    &type_function                      ; TYPE
+    &type_function_name                 ; NAME
 
 :type_unsigned
-    &type_long %0                       ; NEXT
-    %4 %0                               ; SIZE
+    &type_long                          ; NEXT
+    %4                                  ; SIZE
     NULL                                ; OFFSET
-    &type_unsigned %0                   ; INDIRECT
+    &type_unsigned                      ; INDIRECT
     NULL                                ; MEMBERS
-    &type_unsigned %0                   ; TYPE
-    &type_unsigned_name %0              ; NAME
+    &type_unsigned                      ; TYPE
+    &type_unsigned_name                 ; NAME
 
 :type_long
     NULL                                ; NEXT
-    %4 %0                               ; SIZE
+    %4                                  ; SIZE
     NULL                                ; OFFSET
-    &type_long %0                       ; INDIRECT
+    &type_long                          ; INDIRECT
     NULL                                ; MEMBERS
-    &type_long %0                       ; TYPE
-    &type_long_name %0                  ; NAME
+    &type_long                          ; TYPE
+    &type_long_name                     ; NAME
 
 :type_void_name  "void"
 :type_int_name  "int"

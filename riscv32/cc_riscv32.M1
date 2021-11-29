@@ -21,7 +21,7 @@
 ; s2: input fd
 ; s3: output fd
 ; s4: C, global_token
-; s5: string_index, global_constant_listcollect_arguments
+; s5: string_index, global_constant_list
 ; s6: Token, global_symbol_list
 ; s7: globals_list
 ; s8: global_function_list
@@ -1214,7 +1214,7 @@
     RS1_SP RS2_A0 @4 SW               ; Protect bottom nibble
     RD_A0 RS1_A0 RS2_X4 SRLI          ; do high nibble first
     RD_RA $hex4 JAL                   ; Store it
-    RD_A0 RS1_SP !8 LW                ; do low nibble
+    RD_A0 RS1_SP !4 LW                ; do low nibble
     RD_RA $hex4 JAL                   ; Store it
     RD_RA RS1_SP LW                   ; restore ra
     RD_SP RS1_SP !8 ADDI              ; deallocate stack
@@ -2273,7 +2273,7 @@
     $recursive_statement_locals JAL   ; keep going
 
 :recursive_statement_done
-    RS1_S11 RS2_A2 @8 SW              ; function->locals = frame
+    RS1_S11 RS2_A2 @4 SW              ; function->locals = frame
 
     RD_RA RS1_SP LW                   ; restore ra
     RD_A1 RS1_SP !4 LW                ; restore a1

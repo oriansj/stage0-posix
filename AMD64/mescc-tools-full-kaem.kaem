@@ -27,8 +27,8 @@ cd AMD64
 	-f ../M2libc/sys/types.h \
 	-f ../M2libc/stddef.h \
 	-f ../M2libc/amd64/Linux/unistd.h \
-	-f ../M2libc/stdlib.c \
 	-f ../M2libc/amd64/Linux/fcntl.h \
+	-f ../M2libc/stdlib.c \
 	-f ../M2libc/stdio.c \
 	-f ../M2libc/bootstrappable.c \
 	-f ../mescc-tools/stringify.c \
@@ -63,8 +63,8 @@ cd AMD64
 	-f ../M2libc/sys/types.h \
 	-f ../M2libc/stddef.h \
 	-f ../M2libc/amd64/Linux/unistd.h \
-	-f ../M2libc/stdlib.c \
 	-f ../M2libc/amd64/Linux/fcntl.h \
+	-f ../M2libc/stdlib.c \
 	-f ../M2libc/stdio.c \
 	-f ../M2libc/bootstrappable.c \
 	-f ../mescc-tools/get_machine.c \
@@ -96,8 +96,8 @@ cd AMD64
 	-f ../M2libc/sys/types.h \
 	-f ../M2libc/stddef.h \
 	-f ../M2libc/amd64/Linux/unistd.h \
-	-f ../M2libc/stdlib.c \
 	-f ../M2libc/amd64/Linux/fcntl.h \
+	-f ../M2libc/stdlib.c \
 	-f ../M2libc/stdio.c \
 	-f ../M2libc/bootstrappable.c \
 	-f ../M2-Planet/cc.h \

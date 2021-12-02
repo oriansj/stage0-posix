@@ -123,8 +123,8 @@
 	-f ./M2libc/riscv64/Linux/sys/stat.h \
 	-f ./M2libc/stddef.h \
 	-f ./M2libc/riscv64/Linux/unistd.h \
-	-f ./M2libc/stdlib.c \
 	-f ./M2libc/riscv64/Linux/fcntl.h \
+	-f ./M2libc/stdlib.c \
 	-f ./M2libc/stdio.c \
 	-f ./M2libc/bootstrappable.c \
 	-f ./mescc-tools/hex2.h \
@@ -157,8 +157,8 @@
 	-f ./M2libc/stddef.h \
 	-f ./M2libc/string.c \
 	-f ./M2libc/riscv64/Linux/unistd.h \
-	-f ./M2libc/stdlib.c \
 	-f ./M2libc/riscv64/Linux/fcntl.h \
+	-f ./M2libc/stdlib.c \
 	-f ./M2libc/stdio.c \
 	-f ./M2libc/bootstrappable.c \
 	-f ./mescc-tools/stringify.c \
@@ -191,8 +191,8 @@
 	-f ./M2libc/riscv64/Linux/sys/stat.h \
 	-f ./M2libc/stddef.h \
 	-f ./M2libc/riscv64/Linux/unistd.h \
-	-f ./M2libc/stdlib.c \
 	-f ./M2libc/riscv64/Linux/fcntl.h \
+	-f ./M2libc/stdlib.c \
 	-f ./M2libc/stdio.c \
 	-f ./M2libc/bootstrappable.c \
 	-f ./mescc-tools/hex2.h \
@@ -228,8 +228,8 @@
 	-f ./M2libc/stddef.h \
 	-f ./M2libc/string.c \
 	-f ./M2libc/riscv64/Linux/unistd.h \
-	-f ./M2libc/stdlib.c \
 	-f ./M2libc/riscv64/Linux/fcntl.h \
+	-f ./M2libc/stdlib.c \
 	-f ./M2libc/stdio.c \
 	-f ./M2libc/bootstrappable.c \
 	-f ./mescc-tools/Kaem/kaem.h \

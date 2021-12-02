@@ -35,7 +35,7 @@ cd riscv32
 	--debug \
 	-o ./artifact/blood-elf-1.M1
 
-./artifact/blood-elf-0 --64 --little-endian -f ./artifact/blood-elf-1.M1 -o ./artifact/blood-elf-1-footer.M1
+./artifact/blood-elf-0 --little-endian -f ./artifact/blood-elf-1.M1 -o ./artifact/blood-elf-1-footer.M1
 ./bin/M1 --architecture riscv32 \
 	--little-endian \
 	-f ../M2libc/riscv32/riscv32_defs.M1 \
@@ -70,7 +70,7 @@ cd riscv32
 	--debug \
 	-o ./artifact/get_machine.M1
 
-./bin/blood-elf --64 --little-endian -f ./artifact/get_machine.M1 -o ./artifact/get_machine-footer.M1
+./bin/blood-elf --little-endian -f ./artifact/get_machine.M1 -o ./artifact/get_machine-footer.M1
 
 ./bin/M1 --architecture riscv32 \
 	--little-endian \
@@ -110,7 +110,7 @@ cd riscv32
 	--debug \
 	-o ./artifact/M2-1.M1
 
-./bin/blood-elf --64 --little-endian -f ./artifact/M2-1.M1 -o ./artifact/M2-1-footer.M1
+./bin/blood-elf --little-endian -f ./artifact/M2-1.M1 -o ./artifact/M2-1-footer.M1
 
 ./bin/M1 --architecture riscv32 \
 	--little-endian \

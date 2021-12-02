@@ -106,7 +106,7 @@
 	--debug \
 	-o ./riscv32/artifact/M1-macro-0.M1
 
-./riscv32/artifact/blood-elf-0 --64 --little-endian -f ./riscv32/artifact/M1-macro-0.M1 -o ./riscv32/artifact/M1-macro-0-footer.M1
+./riscv32/artifact/blood-elf-0 --little-endian -f ./riscv32/artifact/M1-macro-0.M1 -o ./riscv32/artifact/M1-macro-0-footer.M1
 ./riscv32/artifact/catm ./riscv32/artifact/M1-macro-0-0.M1 ./M2libc/riscv32/riscv32_defs.M1 ./M2libc/riscv32/libc-core.M1 ./riscv32/artifact/M1-macro-0.M1 ./riscv32/artifact/M1-macro-0-footer.M1
 ./riscv32/artifact/M0 ./riscv32/artifact/M1-macro-0-0.M1 ./riscv32/artifact/M1-macro-0.hex2
 ./riscv32/artifact/catm ./riscv32/artifact/M1-macro-0-0.hex2 ./M2libc/riscv32/ELF-riscv32-debug.hex2 ./riscv32/artifact/M1-macro-0.hex2
@@ -134,7 +134,7 @@
 	--debug \
 	-o ./riscv32/artifact/hex2_linker-0.M1
 
-./riscv32/artifact/blood-elf-0 --64 --little-endian -f ./riscv32/artifact/hex2_linker-0.M1 -o ./riscv32/artifact/hex2_linker-0-footer.M1
+./riscv32/artifact/blood-elf-0 --little-endian -f ./riscv32/artifact/hex2_linker-0.M1 -o ./riscv32/artifact/hex2_linker-0-footer.M1
 ./riscv32/artifact/M1-0 --architecture riscv32 \
 	--little-endian \
 	-f ./M2libc/riscv32/riscv32_defs.M1 \
@@ -166,7 +166,7 @@
 	--debug \
 	-o ./riscv32/artifact/M1-macro-1.M1
 
-./riscv32/artifact/blood-elf-0 --64 --little-endian -f ./riscv32/artifact/M1-macro-1.M1 -o ./riscv32/artifact/M1-macro-1-footer.M1
+./riscv32/artifact/blood-elf-0 --little-endian -f ./riscv32/artifact/M1-macro-1.M1 -o ./riscv32/artifact/M1-macro-1-footer.M1
 
 ./riscv32/artifact/M1-0 --architecture riscv32 \
 	--little-endian \
@@ -202,7 +202,7 @@
 	--debug \
 	-o ./riscv32/artifact/hex2_linker-1.M1
 
-./riscv32/artifact/blood-elf-0 --64 --little-endian -f ./riscv32/artifact/hex2_linker-1.M1 -o ./riscv32/artifact/hex2_linker-1-footer.M1
+./riscv32/artifact/blood-elf-0 --little-endian -f ./riscv32/artifact/hex2_linker-1.M1 -o ./riscv32/artifact/hex2_linker-1-footer.M1
 
 ./riscv32/bin/M1 --architecture riscv32 \
 	--little-endian \
@@ -239,7 +239,7 @@
 	--debug \
 	-o ./riscv32/artifact/kaem.M1
 
-./riscv32/artifact/blood-elf-0 --64 --little-endian -f ./riscv32/artifact/kaem.M1 -o ./riscv32/artifact/kaem-footer.M1
+./riscv32/artifact/blood-elf-0 --little-endian -f ./riscv32/artifact/kaem.M1 -o ./riscv32/artifact/kaem-footer.M1
 
 ./riscv32/bin/M1 --architecture riscv32 \
 	--little-endian \

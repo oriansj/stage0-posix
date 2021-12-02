@@ -5125,7 +5125,7 @@ $DO_"
 :process_do_string_7
 "JAL
 :DO_END_"
-process_for_string_6
+
 :process_while_string_0
 "END_WHILE_"
 

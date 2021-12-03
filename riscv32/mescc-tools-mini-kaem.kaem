@@ -122,6 +122,7 @@
 	-f ./M2libc/sys/types.h \
 	-f ./M2libc/riscv32/Linux/sys/stat.h \
 	-f ./M2libc/stddef.h \
+	-f ./M2libc/signal.h \
 	-f ./M2libc/riscv32/Linux/unistd.h \
 	-f ./M2libc/riscv32/Linux/fcntl.h \
 	-f ./M2libc/stdlib.c \
@@ -156,6 +157,7 @@
 	-f ./M2libc/sys/types.h \
 	-f ./M2libc/stddef.h \
 	-f ./M2libc/string.c \
+	-f ./M2libc/signal.h \
 	-f ./M2libc/riscv32/Linux/unistd.h \
 	-f ./M2libc/riscv32/Linux/fcntl.h \
 	-f ./M2libc/stdlib.c \
@@ -190,6 +192,7 @@
 	-f ./M2libc/sys/types.h \
 	-f ./M2libc/riscv32/Linux/sys/stat.h \
 	-f ./M2libc/stddef.h \
+	-f ./M2libc/signal.h \
 	-f ./M2libc/riscv32/Linux/unistd.h \
 	-f ./M2libc/riscv32/Linux/fcntl.h \
 	-f ./M2libc/stdlib.c \
@@ -227,6 +230,7 @@
 	-f ./M2libc/sys/types.h \
 	-f ./M2libc/stddef.h \
 	-f ./M2libc/string.c \
+	-f ./M2libc/signal.h \
 	-f ./M2libc/riscv32/Linux/unistd.h \
 	-f ./M2libc/riscv32/Linux/fcntl.h \
 	-f ./M2libc/stdlib.c \

@@ -21,7 +21,7 @@
 ARCH="riscv32"
 M2LIBC="../M2libc"
 TOOLS="../riscv32/bin"
-BLOOD_FLAG="--32"
+BLOOD_FLAG=" "
 ENDIAN_FLAG="--little-endian"
 BASE_ADDRESS="0x00600000"
 BINDIR="../riscv32/bin"

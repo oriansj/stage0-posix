@@ -29,6 +29,9 @@ Generate-amd64-answers:
 Generate-aarch64-answers:
 	sha256sum AArch64/bin/* >| aarch64.answers
 
+Generate-riscv32-answers:
+	sha256sum riscv32/bin/* >| riscv32.answers
+
 Generate-riscv64-answers:
 	sha256sum riscv64/bin/* >| riscv64.answers
 
@@ -48,11 +51,15 @@ test-aarch64:
 	./bootstrap-seeds/POSIX/AArch64/kaem-optional-seed
 	sha256sum -c aarch64.answers
 
+test-riscv32:
+	./bootstrap-seeds/POSIX/riscv32/kaem-optional-seed
+	sha256sum -c riscv32.answers
+
 test-riscv64:
 	./bootstrap-seeds/POSIX/riscv64/kaem-optional-seed
 	sha256sum -c riscv64.answers
 
-test-all: test-x86 test-amd64 test-aarch64 test-riscv64
+test-all: test-x86 test-amd64 test-aarch64 test-riscv32 test-riscv64
 
 ### dist
 .PHONY: dist

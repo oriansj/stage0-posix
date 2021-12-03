@@ -29,7 +29,7 @@
 
 ./bootstrap-seeds/POSIX/AMD64/kaem-optional-seed ./AMD64/mescc-tools-seed-kaem.kaem
 ./AMD64/artifact/kaem-0 ./AMD64/mescc-tools-mini-kaem.kaem
-./AMD64/bin/kaem --verbose --strict -f ./AMD64/mescc-tools-full-kaem.kaem
+./AMD64/bin/kaem --verbose --strict --file ./AMD64/mescc-tools-full-kaem.kaem
 
 ######################################################
 # Phase 15-22 Build mescc-tools-extra from M2-Planet #

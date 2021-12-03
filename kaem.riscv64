@@ -23,7 +23,7 @@
 
 ./bootstrap-seeds/POSIX/riscv64/kaem-optional-seed ./riscv64/mescc-tools-seed-kaem.kaem
 ./riscv64/artifact/kaem-0 ./riscv64/mescc-tools-mini-kaem.kaem
-./riscv64/bin/kaem --verbose --strict -f ./riscv64/mescc-tools-full-kaem.kaem
+./riscv64/bin/kaem --verbose --strict --file ./riscv64/mescc-tools-full-kaem.kaem
 
 ######################################################
 # Phase 15-22 Build mescc-tools-extra from M2-Planet #

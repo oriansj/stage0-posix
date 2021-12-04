@@ -138,10 +138,12 @@ F3 00              ## e_machine Indicating RISC-V
     $First_pass EF 00 00 00 # RD_RA $First_pass JAL     ; First pass
 
     ; Rewind input file
-    93 08 E0 03     # RD_A7 !62 ADDI                    ; sys_lseek
+    93 08 E0 03     # RD_A7 !62 ADDI                    ; sys_llseek
     13 05 09 00     # RD_A0 RS1_S2 MV                   ; Input file descriptor
     93 05 00 00     # RD_A1 MV                          ; Set offset to zero
-    13 06 00 00     # RD_A2 MV                          ; Set whence to zero
+    13 06 00 00     # RD_A2 MV                          ; Set offset to zero
+    93 06 00 00     # RD_A3 MV                          ; Set result pointer to zero
+    13 07 00 00     # RD_A4 MV                          ; Set whence to zero
     73 00 00 00     # ECALL                             ; syscall
 
     ; Initialize globals

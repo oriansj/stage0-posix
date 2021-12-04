@@ -91,10 +91,12 @@ after_open:
     jal First_pass               # First pass
 
     # Rewind input file
-    li a7, 62                    # sys_lseek
+    li a7, 62                    # sys_llseek
     mv a0, s2                    # Input file descriptor
     mv a1, zero                  # Set offset to zero
-    mv a2, zero                  # Set whence to zero
+    mv a2, zero                  # Set offset to zero
+    mv a3, zero                  # Set result pointer to zero
+    mv a4, zero                  # Set whence to zero
     ecall                        # syscall
 
     # Initialize globals

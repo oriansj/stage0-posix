@@ -118,6 +118,7 @@ C1 04 00 00 00 00 00 00 ## p_memsz
 
 # :after_open ; (0x06000D4)
     EF 00 40 03     # RD_RA $First_pass JAL             ; First pass
+                    # +52B
 
     ; Rewind input file
     93 08 E0 03     # RD_A7 !62 ADDI                    ; sys_lseek
@@ -150,7 +151,7 @@ C1 04 00 00 00 00 00 00 ## p_memsz
 
     ; Deal with EOF
     13 03 C0 FF     # RD_T1 !-4 ADDI
-    63 06 65 04 # RS1_A0 RS2_T1 @First_pass_done BEQ
+    63 06 65 04     # RS1_A0 RS2_T1 @First_pass_done BEQ
                     # +76B
 
     ; Check for :

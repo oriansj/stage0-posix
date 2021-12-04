@@ -55,8 +55,8 @@ F3 00              # e_machine Indicating RISC-V
 00 00 60 00        # ph_vaddr
 00 00 60 00        # ph_physaddr
 
-9D 04 00 00        # ph_filesz
-9D 04 00 00        # ph_memsz
+A5 04 00 00        # ph_filesz
+A5 04 00 00        # ph_memsz
 
 07 00 00 00        # ph_flags: PF-X|PF-W|PF-R = 7
 01 00 00 00        # ph_align
@@ -86,8 +86,8 @@ F3 00              # e_machine Indicating RISC-V
     93 05 06 00     # RD_A1 RS1_A2 MV                   ; file name
     13 06 00 00     # RD_A2 ADDI                        ; read only
     73 00 00 00     # ECALL                             ; syscall
-    63 4C 05 40     # RS1_A0 @Fail BLTZ                 ; Error opening file
-                    # +1048
+    63 40 05 42     # RS1_A0 @Fail BLTZ                 ; Error opening file
+                    # +1056
     13 09 05 00     # RD_S2 RS1_A0 MV                   ; Save fd in for later
 
     ; Set default FD for output file to stdout
@@ -96,8 +96,8 @@ F3 00              # e_machine Indicating RISC-V
     ; If we only have 2 arguments, don't use the third (it's not set)
     93 02 20 00     # RD_T0 !2 ADDI
     03 25 01 00     # RD_A0 RS1_SP LW                   ; Get number of the args
-    63 42 55 40     # RS1_A0 RS2_T0 @Fail BLT           ; No input file provided
-                    # +1028B
+    63 46 55 40     # RS1_A0 RS2_T0 @Fail BLT           ; No input file provided
+                    # +1036B
     63 00 55 02     # RS1_A0 RS2_T0 @after_open BEQ     ; No output file provided. Use stdout
                     # +32B
 
@@ -117,13 +117,15 @@ F3 00              # e_machine Indicating RISC-V
     93 09 05 00     # RD_S3 RS1_A0 MV                   ; Save fd in for later
 
 # :after_open ; (0x06000B0)
-    EF 00 40 03     # RD_RA $First_pass JAL             ; First pass
+    EF 00 C0 03     # RD_RA $First_pass JAL             ; First pass
 
     ; Rewind input file
-    93 08 E0 03     # RD_A7 !62 ADDI                    ; sys_lseek
+    93 08 E0 03     # RD_A7 !62 ADDI                    ; sys_llseek
     13 05 09 00     # RD_A0 RS1_S2 MV                   ; Input file descriptor
     93 05 00 00     # RD_A1 MV                          ; Set offset to zero
-    13 06 00 00     # RD_A2 MV                          ; Set whence to zero
+    13 06 00 00     # RD_A2 MV                          ; Set offset to zero
+    93 06 00 00     # RD_A3 MV                          ; Set result pointer to zero
+    13 07 00 00     # RD_A4 MV                          ; Set whence to zero
     73 00 00 00     # ECALL                             ; syscall
 
     ; Initialize globals
@@ -140,17 +142,17 @@ F3 00              # e_machine Indicating RISC-V
                     # +392B
 
 ; First pass loop to determine addresses of labels
-# :First_pass ; (0x06000E4)
+# :First_pass ; (0x06000EC)
     13 01 C1 FF     # RD_SP RS1_SP !-4 ADDI             ; Allocate stack
     23 20 11 00     # RS1_SP RS2_RA SW                  ; protect ra
 
-# :First_pass_loop ; (0x06000EC)
+# :First_pass_loop ; (0x06000F4)
     EF 00 C0 2D     # RD_RA $Read_byte JAL              ; Get another byte
                     # +732B
 
     ; Deal with EOF
     13 03 C0 FF     # RD_T1 !-4 ADDI
-    63 06 65 04 # RS1_A0 RS2_T1 @First_pass_done BEQ
+    63 06 65 04     # RS1_A0 RS2_T1 @First_pass_done BEQ
                     # +76B
 
     ; Check for :
@@ -160,7 +162,7 @@ F3 00              # e_machine Indicating RISC-V
     EF 00 C0 32     # RD_RA $StoreLabel JAL             ; Store this label
                     # +812B
 
-# :First_pass_0 ; (0x0600104)
+# :First_pass_0 ; (0x060010C)
     ; Check for !
     13 03 10 02     # RD_T1 !0x21 ADDI
     63 08 65 02     # RS1_A0 RS2_T1 @Throwaway_token BEQ
@@ -192,23 +194,23 @@ F3 00              # e_machine Indicating RISC-V
     6F F0 9F FB     # $First_pass_loop JAL              ; Keep looping
                     # -72B
 
-# :Throwaway_token ; (0x0600138)
+# :Throwaway_token ; (0x0600140)
     ; Deal with Pointer to label
     EF 00 00 29     # RD_RA $Read_byte JAL              ; Drop the char
                     # +656B
     6F F0 1F FB     # $First_pass_loop JAL              ; Loop again
                     # -80B
 
-# :First_pass_done ; (0x0600140)
+# :First_pass_done ; (0x0600148)
     83 20 01 00     # RD_RA RS1_SP LW                   ; restore ra
     13 01 41 00     # RD_SP RS1_SP !4 ADDI              ; deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
-# :Second_pass ; (0x060014C)
+# :Second_pass ; (0x0600154)
     13 01 C1 FF     # RD_SP RS1_SP !-4 ADDI             ; Allocate stack
     23 20 11 00     # RS1_SP RS2_RA SW                  ; protect ra
 
-# :Second_pass_loop ; (0x0600154)
+# :Second_pass_loop ; (0x060015C)
     EF 00 40 27     # RD_RA $Read_byte JAL              ; Read another byte
                     # +628B
 
@@ -227,7 +229,7 @@ F3 00              # e_machine Indicating RISC-V
     6F F0 9F FE     # $Second_pass_loop JAL             ; Continue looping
                     # -24B
 
-# :Second_pass_0 ; (0x0600170)
+# :Second_pass_0 ; (0x0600178)
     ; Check for !
     13 03 10 02     # RD_T1 !0x21 ADDI
     63 08 65 02     # RS1_A0 RS2_T1 @UpdateShiftRegister BEQ
@@ -261,7 +263,7 @@ F3 00              # e_machine Indicating RISC-V
     6F F0 5F FB     # $Second_pass_loop JAL             ; continue looping
                     # -76B
 
-# :UpdateShiftRegister ; (0x06001A4)
+# :UpdateShiftRegister ; (0x06001B0)
     93 05 05 00     # RD_A1 RS1_A0 MV                   ; Store label prefix
     EF 00 C0 25     # RD_RA $Get_table_target JAL       ; Get target
                     # +604B
@@ -291,7 +293,7 @@ F3 00              # e_machine Indicating RISC-V
     6F F0 1F F8     # $Second_pass_loop JAL             ; continue looping
                     # -128B
 
-# :UpdateShiftRegister_I ; (0x06001D8)
+# :UpdateShiftRegister_I ; (0x06001E0)
     ; Corresponds to RISC-V I format
     13 05 45 00     # RD_A0 RS1_A0 !4 ADDI              ; add 4 due to this being 2nd part of AUIPC combo
 
@@ -304,7 +306,7 @@ F3 00              # e_machine Indicating RISC-V
     6F F0 5F F6     # $Second_pass_loop JAL             ; continue looping
                     # -156B
 
-# :UpdateShiftRegister_B ; (0x06001F4)
+# :UpdateShiftRegister_B ; (0x06001FC)
     ; Corresponds to RISC-V B format
 
     ; tempword = ((value & 0x1e) << 7)            ; imm[4:1]
@@ -337,7 +339,7 @@ F3 00              # e_machine Indicating RISC-V
     6F F0 DF F1     # $Second_pass_loop JAL             ; continue looping
                     # -228B
 
-# :UpdateShiftRegister_J ; (0x060023C)
+# :UpdateShiftRegister_J ; (0x0600244)
     ; Corresponds to RISC-V J format
 
     ; tempword = ((value & 0x7fe) << (30 - 10))    ; imm[10:1]
@@ -369,7 +371,7 @@ F3 00              # e_machine Indicating RISC-V
     6F F0 9F ED     # $Second_pass_loop JAL             ; continue looping
                     # -296B
 
-# :UpdateShiftRegister_U ; (0x0600280)
+# :UpdateShiftRegister_U ; (0x0600288)
     ; Corresponds to RISC-V U format
     ; if value is 0x800 or more we have to add 11-th bit (0x1000) to compensate for signed extension
 
@@ -391,13 +393,13 @@ F3 00              # e_machine Indicating RISC-V
     B7 12 00 00     # RD_T0 ~0x1000 LUI                 ; load higher bits
     B3 8B 72 01     # RD_S7 RS1_T0 RS2_S7 ADD           ; (value & 0xfffff000) + 0x1000
 
-# :UpdateShiftRegister_U_small ; (0x06002B0)
+# :UpdateShiftRegister_U_small ; (0x06002B8)
     33 4C 7C 01     # RD_S8 RS1_S8 RS2_S7 XOR           ; shiftregister = shiftregister ^ tempword
 
     6F F0 1F EA     # $Second_pass_loop JAL             ; continue looping
                     # -352B
 
-# :Second_pass_done ; (0x06002B8)
+# :Second_pass_done ; (0x06002C0)
     83 20 01 00     # RD_RA RS1_SP LW                   ; restore ra
     13 01 41 00     # RD_SP RS1_SP !4 ADDI              ; deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
@@ -408,7 +410,7 @@ F3 00              # e_machine Indicating RISC-V
 ;   character in a0
 ;   bool write in a1
 ; Does not return anything
-# :DoByte ; (0x06002C4)
+# :DoByte ; (0x06002CC)
     13 01 C1 FF     # RD_SP RS1_SP !-4 ADDI             ; Allocate stack
     23 20 11 00     # RS1_SP RS2_RA SW                  ; protect ra
 
@@ -440,19 +442,19 @@ F3 00              # e_machine Indicating RISC-V
     63 0C 05 18     # RS1_A0 @Fail BEQZ                 ; Fail if nothing was written
                     # +408B
 
-# :DoByte_1 ; (0x06002FC)
+# :DoByte_1 ; (0x0600304)
     13 0B 1B 00     # RD_S6 RS1_S6 !1 ADDI              ; Increment IP
     93 0A 00 00     # RD_S5 MV                          ; hold = 0
     6F 00 80 00     # $DoByte_FlipToggle JAL            ; return
                     # +8B
 
-# :DoByte_NotToggle ; (0x0600308)
+# :DoByte_NotToggle ; (0x0600310)
     93 0A 08 00     # RD_S5 RS1_A6 MV                   ; hold = hex(c)
 
-# :DoByte_FlipToggle ; (0x060030C)
+# :DoByte_FlipToggle ; (0x0600314)
     13 4A FA FF     # RD_S4 RS1_S4 NOT                  ; Flip the toggle
 
-# :DoByte_Done ; (0x0600310)
+# :DoByte_Done ; (0x0600318)
     83 20 01 00     # RD_RA RS1_SP LW                   ; restore ra
     13 01 41 00     # RD_SP RS1_SP !4 ADDI              ; deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
@@ -462,7 +464,7 @@ F3 00              # e_machine Indicating RISC-V
 ;   character in a0
 ; Returns:
 ;   a6 with character's hex value.
-# :hex ; (0x060031C)
+# :hex ; (0x0600324)
     13 01 81 FF     # RD_SP RS1_SP !-8 ADDI             ; Allocate stack
     23 20 11 00     # RS1_SP RS2_RA SW                  ; protect ra
     23 22 B1 00     # RS1_SP RS2_A1 @4 SW               ; protect a1
@@ -516,26 +518,26 @@ F3 00              # e_machine Indicating RISC-V
     6F 00 80 02     # $ascii_other JAL
                     # +40B
 
-# :ascii_num ; (0x0600374)
+# :ascii_num ; (0x060037C)
     13 03 00 03     # RD_T1 !0x30 ADDI                  ; '0' -> 0
     33 08 65 40     # RD_A6 RS1_A0 RS2_T1 SUB
     6F 00 C0 03     # $hex_return JAL                   ; return
                     # +60B
-# :ascii_low ; (0x0600380)
+# :ascii_low ; (0x0600388)
     13 03 70 05     # RD_T1 !0x57 ADDI                  ; 'a' -> 0xA
     33 08 65 40     # RD_A6 RS1_A0 RS2_T1 SUB
     6F 00 00 03     # $hex_return JAL                   ; return
                     # +48B
-# :ascii_high ; (0x060038C)
+# :ascii_high ; (0x0600394)
     13 03 70 03     # RD_T1 !0x37 ADDI                  ; 'A' -> 0xA
     33 08 65 40     # RD_A6 RS1_A0 RS2_T1 SUB
     6F 00 40 02 # $hex_return JAL                       ; return
                     # +36B
-# :ascii_other ; (0x0600398)
+# :ascii_other ; (0x06003A0)
     13 08 F0 FF     # RD_A6 !-1 ADDI                    ; Return -1
     6F 00 C0 01     # $hex_return JAL                   ; return
                     # +28B
-# :ascii_comment ; (0x06003A0)                          ; Read the comment until newline
+# :ascii_comment ; (0x06003A8)                          ; Read the comment until newline
     EF 00 80 02     # RD_RA $Read_byte JAL
                     # +40B
     13 03 D0 00     # RD_T1 !0xD ADDI                   ; CR
@@ -544,16 +546,16 @@ F3 00              # e_machine Indicating RISC-V
     13 03 A0 00     # RD_T1 !0xA ADDI                   ; LF
     E3 18 65 FE     # RS1_A0 RS2_T1 @ascii_comment BNE  ; Keep reading comment
                     # -16B
-# :ascii_comment_cr ; (0x06003B4)
+# :ascii_comment_cr ; (0x06003BC)
     13 08 F0 FF     # RD_A6 !-1 ADDI                    ; Return -1
-# :hex_return ; (0x06003B8)
+# :hex_return ; (0x06003C0)
     83 20 01 00     # RD_RA RS1_SP LW                   ; restore ra
     83 25 41 00     # RD_A1 RS1_SP !4 LW                ; restore a1
     13 01 81 00     # RD_SP RS1_SP !8 ADDI              ; Deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
 ; Read byte into a0
-# :Read_byte ; (0x06003C8)
+# :Read_byte ; (0x06003D0)
     13 01 81 FF     # RD_SP RS1_SP !-8 ADDI             ; Allocate stack
     23 22 B1 00     # RS1_SP RS2_A1 @4 SW               ; protect a1
 
@@ -571,16 +573,16 @@ F3 00              # e_machine Indicating RISC-V
     6F 00 80 00     # $Read_byte_done JAL               ; return
                     # +8B
 
-# :Read_byte_1 ; (0x06003F4)
+# :Read_byte_1 ; (0x06003FC)
     13 05 C0 FF     # RD_A0 !-4 ADDI                    ; Put EOF in a0
-# :Read_byte_done ; (0x06003F8)
+# :Read_byte_done ; (0x0600400)
     83 25 41 00     # RD_A1 RS1_SP !4 LW                ; restore a1
     13 01 81 00     # RD_SP RS1_SP !16 ADDI             ; Deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
 ; Reads a byte and calculates table address
 ; Returns a pointer in a0
-# :Get_table_target ; (0x0600404)
+# :Get_table_target ; (0x060040C)
     13 01 C1 FF     # RD_SP RS1_SP !-4 ADDI             ; Allocate stack
     23 20 11 00     # RS1_SP RS2_RA SW                  ; protect ra
 
@@ -596,7 +598,7 @@ F3 00              # e_machine Indicating RISC-V
     13 01 41 00     # RD_SP RS1_SP !4 ADDI              ; deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
-# :StoreLabel ; (0x060042C)
+# :StoreLabel ; (0x0600434)
     13 01 C1 FF     # RD_SP RS1_SP !-4 ADDI             ; Allocate stack
     23 20 11 00     # RS1_SP RS2_RA SW                  ; protect ra
 
@@ -611,7 +613,7 @@ F3 00              # e_machine Indicating RISC-V
 ; fputc function
 ; Receives CHAR in a0
 ; Writes and returns number of bytes written in a0
-# :fputc ; (0x0600448)
+# :fputc ; (0x0600450)
     13 01 01 FF     # RD_SP RS1_SP !-16 ADDI            ; allocate stack
     23 20 A1 00     # RS1_SP RS2_A0 SW                  ; protect a0
     23 22 11 00     # RS1_SP RS2_RA @4 SW               ; protect ra
@@ -630,17 +632,17 @@ F3 00              # e_machine Indicating RISC-V
     13 01 01 01     # RD_SP RS1_SP !16 ADDI             ; Deallocate stack
     67 80 00 00     # RS1_RA JALR                       ; return
 
-# :Done ; (0x0600484)
+# :Done ; (0x060048C)
     ; Terminate program with 0 return code
     93 08 D0 05     # RD_A7 !93 ADDI                    ; sys_exit
     13 05 00 00     # RD_A0 MV                          ; Return code 0
     73 00 00 00     # ECALL                             ; exit(0)
-# :Fail ; (0x0600490)
+# :Fail ; (0x0600498)
     ; Terminate program with 1 return code
     93 08 D0 05     # RD_A7 !93 ADDI                    ; sys_exit
     13 05 10 00     # RD_A0 !1 ADDI                     ; Return code 1
     73 00 00 00     # ECALL                             ; exit(1)
 # PROGRAM END
 
-# :table; (0x060049C)
+# :table; (0x06004A4)
     00

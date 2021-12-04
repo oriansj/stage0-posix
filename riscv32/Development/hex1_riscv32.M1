@@ -72,10 +72,12 @@
     RD_RA $First_pass JAL             ; First pass
 
     ; Rewind input file
-    RD_A7 !62 ADDI                    ; sys_lseek
+    RD_A7 !62 ADDI                    ; sys_llseek
     RD_A0 RS1_S2 MV                   ; Input file descriptor
     RD_A1 MV                          ; Set offset to zero
-    RD_A2 MV                          ; Set whence to zero
+    RD_A2 MV                          ; Set offset to zero
+    RD_A4 MV                          ; Set result pointer to zero
+    RD_A4 MV                          ; Set whence to zero
     ECALL                             ; syscall
 
     ; Initialize globals

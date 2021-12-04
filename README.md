@@ -30,12 +30,13 @@ kaem-optional-seed in the same folder with the hex0 seed. Otherwise, you can use
 a shell you trust. The kernel issue is not yet solved and at the moment the
 kernel is trusted.
 
-This repository currently supports AMD64 (x86_64), x86 (i386), AArch64 and RISC-V (64-bit)
-architectures. To run the entire bootstrap process in the safest way,
+This repository currently supports AMD64 (x86_64), x86 (i386), AArch64 and RISC-V
+(32 and 64-bit) architectures. To run the entire bootstrap process in the safest way,
 run the following command matching your architecture:
 `bootstrap-seeds/POSIX/AMD64/kaem-optional-seed`
 `bootstrap-seeds/POSIX/x86/kaem-optional-seed`
 `bootstrap-seeds/POSIX/AArch64/kaem-optional-seed`
+`bootstrap-seeds/POSIX/riscv32/kaem-optional-seed`
 `bootstrap-seeds/POSIX/riscv64/kaem-optional-seed`
 This uses the kaem seed rather then relying on your shell.
 

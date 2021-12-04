@@ -78,6 +78,7 @@ F3 00              ## e_machine Indicating RISC-V
     # Else use kaem.run
     ~default_file 17 06 00 00 # RD_A2 ~default_file AUIPC         ; load address of default_file
     !default_file 13 06 06 00 # RD_A2 RS1_A2 !default_file ADDI   ; into register a2
+    13 07 00 00     # RD_A4 MV                          ; Initialize register (set *rusage = NULL in waitid)
 
 :_start_out
 

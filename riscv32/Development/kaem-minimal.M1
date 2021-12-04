@@ -30,6 +30,7 @@
     # Else use kaem.run
     RD_A2 ~default_file AUIPC         # load address of default_file
     RD_A2 RS1_A2 !default_file ADDI   # into register a2
+    RD_A4 MV                          # Initialize register (set *rusage = NULL in waitid)
 
 :_start_out
 

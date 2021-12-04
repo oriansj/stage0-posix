@@ -54,8 +54,8 @@ F3 00              ## e_machine Indicating RISC-V
 00 00 60 00        ## ph_vaddr
 00 00 60 00        ## ph_physaddr
 
-C8 07 00 00        ## p_filesz
-C8 07 00 00        ## p_memsz
+D0 07 00 00        ## p_filesz
+D0 07 00 00        ## p_memsz
 
 07 00 00 00        ## ph_flags: PF-X|PF-W|PF-R = 7
 01 00 00 00        ## ph_align

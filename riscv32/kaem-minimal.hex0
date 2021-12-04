@@ -69,6 +69,7 @@ F3 00              ## e_machine Indicating RISC-V
 # s6: malloc pointer
 
     03 26 81 00     # RD_A2 RS1_SP !8 LW                ; Input file name
+    13 07 00 00     # RD_A4 MV                          ; Initialize register (set *rusage = NULL in waitid)
 
     63 16 06 00     # RS1_A2 @_start_out BNEZ           ; Use input file if specified
                     # +12B
@@ -77,7 +78,6 @@ F3 00              ## e_machine Indicating RISC-V
     17 06 00 00     # RD_A2 ~default_file AUIPC         ; load address of default_file
     13 06 86 2E     # RD_A2 RS1_A2 !default_file ADDI   ; into register a2
                     # +744B
-    13 07 00 00     # RD_A4 MV                          ; Initialize register (set *rusage = NULL in waitid)
 
 # :_start_out ; (0x0600064)
 

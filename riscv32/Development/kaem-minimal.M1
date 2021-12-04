@@ -25,12 +25,12 @@
 # s6: malloc pointer
 
     RD_A2 RS1_SP !8 LW                # Input file name
+    RD_A4 MV                          # Initialize register (set *rusage = NULL in waitid)
 
     RS1_A2 @_start_out BNEZ           # Use input file if specified
     # Else use kaem.run
     RD_A2 ~default_file AUIPC         # load address of default_file
     RD_A2 RS1_A2 !default_file ADDI   # into register a2
-    RD_A4 MV                          # Initialize register (set *rusage = NULL in waitid)
 
 :_start_out
 

@@ -73,12 +73,12 @@ F3 00              ## e_machine Indicating RISC-V
 # E.g. RD_A0 RS1_SP LD = 00050000 + 00000100 + 03300000 = 03350100
 
     03 26 81 00     # RD_A2 RS1_SP !8 LW                ; Input file name
+    13 07 00 00     # RD_A4 MV                          ; Initialize register (set *rusage = NULL in waitid)
 
     @_start_out 63 10 06 00   # RS1_A2 @_start_out BNEZ           ; Use input file if specified
     # Else use kaem.run
     ~default_file 17 06 00 00 # RD_A2 ~default_file AUIPC         ; load address of default_file
     !default_file 13 06 06 00 # RD_A2 RS1_A2 !default_file ADDI   ; into register a2
-    13 07 00 00     # RD_A4 MV                          ; Initialize register (set *rusage = NULL in waitid)
 
 :_start_out
 

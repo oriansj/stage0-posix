@@ -27,12 +27,11 @@
 
 :_start
     RD_S4 MV                 ; Initialize register
-    RD_A2 RS1_SP !8 LW       ; Input file name
+    RD_A1 RS1_SP !8 LW       ; Input file name
 
     ; Open input file and store FD in s2
     RD_A7 !56 ADDI           ; sys_openat
     RD_A0 !-100 ADDI         ; AT_FDCWD
-    RD_A1 RS1_A2 MV          ; input file
     RD_A2 MV                 ; read only
     ECALL
     RD_S2 RS1_A0 MV          ; Save fd in for later

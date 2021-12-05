@@ -29,12 +29,11 @@
 .global _start
 _start:
     li s4, 0              # Initialize to 0
-    ld a2, 16(sp)         # Input file name
+    ld a1, 16(sp)         # Input file name
 
     # Open input file and store FD in s2
     li a7, 56             # sys_openat
     li a0, -100           # AT_FDCWD
-    mv a1, a2             # input file
     li a2, 0              # read only
     ecall
     mv s2, a0             # Save fd in for later

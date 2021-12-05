@@ -64,19 +64,18 @@ F3 00              ## e_machine Indicating RISC-V
 00 00 60 00 00 00 00 00 ## p_vaddr
 00 00 60 00 00 00 00 00 ## p_physaddr
 
-8c 01 00 00 00 00 00 00 ## p_filesz
-8c 01 00 00 00 00 00 00 ## p_memsz
+88 01 00 00 00 00 00 00 ## p_filesz
+88 01 00 00 00 00 00 00 ## p_memsz
 
 01 00 00 00 00 00 00 00 ## Required alignment
 
 # :_start ; (0x0600078)
     13 0A 00 00    # RD_S4 MV                 ; Initialize register
-    03 36 01 01    # RD_A2 RS1_SP !16 LD      ; Input file name
+    83 35 01 01    # RD_A1 RS1_SP !16 LD      ; Input file name
 
     ; Open input file and store FD in s2
     93 08 80 03    # RD_A7 !56 ADDI           ; sys_openat
     13 05 C0 F9    # RD_A0 !-100 ADDI         ; AT_FDCWD
-    93 05 06 00    # RD_A1 RS1_A2 MV          ; input file
     13 06 00 00    # RD_A2 MV                 ; read only
     73 00 00 00    # ECALL
     13 09 05 00    # RD_S2 RS1_A0 MV          ; Save fd in for later
@@ -97,7 +96,7 @@ F3 00              ## e_machine Indicating RISC-V
     73 00 00 00    # ECALL
     93 09 05 00    # RD_S3 RS1_A0 MV          ; Save fd in for later
 
-# :next_byte ; (0x06000B0)
+# :next_byte ; (0x06000AC)
     93 08 F0 03    # RD_A7 !63 ADDI           ; sys_read
     13 05 09 00    # RD_A0 RS1_S2 MV          ; File descriptor
     93 05 01 00    # RD_A1 RS1_SP MV          ; Buffer
@@ -118,7 +117,7 @@ F3 00              ## e_machine Indicating RISC-V
                    # +8B
     6F 00 80 02    # $not_comment JAL
                    # +40B
-# :loop ; (0x06000E0)
+# :loop ; (0x06000DC)
         13 05 09 00    # RD_A0 RS1_S2 MV   ; File descriptor
         73 00 00 00    # ECALL             ; sys_read
 
@@ -135,7 +134,7 @@ F3 00              ## e_machine Indicating RISC-V
         E3 0A 55 FA     # RS1_A0 RS2_T0 @next_byte BEQ ; a0 eq to \r
                         # -76B
     6F F0 1F FE    # $loop JAL
-# :not_comment ; (0x0600104)
+# :not_comment ; (0x0600100)
     ; Check if it's a hex character:
     ; in the case it's not, ignores and reads next byte
     03 05 01 00    # RD_A0 RS1_SP LB
@@ -150,7 +149,7 @@ F3 00              ## e_machine Indicating RISC-V
     13 05 05 FD    # RD_A0 RS1_A0 !-48 ADDI
     6F 00 00 03    # $hex_read JAL
                    # +48B
-# :uppercase_alpha ; (0x0600120)
+# :uppercase_alpha ; (0x060011C)
     ; Is it between 'A' and 'F'?
     93 02 10 04    # RD_T0 !65 ADDI           ; 'A' character
     63 4A 55 00    # RS1_A0 RS2_T0 @lowercase_alpha BLT
@@ -161,7 +160,7 @@ F3 00              ## e_machine Indicating RISC-V
     13 05 95 FC    # RD_A0 RS1_A0 !-55 ADDI
     6F 00 80 01    # $hex_read JAL
                    # +24B
-# :lowercase_alpha
+# :lowercase_alpha ; (0x0600134)
     ; Is it between 'a' and 'f'?
     93 02 10 06    # RD_T0 !97 ADDI           ; 'a' character
     E3 4A 55 F6    # RS1_A0 RS2_T0 @next_byte BLT ; Not hex, continue reading
@@ -170,7 +169,7 @@ F3 00              ## e_machine Indicating RISC-V
     E3 C6 A2 F6    # RS1_T0 RS2_A0 @next_byte BLT ; Not hex, continue reading
                    # -148B
     13 05 95 FA    # RD_A0 RS1_A0 !-87 ADDI
-# :hex_read ; (0x060014C)
+# :hex_read ; (0x0600148)
     ; END check hex -- leaves the half byte in a0
 
     63 18 0A 00    # RS1_S4 @combine BNEZ     ; if toggle != 0 -> combine
@@ -182,7 +181,7 @@ F3 00              ## e_machine Indicating RISC-V
     6F F0 9F F5    # $next_byte JAL           ; Read next byte
                    # -168B
 
-# :combine ; (0x060015C)
+# :combine ; (0x0600158)
     ; Combine half bytes
     93 95 4A 00    # RD_A1 RS1_S5 RS2_X4 SLLI ; Shift logical left 4 times
     33 05 B5 00    # RD_A0 RS1_A0 RS2_A1 ADD  ; Combine two half bytes
@@ -203,10 +202,10 @@ F3 00              ## e_machine Indicating RISC-V
     6F F0 1F F3    # $next_byte JAL
                    # -208B
 
-# :terminate  ; (0x600184)
+# :terminate  ; (0x600180)
     ; Terminate program with 0 return code
     93 08 D0 05    # RD_A7 !93 ADDI           ; sys_exit
     73 00 00 00    # ECALL
 # PROGRAM END
 
-# :ELF_end ; (0x60018C)
+# :ELF_end ; (0x600188)

@@ -13,3 +13,6 @@
 [submodule "mescc-tools-extra"]
 	path = mescc-tools-extra
 	url = https://github.com/oriansj/mescc-tools-extra
+[submodule "M2-Mesoplanet"]
+	path = M2-Mesoplanet
+	url = https://github.com/oriansj/M2-Mesoplanet.git

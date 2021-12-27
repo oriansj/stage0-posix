@@ -69,7 +69,7 @@
 # Phase-5 Build M2-Planet from cc_x86   #
 #########################################
 ./x86/artifact/catm ./x86/artifact/M2-0.c \
-	./M2libc/x86/Linux/bootstrap.c \
+	./M2libc/x86/linux/bootstrap.c \
 	./M2-Planet/cc.h \
 	./M2libc/bootstrappable.c \
 	./M2-Planet/cc_globals.c \
@@ -89,7 +89,7 @@
 # Phase-6 Build blood-elf-0 from C sources  #
 #############################################
 ./x86/artifact/M2 --architecture x86 \
-	-f ./M2libc/x86/Linux/bootstrap.c \
+	-f ./M2libc/x86/linux/bootstrap.c \
 	-f ./M2libc/bootstrappable.c \
 	-f ./mescc-tools/stringify.c \
 	-f ./mescc-tools/blood-elf.c \
@@ -107,7 +107,7 @@
 # Phase-7 Build M1-0 from C sources #
 #####################################
 ./x86/artifact/M2 --architecture x86 \
-	-f ./M2libc/x86/Linux/bootstrap.c \
+	-f ./M2libc/x86/linux/bootstrap.c \
 	-f ./M2libc/bootstrappable.c \
 	-f ./mescc-tools/stringify.c \
 	-f ./mescc-tools/M1-macro.c \
@@ -130,10 +130,10 @@
 #######################################
 ./x86/artifact/M2 --architecture x86 \
 	-f ./M2libc/sys/types.h \
-	-f ./M2libc/x86/Linux/sys/stat.h \
 	-f ./M2libc/stddef.h \
-	-f ./M2libc/x86/Linux/unistd.h \
-	-f ./M2libc/x86/Linux/fcntl.h \
+	-f ./M2libc/x86/linux/unistd.c \
+	-f ./M2libc/x86/linux/fcntl.c \
+	-f ./M2libc/x86/linux/sys/stat.c \
 	-f ./M2libc/stdlib.c \
 	-f ./M2libc/stdio.c \
 	-f ./M2libc/bootstrappable.c \
@@ -167,9 +167,9 @@
 ./x86/artifact/M2 --architecture x86 \
 	-f ./M2libc/sys/types.h \
 	-f ./M2libc/stddef.h \
+	-f ./M2libc/x86/linux/fcntl.c \
+	-f ./M2libc/x86/linux/unistd.c \
 	-f ./M2libc/string.c \
-	-f ./M2libc/x86/Linux/unistd.h \
-	-f ./M2libc/x86/Linux/fcntl.h \
 	-f ./M2libc/stdlib.c \
 	-f ./M2libc/stdio.c \
 	-f ./M2libc/bootstrappable.c \
@@ -200,10 +200,10 @@
 ######################################
 ./x86/artifact/M2 --architecture x86 \
 	-f ./M2libc/sys/types.h \
-	-f ./M2libc/x86/Linux/sys/stat.h \
 	-f ./M2libc/stddef.h \
-	-f ./M2libc/x86/Linux/unistd.h \
-	-f ./M2libc/x86/Linux/fcntl.h \
+	-f ./M2libc/x86/linux/unistd.c \
+	-f ./M2libc/x86/linux/fcntl.c \
+	-f ./M2libc/x86/linux/sys/stat.c \
 	-f ./M2libc/stdlib.c \
 	-f ./M2libc/stdio.c \
 	-f ./M2libc/bootstrappable.c \
@@ -239,8 +239,8 @@
 	-f ./M2libc/sys/types.h \
 	-f ./M2libc/stddef.h \
 	-f ./M2libc/string.c \
-	-f ./M2libc/x86/Linux/unistd.h \
-	-f ./M2libc/x86/Linux/fcntl.h \
+	-f ./M2libc/x86/linux/unistd.c \
+	-f ./M2libc/x86/linux/fcntl.c \
 	-f ./M2libc/stdlib.c \
 	-f ./M2libc/stdio.c \
 	-f ./M2libc/bootstrappable.c \

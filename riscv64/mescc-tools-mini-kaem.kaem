@@ -60,7 +60,7 @@
 # Phase-5 Build M2-Planet from cc_riscv64 #
 ###########################################
 ./riscv64/artifact/catm ./riscv64/artifact/M2-0.c \
-	./M2libc/riscv64/Linux/bootstrap.c \
+	./M2libc/riscv64/linux/bootstrap.c \
 	./M2-Planet/cc.h \
 	./M2libc/bootstrappable.c \
 	./M2-Planet/cc_globals.c \
@@ -80,7 +80,7 @@
 # Phase-6 Build blood-elf-0 from C sources  #
 #############################################
 ./riscv64/artifact/M2 --architecture riscv64 \
-	-f ./M2libc/riscv64/Linux/bootstrap.c \
+	-f ./M2libc/riscv64/linux/bootstrap.c \
 	-f ./M2libc/bootstrappable.c \
 	-f ./mescc-tools/stringify.c \
 	-f ./mescc-tools/blood-elf.c \
@@ -98,7 +98,7 @@
 # Phase-7 Build M1-0 from C sources #
 #####################################
 ./riscv64/artifact/M2 --architecture riscv64 \
-	-f ./M2libc/riscv64/Linux/bootstrap.c \
+	-f ./M2libc/riscv64/linux/bootstrap.c \
 	-f ./M2libc/bootstrappable.c \
 	-f ./mescc-tools/stringify.c \
 	-f ./mescc-tools/M1-macro.c \
@@ -120,10 +120,10 @@
 #######################################
 ./riscv64/artifact/M2 --architecture riscv64 \
 	-f ./M2libc/sys/types.h \
-	-f ./M2libc/riscv64/Linux/sys/stat.h \
 	-f ./M2libc/stddef.h \
-	-f ./M2libc/riscv64/Linux/unistd.h \
-	-f ./M2libc/riscv64/Linux/fcntl.h \
+	-f ./M2libc/riscv64/linux/unistd.c \
+	-f ./M2libc/riscv64/linux/fcntl.c \
+	-f ./M2libc/riscv64/linux/sys/stat.c \
 	-f ./M2libc/stdlib.c \
 	-f ./M2libc/stdio.c \
 	-f ./M2libc/bootstrappable.c \
@@ -156,8 +156,8 @@
 	-f ./M2libc/sys/types.h \
 	-f ./M2libc/stddef.h \
 	-f ./M2libc/string.c \
-	-f ./M2libc/riscv64/Linux/unistd.h \
-	-f ./M2libc/riscv64/Linux/fcntl.h \
+	-f ./M2libc/riscv64/linux/unistd.c \
+	-f ./M2libc/riscv64/linux/fcntl.c \
 	-f ./M2libc/stdlib.c \
 	-f ./M2libc/stdio.c \
 	-f ./M2libc/bootstrappable.c \
@@ -188,10 +188,10 @@
 ######################################
 ./riscv64/artifact/M2 --architecture riscv64 \
 	-f ./M2libc/sys/types.h \
-	-f ./M2libc/riscv64/Linux/sys/stat.h \
 	-f ./M2libc/stddef.h \
-	-f ./M2libc/riscv64/Linux/unistd.h \
-	-f ./M2libc/riscv64/Linux/fcntl.h \
+	-f ./M2libc/riscv64/linux/unistd.c \
+	-f ./M2libc/riscv64/linux/fcntl.c \
+	-f ./M2libc/riscv64/linux/sys/stat.c \
 	-f ./M2libc/stdlib.c \
 	-f ./M2libc/stdio.c \
 	-f ./M2libc/bootstrappable.c \
@@ -227,8 +227,8 @@
 	-f ./M2libc/sys/types.h \
 	-f ./M2libc/stddef.h \
 	-f ./M2libc/string.c \
-	-f ./M2libc/riscv64/Linux/unistd.h \
-	-f ./M2libc/riscv64/Linux/fcntl.h \
+	-f ./M2libc/riscv64/linux/unistd.c \
+	-f ./M2libc/riscv64/linux/fcntl.c \
 	-f ./M2libc/stdlib.c \
 	-f ./M2libc/stdio.c \
 	-f ./M2libc/bootstrappable.c \

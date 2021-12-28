@@ -18,15 +18,32 @@
 # You should have received a copy of the GNU General Public License
 # along with Mes.  If not, see <http://www.gnu.org/licenses/>.
 
+# To run in kaem simply: kaem --verbose --strict
+
 ARCH="x86"
+ARCH_DIR="x86"
 M2LIBC="../M2libc"
-TOOLS="../x86/bin"
+TOOLS="../${ARCH_DIR}/bin"
 BLOOD_FLAG=" "
 BASE_ADDRESS="0x08048000"
-BINDIR="../x86/bin"
 ENDIAN_FLAG="--little-endian"
-BUILDDIR="../x86/artifact"
+BINDIR="../${ARCH_DIR}/bin"
+BUILDDIR="../${ARCH_DIR}/artifact"
+
+################################################
+# Phase 12-15 Rebuild M2-Planet from C sources #
+################################################
+./${ARCH_DIR}/bin/kaem --verbose --strict --file ${ARCH_DIR}/mescc-tools-full-kaem.kaem
+
+######################################################
+# Phase 16-23 Build mescc-tools-extra from M2-Planet #
+######################################################
 cd mescc-tools-extra
-../x86/bin/kaem --verbose --strict --file mescc-tools-extra.kaem
+${BINDIR}/kaem --verbose --strict --file mescc-tools-extra.kaem
 cd ..
-./x86/bin/sha256sum -c x86.answers
+./${ARCH_DIR}/bin/sha256sum -c ${ARCH}.answers
+
+#########################
+# Load after.kaem hook  #
+#########################
+exec ./${ARCH_DIR}/bin/kaem --verbose --strict --file ./after.kaem

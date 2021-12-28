@@ -18,12 +18,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Mes.  If not, see <http://www.gnu.org/licenses/>.
 
-ARCH=x86
-ARCH_DIR=x86
-BLOOD_FLAG=" "
-BASE_ADDRESS="0x08048000"
-ENDIAN_FLAG="--little-endian"
-
 cd ${ARCH_DIR}
 
 ############################################

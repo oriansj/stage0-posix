@@ -24,19 +24,13 @@
 # To run in kaem simply: kaem --verbose --strict
 
 ##################################################
-# Phase 0-14 Build hex0 from bootstrapped binary #
+# Phase 0-11 Build hex0 from bootstrapped binary #
 ##################################################
 
 ./bootstrap-seeds/POSIX/x86/kaem-optional-seed ./x86/mescc-tools-seed-kaem.kaem
 ./x86/artifact/kaem-0 ./x86/mescc-tools-mini-kaem.kaem
-./x86/bin/kaem --verbose --strict --file ./x86/mescc-tools-full-kaem.kaem
 
-######################################################
-# Phase 15-22 Build mescc-tools-extra from M2-Planet #
-######################################################
-./x86/bin/kaem --verbose --strict --file ./x86/mescc-tools-extra.kaem
-
-#########################
-# Load after.kaem hook  #
-#########################
-./x86/bin/kaem --verbose --strict --file ./after.kaem
+#######################################
+# Run remaining phases with full kaem #
+#######################################
+./x86/bin/kaem --verbose --strict --file ./x86/kaem.run

@@ -20,9 +20,9 @@
 
 cd ${ARCH_DIR}
 
-############################################
-# Phase-12 Build M2-Planet from M2-Planet  #
-############################################
+###############################################
+# Phase-12 Build M2-Mesoplanet from M2-Planet #
+###############################################
 
 ./artifact/M2 --architecture ${ARCH} \
 	-f ../M2libc/sys/types.h \

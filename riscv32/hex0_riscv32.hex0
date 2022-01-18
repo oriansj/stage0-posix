@@ -1,6 +1,6 @@
 ## Copyright (C) 2021 Ekaitz Zarraga
 ## Copyright (C) 2021 Andrius Štikonas
-## Copyright (C) 2021 Gabriel Wicki
+## Copyright (C) 2021,2022 Gabriel Wicki
 ## This file is part of stage0.
 ##
 ## stage0 is free software: you can redistribute it and/or modify
@@ -80,7 +80,7 @@ F3 00              # e_machine Indicating RISC-V
     13 05 C0 F9    # RD_A0 !-100 ADDI         ; AT_FDCWD
     13 06 00 00    # RD_A2 MV                 ; read only
     73 00 00 00    # ECALL
-    13 09 05 00    # RD_S2 RS1_A0 MV          ; Save fd in for later
+    13 09 05 00    # RD_S2 RS1_A0 MV          ; Save fd in s2 for later
 
     ; Open output file and store the FD in s3
     13 05 C0 F9    # RD_A0 !-100 ADDI         ; AT_FDCWD
@@ -96,7 +96,7 @@ F3 00              # e_machine Indicating RISC-V
     ; OCTAL!
 
     73 00 00 00    # ECALL
-    93 09 05 00    # RD_S3 RS1_A0 MV          ; Save fd in for later
+    93 09 05 00    # RD_S3 RS1_A0 MV          ; Save fd in s3 for later
 
 # :next_byte ; (0x0600088)
     93 08 F0 03    # RD_A7 !63 ADDI           ; sys_read
@@ -126,8 +126,8 @@ F3 00              # e_machine Indicating RISC-V
         ; If the file ended (0 bytes read) terminate
         63 0E 05 08    # RS1_A0 @terminate BEQZ
                        # +156B
-        ; Check if read byte is the end of the comment,
-        ; in the case it is continue processing
+        ; Check if read byte is the end of the comment (i.e. a newline character),
+        ; in that case we continue processing
         03 05 01 00     # RD_A0 RS1_SP LB
         93 02 A0 00     # RD_T0 !0xA ADDI
         E3 0E 55 FA     # RS1_A0 RS2_T0 @next_byte BEQ ; a0 eq to \n

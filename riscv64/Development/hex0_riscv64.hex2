@@ -1,5 +1,6 @@
 ## Copyright (C) 2021 Ekaitz Zarraga
 ## Copyright (C) 2021 Andrius Štikonas
+## Copyright (C) 2022 Gabriel Wicki
 ## This file is part of stage0.
 ##
 ## stage0 is free software: you can redistribute it and/or modify
@@ -86,7 +87,7 @@ F3 00              ## e_machine Indicating RISC-V
     .00060000 13000000
     # ECALL
     73000000
-    # RD_S2 RS1_A0 MV          ; Save fd in for later
+    # RD_S2 RS1_A0 MV          ; Save fd in s2 for later
     .00090000 .00000500 13000000
 
     ; Open output file and store the FD in s3
@@ -106,7 +107,7 @@ F3 00              ## e_machine Indicating RISC-V
     ; OCTAL!
     # ECALL
     73000000
-    # RD_S3 RS1_A0 MV          ; Save fd in for later
+    # RD_S3 RS1_A0 MV          ; Save fd in s3 for later
     .80090000 .00000500 13000000
 
 :next_byte
@@ -147,8 +148,8 @@ F3 00              ## e_machine Indicating RISC-V
         ; If the file ended (0 bytes read) terminate
         # RS1_A0 @terminate BEQZ
         .00000500 @terminate 63000000
-        ; Check if read byte is the end of the comment,
-        ; in the case it is continue processing
+        ; Check if read byte is the end of the comment (i.e. a newline character),
+        ; in that case we continue processing
         # RD_A0 RS1_SP LB
         .00050000 .00000100 03000000
         # RD_T0 !0xA ADDI

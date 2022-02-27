@@ -16,3 +16,6 @@
 [submodule "M2-Mesoplanet"]
 	path = M2-Mesoplanet
 	url = https://github.com/oriansj/M2-Mesoplanet.git
+[submodule "x86"]
+	path = x86
+	url = https://github.com/oriansj/stage0-posix-x86.git

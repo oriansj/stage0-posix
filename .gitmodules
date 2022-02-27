@@ -22,3 +22,6 @@
 [submodule "AMD64"]
 	path = AMD64
 	url = https://github.com/oriansj/stage0-posix-amd64.git
+[submodule "AArch64"]
+	path = AArch64
+	url = https://github.com/oriansj/stage0-posix-aarch64.git

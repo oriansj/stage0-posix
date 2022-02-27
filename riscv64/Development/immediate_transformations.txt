@@ -1,9 +1,0 @@
-J-type immediate transformation:
-    # ADDDDDDDCBBBBBBBBBB     ABBBBBBBBBBCDDDDDDDD
-    # 11111111111111110000 -> 11111111000111111111
-_________________________________________________________________
-
-B-type immediate transformation:
-
-    # ADBBBBBBCCCC         ABBBBBB CCCCD
-    # 1111111101000   ->   1111111 01001

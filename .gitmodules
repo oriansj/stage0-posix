@@ -31,3 +31,6 @@
 [submodule "riscv32"]
 	path = riscv32
 	url = https://github.com/oriansj/stage0-posix-riscv32.git
+[submodule "riscv64"]
+	path = riscv64
+	url = https://github.com/oriansj/stage0-posix-riscv64.git

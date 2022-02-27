@@ -19,3 +19,6 @@
 [submodule "x86"]
 	path = x86
 	url = https://github.com/oriansj/stage0-posix-x86.git
+[submodule "AMD64"]
+	path = AMD64
+	url = https://github.com/oriansj/stage0-posix-amd64.git

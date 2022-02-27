@@ -1,8 +1,0 @@
-# These files are generated when the build runs
-# and should never be included
-
-# The files built
-bin/*
-
-# All of the build artifacts
-artifact/*

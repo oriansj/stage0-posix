@@ -25,3 +25,6 @@
 [submodule "AArch64"]
 	path = AArch64
 	url = https://github.com/oriansj/stage0-posix-aarch64.git
+[submodule "armv7l"]
+	path = armv7l
+	url = https://github.com/oriansj/stage0-posix-armv7l.git

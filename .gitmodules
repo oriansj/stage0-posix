@@ -28,3 +28,6 @@
 [submodule "armv7l"]
 	path = armv7l
 	url = https://github.com/oriansj/stage0-posix-armv7l.git
+[submodule "riscv32"]
+	path = riscv32
+	url = https://github.com/oriansj/stage0-posix-riscv32.git

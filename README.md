@@ -1,4 +1,4 @@
-# mescc-tools-seed
+# stage0-posix
 
 This repository contains all the various parts needed to bootstrap the
 following:
@@ -21,14 +21,13 @@ following:
 
 It bootstraps all these from a single 357 byte seed (which you will find in the
 folder bootstrap-seeds). The ultimate goal is for this to bootstrap all the way
-up to GCC. This will happen when mes-m2 is finished.
+up to GCC. Thanks to the wonderful people on #bootstrappable and their hard work
+https://github.com/fosslinux/live-bootstrap it is done. Everything you need to
+go from Hex0 to GCC+Guile is just a kaem.run away.
 
-There are only two "missing" parts that are not source code; a shell/kaem, and a
-kernel. Kaem is a very basic build tool that basically evaluates a very simple
-script. A seed kaem that was hand written in hex0 (737bytes) is available as
-kaem-optional-seed in the same folder with the hex0 seed. Otherwise, you can use
-a shell you trust. The kernel issue is not yet solved and at the moment the
-kernel is trusted.
+There is only one "missing" part that is not bootstrappable from the hex0 seed; a
+kernel. This issue is not yet solved and at the moment the kernel is trusted.
+(This issue will ultimately have to be solved on bare metal in stage0)
 
 This repository currently supports AMD64 (x86_64), x86 (i386), AArch64 and RISC-V
 (32 and 64-bit) architectures. To run the entire bootstrap process in the safest way,
@@ -88,6 +87,9 @@ kaem.run.
 
 ALL of these steps have a NASM or GAS version in the NASM/ or GAS/ subdirectory
 of the folder for the architecture.
+
+All of the intermediate build products are in the $ARCH/artifact/ folders (for
+inspection and audit purposes)
 
 ### Phase 0: Rebuild hex0 from the hex0 seed
 
@@ -180,7 +182,6 @@ features provided by M2libc and M2-Planet to enable significantly faster builds.
 
 This is the final debuggable version of hex2 with all of the optimizations and
 features provided by M2libc and M2-Planet to enable significantly faster builds.
-
 
 ### Phase 11: Build kaem
 

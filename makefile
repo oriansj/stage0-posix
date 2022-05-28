@@ -107,7 +107,7 @@ riscv64/bin/untar >| riscv64.answers
 
 .PHONY: clean
 clean:
-	git clean -xdf
+	./cleanup.sh
 
 test-x86:
 	./bootstrap-seeds/POSIX/x86/kaem-optional-seed

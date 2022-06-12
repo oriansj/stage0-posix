@@ -33,6 +33,7 @@ x86/bin/M2-Mesoplanet \
 x86/bin/M2-Planet \
 x86/bin/match \
 x86/bin/mkdir \
+x86/bin/replace \
 x86/bin/rm \
 x86/bin/sha256sum \
 x86/bin/ungz \
@@ -51,6 +52,7 @@ AMD64/bin/M2-Mesoplanet \
 AMD64/bin/M2-Planet \
 AMD64/bin/match \
 AMD64/bin/mkdir \
+AMD64/bin/replace \
 AMD64/bin/rm \
 AMD64/bin/sha256sum \
 AMD64/bin/ungz \
@@ -69,6 +71,7 @@ AArch64/bin/M2-Mesoplanet \
 AArch64/bin/M2-Planet \
 AArch64/bin/match \
 AArch64/bin/mkdir \
+AArch64/bin/replace \
 AArch64/bin/rm \
 AArch64/bin/sha256sum \
 AArch64/bin/ungz \
@@ -87,6 +90,7 @@ riscv32/bin/M2-Mesoplanet \
 riscv32/bin/M2-Planet \
 riscv32/bin/match \
 riscv32/bin/mkdir \
+riscv32/bin/replace \
 riscv32/bin/rm \
 riscv32/bin/sha256sum \
 riscv32/bin/ungz \
@@ -105,6 +109,7 @@ riscv64/bin/M2-Mesoplanet \
 riscv64/bin/M2-Planet \
 riscv64/bin/match \
 riscv64/bin/mkdir \
+riscv64/bin/replace \
 riscv64/bin/rm \
 riscv64/bin/sha256sum \
 riscv64/bin/ungz \

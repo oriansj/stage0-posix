@@ -19,7 +19,7 @@ following:
   - sha256sum
 - M2-Planet (https://github.com/oriansj/M2-Planet)
 
-It bootstraps all these from a single 295 byte seed (which you will find in the
+It bootstraps all these from a single 256 byte seed (which you will find in the
 folder bootstrap-seeds). The ultimate goal is for this to bootstrap all the way
 up to GCC. Thanks to the wonderful people on #bootstrappable and their hard work
 https://github.com/fosslinux/live-bootstrap it is done. Everything you need to

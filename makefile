@@ -37,6 +37,7 @@ x86/bin/replace \
 x86/bin/rm \
 x86/bin/sha256sum \
 x86/bin/ungz \
+x86/bin/unbz2 \
 x86/bin/untar >| x86.answers
 
 Generate-amd64-answers:
@@ -56,6 +57,7 @@ AMD64/bin/replace \
 AMD64/bin/rm \
 AMD64/bin/sha256sum \
 AMD64/bin/ungz \
+AMD64/bin/unbz2 \
 AMD64/bin/untar >| amd64.answers
 
 Generate-aarch64-answers:
@@ -75,6 +77,7 @@ AArch64/bin/replace \
 AArch64/bin/rm \
 AArch64/bin/sha256sum \
 AArch64/bin/ungz \
+AArch64/bin/unbz2 \
 AArch64/bin/untar >| aarch64.answers
 
 Generate-riscv32-answers:
@@ -94,6 +97,7 @@ riscv32/bin/replace \
 riscv32/bin/rm \
 riscv32/bin/sha256sum \
 riscv32/bin/ungz \
+riscv32/bin/unbz2 \
 riscv32/bin/untar >| riscv32.answers
 
 Generate-riscv64-answers:
@@ -113,6 +117,7 @@ riscv64/bin/replace \
 riscv64/bin/rm \
 riscv64/bin/sha256sum \
 riscv64/bin/ungz \
+riscv64/bin/unbz2 \
 riscv64/bin/untar >| riscv64.answers
 
 .PHONY: clean

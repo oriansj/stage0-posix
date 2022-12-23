@@ -227,24 +227,28 @@ not needed to further extend stage0-posix to achieve GCC+Linux.
 ungz enables the decompressing of .tar.gz tarballs such as Gnu Mes. Thus
 enabling source tarballs on hosts that don't distribute uncompressed tarballs.
 
-### Phase 20: Build catm
+### Phase 19: Build unbz2
+
+Similar to ungz, unbz2 enables the decompressing of .tar.bz2 tarballs.
+
+### Phase 21: Build catm
 
 catm is a simple tool that provides the functionality of:
 cat file1 file2 ... fileN >| output in environments where pipes and I/O
 redirection doesn't exist. With slightly unique syntax:
 catm output file1 file2 ... fileN
 
-### Phase 21: build primitive cp
+### Phase 22: build primitive cp
 
 This primitive version of cp simply copies the contents of the file but does NOT
 copy the file permissions or any other STAT information.
 
-### Phase 22: build chmod
+### Phase 23: build chmod
 
 To fix up the permissions, of any binaries you used the primitive cp command to
 move, chmod is included.
 
-### Phase 23: after.kaem
+### Phase 24: after.kaem
 
 after.kaem exists for you to replace with anything you want to kick off your
 bootstrap chain.

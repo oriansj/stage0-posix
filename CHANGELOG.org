@@ -1,0 +1,57 @@
+# SPDX-FileCopyrightText: Andrius Štikonas
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+* Current
+** M2-Planet
+   + Added support for #warning.
+   + Added global structs (and . operator).
+   + Added local structs.
+   + Added (u)int8_t, (u)int16_t and (u)int32_t.
+   + Properly remove blocks that are not used (e.g. after #if 0)
+
+   + Fixed doubly indirect structs.
+   + Fixed a few segfaults.
+   + Fixed macro expressions with ')'.
+
+** M2-Mesoplanet
+   + Added #warning.
+   + Added -D flags.
+   + Added support for building UEFI binaries.
+
+   + Fixed macro expressions with ')'.
+   + Fixed --no-includes option.
+
+** M2libc
+   + Added a memory manager for malloc() and free().
+   + Added getenv and setenv calls.
+   + Added support for building UEFI applications.
+
+** mescc-tools
+   + Set SHELL variable in kaem.
+
+** mescc-tools-extra
+   + Added unbz2.
+   + Added replace utility to replace strings in file.
+   + Added rm to remove files.
+   + Added --file and --output to ungz.
+   + Added --verbose to untar and made default mode quiet.
+
+   + Fixed some segfaults.
+
+** stage0-posix-x86
+   + Reduced hex0-seed from 357 to 256 bytes.
+   + Reduced kaem-optional-seed from 757 to 640 bytes.
+   + Partially switch M1 defines to GAS-like defines.
+
+** stage0-posix-amd64
+   + Reduced hex0-seed to from 405 to 292 bytes.
+   + Reduced kaem-optional-seed from 896 to 618 bytes.
+   + All M1 defines are switched to GAS-like defines.
+
+** stage0-posix-aarch64
+
+** stage0-posix-riscv64
+
+** stage0-posix-riscv32
+
+* 1.5.0 - 2022-05-01

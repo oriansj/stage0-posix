@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Andrius Štikonas
+# SPDX-FileCopyrightText: © Andrius Štikonas
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 * Current

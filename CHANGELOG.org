@@ -19,7 +19,7 @@
    + Added support for building UEFI binaries.
 
    + Fixed macro expressions with ')'.
-   + Fixed --no-includes option.
+   + Fixed =--no-includes= option.
 
 ** M2libc
    + Added a memory manager for malloc() and free().
@@ -33,8 +33,8 @@
    + Added unbz2.
    + Added replace utility to replace strings in file.
    + Added rm to remove files.
-   + Added --file and --output to ungz.
-   + Added --verbose to untar and made default mode quiet.
+   + Added =--file= and =--output= to ungz.
+   + Added =--verbose= to untar and made default mode quiet.
 
    + Fixed some segfaults.
 

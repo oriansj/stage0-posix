@@ -41,13 +41,13 @@
 ** stage0-posix-x86
    + Reduced hex0-seed from 357 to 256 bytes.
    + Reduced kaem-optional-seed from 757 to 640 bytes.
-   + Partially switch M1 defines to GAS-like defines.
+   + Switched M1 defines to GAS-like style.
 
 ** stage0-posix-amd64
    + Reduced hex0-seed to from 405 to 292 bytes.
    + Reduced kaem-optional-seed from 896 to 618 bytes.
    + All binaries except for kaem-optional are now position independent (PIE).
-   + All M1 defines are switched to GAS-like defines.
+   + Switched M1 defines to GAS-like style.
 
 ** stage0-posix-aarch64
 

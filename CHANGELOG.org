@@ -28,6 +28,7 @@
 
 ** mescc-tools
    + Set SHELL variable in kaem.
+   + Fix kaem aliases that are longer than commands.
 
 ** mescc-tools-extra
    + Added unbz2.

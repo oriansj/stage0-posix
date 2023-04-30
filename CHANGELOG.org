@@ -12,6 +12,7 @@
    + Fixed doubly indirect structs.
    + Fixed a few segfaults.
    + Fixed macro expressions with ')'.
+   + Add sufficient padding when assigning global constants on 64-bit architectures.
 
 ** M2-Mesoplanet
    + Added #warning.

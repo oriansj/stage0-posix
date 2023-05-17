@@ -3,51 +3,54 @@
 
 * Current
 ** M2-Planet
-   + Added support for #warning.
-   + Added global structs (and . operator).
+   + Added support for =#warning=.
+   + Added global structs (and =.= operator).
    + Added local structs.
-   + Added (u)int8_t, (u)int16_t and (u)int32_t.
-   + Properly remove blocks that are not used (e.g. after #if 0)
+   + Added =(u)int8_t=, =(u)int16_t= and =(u)int32_t=.
+   + Properly remove blocks that are not used (e.g. after =#if 0=)
 
    + Fixed doubly indirect structs.
    + Fixed a few segfaults.
-   + Fixed macro expressions with ')'.
+   + Fixed macro expressions with =)=.
    + Add sufficient padding when assigning global constants on 64-bit architectures.
 
 ** M2-Mesoplanet
-   + Added #warning.
-   + Added -D flags.
+   + Added =#warning=.
+   + Added =-D= flags.
    + Added support for building UEFI binaries.
 
-   + Fixed macro expressions with ')'.
+   + Fixed macro expressions with =)=.
    + Fixed =--no-includes= option.
 
 ** M2libc
-   + Added a memory manager for malloc() and free().
-   + Added getenv and setenv calls.
+   + Added a memory manager for =malloc()= and =free()=.
+   + Added =getenv= and =setenv= calls.
    + Added support for building UEFI applications.
 
 ** mescc-tools
-   + Set SHELL variable in kaem.
-   + Fix kaem aliases that are longer than commands.
+   + Set SHELL variable in =kaem=.
+   + Fix =kaem= aliases that are longer than commands.
 
 ** mescc-tools-extra
-   + Added unbz2.
-   + Added replace utility to replace strings in file.
-   + Added rm to remove files.
-   + Added =--file= and =--output= to ungz.
-   + Added =--verbose= to untar and made default mode quiet.
+   + Added =unbz2=.
+   + Added =replace= utility to replace strings in file.
+   + Added =rm= to remove files.
+   + Added =--file= and =--output= to =ungz=.
+   + Added =--verbose= to =untar= and made default mode quiet.
 
    + Fixed some segfaults.
 
+** bootstrap-seeds
+   + Reduced =POSIX/x86/hex0-seed= from 357 to 256 bytes.
+   + Reduced =POSIX/x86/kaem-optional-seed= from 757 to 640 bytes.
+   + Reduced =POSIX/AMD64/hex0-seed= to from 405 to 292 bytes.
+   + Reduced =POSIX/AMD64/kaem-optional-seed= from 896 to 618 bytes.
+   + Add =NATIVE/x86/builder-hex0-x86-stage1.img= seed for kernel bootstrapping.
+
 ** stage0-posix-x86
-   + Reduced hex0-seed from 357 to 256 bytes.
-   + Reduced kaem-optional-seed from 757 to 640 bytes.
    + Switched M1 defines to GAS-like style.
 
 ** stage0-posix-amd64
-   + Reduced hex0-seed to from 405 to 292 bytes.
-   + Reduced kaem-optional-seed from 896 to 618 bytes.
    + All binaries except for kaem-optional are now position independent (PIE).
    + Switched M1 defines to GAS-like style.
 

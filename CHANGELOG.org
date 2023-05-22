@@ -30,6 +30,7 @@
 ** mescc-tools
    + Set SHELL variable in =kaem=.
    + Fix =kaem= aliases that are longer than commands.
+   + Fix quoted DEFINE statements.
 
 ** mescc-tools-extra
    + Added =unbz2=.
@@ -57,7 +58,9 @@
 ** stage0-posix-aarch64
 
 ** stage0-posix-riscv64
+   + Switch to lowercase M1 defines.
 
 ** stage0-posix-riscv32
+   _ Switch to lowercase M1 defines.
 
 * 1.5.0 - 2022-05-01

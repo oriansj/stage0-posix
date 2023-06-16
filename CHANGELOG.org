@@ -63,6 +63,6 @@
    + Switch to lowercase M1 defines.
 
 ** stage0-posix-riscv32
-   _ Switch to lowercase M1 defines.
+   + Switch to lowercase M1 defines.
 
 * 1.5.0 - 2022-05-01

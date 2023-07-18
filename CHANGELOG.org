@@ -30,7 +30,7 @@
 ** mescc-tools
    + Set SHELL variable in =kaem=.
    + Fix =kaem= aliases that are longer than commands.
-   + Fix quoted DEFINE statements.
+   + Fix quoted DEFINE statements in =M1=.
    + =hex2= added support for signed and unsigned =range_check= behavior.
    + Fix =kaem= bug where unset removes the first environment variable when a token value is =NULL=.
 

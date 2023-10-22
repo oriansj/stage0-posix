@@ -13,6 +13,7 @@
    + Fixed a few segfaults.
    + Fixed macro expressions with =)=.
    + Add sufficient padding when assigning global constants on 64-bit architectures.
+   + Fix structs greater than 512bytes in size on armv7l.
 
 ** M2-Mesoplanet
    + Added =#warning=.

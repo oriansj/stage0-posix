@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: © Andrius Štikonas
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-* Current
+* 1.6.0 - 2023-11-02
 ** M2-Planet
    + Added support for =#warning=.
    + Added global structs (and =.= operator).

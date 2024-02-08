@@ -1,6 +1,74 @@
 # SPDX-FileCopyrightText: © Andrius Štikonas
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+* current
+** M2-Planet
+   + Added more advanced switch statement tests
+   + Fix a typo in the docs
+   + Remove VPATH from makefiles.
+   + add missing make ${program} targets
+   + Add M2-planet and M2-minimal makefile targets to .PHONY
+   + ensure arithmetic priority better matches the C spec
+
+** M2-Mesoplanet
+   + Ignore UEFI files if Linux; ignore linux files if UEFI
+
+** M2libc
+   + Add syscalls needed for a simple sandbox
+   + Fix function formatting to comply with existing standard
+   + Fix UEFI calling convention.
+   + Improve handling of relative paths in UEFI.
+   + Remove /./ from paths rather than convert them to ///.
+   + Fix file opening modes in UEFI (== has higher precedence than | )
+   + Add non-trivial access function to UEFI.
+   + Add UEFI task priority level defines.
+   + Add dummy stdint.h
+   + Fix sal_eax,cl and sal_rax,cl encoding.
+   + Move the utsname struct definition to sys/utsname.h
+   + Add dummy sys/wait.h
+   + A very rough prototype for strstr
+   + ensure needed libraries are read first for fcntl.h
+
+** mescc-tools
+   + Fix shebang of check.sh
+   + makefile: Call cleanup.sh for test12 and test13
+   + Remove VPATH from makefile.
+   + Also fix kaem's makefile
+
+** mescc-tools-extra
+   + Remove VPATH from makefile
+   + Remove obsolete comment from makefile
+   + Add wrap - A small bubblewrap like program
+   + clean up cc_*-isms
+   + Add a fully functional unxz program
+
+** bootstrap-seeds
+   + Fix UEFI bootstrap binaries.
+   + Fix minor typos in comments in UEFI kaem-optional
+   + Make sure read function works if file descriptor is longer than 1 byte.
+
+** stage0-posix-x86
+   + Make sure read function works if file descriptor is longer than 1 byte
+   + Fix encoding for sal_eax,cl
+   + Fix regression caused by M2libc commit: fb6701a73189afca152ea1154650c315df4e6a93
+
+** stage0-posix-amd64
+   + Fix encoding of some mov instructions to actually use 64-bit registers rather than 32
+   + Fix encoding for sal_rax,cl.
+   + Fix regression caused by M2libc's fb6701a73189afca152ea1154650c315df4e6a93 commit
+
+** stage0-posix-aarch64
+   + Add M2libc/stdio.h to build sources.
+   + Set OPERATING_SYSTEM=Linux environmental variable.
+   + Fix a typo in a comment in cc_aarch64
+   + Fix regression caused by M2libc's fb6701a73189afca152ea1154650c315df4e6a93 commit
+
+** stage0-posix-riscv64
+   + Fix regression caused by M2libc's fb6701a73189afca152ea1154650c315df4e6a93 commit
+
+** stage0-posix-riscv32
+   + Fix regression caused by M2libc's fb6701a73189afca152ea1154650c315df4e6a93 commit
+
 * 1.6.0 - 2023-11-02
 ** M2-Planet
    + Added support for =#warning=.

@@ -15,6 +15,8 @@ following:
   - match
   - mkdir
   - ungz
+  - unbz2
+  - unxz
   - untar
   - sha256sum
 - M2-Planet (https://github.com/oriansj/M2-Planet)
@@ -26,8 +28,10 @@ https://github.com/fosslinux/live-bootstrap it is done. Everything you need to
 go from Hex0 to GCC+Guile is just a kaem.run away.
 
 There is only one "missing" part that is not bootstrappable from the hex0 seed; a
-kernel. This issue is not yet solved and at the moment the kernel is trusted.
-(This issue will ultimately have to be solved on bare metal in stage0)
+kernel. This issue was solved in live-bootstrap thanks to the wonderful work done
+by Rick Masters and Gabor Stefanik in https://github.com/ironmeld/builder-hex0.git
+and thus solved up to the firmware level. (We are seeking hardware developers who
+wish to chase this all the way down to transistors.)
 
 This repository currently supports AMD64 (x86_64), x86 (i386), AArch64 and RISC-V
 (32 and 64-bit) architectures. To run the entire bootstrap process in the safest way,
@@ -227,28 +231,47 @@ not needed to further extend stage0-posix to achieve GCC+Linux.
 ungz enables the decompressing of .tar.gz tarballs such as Gnu Mes. Thus
 enabling source tarballs on hosts that don't distribute uncompressed tarballs.
 
-### Phase 19: Build unbz2
+### Phase 20: Build unbz2
 
 Similar to ungz, unbz2 enables the decompressing of .tar.bz2 tarballs.
 
-### Phase 21: Build catm
+### Phase 21: Build unxz
+
+Similar to ungz, unxz enables the decompressing of .tar.xz tarballs.
+
+### Phase 22: Build catm
 
 catm is a simple tool that provides the functionality of:
 cat file1 file2 ... fileN >| output in environments where pipes and I/O
 redirection doesn't exist. With slightly unique syntax:
 catm output file1 file2 ... fileN
 
-### Phase 22: build primitive cp
+### Phase 23: build primitive cp
 
 This primitive version of cp simply copies the contents of the file but does NOT
 copy the file permissions or any other STAT information.
 
-### Phase 23: build chmod
+### Phase 24: build chmod
 
 To fix up the permissions, of any binaries you used the primitive cp command to
 move, chmod is included.
 
-### Phase 24: after.kaem
+### Phase 25: build rm
+
+Enable the deletion of files folders (Essential if disk constrained)
+
+### Phase 26: build replace
+
+A primitive sed replacement; which is limited to a single search and replace
+which files all instances of a given pattern of characters in a file (No regex
+supported) and replaces it with the desired replacement.
+
+### Phase 27: build wrap
+
+If you need a chroot or to isolate what you are doing; wrap is the first tool
+available for that job and does it well enough to get you quite far.
+
+### Phase 28: after.kaem
 
 after.kaem exists for you to replace with anything you want to kick off your
 bootstrap chain.

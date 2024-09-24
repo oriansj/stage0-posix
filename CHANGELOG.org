@@ -3,6 +3,29 @@
 
 * current
 ** M2-Planet
+
+** M2-Mesoplanet
+
+** M2libc
+
+** mescc-tools
+
+** mescc-tools-extra
+
+** bootstrap-seeds
+
+** stage0-posix-x86
+
+** stage0-posix-amd64
+
+** stage0-posix-aarch64
+
+** stage0-posix-riscv64
+
+** stage0-posix-riscv32
+
+* 1.7.0 - 2024-09-23
+** M2-Planet
    + Added more advanced switch statement tests
    + Fix a typo in the docs
    + Remove VPATH from makefiles.

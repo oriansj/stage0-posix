@@ -164,7 +164,7 @@ MTIME=$(shell git show HEAD --format=%ct --no-patch)
 TAR_FLAGS=--sort=name --mtime=@$(MTIME) --owner=0 --group=0 --numeric-owner --mode=go=rX,u+rw,a-s
 
 $(TARBALL):
-	(git ls-files					\
+	(git ls-files --recurse-submodules		\
 	    --exclude=$(TARBALL_DIR);			\
 	    echo $^ | tr ' ' '\n')			\
 	    | tar $(TAR_FLAGS)				\

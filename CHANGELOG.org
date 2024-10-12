@@ -15,6 +15,7 @@
 ** bootstrap-seeds
 
 ** stage0-posix-x86
+   + Updated hex0 source to match the one in bootstrap-seeds.
 
 ** stage0-posix-amd64
 
@@ -66,6 +67,7 @@
    + Add a fully functional unxz program
 
 ** bootstrap-seeds
+   + Reduced =POSIX/x86/hex0-seed= from 256 to 190 bytes.
    + Fix UEFI bootstrap binaries.
    + Fix minor typos in comments in UEFI kaem-optional
    + Make sure read function works if file descriptor is longer than 1 byte.

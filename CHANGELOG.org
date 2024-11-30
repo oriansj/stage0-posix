@@ -13,6 +13,9 @@
 ** mescc-tools-extra
 
 ** bootstrap-seeds
+   + Reduced =POSIX/x86/hex0-seed= from 190 to 181 bytes.
+   + Reduced =POSIX/x86/kaem-optional-seed= from 640 to 632 bytes.
+   + Reduced =POSIX/AMD64/hex0-seed= from 292 to 229 bytes.
 
 ** stage0-posix-x86
    + Updated hex0 source to match the one in bootstrap-seeds.

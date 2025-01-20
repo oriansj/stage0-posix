@@ -3,14 +3,23 @@
 
 * current
 ** M2-Planet
+   + Initial enum support
+   + Add _Bool type
+   + Add support for west-const for variables and function arguments
 
 ** M2-Mesoplanet
 
 ** M2libc
+   + Add stdbool.h
+   + Fixed a few aarch64 syscalls
+   + Add support for symlink system call
+   + Make retrieving UEFI variables conform to spec
 
 ** mescc-tools
 
 ** mescc-tools-extra
+   + Mount /dev/pts in the wrap environment
+   + Add support for symlinks in untar
 
 ** bootstrap-seeds
    + Reduced =POSIX/x86/hex0-seed= from 190 to 181 bytes.

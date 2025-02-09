@@ -3,23 +3,30 @@
 
 * current
 ** M2-Planet
-   + =enum= support
-   + Add =_Bool= type
-   + Add support for west-=const= for variables and function arguments
+   + Added support for pointer arithmetic for += and -= operators (not yet support for =+= and =-=).
+   + Added support for =__LINE__= macro.
+   + Added support for =__FILE__= macro.
+   + Added support for =__DATE__= macro which will always be =Jan  1 1970= and =__TIME__= which will always be =00:00:00=.
+   + Added support for =__STDC__=, =__STDC_HOSTED__=, and =__STDC_VERSION__= macros. =__STDC_VERSION__= claims support for C89.
+   + Added initial support for function-like macros.
+   + =enum= support.
+   + Add =_Bool= type.
+   + Add support for west-=const= for variables and function arguments.
 
 ** M2-Mesoplanet
 
 ** M2libc
+   + Convert setenv/getenv calls to use C-like pointer arithmetic.
    + Add =stdbool.h=
-   + Fixed a few =aarch64= syscalls
-   + Add support for =symlink= system call
-   + Make retrieving UEFI variables conform to spec
+   + Fixed a few =aarch64= syscalls.
+   + Add support for =symlink= system call.
+   + Make retrieving UEFI variables conform to spec.
 
 ** mescc-tools
 
 ** mescc-tools-extra
-   + Mount =/dev/pts= in the =wrap= environment
-   + Add support for symlinks in =untar=
+   + Mount =/dev/pts= in the =wrap= environment.
+   + Add support for symlinks in =untar=.
 
 ** bootstrap-seeds
    + Reduced =POSIX/x86/hex0-seed= from 190 to 181 bytes.

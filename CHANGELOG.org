@@ -10,10 +10,22 @@
    + Added support for =__STDC__=, =__STDC_HOSTED__=, and =__STDC_VERSION__= macros. =__STDC_VERSION__= claims support for C89.
    + Added initial support for function-like macros.
    + =enum= support.
-   + Add =_Bool= type.
-   + Add support for west-=const= for variables and function arguments.
+   + Added =_Bool= type.
+   + Added support for west-=const= for variables and function arguments.
+   + Improved RISC-V support to work with large types (size > 11 bits).
+   + Added support for octal and \? escape codes.
+   + Make arguments that aren't options be considered files.
+   + Make help output more accurately describe available options.
+   + Added support for multiple variable declarations per statement.
+   + Added support for static/inline/_Noreturn qualifiers on globals.
+   + Added support for static local variables.
+   + Make implicit return load 0 for the =main= function.
+   + Fix dereferencing =char= pointers (or other types whose size is not equal to register size).
 
 ** M2-Mesoplanet
+   + Make arguments that aren't options be considered files.
+   + Make help output more accurately describe available options.
+   + Fix `make install` not working.
 
 ** M2libc
    + Convert setenv/getenv calls to use C-like pointer arithmetic.
@@ -21,6 +33,7 @@
    + Fixed a few =aarch64= syscalls.
    + Add support for =symlink= system call.
    + Make retrieving UEFI variables conform to spec.
+   + Removed undefined behavior in int2str.
 
 ** mescc-tools
 
@@ -28,6 +41,7 @@
    + Mount =/dev/pts= in the =wrap= environment.
    + Add support for symlinks in =untar=.
    + Switch =ungz= to use C-like pointer arithmetic.
+   + =unxz=: Do not crash when input file is not found.
 
 ** bootstrap-seeds
    + Reduced =POSIX/x86/hex0-seed= from 190 to 181 bytes.

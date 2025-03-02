@@ -21,6 +21,15 @@
    + Added support for static local variables.
    + Make implicit return load 0 for the =main= function.
    + Fix dereferencing =char= pointers (or other types whose size is not equal to register size).
+   + Added support for multi token integer types (=unsigned int=, =long long=, =long long int=, etc.)/
+   + Allow anonymous structs/enums and inline =typedef=.
+   + Added support arrays on the stack.
+   + Added support for using variables in =sizeof=, including dereferencing.
+   + Added support for string literals in =sizeof=.
+   + Added support for variables in loop bodies.
+   + Added =__M2C__=, =__M2C_MINOR__=, and =__M2C_PATCHLEVEL__= defines.
+   + Add support for locals in loops.
+   + Fixed multiple chained uses of dot and arrow operators segfaulting.
 
 ** M2-Mesoplanet
    + Make arguments that aren't options be considered files.
@@ -36,6 +45,7 @@
    + Removed undefined behavior in int2str.
 
 ** mescc-tools
+   + Added support for %&! to M1 for knight architecture and allowed @$ syntax.
 
 ** mescc-tools-extra
    + Mount =/dev/pts= in the =wrap= environment.

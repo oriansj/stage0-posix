@@ -26,7 +26,7 @@
 
 * 1.8.0 - 2025-03-15
 ** M2-Planet
-   + Added support for pointer arithmetic for += and -= operators (not yet support for =+= and =-=).
+   + Added support for pointer arithmetic for += and -= operators (not yet supported for =+= and =-=).
    + Added support for =__LINE__= macro.
    + Added support for =__FILE__= macro.
    + Added support for =__DATE__= macro which will always be =Jan  1 1970= and =__TIME__= which will always be =00:00:00=.
@@ -44,18 +44,18 @@
    + Added support for static local variables.
    + Make implicit return load 0 for the =main= function.
    + Fix dereferencing =char= pointers (or other types whose size is not equal to register size).
-   + Added support for multi token integer types (=unsigned int=, =long long=, =long long int=, etc.)/
+   + Added support for multi token integer types (=unsigned int=, =long long=, =long long int=, etc.).
    + Allow anonymous structs/enums and inline =typedef=.
    + Added support arrays on the stack.
    + Added support for using variables in =sizeof=, including dereferencing.
    + Added support for string literals in =sizeof=.
-   + Added support for variables in loop bodies.
+   + Added support for variables in loop bodies (doesn't work with =goto= yet).
    + Added =__M2C__=, =__M2C_MINOR__=, and =__M2C_PATCHLEVEL__= defines.
    + Add support for locals in loops.
    + Fixed multiple chained uses of dot and arrow operators segfaulting.
    + Added support for initializer lists for global integer arrays.
    + Added support for global arrays without explicit size when initializer lists are used.
-   + Improved switch statement to support constant expressions in case statements.
+   + Improved =switch= statement to support constant expressions in =case= statements.
 
 ** M2-Mesoplanet
    + Make arguments that aren't options be considered files.

@@ -60,7 +60,7 @@
 ** M2-Mesoplanet
    + Make arguments that aren't options be considered files.
    + Make help output more accurately describe available options.
-   + Fix `make install` not working.
+   + Fix =make install= not working.
 
 ** M2libc
    + Convert setenv/getenv calls to use C-like pointer arithmetic.

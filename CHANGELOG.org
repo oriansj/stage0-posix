@@ -3,6 +3,29 @@
 
 * current
 ** M2-Planet
+
+** M2-Mesoplanet
+
+** M2libc
+
+** mescc-tools
+
+** mescc-tools-extra
+
+** bootstrap-seeds
+
+** stage0-posix-x86
+
+** stage0-posix-amd64
+
+** stage0-posix-aarch64
+
+** stage0-posix-riscv64
+
+** stage0-posix-riscv32
+
+* 1.8.0 - 2025-03-15
+** M2-Planet
    + Added support for pointer arithmetic for += and -= operators (not yet support for =+= and =-=).
    + Added support for =__LINE__= macro.
    + Added support for =__FILE__= macro.
@@ -30,6 +53,9 @@
    + Added =__M2C__=, =__M2C_MINOR__=, and =__M2C_PATCHLEVEL__= defines.
    + Add support for locals in loops.
    + Fixed multiple chained uses of dot and arrow operators segfaulting.
+   + Added support for initializer lists for global integer arrays.
+   + Added support for global arrays without explicit size when initializer lists are used.
+   + Improved switch statement to support constant expressions in case statements.
 
 ** M2-Mesoplanet
    + Make arguments that aren't options be considered files.

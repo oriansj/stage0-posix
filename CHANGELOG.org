@@ -3,12 +3,23 @@
 
 * current
 ** M2-Planet
+   + Added support for global initializer list for structs of integers.
+   + Added support for initializing global arrays of structs using initializer lists.
+   + Added support for prefix operators ++ and --.
+   + Added support for postfix operators ++ and --.
+   + Added ability to parse typedefs for simple function pointers.
+   + Added support for anonymous structs (C11 extension). This was already implemented as the only way to use unions.
+   + Added support for unions in all places where structs work.
+   + Added initial support for variable arguments.
 
 ** M2-Mesoplanet
 
 ** M2libc
+   + Initial printf support for %s.
+   + Added stdarg.h header with =va_arg= definitions.
 
 ** mescc-tools
+   + Add support for 16bit immediate constants in RISC-V.
 
 ** mescc-tools-extra
 

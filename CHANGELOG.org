@@ -26,14 +26,19 @@
 ** bootstrap-seeds
 
 ** stage0-posix-x86
+   + Added stdarg.h to kaem scripts.
 
 ** stage0-posix-amd64
+   + Added stdarg.h to kaem scripts.
 
 ** stage0-posix-aarch64
+   + Added stdarg.h to kaem scripts.
 
 ** stage0-posix-riscv64
+   + Added stdarg.h to kaem scripts.
 
 ** stage0-posix-riscv32
+   + Added stdarg.h to kaem scripts.
 
 * 1.8.0 - 2025-03-15
 ** M2-Planet

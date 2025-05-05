@@ -11,12 +11,27 @@
    + Added support for anonymous structs (C11 extension). This was already implemented as the only way to use unions.
    + Added support for unions in all places where structs work.
    + Added initial support for variable arguments.
+   + Added initial very hacky support for casting after dereferencing.
+   + Added support for calling function pointers directly on global variables and struct members. Previously only locals worked.
+   + Added support for initializing global variables with negative values.
+   + Added support for optional argument names in function pointers.
+   + Added support for function pointers in casts and function pointer arguments.
+   + Added support for array arguments to functions.
+   + Allow switch statement without default case.
+   + Various codegen optiizations.
 
 ** M2-Mesoplanet
+   + Look up include in directory of current file as well as CWD.
+   + Added support for =-c= (no linking).
+   + Added support for multiple include directories using =-I=.
+   + Added support for calling without arguments (when explicit - is used for stdin).
 
 ** M2libc
-   + Initial printf support for %s.
-   + Added stdarg.h header with =va_arg= definitions.
+   + Added =printf=.
+   + Added =stdarg.h= header with =va_arg= definitions.
+   + Added =isdigit=, =atoi=, =strdup= and =realloc=.
+   + Fixed =strstr= function.
+   + Added support for "a" (append) to =fopen=.
 
 ** mescc-tools
    + Add support for 16bit immediate constants in RISC-V.
@@ -26,19 +41,19 @@
 ** bootstrap-seeds
 
 ** stage0-posix-x86
-   + Added stdarg.h to kaem scripts.
+   + Added =stdarg.h=, =ctype.c= and =cc_emit.c= to kaem scripts.
 
 ** stage0-posix-amd64
-   + Added stdarg.h to kaem scripts.
+   + Added =stdarg.h=, =ctype.c= and =cc_emit.c= to kaem scripts.
 
 ** stage0-posix-aarch64
-   + Added stdarg.h to kaem scripts.
+   + Added =stdarg.h=, =ctype.c= and =cc_emit.c= to kaem scripts.
 
 ** stage0-posix-riscv64
-   + Added stdarg.h to kaem scripts.
+   + Added =stdarg.h=, =ctype.c= and =cc_emit.c= to kaem scripts.
 
 ** stage0-posix-riscv32
-   + Added stdarg.h to kaem scripts.
+   + Added =stdarg.h=, =ctype.c= and =cc_emit.c= to kaem scripts.
 
 * 1.8.0 - 2025-03-15
 ** M2-Planet

@@ -18,7 +18,9 @@
    + Added support for function pointers in casts and function pointer arguments.
    + Added support for array arguments to functions.
    + Allow switch statement without default case.
-   + Various codegen optiizations.
+   + Various codegen optimizations.
+   + Added support for declaring variables in for loops.
+   + Added support for using includes with the =--expand-includes= CLI option.
 
 ** M2-Mesoplanet
    + Look up include in directory of current file as well as CWD.
@@ -32,6 +34,7 @@
    + Added =isdigit=, =atoi=, =strdup= and =realloc=.
    + Fixed =strstr= function.
    + Added support for "a" (append) to =fopen=.
+   + Fixed =chroot= call on x86.
 
 ** mescc-tools
    + Add support for 16bit immediate constants in RISC-V.
@@ -42,18 +45,23 @@
 
 ** stage0-posix-x86
    + Added =stdarg.h=, =ctype.c= and =cc_emit.c= to kaem scripts.
+   + Added support for anonymous enums to =cc_x86=.
 
 ** stage0-posix-amd64
    + Added =stdarg.h=, =ctype.c= and =cc_emit.c= to kaem scripts.
+   + Added support for anonymous enums to =cc_amd64=.
 
 ** stage0-posix-aarch64
    + Added =stdarg.h=, =ctype.c= and =cc_emit.c= to kaem scripts.
+   + Added support for anonymous enums to =cc_aarch64=.
 
 ** stage0-posix-riscv64
    + Added =stdarg.h=, =ctype.c= and =cc_emit.c= to kaem scripts.
+   + Added support for anonymous enums to =cc_riscv64=.
 
 ** stage0-posix-riscv32
    + Added =stdarg.h=, =ctype.c= and =cc_emit.c= to kaem scripts.
+   + Added support for anonymous enums to =cc_riscv32=.
 
 * 1.8.0 - 2025-03-15
 ** M2-Planet

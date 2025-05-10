@@ -21,6 +21,7 @@
    + Various codegen optimizations.
    + Added support for declaring variables in for loops.
    + Added support for using includes with the =--expand-includes= CLI option.
+   + Fixed include on first line being ignored.
 
 ** M2-Mesoplanet
    + Look up include in directory of current file as well as CWD.

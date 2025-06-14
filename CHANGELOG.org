@@ -28,6 +28,7 @@
    + Added support for =-c= (no linking).
    + Added support for multiple include directories using =-I=.
    + Added support for calling without arguments (when explicit - is used for stdin).
+   + Remove append from M2-Mesoplanet spawn =catm= instaed to restore =builder-hex0= support.
 
 ** M2libc
    + Added =printf=.
@@ -36,6 +37,8 @@
    + Fixed =strstr= function.
    + Added support for "a" (append) to =fopen=.
    + Fixed =chroot= call on x86.
+   + M1 define =cmp= was replaced with =cmp_ebx,eax=.
+   + Added =fread= and =fwrite= to =bootstrap.c=.
 
 ** mescc-tools
    + Add support for 16bit immediate constants in RISC-V.
@@ -47,22 +50,28 @@
 ** stage0-posix-x86
    + Added =stdarg.h=, =ctype.c= and =cc_emit.c= to kaem scripts.
    + Added support for anonymous enums to =cc_x86=.
+   + Negation operator in =cc_x86= now works for integers greater than 1.
+   + M1 define =cmp= was replaced with =cmp_ebx,eax=.
 
 ** stage0-posix-amd64
    + Added =stdarg.h=, =ctype.c= and =cc_emit.c= to kaem scripts.
    + Added support for anonymous enums to =cc_amd64=.
+   + Negation operator in =cc_amd64= now works for integers greater than 1.
 
 ** stage0-posix-aarch64
    + Added =stdarg.h=, =ctype.c= and =cc_emit.c= to kaem scripts.
    + Added support for anonymous enums to =cc_aarch64=.
+   + Negation operator in =cc_aarch64= now works for integers greater than 1.
 
 ** stage0-posix-riscv64
    + Added =stdarg.h=, =ctype.c= and =cc_emit.c= to kaem scripts.
    + Added support for anonymous enums to =cc_riscv64=.
+   + Negation operator in =cc_riscv64= now works for integers greater than 1.
 
 ** stage0-posix-riscv32
    + Added =stdarg.h=, =ctype.c= and =cc_emit.c= to kaem scripts.
    + Added support for anonymous enums to =cc_riscv32=.
+   + Negation operator in =cc_riscv32= now works for integers greater than 1.
 
 * 1.8.0 - 2025-03-15
 ** M2-Planet

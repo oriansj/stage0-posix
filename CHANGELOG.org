@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: © Andrius Štikonas
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-* current
+* 1.9.0 - 2025-08-17
 ** M2-Planet
    + Added support for global initializer list for structs of integers.
    + Added support for initializing global arrays of structs using initializer lists.

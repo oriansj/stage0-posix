@@ -5,8 +5,8 @@
 ** M2-Planet
    + Added support for global initializer list for structs of integers.
    + Added support for initializing global arrays of structs using initializer lists.
-   + Added support for prefix operators ++ and --.
-   + Added support for postfix operators ++ and --.
+   + Added support for prefix operators =++= and =--=.
+   + Added support for postfix operators =++= and =--=.
    + Added ability to parse typedefs for simple function pointers.
    + Added support for anonymous structs (C11 extension). This was already implemented as the only way to use unions.
    + Added support for unions in all places where structs work.
@@ -28,7 +28,6 @@
    + Added support for =-c= (no linking).
    + Added support for multiple include directories using =-I=.
    + Added support for calling without arguments (when explicit - is used for stdin).
-   + Remove append from M2-Mesoplanet spawn =catm= instaed to restore =builder-hex0= support.
 
 ** M2libc
    + Added =printf=.

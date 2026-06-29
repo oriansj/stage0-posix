@@ -1,0 +1,59 @@
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  amd64:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up access and checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+      - run: ./bootstrap-seeds/POSIX/AMD64/kaem-optional-seed
+
+  x86:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up access and checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+      - run: ./bootstrap-seeds/POSIX/x86/kaem-optional-seed
+
+  aarch64:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Set up access and checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+      - run: ./bootstrap-seeds/POSIX/AArch64/kaem-optional-seed
+
+  # There is no full bootstrap for armv7l
+
+  riscv64:
+    runs-on: ubuntu-24.04-riscv
+    steps:
+      - name: Set up access and checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+      - run: ./bootstrap-seeds/POSIX/riscv64/kaem-optional-seed
+
+  # riscv32 can't run on natively riscv64 and there are no riscv32 runners
+  riscv32:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install qemu and git
+        run: sudo apt-get update && sudo apt-get install qemu-user
+
+      - name: Set up access and checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - run: qemu-riscv32 ./bootstrap-seeds/POSIX/riscv32/kaem-optional-seed
+

@@ -13,6 +13,20 @@ jobs:
         with:
           submodules: recursive
       - run: ./bootstrap-seeds/POSIX/AMD64/kaem-optional-seed
+      - name: Upload artifacts
+        if: always() # Always upload artifacts for debugging
+        uses: actions/upload-artifact@v7
+        with:
+          name: amd64-artifact
+          path: AMD64/artifact
+          if-no-files-found: error
+      - name: Upload binaries
+        if: always() # Always upload artifacts for debugging
+        uses: actions/upload-artifact@v7
+        with:
+          name: amd64-bin
+          path: AMD64/bin
+          if-no-files-found: error
 
   x86:
     runs-on: ubuntu-latest
@@ -22,6 +36,20 @@ jobs:
         with:
           submodules: recursive
       - run: ./bootstrap-seeds/POSIX/x86/kaem-optional-seed
+      - name: Upload artifacts
+        if: always() # Always upload artifacts for debugging
+        uses: actions/upload-artifact@v7
+        with:
+          name: x86-artifact
+          path: x86/artifact
+          if-no-files-found: error
+      - name: Upload binaries
+        if: always() # Always upload artifacts for debugging
+        uses: actions/upload-artifact@v7
+        with:
+          name: x86-bin
+          path: x86/bin
+          if-no-files-found: error
 
   aarch64:
     runs-on: ubuntu-24.04-arm
@@ -31,6 +59,20 @@ jobs:
         with:
           submodules: recursive
       - run: ./bootstrap-seeds/POSIX/AArch64/kaem-optional-seed
+      - name: Upload artifacts
+        if: always() # Always upload artifacts for debugging
+        uses: actions/upload-artifact@v7
+        with:
+          name: aarch64-artifact
+          path: AArch64/artifact
+          if-no-files-found: error
+      - name: Upload binaries
+        if: always() # Always upload artifacts for debugging
+        uses: actions/upload-artifact@v7
+        with:
+          name: aarch64-bin
+          path: AArch64/bin
+          if-no-files-found: error
 
   # There is no full bootstrap for armv7l
 
@@ -42,6 +84,20 @@ jobs:
         with:
           submodules: recursive
       - run: ./bootstrap-seeds/POSIX/riscv64/kaem-optional-seed
+      - name: Upload artifacts
+        if: always() # Always upload artifacts for debugging
+        uses: actions/upload-artifact@v7
+        with:
+          name: riscv64-artifact
+          path: riscv64/artifact
+          if-no-files-found: error
+      - name: Upload binaries
+        if: always() # Always upload artifacts for debugging
+        uses: actions/upload-artifact@v7
+        with:
+          name: riscv64-bin
+          path: riscv64/bin
+          if-no-files-found: error
 
   # riscv32 can't run on natively riscv64 and there are no riscv32 runners
   riscv32:
@@ -56,4 +112,18 @@ jobs:
           submodules: recursive
 
       - run: qemu-riscv32 ./bootstrap-seeds/POSIX/riscv32/kaem-optional-seed
+      - name: Upload artifacts
+        if: always() # Always upload artifacts for debugging
+        uses: actions/upload-artifact@v7
+        with:
+          name: riscv32-artifact
+          path: riscv32/artifact
+          if-no-files-found: error
+      - name: Upload binaries
+        if: always() # Always upload artifacts for debugging
+        uses: actions/upload-artifact@v7
+        with:
+          name: riscv32-bin
+          path: riscv32/bin
+          if-no-files-found: error
 

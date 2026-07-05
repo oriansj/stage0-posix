@@ -77,13 +77,17 @@ jobs:
   # There is no full bootstrap for armv7l
 
   riscv64:
-    runs-on: ubuntu-24.04-riscv
+    runs-on: ubuntu-latest
     steps:
+      - name: Install qemu and git
+        run: sudo apt-get update && sudo apt-get install qemu-user
+
       - name: Set up access and checkout
         uses: actions/checkout@v7
         with:
           submodules: recursive
-      - run: ./bootstrap-seeds/POSIX/riscv64/kaem-optional-seed
+
+      - run: qemu-riscv64 ./bootstrap-seeds/POSIX/riscv64/kaem-optional-seed
       - name: Upload artifacts
         if: always() # Always upload artifacts for debugging
         uses: actions/upload-artifact@v7
@@ -99,7 +103,6 @@ jobs:
           path: riscv64/bin
           if-no-files-found: error
 
-  # riscv32 can't run on natively riscv64 and there are no riscv32 runners
   riscv32:
     runs-on: ubuntu-latest
     steps:
